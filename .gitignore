@@ -29,3 +29,12 @@ Thumbs.db
 # Temp
 *.tmp
 *.log
+
+# Project Directories (each has own git repo)
+mbti-project/
+mdm-project/
+
+# Legacy MBTI skills (not needed)
+skills/mbti-*/
+skills/backup-recovery-mbti/
+skills/jwt-authentication-mbti/
