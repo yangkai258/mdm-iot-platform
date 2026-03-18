@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>MBTI性格测试</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
     <style>
         * {
             margin: 0;
@@ -33,6 +34,25 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+        }
+        
+        .profile-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: fit-content;
+        }
+        
+        .profile-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
         
         @media (min-width: 768px) {
@@ -795,6 +815,24 @@
         .suggestions li {
             margin-bottom: 8px;
             color: #555;
+        }
+        
+        .suggestion-content p {
+            font-size: 15px;
+            line-height: 2;
+            color: #444;
+            margin-bottom: 14px;
+        }
+        
+        .suggestion-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .retake-test-container {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px dashed #ddd;
         }
         
         /* 消息提示 */
@@ -1573,38 +1611,11 @@
             <div class="logo">
                 <h1>🧠 MBTI性格测试</h1>
                 <p>发现真实的自我，探索性格密码</p>
-            </div>
-            <div class="user-info">
-                <div class="user-name" id="userName">加载中...</div>
-                <button class="logout-btn" onclick="logout()">退出登录</button>
+                <div class="profile-link" onclick="showSection('profile')">📤 个人资料</div>
             </div>
         </header>
         
         <div class="main-content">
-            <!-- 侧边栏菜单 -->
-            <div class="sidebar">
-                <div class="menu-item active" onclick="showSection('instructions')">
-                    <span class="menu-icon">📋</span>
-                    <span class="menu-text">测试说明</span>
-                </div>
-                <div class="menu-item" onclick="showSection('test')">
-                    <span class="menu-icon">🧪</span>
-                    <span class="menu-text">开始测试</span>
-                </div>
-                <div class="menu-item" onclick="showSection('history')">
-                    <span class="menu-icon">📊</span>
-                    <span class="menu-text">测试历史</span>
-                </div>
-                <div class="menu-item" onclick="showSection('profile')">
-                    <span class="menu-icon">👤</span>
-                    <span class="menu-text">个人资料</span>
-                </div>
-                <div class="menu-item" onclick="showSection('analysis')">
-                    <span class="menu-icon">📈</span>
-                    <span class="menu-text">分析报告</span>
-                </div>
-            </div>
-            
             <!-- 主要内容区 -->
             <div class="test-area">
                 <!-- 移动端菜单 -->
@@ -1612,18 +1623,11 @@
                     <div class="mobile-menu-item active" onclick="showSection('instructions')">测试说明</div>
                     <div class="mobile-menu-item" onclick="showSection('test')">开始测试</div>
                     <div class="mobile-menu-item" onclick="showSection('history')">测试历史</div>
-                    <div class="mobile-menu-item" onclick="showSection('profile')">个人资料</div>
                     <div class="mobile-menu-item" onclick="showSection('analysis')">分析报告</div>
                 </div>
                 
                 <!-- 消息提示 -->
                 <div id="message" class="message"></div>
-                
-                <!-- 加载动画 -->
-                <div id="loading" class="loading">
-                    <div class="spinner"></div>
-                    <p>加载中...</p>
-                </div>
                 
                 <!-- 测试说明部分 -->
                 <div id="instructions-section" class="section active">
@@ -1757,6 +1761,7 @@
         let currentQuestionIndex = 0;
         let answers = {};
         let testRecordId = null;
+        let currentSection = 'instructions';
         
         // 页面加载时初始化
         window.addEventListener('load', function() {
@@ -1778,7 +1783,10 @@
             
             try {
                 currentUser = JSON.parse(userStr);
-                document.getElementById('userName').textContent = currentUser.nickname || currentUser.username;
+                const nameEl = document.getElementById('userName');
+                if (nameEl) {
+                    nameEl.textContent = currentUser.nickname || currentUser.username;
+                }
             } catch (error) {
                 console.error('解析用户信息失败:', error);
                 logout();
@@ -1801,16 +1809,24 @@
         
         // 显示加载
         function showLoading() {
-            document.getElementById('loading').classList.add('active');
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) {
+                loadingEl.classList.add('active');
+            }
         }
         
         // 隐藏加载
         function hideLoading() {
-            document.getElementById('loading').classList.remove('active');
+            const loadingEl = document.getElementById('loading');
+            if (loadingEl) {
+                loadingEl.classList.remove('active');
+            }
         }
         
         // 切换部分显示
         function showSection(sectionId) {
+            currentSection = sectionId;
+            
             // 更新桌面端菜单项
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active');
@@ -1841,7 +1857,7 @@
             });
             document.getElementById(sectionId + '-section').classList.add('active');
             
-            // 加载对应部分的数据
+            // 加载对应部分的数据（只在用户主动切换时加载）
             switch(sectionId) {
                 case 'history':
                     loadTestHistory();
@@ -1850,7 +1866,10 @@
                     loadUserProfile();
                     break;
                 case 'analysis':
-                    loadLatestAnalysis();
+                    // 只在当前section是analysis时才加载
+                    if (currentSection === 'analysis') {
+                        loadLatestAnalysis();
+                    }
                     break;
             }
         }
@@ -2198,6 +2217,30 @@
             }
         }
         
+        // 格式化长文本为段落
+        function formatSuggestions(text) {
+            if (!text) return '';
+            // 按中文句号分段，每段用一个<p>标签
+            const sentences = text.split(/(?<=[。！？])/);
+            const paragraphs = [];
+            let current = '';
+            let count = 0;
+            for (const s of sentences) {
+                current += s;
+                count++;
+                // 每3-4句话为一段
+                if (count >= 3) {
+                    paragraphs.push('<p>' + current.trim() + '</p>');
+                    current = '';
+                    count = 0;
+                }
+            }
+            if (current.trim()) {
+                paragraphs.push('<p>' + current.trim() + '</p>');
+            }
+            return paragraphs.join('');
+        }
+        
         // 显示分析结果
         function displayAnalysis(data) {
             const analysisContent = document.getElementById('analysisContent');
@@ -2221,14 +2264,16 @@
                 
                 <div class="suggestions">
                     <h3>💼 职业建议</h3>
-                    <ul>
-                        ${data.analysis.career_suggestions.map(job => `<li>${job}</li>`).join('')}
-                    </ul>
+                    <div class="suggestion-content">${formatSuggestions(data.analysis.career_suggestions)}</div>
                 </div>
                 
                 <div class="suggestions">
                     <h3>🤝 人际关系建议</h3>
-                    <p>${data.analysis.relationship_advice}</p>
+                    <div class="suggestion-content">${formatSuggestions(data.analysis.relationship_advice)}</div>
+                </div>
+                
+                <div class="retake-test-container">
+                    <button class="start-test-btn" onclick="startNewTest()">🔄 重新测试</button>
                 </div>
             `;
         }
@@ -2308,7 +2353,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     displayAnalysis(data);
-                    showSection('analysis');
+                    // 不再调用 showSection，避免循环
                 } else {
                     const error = await response.json();
                     showMessage(error.message || '加载分析失败', 'error');
@@ -2323,8 +2368,51 @@
         
         // 继续特定测试
         async function continueSpecificTest(recordId) {
-            // 这里需要实现继续特定测试的逻辑
-            showMessage('功能开发中', 'info');
+            if (!currentUser || !currentUser.token) {
+                showMessage('请先登录', 'error');
+                return;
+            }
+            
+            showLoading();
+            
+            try {
+                // 调用 API 获取特定测试的详情
+                const response = await fetch(`/api/test/continue?record_id=${recordId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${currentUser.token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.can_continue) {
+                        // 设置测试状态
+                        testRecordId = data.record_id;
+                        currentTest = data;
+                        answers = data.answered || {};
+                        
+                        // 计算当前题目索引
+                        currentQuestionIndex = Object.keys(answers).length;
+                        
+                        // 加载题目
+                        await loadQuestions();
+                        
+                        // 跳转到测试页面
+                        showSection('test');
+                    } else {
+                        showMessage('该测试无法继续', 'error');
+                    }
+                } else {
+                    const error = await response.json();
+                    showMessage(error.message || '加载测试失败', 'error');
+                }
+            } catch (error) {
+                console.error('继续测试失败:', error);
+                showMessage('加载测试失败', 'error');
+            } finally {
+                hideLoading();
+            }
         }
         
         // 加载最新分析
@@ -2417,7 +2505,10 @@
                     if (updateData.nickname) {
                         currentUser.nickname = updateData.nickname;
                         localStorage.setItem('mbti_user', JSON.stringify(currentUser));
-                        document.getElementById('userName').textContent = updateData.nickname;
+                        const nameEl = document.getElementById('userName');
+                        if (nameEl) {
+                            nameEl.textContent = updateData.nickname;
+                        }
                     }
                     
                     // 重新加载用户资料
