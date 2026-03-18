@@ -8,19 +8,19 @@
 ```
 C:\Users\YKing\.openclaw\workspace\
 │
-├── mbti-project/          # MBTI测试项目
+├── mbti-project/          # MBTI测试项目（独立Git仓库）
 │   ├── test.html           # 前端页面
 │   ├── login.html          # 登录页面
 │   ├── complete_server.py  # 后端服务
 │   ├── mbti_questions_100.json  # 题目数据
 │   └── mbti_test.db      # SQLite数据库
 │
-├── mdm-project/           # MDM控制中台项目
+├── mdm-project/           # MDM控制中台项目（独立Git仓库）
 │   ├── backend/           # Golang后端
 │   │   ├── models/       # 数据模型
 │   │   ├── controllers/  # 控制器
 │   │   ├── mqtt/        # MQTT处理
-│   │   └── utils/       # 工具类
+│   │   └── utils/        # 工具类
 │   ├── frontend/         # Vue3前端
 │   │   └── src/views/   # 页面组件
 │   ├── agent_tasks/     # Agent任务定义
@@ -34,12 +34,14 @@ C:\Users\YKing\.openclaw\workspace\
 └── memory/              # 每日工作日志
 ```
 
-## GitHub仓库
+## GitHub仓库（完全独立）
 
-| 项目 | 仓库 | 说明 |
-|------|------|------|
+| 项目 | 仓库地址 | 说明 |
+|------|----------|------|
 | MBTI测试 | https://github.com/yangkai258/mbti-web | 已在master分支 |
-| MDM控制中台 | https://github.com/yangkai258/mdm-control-center | 已在main分支 |
+| MDM控制中台 | https://github.com/yangkai258/mdm-iot-platform | 已在master分支 |
+
+**两个项目完全独立，无任何交集**
 
 ## 开发原则
 

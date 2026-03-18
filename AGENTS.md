@@ -92,9 +92,9 @@ $$E = \frac{Dev\_Time}{Test\_Cycles + Fix\_Time}$$
 | 项目 | 目录 | GitHub |
 |------|------|--------|
 | MBTI测试 | mbti-project/ | mbti-web |
-| MDM控制中台 | mdm-project/ | mdm-control-center |
+| MDM控制中台 | mdm-project/ | mdm-iot-platform |
 
-每个项目的文件必须存放在各自目录，禁止混放。
+两个项目完全独立，无任何交集。每个项目的文件必须存放在各自目录，禁止混放。
 
 ## External vs Internal
 

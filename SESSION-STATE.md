@@ -10,7 +10,7 @@
 | 项目 | 目录 | GitHub仓库 |
 |------|------|-----------|
 | MBTI测试 | mbti-project/ | https://github.com/yangkai258/mbti-web |
-| MDM控制中台 | mdm-project/ | https://github.com/yangkai258/mdm-control-center |
+| MDM控制中台 | mdm-project/ | https://github.com/yangkai258/mdm-iot-platform |
 
 ## 关键细节
 - 两个项目已完全分离
