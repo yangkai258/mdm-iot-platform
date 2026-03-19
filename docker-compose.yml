@@ -42,7 +42,7 @@ services:
 
   # EMQX MQTT Broker
   emqx:
-    image: emqx/emqx:5.0-alpine
+    image: emqx/emqx
     container_name: mdm_emqx
     restart: unless-stopped
     environment:

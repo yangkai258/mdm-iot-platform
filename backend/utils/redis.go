@@ -4,10 +4,58 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
+
+// InitDB 初始化数据库连接
+func InitDB() (*gorm.DB, error) {
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		dsn = "host=localhost user=mdm_user password=mdm_password dbname=mdm_db port=5432 sslmode=disable"
+	}
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
+	}
+
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
+	return db, nil
+}
+
+// InitRedis 初始化 Redis 连接
+func InitRedis() (*RedisClient, error) {
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://localhost:6379"
+	}
+
+	// 简单解析 redis://host:port
+	addr := "localhost:6379"
+	password := ""
+	db := 0
+	fmt.Sscanf(redisURL, "redis://%*s@%s", &addr)
+	// 简化处理
+	addr = "localhost:6379"
+
+	return NewRedisClient(addr, password, db)
+}
 
 // RedisClient Redis 客户端封装
 type RedisClient struct {

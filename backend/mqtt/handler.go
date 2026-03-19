@@ -4,12 +4,45 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
-	"mdm/backend/utils"
+	"mdm-backend/utils"
 
 	"github.com/eclipse/paho.mqtt.golang"
 )
+
+// InitMQTT 初始化 MQTT 客户端
+func InitMQTT(redisClient *utils.RedisClient) (mqtt.Client, error) {
+	broker := os.Getenv("MQTT_BROKER")
+	if broker == "" {
+		broker = "tcp://localhost:1883"
+	}
+
+	opts := mqtt.NewClientOptions()
+	opts.AddBroker(broker)
+	opts.SetClientID("mdm-backend")
+	opts.SetUsername("admin")
+	opts.SetPassword("public")
+	opts.SetKeepAlive(60 * time.Second)
+	opts.SetPingTimeout(10 * time.Second)
+
+	client := mqtt.NewClient(opts)
+	token := client.Connect()
+
+	if token.Wait() && token.Error() != nil {
+		return nil, fmt.Errorf("MQTT 连接失败: %w", token.Error())
+	}
+
+	log.Printf("[MQTT] 已连接到: %s", broker)
+
+	// 设置订阅处理器
+	handler := NewHandler(redisClient)
+	handler.SetupSubscriber(client)
+	handler.StartHeartbeatChecker()
+
+	return client, nil
+}
 
 // MQTTConfig MQTT 配置
 type MQTTConfig struct {

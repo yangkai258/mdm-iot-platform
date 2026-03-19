@@ -53,6 +53,47 @@ type OTAPackage struct {
 	CreatedAt      time.Time `json:"created_at"`
 }
 
+// OTADeployment OTA发布任务
+type OTADeployment struct {
+	ID              uint      `gorm:"primaryKey" json:"id"`
+	PackageID       uint      `gorm:"not null" json:"package_id"`
+	TargetHardware  string    `gorm:"type:varchar(32);not null" json:"target_hardware"`
+	RolloutStrategy string    `gorm:"type:varchar(20);not null" json:"rollout_strategy"` // full, percentage, whitelist
+	Percentage      int       `gorm:"default:0" json:"percentage"`
+	Status          string    `gorm:"type:varchar(20);default:'pending'" json:"status"` // pending, rolling, paused, completed
+	SuccessRate     float64   `gorm:"default:0" json:"success_rate"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}
+
+// OTAProgress 设备OTA升级进度
+type OTAProgress struct {
+	ID            uint      `gorm:"primaryKey" json:"id"`
+	DeviceID      string    `gorm:"type:varchar(36);index;not null" json:"device_id"`
+	DeploymentID  uint      `gorm:"not null" json:"deployment_id"`
+	PackageID     uint      `gorm:"not null" json:"package_id"`
+	TargetVersion string    `gorm:"type:varchar(32);not null" json:"target_version"`
+	Status        string    `gorm:"type:varchar(20);default:'pending'" json:"status"` // pending, downloading, verifying, installing, completed, failed
+	Progress      int       `gorm:"default:0" json:"progress"`                          // 0-100
+	ErrorMessage  string    `gorm:"type:varchar(512)" json:"error_message"`
+	StartedAt     *time.Time `json:"started_at"`
+	CompletedAt   *time.Time `json:"completed_at"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+}
+
+// CommandHistory 指令历史
+type CommandHistory struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	DeviceID  string    `gorm:"type:varchar(36);index" json:"device_id"`
+	CmdID     string    `gorm:"type:varchar(36)" json:"cmd_id"`
+	CmdType   string    `gorm:"type:varchar(20)" json:"cmd_type"`
+	Action    string    `gorm:"type:varchar(50)" json:"action"`
+	Status    string    `gorm:"type:varchar(20)" json:"status"` // sent, delivered, executed, failed
+	SentAt    time.Time `json:"sent_at"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 // PetProfile 宠物配置
 type PetProfile struct {
 	DeviceID         string                 `gorm:"primaryKey;type:varchar(36)" json:"device_id"`
@@ -64,4 +105,14 @@ type PetProfile struct {
 	CustomRules     map[string]interface{} `gorm:"type:jsonb" json:"custom_rules"`
 	CreatedAt       time.Time              `json:"created_at"`
 	UpdatedAt       time.Time              `json:"updated_at"`
+}
+
+// DeviceData MQTT设备数据消息
+type DeviceData struct {
+	DeviceID     string                 `json:"device_id"`
+	Battery      int                    `json:"battery"`
+	Mode         string                 `json:"mode"`
+	IP           string                 `json:"ip"`
+	Timestamp   int64                  `json:"timestamp"`
+	ExtraData   map[string]interface{} `json:"extra_data"`
 }

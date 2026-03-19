@@ -1,11 +1,86 @@
 # MDM 控制中台 - 接口契约规范
-**版本:** V1.0  
+**版本:** V1.1  
 **编写:** agentcp (产品经理)  
-**日期:** 2026-03-18
+**日期:** 2026-03-19
 
 ---
 
-## 一、MQTT Topic 树与 JSON 协议定义
+## 一、认证接口 (Auth)
+
+### 1.1 用户登录
+```
+POST /api/v1/auth/login
+```
+
+**请求体：**
+```json
+{
+  "username": "string (必填)",
+  "password": "string (必填)"
+}
+```
+
+**响应：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "token": "string - JWT Token",
+    "user": {
+      "id": 1,
+      "username": "admin",
+      "nickname": "管理员",
+      "email": "admin@mdm.local",
+      "role_id": 1
+    }
+  }
+}
+```
+
+### 1.2 退出登录
+```
+POST /api/v1/auth/logout
+```
+需要 JWT 认证 Header: `Authorization: Bearer <token>`
+
+---
+
+## 二、系统管理接口 (System)
+
+### 2.1 操作日志查询
+```
+GET /api/v1/logs/operations
+```
+
+**查询参数：**
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| user_id | int | 用户ID |
+| module | string | 模块名称 |
+| start_time | string | 开始时间 |
+| end_time | string | 结束时间 |
+| page | int | 页码 |
+| page_size | int | 每页条数 |
+
+### 2.2 登录日志查询
+```
+GET /api/v1/logs/login
+```
+
+### 2.3 字典数据查询
+```
+GET /api/v1/dicts/:type
+```
+
+### 2.4 菜单树查询
+```
+GET /api/v1/menus/tree
+```
+
+---
+
+## 三、MQTT Topic 树与 JSON 协议定义
 
 ### 1.1 设备上行消息 (Device → Cloud)
 
@@ -184,6 +259,59 @@ Authorization: Bearer {token} (必填)
 }
 ```
 
+**错误响应 (400)：**
+```json
+{
+  "code": 4003,
+  "message": "非法设备状态，无法绑定",
+  "error_code": "ERR_DEVICE_003"
+}
+```
+
+---
+
+#### POST /api/v1/devices/{sn_code}/unbind
+
+**功能说明：** 用户解绑设备，解除用户与设备之间的绑定关系
+
+**请求头：**
+```
+Content-Type: application/json
+Authorization: Bearer {token} (必填)
+```
+
+**路径参数：**
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| sn_code | string | 是 | 设备序列号 |
+
+**请求体：**
+```json
+{}
+```
+
+**成功响应 (200)：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "device_id": "string",
+    "sn_code": "string",
+    "status": "unbound"
+  }
+}
+```
+
+**错误响应 (404)：**
+```json
+{
+  "code": 4002,
+  "message": "设备不存在",
+  "error_code": "ERR_DEVICE_002"
+}
+```
+
 ---
 
 ### 2.2 设备列表（分页+筛选）
@@ -246,9 +374,72 @@ Authorization: Bearer {token} (必填)
 - `total`: 总记录数
 - `total_pages`: 总页数
 
+### 2.4 设备状态更新
+
+#### PUT /api/v1/devices/{device_id}/status
+
+**功能说明：** 更新设备的生命周期状态（待激活、服役中、维修中、已挂失、已报废）
+
+**请求头：**
+```
+Content-Type: application/json
+Authorization: Bearer {token} (必填)
+```
+
+**路径参数：**
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| device_id | string | 是 | 设备唯一标识 |
+
+**请求体：**
+```json
+{
+  "status": "integer (1-5, 必填) - 生命周期状态码"
+}
+```
+
+**状态码说明：**
+| 状态码 | 说明 |
+|--------|------|
+| 1 | 待激活 - 设备未绑定用户 |
+| 2 | 服役中 - 正常使用中 |
+| 3 | 维修中 - 设备报修中 |
+| 4 | 已挂失 - 设备遗失 |
+| 5 | 已报废 - 设备淘汰 |
+
+**成功响应 (200)：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "device_id": "string",
+    "lifecycle_status": 3
+  }
+}
+```
+
+**错误响应 (400)：**
+```json
+{
+  "code": 4005,
+  "message": "无效的状态值",
+  "error_code": "ERR_VALIDATION"
+}
+```
+
+**错误响应 (404)：**
+```json
+{
+  "code": 4002,
+  "message": "设备不存在",
+  "error_code": "ERR_DEVICE_002"
+}
+```
+
 ---
 
-### 2.3 设备详情
+### 2.5 设备详情
 
 #### GET /api/v1/devices/{device_id}
 

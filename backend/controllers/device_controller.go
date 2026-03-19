@@ -5,12 +5,55 @@ import (
 	"strings"
 	"time"
 
-	"mdm/backend/models"
-	"mdm/backend/utils"
+	"mdm-backend/models"
+	"mdm-backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
+
+// RegisterRoutes 注册路由 - 合并所有设备相关路由
+func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) {
+	deviceCtrl := &DeviceController{
+		DB:    db,
+		Redis: redisClient,
+	}
+
+	otaCtrl := &OTAController{DB: db}
+	profileCtrl := &PetProfileController{DB: db}
+	cmdCtrl := &CommandController{
+		DB:    db,
+		Redis: redisClient,
+		MQTT:  nil,
+	}
+
+	api := r.Group("/api/v1")
+	{
+		// 设备管理
+		api.POST("/devices/register", deviceCtrl.Register)
+		api.GET("/devices", deviceCtrl.List)
+		
+		// 设备绑定/解绑
+		api.POST("/devices/bind/:sn_code", deviceCtrl.Bind)
+		api.POST("/devices/unbind/:sn_code", UnbindDevice(db))
+		
+		// 设备详情及子路由 - 统一用 device_id
+		api.GET("/devices/:device_id", deviceCtrl.Get)
+		api.PUT("/devices/:device_id", UpdateDevice(db))
+		api.DELETE("/devices/:device_id", DeleteDevice(db))
+		api.PUT("/devices/:device_id/status", UpdateDeviceStatus(db))
+		api.GET("/devices/:device_id/profile", profileCtrl.GetProfile)
+		api.PUT("/devices/:device_id/profile", profileCtrl.UpdateProfile)
+		api.POST("/devices/:device_id/commands", cmdCtrl.SendCommand)
+		api.GET("/devices/:device_id/commands", cmdCtrl.GetCommandHistory)
+		
+		// OTA 路由
+		api.POST("/ota/packages", otaCtrl.CreatePackage)
+		api.GET("/ota/packages", otaCtrl.ListPackages)
+		api.POST("/ota/deployments", otaCtrl.CreateDeployment)
+		api.GET("/ota/devices/:device_id/check", otaCtrl.CheckOTA)
+	}
+}
 
 // DeviceController 设备管理控制器
 type DeviceController struct {
