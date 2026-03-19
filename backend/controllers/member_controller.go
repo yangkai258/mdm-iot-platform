@@ -504,6 +504,138 @@ func (c *MemberController) LevelList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": levels})
 }
 
+// LevelCreate 创建会员等级
+func (c *MemberController) LevelCreate(ctx *gin.Context) {
+	var level models.MemberLevel
+	if err := ctx.ShouldBindJSON(&level); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+	if err := c.DB.Create(&level).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": level})
+}
+
+// LevelUpdate 更新会员等级
+func (c *MemberController) LevelUpdate(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var level models.MemberLevel
+	if err := c.DB.First(&level, id).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "等级不存在"})
+		return
+	}
+	if err := ctx.ShouldBindJSON(&level); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+	if err := c.DB.Save(&level).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": level})
+}
+
+// LevelDelete 删除会员等级
+func (c *MemberController) LevelDelete(ctx *gin.Context) {
+	id := ctx.Param("id")
+	if err := c.DB.Delete(&models.MemberLevel{}, id).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "删除失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
+}
+
+// OrderList 会员订单列表
+func (c *MemberController) OrderList(ctx *gin.Context) {
+	var orders []models.MemberOrder
+	var total int64
+
+	query := c.DB.Model(&models.MemberOrder{})
+	if memberID := ctx.Query("member_id"); memberID != "" {
+		query = query.Where("member_id = ?", memberID)
+	}
+	if orderType := ctx.Query("order_type"); orderType != "" {
+		query = query.Where("order_type = ?", orderType)
+	}
+	if status := ctx.Query("status"); status != "" {
+		query = query.Where("status = ?", status)
+	}
+	query.Count(&total)
+
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "10"))
+	offset := (page - 1) * pageSize
+
+	if err := query.Offset(offset).Limit(pageSize).Order("id DESC").Find(&orders).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": gin.H{
+		"list":      orders,
+		"total":     total,
+		"page":      page,
+		"page_size": pageSize,
+	}})
+}
+
+// OrderCreate 创建会员订单
+func (c *MemberController) OrderCreate(ctx *gin.Context) {
+	var order models.MemberOrder
+	if err := ctx.ShouldBindJSON(&order); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+	if order.OrderNo == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "订单号不能为空"})
+		return
+	}
+	if err := c.DB.Create(&order).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": order})
+}
+
+// OrderDetail 会员订单详情
+func (c *MemberController) OrderDetail(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var order models.MemberOrder
+	if err := c.DB.First(&order, id).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "订单不存在"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": order})
+}
+
+// UpgradeRecordList 等级调整流水列表
+func (c *MemberController) UpgradeRecordList(ctx *gin.Context) {
+	var records []models.MemberUpgradeRecord
+	var total int64
+
+	query := c.DB.Model(&models.MemberUpgradeRecord{})
+	if memberID := ctx.Query("member_id"); memberID != "" {
+		query = query.Where("member_id = ?", memberID)
+	}
+	query.Count(&total)
+
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "10"))
+	offset := (page - 1) * pageSize
+
+	if err := query.Offset(offset).Limit(pageSize).Order("id DESC").Find(&records).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": gin.H{
+		"list":      records,
+		"total":     total,
+		"page":      page,
+		"page_size": pageSize,
+	}})
+}
+
 // PointsRuleList 积分规则列表
 func (c *MemberController) PointsRuleList(ctx *gin.Context) {
 	var rules []models.PointsRule

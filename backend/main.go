@@ -39,6 +39,9 @@ func main() {
 		// 告警表
 		&models.DeviceAlertRule{},
 		&models.DeviceAlert{},
+		// 会员表
+		&models.MemberOrder{},
+		&models.MemberUpgradeRecord{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}

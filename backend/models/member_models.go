@@ -222,3 +222,29 @@ type TempMember struct {
 	ExpireTime time.Time `json:"expire_time"`                   // 过期时间
 	CreatedAt time.Time `json:"created_at"`
 }
+
+// MemberOrder 会员订单信息
+type MemberOrder struct {
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	OrderNo      string    `gorm:"size:50;uniqueIndex" json:"order_no"`
+	MemberID     uint      `gorm:"index" json:"member_id"`
+	OrderType    int       `gorm:"default:1" json:"order_type"`    // 1消费 2充值 3退款
+	Amount       float64   `json:"amount"`                          // 订单金额
+	PointsEarned int64     `json:"points_earned"`                   // 获得积分
+	PayType      int       `json:"pay_type"`                       // 支付方式
+	Status       int       `gorm:"default:1" json:"status"`        // 订单状态
+	Remark       string    `gorm:"size:500" json:"remark"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+// MemberUpgradeRecord 会员等级调整流水
+type MemberUpgradeRecord struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	MemberID  uint      `gorm:"index" json:"member_id"`
+	FromLevel uint      `json:"from_level"`
+	ToLevel   uint      `json:"to_level"`
+	Reason    string    `gorm:"size:200" json:"reason"`
+	Operator  string    `gorm:"size:50" json:"operator"`
+	CreatedAt time.Time `json:"created_at"`
+}

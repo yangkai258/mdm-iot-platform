@@ -1,40 +1,67 @@
-# TOOLS.md - Local Notes
+# TOOLS.md - agentqd 工具箱
 
-Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
+## 开发工具
 
-## What Goes Here
+### IDE
+- **VSCode** - 首选，轻量可扩展
+- **WebStorm** - 功能强大但重
+- **Volar** - Vue 3 专用支持
 
-Things like:
+### 必备插件
+- Vue - Official
+- Tailwind CSS IntelliSense
+- Prettier
+- ESLint
+- Auto Close Tag
+- Path IntelliSense
 
-- Camera names and locations
-- SSH hosts and aliases
-- Preferred voices for TTS
-- Speaker/room names
-- Device nicknames
-- Anything environment-specific
+## 调试工具
 
-## Examples
+### 浏览器
+- **Chrome DevTools** - 必备
+- **Vue DevTools** - Vue调试
+- **React DevTools** - 如用到
 
-```markdown
-### Cameras
+### 网络
+- F12 Network 面板
+- Postman
+- REST Client (VSCode插件)
 
-- living-room → Main area, 180° wide angle
-- front-door → Entrance, motion-triggered
+## UI 工具
 
-### SSH
+### 组件库
+- **Arco Design** - 当前使用
+- Ant Design Vue
+- Element Plus
 
-- home-server → 192.168.1.100, user: admin
+### 图标
+- **Arco Icons**
+- Heroicons
+- Remix Icon
 
-### TTS
+### 配色
+- Arco Design 色板
+- Coolors 配色工具
+- Material Design 色彩
 
-- Preferred voice: "Nova" (warm, slightly British)
-- Default speaker: Kitchen HomePod
+## 构建工具
+
+### Vite
+```bash
+npm create vite@latest
+npm run dev      # 开发
+npm run build    # 构建
+npm run preview  # 预览
 ```
 
-## Why Separate?
-
-Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
+### 常用命令
+```bash
+npm install          # 安装
+npm update           # 更新
+npm run lint         # 检查
+npm run format       # 格式化
+```
 
 ---
 
-Add whatever helps you do your job. This is your cheat sheet.
+_工具顺手，效率翻倍。_

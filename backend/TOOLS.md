@@ -1,40 +1,60 @@
-# TOOLS.md - Local Notes
+# TOOLS.md - agenthd 工具箱
 
-Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
+## 开发工具
 
-## What Goes Here
+### IDE
+- **GoLand** - 推荐，功能强大
+- **VSCode** - 轻量级，需要插件
+- **Sublime** - 极快
 
-Things like:
+### 必备插件
+- Go Extension
+- Go Doc
+- File Icons
+- GitLens
 
-- Camera names and locations
-- SSH hosts and aliases
-- Preferred voices for TTS
-- Speaker/room names
-- Device nicknames
-- Anything environment-specific
+### API 测试
+- **Postman** - 功能完整
+- **Insomnia** - 轻量美观
+- **curl** - 命令行快速测试
 
-## Examples
+## 数据库工具
 
-```markdown
-### Cameras
+### PostgreSQL
+- **pgAdmin** - 官方客户端
+- **DBeaver** - 通用数据库工具
+- **DataGrip** - JetBrains 全家桶
 
-- living-room → Main area, 180° wide angle
-- front-door → Entrance, motion-triggered
+### Redis
+- **Redis Desktop Manager** - 图形化
+- **RedisInsight** - 官方工具
 
-### SSH
+## 调试工具
 
-- home-server → 192.168.1.100, user: admin
+### 日志
+```bash
+# 实时查看日志
+tail -f logs/app.log
 
-### TTS
-
-- Preferred voice: "Nova" (warm, slightly British)
-- Default speaker: Kitchen HomePod
+# 搜索错误
+grep -i error logs/app.log
 ```
 
-## Why Separate?
+### 性能分析
+```bash
+# CPU Profile
+go tool pprof http://localhost:8080/debug/pprof/profile
 
-Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
+# Memory Profile
+go tool pprof http://localhost:8080/debug/pprof/heap
+```
+
+## 部署工具
+
+- **Docker** - 容器化
+- **Docker Compose** - 多容器编排
+- **Nginx** - 反向代理
 
 ---
 
-Add whatever helps you do your job. This is your cheat sheet.
+_选对工具，事半功倍。_

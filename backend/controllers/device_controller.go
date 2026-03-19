@@ -143,6 +143,17 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		
 		// 会员等级
 		api.GET("/member/levels", memberCtrl.LevelList)
+		api.POST("/member/levels", memberCtrl.LevelCreate)
+		api.PUT("/member/levels/:id", memberCtrl.LevelUpdate)
+		api.DELETE("/member/levels/:id", memberCtrl.LevelDelete)
+
+		// 会员订单
+		api.GET("/member/orders", memberCtrl.OrderList)
+		api.POST("/member/orders", memberCtrl.OrderCreate)
+		api.GET("/member/orders/:id", memberCtrl.OrderDetail)
+
+		// 等级调整流水
+		api.GET("/member/upgrade-records", memberCtrl.UpgradeRecordList)
 		
 		// 积分规则
 		api.GET("/member/points/rules", memberCtrl.PointsRuleList)
