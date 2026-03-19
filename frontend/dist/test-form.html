@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试表单 - MDM控制台</title>
+  <link href="https://cdn.jsdelivr.net/npm/arco-design@2.11.0/dist/arco.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@arco-design/web-vue@2.11.0/dist/arco.min.js"></script>
+  <style>
+    body { margin: 0; background: #f2f3f5; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { background: #fff; padding: 16px 20px; border-radius: 4px; margin-bottom: 16px; }
+    .card { background: #fff; border-radius: 4px; padding: 20px; margin-bottom: 16px; }
+    .form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+    <div class="header">
+      <h2>📝 测试表单工具</h2>
+      <p style="color: #666; margin-top: 8px;">用于测试各种表单组件</p>
+    </div>
+
+    <div class="card">
+      <a-form :model="form" layout="vertical">
+        <div class="form-row">
+          <a-form-item label="文本输入" field="text" style="width: 300px;">
+            <a-input v-model="form.text" placeholder="请输入文本" />
+          </a-form-item>
+          <a-form-item label="数字输入" field="number" style="width: 200px;">
+            <a-input-number v-model="form.number" placeholder="请输入数字" />
+          </a-form-item>
+          <a-form-item label="金额" field="money" style="width: 200px;">
+            <a-input-number v-model="form.money" :min="0" :precision="2" />
+          </a-form-item>
+        </div>
+        
+        <div class="form-row">
+          <a-form-item label="下拉选择" field="select" style="width: 200px;">
+            <a-select v-model="form.select" placeholder="请选择">
+              <a-option value="1">选项一</a-option>
+              <a-option value="2">选项二</a-option>
+              <a-option value="3">选项三</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="多选" field="multiSelect" style="width: 300px;">
+            <a-select v-model="form.multiSelect" multiple placeholder="请选择">
+              <a-option value="1">选项一</a-option>
+              <a-option value="2">选项二</a-option>
+              <a-option value="3">选项三</a-option>
+              <a-option value="4">选项四</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="开关" field="switch" style="width: 100px;">
+            <a-switch v-model="form.switch" />
+          </a-form-item>
+        </div>
+
+        <div class="form-row">
+          <a-form-item label="单选" field="radio" style="width: 300px;">
+            <a-radio-group v-model="form.radio">
+              <a-radio value="a">选项 A</a-radio>
+              <a-radio value="b">选项 B</a-radio>
+              <a-radio value="c">选项 C</a-radio>
+            </a-radio-group>
+          </a-form-item>
+          <a-form-item label="复选框" field="checkbox" style="width: 300px;">
+            <a-checkbox-group v-model="form.checkbox">
+              <a-checkbox value="1">选项一</a-checkbox>
+              <a-checkbox value="2">选项二</a-checkbox>
+              <a-checkbox value="3">选项三</a-checkbox>
+            </a-checkbox-group>
+          </a-form-item>
+        </div>
+
+        <div class="form-row">
+          <a-form-item label="日期选择" field="date" style="width: 200px;">
+            <a-date-picker v-model="form.date" style="width: 100%;" />
+          </a-form-item>
+          <a-form-item label="时间选择" field="time" style="width: 200px;">
+            <a-time-picker v-model="form.time" style="width: 100%;" />
+          </a-form-item>
+          <a-form-item label="日期范围" field="daterange" style="width: 300px;">
+            <a-range-picker v-model="form.daterange" style="width: 100%;" />
+          </a-form-item>
+        </div>
+
+        <div class="form-row">
+          <a-form-item label="滑块" field="slider" style="width: 300px;">
+            <a-slider v-model="form.slider" :min="0" :max="100" show-input />
+          </a-form-item>
+          <a-form-item label="评分" field="rate" style="width: 200px;">
+            <a-rate v-model="form.rate" />
+          </a-form-item>
+        </div>
+
+        <a-form-item label="文本域" field="textarea">
+          <a-textarea v-model="form.textarea" placeholder="请输入多行文本" :rows="3" />
+        </a-form-item>
+
+        <a-form-item label="上传图片" field="upload">
+          <a-upload
+            action="/upload"
+            :limit="3"
+            list-type="picture-card"
+            @success="handleSuccess"
+            @error="handleError"
+          >
+            <div>+</div>
+          </a-upload>
+        </a-form-item>
+
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="submitForm">提交</a-button>
+            <a-button @click="resetForm">重置</a-button>
+            <a-button @click="showFormData">查看数据</a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </div>
+
+    <div class="card" v-if="formDataVisible">
+      <h3>表单数据</h3>
+      <pre style="background: #f5f5f5; padding: 16px; border-radius: 4px; overflow: auto;">{{ JSON.stringify(form, null, 2) }}</pre>
+    </div>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive } = Vue;
+
+const app = createApp({
+  setup() {
+    const formDataVisible = ref(false);
+    const form = reactive({
+      text: '',
+      number: 0,
+      money: 0,
+      select: '',
+      multiSelect: [],
+      switch: false,
+      radio: 'a',
+      checkbox: [],
+      date: '',
+      time: '',
+      daterange: [],
+      slider: 50,
+      rate: 0,
+      textarea: ''
+    });
+
+    const submitForm = () => {
+      Arco.Message.success('表单提交成功！');
+    };
+
+    const resetForm = () => {
+      Object.assign(form, {
+        text: '',
+        number: 0,
+        money: 0,
+        select: '',
+        multiSelect: [],
+        switch: false,
+        radio: 'a',
+        checkbox: [],
+        date: '',
+        time: '',
+        daterange: [],
+        slider: 50,
+        rate: 0,
+        textarea: ''
+      });
+      Arco.Message.info('表单已重置');
+    };
+
+    const showFormData = () => {
+      formDataVisible.value = true;
+    };
+
+    const handleSuccess = (file) => {
+      Arco.Message.success('上传成功: ' + file.name);
+    };
+
+    const handleError = () => {
+      Arco.Message.error('上传失败');
+    };
+
+    return {
+      form,
+      formDataVisible,
+      submitForm,
+      resetForm,
+      showFormData,
+      handleSuccess,
+      handleError
+    };
+  }
+});
+
+app.use(ArcoVue);
+app.mount('#app');
+</script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>已办任务 - MDM控制台</title>
+  <link href="https://cdn.jsdelivr.net/npm/arco-design@2.11.0/dist/arco.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@arco-design/web-vue@2.11.0/dist/arco.min.js"></script>
+  <style>
+    body { margin: 0; background: #f2f3f5; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .header { background: #fff; padding: 16px 20px; border-radius: 4px; margin-bottom: 16px; }
+    .card { background: #fff; border-radius: 4px; padding: 20px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+    <div class="header">
+      <h2>✅ 已办任务列表</h2>
+    </div>
+
+    <div class="card">
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="{total: total, current: page, pageSize: pageSize}" @page-change="changePage" stripe>
+        <template #result="{ record }">
+          <a-tag :color="record.result === '通过' ? 'green' : record.result === '拒绝' ? 'red' : 'blue'">
+            {{ record.result }}
+          </a-tag>
+        </template>
+        <template #operations="{ record }">
+          <a-space>
+            <a-link @click="viewDetail(record)">详情</a-link>
+            <a-link @click="viewTimeline(record)">流程跟踪</a-link>
+          </a-space>
+        </template>
+      </a-table>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <a-drawer v-model:visible="showDetail" title="任务详情" :width="600" unmount-on-close>
+      <a-descriptions :column="2" bordered v-if="currentTask">
+        <a-descriptions-item label="任务标题" :span="2">{{ currentTask.title }}</a-descriptions-item>
+        <a-descriptions-item label="流程名称">{{ currentTask.flow_name }}</a-descriptions-item>
+        <a-descriptions-item label="处理结果">
+          <a-tag :color="currentTask.result === '通过' ? 'green' : 'red'">{{ currentTask.result }}</a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="发起人">{{ currentTask.creator }}</a-descriptions-item>
+        <a-descriptions-item label="处理时间">{{ currentTask.handle_time }}</a-descriptions-item>
+        <a-descriptions-item label="任务描述" :span="2">{{ currentTask.description }}</a-descriptions-item>
+        <a-descriptions-item label="处理意见" :span="2">{{ currentTask.comment || '无' }}</a-descriptions-item>
+      </a-descriptions>
+    </a-drawer>
+
+    <!-- 流程跟踪弹窗 -->
+    <a-modal v-model:visible="showTimeline" title="流程跟踪" :width="700" unmount-on-close>
+      <a-timeline>
+        <a-timeline-item v-for="(item, idx) in timeline" :key="idx" :color="item.color">
+          <p><strong>{{ item.title }}</strong></p>
+          <p style="color: #666; font-size: 12px;">{{ item.desc }}</p>
+          <p style="color: #999; font-size: 12px;">{{ item.time }}</p>
+        </a-timeline-item>
+      </a-timeline>
+    </a-modal>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive } = Vue;
+
+const app = createApp({
+  setup() {
+    const loading = ref(false);
+    const page = ref(1);
+    const pageSize = ref(10);
+    const total = ref(50);
+    const showDetail = ref(false);
+    const showTimeline = ref(false);
+    const currentTask = ref(null);
+
+    const timeline = ref([
+      { title: '提交申请', desc: '王五 提交了权限变更申请', time: '2026-03-18 16:00', color: 'green' },
+      { title: '自动分配', desc: '系统自动分配给管理员', time: '2026-03-18 16:01', color: 'blue' },
+      { title: '管理员审批', desc: '同意申请，开通日志查看权限', time: '2026-03-18 16:30', color: 'green' },
+      { title: '流程结束', desc: '任务已完成', time: '2026-03-18 16:30', color: 'gray' },
+    ]);
+
+    const data = ref([
+      { id: 1, title: '设备采购申请-研发部', flow_name: '设备采购流程', creator: '张三', handle_time: '2026-03-19 10:30', result: '通过', description: '申请采购M5Stack设备5台用于研发', comment: '同意采购，请联系采购部' },
+      { id: 2, title: '固件升级申请-生产线A', flow_name: 'OTA升级流程', creator: '李四', handle_time: '2026-03-18 17:00', result: '通过', description: '生产线A设备固件升级到v2.0.0', comment: '已升级完成' },
+      { id: 3, title: '权限变更申请-admin', flow_name: '权限变更流程', creator: '王五', handle_time: '2026-03-18 16:30', result: '通过', description: '申请开通日志查看权限', comment: '已开通' },
+      { id: 4, title: '设备报废申请-测试组', flow_name: '设备报废流程', creator: '赵六', handle_time: '2026-03-17 15:00', result: '拒绝', description: '测试设备老化需报废', comment: '设备仍在保修期内，建议维修' },
+      { id: 5, title: '账号开通申请-新员工', flow_name: '账号开通流程', creator: '人事部', handle_time: '2026-03-17 11:00', result: '通过', description: '新员工入职账号开通', comment: '账号已开通，初始密码已发送' },
+    ]);
+
+    const columns = [
+      { title: '任务标题', dataIndex: 'title' },
+      { title: '流程名称', dataIndex: 'flow_name', width: 140 },
+      { title: '发起人', dataIndex: 'creator', width: 80 },
+      { title: '处理时间', dataIndex: 'handle_time', width: 160 },
+      { title: '结果', slotName: 'result', width: 80 },
+      { title: '操作', slotName: 'operations', width: 140 }
+    ];
+
+    const changePage = (p) => {
+      page.value = p;
+    };
+
+    const viewDetail = (record) => {
+      currentTask.value = record;
+      showDetail.value = true;
+    };
+
+    const viewTimeline = (record) => {
+      currentTask.value = record;
+      showTimeline.value = true;
+    };
+
+    return {
+      loading,
+      page,
+      pageSize,
+      total,
+      data,
+      columns,
+      showDetail,
+      showTimeline,
+      currentTask,
+      timeline,
+      changePage,
+      viewDetail,
+      viewTimeline
+    };
+  }
+});
+
+app.use(ArcoVue);
+app.mount('#app');
+</script>
+</body>
+</html>

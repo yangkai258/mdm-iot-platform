@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据字典 - MDM控制台</title>
+  <link href="https://cdn.jsdelivr.net/npm/arco-design@2.11.0/dist/arco.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@arco-design/web-vue@2.11.0/dist/arco.min.js"></script>
+  <style>
+    body { margin: 0; background: #f2f3f5; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { background: #fff; padding: 16px 20px; border-radius: 4px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .card { background: #fff; border-radius: 4px; padding: 20px; }
+    .pagination { display: flex; justify-content: flex-end; padding: 16px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+    <div class="header">
+      <h2>📖 数据字典</h2>
+      <a-button type="primary" @click="showAddModal = true">新增类型</a-button>
+    </div>
+
+    <div class="card">
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="false" stripe>
+        <template #status="{ record }">
+          <a-tag :color="record.status === 1 ? 'green' : 'red'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
+        </template>
+        <template #operations="{ record }">
+          <a-space>
+            <a-link @click="viewItems(record)">字典项</a-link>
+            <a-link @click="editRecord(record)">编辑</a-link>
+            <a-link status="danger" @click="deleteRecord(record)">删除</a-link>
+          </a-space>
+        </template>
+      </a-table>
+    </div>
+
+    <!-- 字典项弹窗 -->
+    <a-modal v-model:visible="showItemModal" title="字典项管理" :width="700" unmount-on-close>
+      <div style="margin-bottom: 12px;">
+        <a-button type="primary" size="small" @click="showAddItemModal = true">新增字典项</a-button>
+      </div>
+      <a-table :columns="itemColumns" :data="dictItems" :pagination="false" stripe size="small" />
+    </a-modal>
+
+    <!-- 新增/编辑类型弹窗 -->
+    <a-modal v-model:visible="showAddModal" :title="editId ? '编辑字典类型' : '新增字典类型'" @before-ok="submitForm" unmount-on-close>
+      <a-form :model="form" layout="vertical">
+        <a-form-item field="dict_type" label="字典类型" required>
+          <a-input v-model="form.dict_type" placeholder="如: gender, status" />
+        </a-form-item>
+        <a-form-item field="dict_name" label="字典名称" required>
+          <a-input v-model="form.dict_name" placeholder="如: 性别、状态" />
+        </a-form-item>
+        <a-form-item field="description" label="描述">
+          <a-textarea v-model="form.description" placeholder="请输入描述" />
+        </a-form-item>
+        <a-form-item field="status" label="状态">
+          <a-switch v-model="form.status" checked-value="1" unchecked-value="0" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive, onMounted } = Vue;
+const API_BASE = 'http://localhost:8080/api/v1';
+
+const app = createApp({
+  setup() {
+    const loading = ref(false);
+    const data = ref([
+      { id: 1, dict_type: 'gender', dict_name: '性别', description: '性别字典', status: 1 },
+      { id: 2, dict_type: 'device_status', dict_name: '设备状态', description: '设备状态字典', status: 1 },
+      { id: 3, dict_type: 'alert_level', dict_name: '告警级别', description: '告警级别字典', status: 1 },
+    ]);
+    const showAddModal = ref(false);
+    const showItemModal = ref(false);
+    const showAddItemModal = ref(false);
+    const editId = ref(null);
+    const dictItems = ref([
+      { id: 1, item_text: '男', item_value: 'M', sort: 1 },
+      { id: 2, item_text: '女', item_value: 'F', sort: 2 },
+    ]);
+    const currentDictType = ref('');
+
+    const form = reactive({
+      dict_type: '',
+      dict_name: '',
+      description: '',
+      status: 1
+    });
+
+    const columns = [
+      { title: '字典类型', dataIndex: 'dict_type', width: 150 },
+      { title: '字典名称', dataIndex: 'dict_name', width: 150 },
+      { title: '描述', dataIndex: 'description' },
+      { title: '状态', dataIndex: 'status', slotName: 'status', width: 80 },
+      { title: '操作', slotName: 'operations', width: 180 }
+    ];
+
+    const itemColumns = [
+      { title: '字典文本', dataIndex: 'item_text', width: 120 },
+      { title: '字典值', dataIndex: 'item_value', width: 100 },
+      { title: '排序', dataIndex: 'sort', width: 60 },
+      { title: '状态', width: 60, slotName: 'status' }
+    ];
+
+    const viewItems = (record) => {
+      currentDictType.value = record.dict_type;
+      showItemModal.value = true;
+    };
+
+    const editRecord = (record) => {
+      Object.assign(form, record);
+      editId.value = record.id;
+      showAddModal.value = true;
+    };
+
+    const deleteRecord = (record) => {
+      if (confirm('确定要删除吗？')) {
+        data.value = data.value.filter(d => d.id !== record.id);
+      }
+    };
+
+    const submitForm = (done) => {
+      if (editId.value) {
+        const idx = data.value.findIndex(d => d.id === editId.value);
+        if (idx > -1) Object.assign(data.value[idx], form);
+      } else {
+        data.value.push({ ...form, id: Date.now() });
+      }
+      showAddModal.value = false;
+      Object.assign(form, { dict_type: '', dict_name: '', description: '', status: 1 });
+      editId.value = null;
+      done(true);
+    };
+
+    return {
+      loading,
+      data,
+      columns,
+      itemColumns,
+      dictItems,
+      showAddModal,
+      showItemModal,
+      showAddItemModal,
+      editId,
+      form,
+      viewItems,
+      editRecord,
+      deleteRecord,
+      submitForm
+    };
+  }
+});
+
+app.use(ArcoVue);
+app.mount('#app');
+</script>
+</body>
+</html>

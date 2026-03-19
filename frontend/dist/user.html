@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>用户管理 - MDM控制台</title>
+  <link href="https://cdn.jsdelivr.net/npm/arco-design@2.11.0/dist/arco.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@arco-design/web-vue@2.11.0/dist/arco.min.js"></script>
+  <style>
+    body { margin: 0; background: #f2f3f5; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .header { background: #fff; padding: 16px 20px; border-radius: 4px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .card { background: #fff; border-radius: 4px; padding: 20px; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+    <div class="header">
+      <h2>👤 用户管理</h2>
+      <a-space>
+        <a-button type="primary" @click="showAddModal = true">新增用户</a-button>
+      </a-space>
+    </div>
+
+    <div class="card">
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="false" stripe>
+        <template #avatar="{ record }">
+          <a-avatar :size="32">{{ record.nickname ? record.nickname[0] : record.username[0] }}</a-avatar>
+        </template>
+        <template #status="{ record }">
+          <a-tag :color="record.status === 1 ? 'green' : 'red'">{{ record.status === 1 ? '正常' : '禁用' }}</a-tag>
+        </template>
+        <template #role="{ record }">
+          {{ record.role_name || '-' }}
+        </template>
+        <template #last_login="{ record }">
+          {{ record.last_login || '-' }}
+        </template>
+        <template #operations="{ record }">
+          <a-space>
+            <a-link @click="editRecord(record)">编辑</a-link>
+            <a-link @click="resetPwd(record)">重置密码</a-link>
+            <a-link status="danger" @click="deleteRecord(record)">删除</a-link>
+          </a-space>
+        </template>
+      </a-table>
+    </div>
+
+    <!-- 新增/编辑弹窗 -->
+    <a-modal v-model:visible="showAddModal" :title="editId ? '编辑用户' : '新增用户'" :width="560" @before-ok="submitForm" unmount-on-close>
+      <a-form :model="form" layout="vertical">
+        <a-form-item field="username" label="用户名" required>
+          <a-input v-model="form.username" placeholder="请输入用户名" />
+        </a-form-item>
+        <a-form-item field="nickname" label="昵称">
+          <a-input v-model="form.nickname" placeholder="请输入昵称" />
+        </a-form-item>
+        <a-form-item field="password" label="密码" v-if="!editId">
+          <a-input-password v-model="form.password" placeholder="请输入密码" />
+        </a-form-item>
+        <a-form-item field="email" label="邮箱">
+          <a-input v-model="form.email" placeholder="请输入邮箱" />
+        </a-form-item>
+        <a-form-item field="phone" label="手机号">
+          <a-input v-model="form.phone" placeholder="请输入手机号" />
+        </a-form-item>
+        <a-form-item field="role_id" label="角色">
+          <a-select v-model="form.role_id" placeholder="请选择角色">
+            <a-option value="1">超级管理员</a-option>
+            <a-option value="2">运维人员</a-option>
+            <a-option value="3">普通用户</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item field="status" label="状态">
+          <a-switch v-model="form.status" checked-value="1" unchecked-value="0" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive, onMounted } = Vue;
+const API_BASE = 'http://localhost:8080/api/v1';
+
+const app = createApp({
+  setup() {
+    const loading = ref(false);
+    const data = ref([
+      { id: 1, username: 'admin', nickname: '管理员', email: 'admin@example.com', phone: '13800138000', role_id: 1, role_name: '超级管理员', status: 1, last_login: '2026-03-19 10:30:00' },
+      { id: 2, username: 'operator', nickname: '运维人员', email: 'op@example.com', phone: '13800138001', role_id: 2, role_name: '运维人员', status: 1, last_login: '2026-03-18 15:20:00' },
+      { id: 3, username: 'user1', nickname: '张三', email: 'user1@example.com', phone: '13800138002', role_id: 3, role_name: '普通用户', status: 1, last_login: '2026-03-19 09:00:00' },
+      { id: 4, username: 'user2', nickname: '李四', email: 'user2@example.com', phone: '13800138003', role_id: 3, role_name: '普通用户', status: 0, last_login: '2026-03-15 14:00:00' },
+    ]);
+    const showAddModal = ref(false);
+    const editId = ref(null);
+
+    const form = reactive({
+      username: '',
+      nickname: '',
+      password: '',
+      email: '',
+      phone: '',
+      role_id: '',
+      status: 1
+    });
+
+    const columns = [
+      { title: '头像', slotName: 'avatar', width: 70 },
+      { title: '用户名', dataIndex: 'username', width: 120 },
+      { title: '昵称', dataIndex: 'nickname', width: 100 },
+      { title: '邮箱', dataIndex: 'email', width: 180 },
+      { title: '手机号', dataIndex: 'phone', width: 130 },
+      { title: '角色', slotName: 'role', width: 100 },
+      { title: '状态', slotName: 'status', width: 70 },
+      { title: '最后登录', slotName: 'last_login', width: 160 },
+      { title: '操作', slotName: 'operations', width: 200 }
+    ];
+
+    const editRecord = (record) => {
+      Object.assign(form, record);
+      editId.value = record.id;
+      showAddModal.value = true;
+    };
+
+    const resetPwd = (record) => {
+      Arco.Message.info('密码已重置为: 123456');
+    };
+
+    const deleteRecord = (record) => {
+      if (confirm('确定要删除用户 ' + record.username + ' 吗？')) {
+        data.value = data.value.filter(d => d.id !== record.id);
+        Arco.Message.success('删除成功');
+      }
+    };
+
+    const submitForm = (done) => {
+      if (editId.value) {
+        const idx = data.value.findIndex(d => d.id === editId.value);
+        if (idx > -1) {
+          Object.assign(data.value[idx], form);
+          data.value[idx].role_name = data.value[idx].role_id === 1 ? '超级管理员' : data.value[idx].role_id === 2 ? '运维人员' : '普通用户';
+        }
+        Arco.Message.success('更新成功');
+      } else {
+        const newUser = { ...form, id: Date.now(), last_login: '-' };
+        newUser.role_name = newUser.role_id === '1' ? '超级管理员' : newUser.role_id === '2' ? '运维人员' : '普通用户';
+        data.value.push(newUser);
+        Arco.Message.success('创建成功');
+      }
+      showAddModal.value = false;
+      Object.assign(form, { username: '', nickname: '', password: '', email: '', phone: '', role_id: '', status: 1 });
+      editId.value = null;
+      done(true);
+    };
+
+    return {
+      loading,
+      data,
+      columns,
+      showAddModal,
+      editId,
+      form,
+      editRecord,
+      resetPwd,
+      deleteRecord,
+      submitForm
+    };
+  }
+});
+
+app.use(ArcoVue);
+app.mount('#app');
+</script>
+</body>
+</html>

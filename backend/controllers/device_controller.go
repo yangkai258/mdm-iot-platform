@@ -26,10 +26,14 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		Redis: redisClient,
 		MQTT:  nil,
 	}
+	orgCtrl := &OrgController{DB: db}
+	permCtrl := &PermissionController{DB: db}
+	roleCtrl := &RoleController{DB: db}
+	memberCtrl := &MemberController{DB: db}
 
 	api := r.Group("/api/v1")
 	{
-		// 设备管理
+		// ============ 设备管理 ============
 		api.POST("/devices/register", deviceCtrl.Register)
 		api.GET("/devices", deviceCtrl.List)
 		
@@ -52,6 +56,102 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.GET("/ota/packages", otaCtrl.ListPackages)
 		api.POST("/ota/deployments", otaCtrl.CreateDeployment)
 		api.GET("/ota/devices/:device_id/check", otaCtrl.CheckOTA)
+
+		// ============ 组织管理 ============
+		// 公司管理
+		api.GET("/org/companies", orgCtrl.CompanyList)
+		api.POST("/org/companies", orgCtrl.CompanyCreate)
+		api.PUT("/org/companies/:id", orgCtrl.CompanyUpdate)
+		api.DELETE("/org/companies/:id", orgCtrl.CompanyDelete)
+		
+		// 部门管理
+		api.GET("/org/departments", orgCtrl.DepartmentList)
+		api.GET("/org/departments/tree", orgCtrl.DepartmentTree)
+		api.POST("/org/departments", orgCtrl.DepartmentCreate)
+		api.PUT("/org/departments/:id", orgCtrl.DepartmentUpdate)
+		api.DELETE("/org/departments/:id", orgCtrl.DepartmentDelete)
+		
+		// 岗位管理
+		api.GET("/org/positions", orgCtrl.PositionList)
+		api.POST("/org/positions", orgCtrl.PositionCreate)
+		api.PUT("/org/positions/:id", orgCtrl.PositionUpdate)
+		api.DELETE("/org/positions/:id", orgCtrl.PositionDelete)
+		
+		// 员工管理
+		api.GET("/org/employees", orgCtrl.EmployeeList)
+		api.POST("/org/employees", orgCtrl.EmployeeCreate)
+		api.PUT("/org/employees/:id", orgCtrl.EmployeeUpdate)
+		api.DELETE("/org/employees/:id", orgCtrl.EmployeeDelete)
+		
+		// 基准岗位管理
+		api.GET("/org/standard-positions", orgCtrl.StandardPositionList)
+		api.POST("/org/standard-positions", orgCtrl.StandardPositionCreate)
+		api.PUT("/org/standard-positions/:id", orgCtrl.StandardPositionUpdate)
+		api.DELETE("/org/standard-positions/:id", orgCtrl.StandardPositionDelete)
+
+		// ============ 权限管理 ============
+		api.GET("/permissions", permCtrl.List)
+		api.POST("/permissions", permCtrl.Create)
+		api.PUT("/permissions/:id", permCtrl.Update)
+		api.DELETE("/permissions/:id", permCtrl.Delete)
+
+		// ============ 角色管理 ============
+		api.GET("/roles", roleCtrl.List)
+		api.POST("/roles", roleCtrl.Create)
+		api.PUT("/roles/:id", roleCtrl.Update)
+		api.DELETE("/roles/:id", roleCtrl.Delete)
+		api.GET("/roles/:id/perms", roleCtrl.GetPerms)
+		api.PUT("/roles/:id/perms", roleCtrl.SetPerms)
+
+		// ============ 会员管理 ============
+		// 会员信息
+		api.GET("/members", memberCtrl.MemberList)
+		api.POST("/members", memberCtrl.MemberCreate)
+		api.PUT("/members/:id", memberCtrl.MemberUpdate)
+		api.DELETE("/members/:id", memberCtrl.MemberDelete)
+		api.GET("/members/:id", memberCtrl.MemberDetail)
+		
+		// 会员卡
+		api.GET("/member/cards", memberCtrl.CardList)
+		api.POST("/member/cards", memberCtrl.CardCreate)
+		api.PUT("/member/cards/:id", memberCtrl.CardUpdate)
+		api.DELETE("/member/cards/:id", memberCtrl.CardDelete)
+		
+		// 优惠券
+		api.GET("/member/coupons", memberCtrl.CouponList)
+		api.POST("/member/coupons", memberCtrl.CouponCreate)
+		api.PUT("/member/coupons/:id", memberCtrl.CouponUpdate)
+		api.DELETE("/member/coupons/:id", memberCtrl.CouponDelete)
+		
+		// 店铺管理
+		api.GET("/member/stores", memberCtrl.StoreList)
+		api.POST("/member/stores", memberCtrl.StoreCreate)
+		api.PUT("/member/stores/:id", memberCtrl.StoreUpdate)
+		api.DELETE("/member/stores/:id", memberCtrl.StoreDelete)
+		
+		// 会员标签
+		api.GET("/member/tags", memberCtrl.TagList)
+		api.POST("/member/tags", memberCtrl.TagCreate)
+		api.PUT("/member/tags/:id", memberCtrl.TagUpdate)
+		api.DELETE("/member/tags/:id", memberCtrl.TagDelete)
+		
+		// 促销活动
+		api.GET("/member/promotions", memberCtrl.PromotionList)
+		api.POST("/member/promotions", memberCtrl.PromotionCreate)
+		api.PUT("/member/promotions/:id", memberCtrl.PromotionUpdate)
+		api.DELETE("/member/promotions/:id", memberCtrl.PromotionDelete)
+		
+		// 会员等级
+		api.GET("/member/levels", memberCtrl.LevelList)
+		
+		// 积分规则
+		api.GET("/member/points/rules", memberCtrl.PointsRuleList)
+		api.POST("/member/points/rules", memberCtrl.PointsRuleCreate)
+		api.PUT("/member/points/rules/:id", memberCtrl.PointsRuleUpdate)
+		api.DELETE("/member/points/rules/:id", memberCtrl.PointsRuleDelete)
+		
+		// 积分流水
+		api.GET("/member/points/records", memberCtrl.PointsRecordList)
 	}
 }
 

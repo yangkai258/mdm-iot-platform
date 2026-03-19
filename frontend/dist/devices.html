@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>设备列表 - MDM控制台</title>
+  <link href="https://cdn.jsdelivr.net/npm/arco-design@2.11.0/dist/arco.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@arco-design/web-vue@2.11.0/dist/arco.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f2f3f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .page-container { padding: 20px; max-width: 1600px; margin: 0 auto; }
+    
+    /* 页面头部 */
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .page-title { display: flex; align-items: center; gap: 12px; }
+    .page-title h2 { font-size: 20px; font-weight: 600; color: #1f2329; }
+    .page-title .count { background: #165qff; color: #fff; padding: 2px 10px; border-radius: 12px; font-size: 13px; font-weight: normal; }
+    
+    /* 搜索栏 */
+    .search-bar { background: #fff; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .search-input { flex: 1; min-width: 200px; }
+    .filter-group { display: flex; gap: 12px; }
+    
+    /* 表格样式 */
+    .table-card { background: #fff; border-radius: 8px; overflow: hidden; }
+    .arco-table { font-size: 14px; }
+    .arco-table-th { background: #f7f8fa !important; font-weight: 600; }
+    
+    /* 设备卡片在表格中 */
+    .device-cell { display: flex; align-items: center; gap: 12px; }
+    .device-avatar { 
+      width: 40px; height: 40px; border-radius: 10px; 
+      background: linear-gradient(135deg, #165qff, #4080ff);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 600; font-size: 14px;
+    }
+    .device-info { display: flex; flex-direction: column; }
+    .device-name { font-weight: 500; color: #1f2329; }
+    .device-id { font-size: 12px; color: #646a73; }
+    
+    /* 状态标签 */
+    .status-tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+    .status-tag.online { background: #e6fff0; color: #00b42a; }
+    .status-tag.offline { background: #f2f3f5; color: #646a73; }
+    .status-tag.maintenance { background: #fff7e6; color: #ff7d00; }
+    
+    /* 操作按钮 */
+    .action-btn { padding: 4px 8px; border: none; background: none; cursor: pointer; color: #165qff; font-size: 14px; transition: color 0.2s; }
+    .action-btn:hover { color: #4080ff; }
+    .action-btn.danger { color: #f53f3f; }
+    .action-btn.danger:hover { color: #f76560; }
+    
+    /* 弹窗样式 */
+    .modal-form { padding: 20px; }
+    .form-section { margin-bottom: 20px; }
+    .form-section-title { font-size: 14px; font-weight: 600; color: #1f2329; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f2f3f5; }
+    
+    /* 空状态 */
+    .empty-state { text-align: center; padding: 60px 20px; color: #969799; }
+    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+    
+    /* 底部统计 */
+    .table-footer { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-top: 1px solid #f2f3f5; }
+    .footer-stats { font-size: 13px; color: #646a73; }
+    .footer-stats span { margin-right: 16px; }
+    .footer-stats .online { color: #00b42a; font-weight: 500; }
+    .footer-stats .offline { color: #c9cdd4; font-weight: 500; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="page-container">
+    <!-- 页面头部 -->
+    <div class="page-header">
+      <div class="page-title">
+        <h2>📋 设备列表</h2>
+        <span class="count">共 {{ total }} 台设备</span>
+      </div>
+      <a-space>
+        <a-button @click="loadData">
+          <template #icon>🔄</template> 刷新
+        </a-button>
+        <a-button type="primary" @click="showAddModal = true">
+          <template #icon>+</template> 新增设备
+        </a-button>
+      </a-space>
+    </div>
+
+    <!-- 搜索栏 -->
+    <div class="search-bar">
+      <a-input-search 
+        class="search-input"
+        v-model="searchKeyword" 
+        placeholder="搜索设备名称/MAC地址/序列号" 
+        search-button 
+        @search="loadData"
+      />
+      <div class="filter-group">
+        <a-select v-model="filterStatus" placeholder="设备状态" style="width: 120px" allow-clear @change="loadData">
+          <a-option value="1">在线</a-option>
+          <a-option value="2">离线</a-option>
+          <a-option value="3">维护中</a-option>
+        </a-select>
+        <a-select v-model="filterModel" placeholder="设备型号" style="width: 150px" allow-clear @change="loadData">
+          <a-option value="M5Stack Core2">M5Stack Core2</a-option>
+          <a-option value="M5Stack Basic">M5Stack Basic</a-option>
+          <a-option value="M5Stack Fire">M5Stack Fire</a-option>
+          <a-option value="M5Stack Plus">M5Stack Plus</a-option>
+        </a-select>
+      </div>
+    </div>
+
+    <!-- 数据表格 -->
+    <div class="table-card">
+      <a-table 
+        :columns="columns" 
+        :data="data" 
+        :loading="loading" 
+        :pagination="pagination"
+        :stripe="true"
+        @page-change="changePage"
+        @page-size-change="changePageSize"
+      >
+        <!-- 设备信息列 -->
+        <template #device="{ record }">
+          <div class="device-cell">
+            <div class="device-avatar">{{ record.name[0] }}</div>
+            <div class="device-info">
+              <span class="device-name">{{ record.name }}</span>
+              <span class="device-id">ID: {{ record.device_id }}</span>
+            </div>
+          </div>
+        </template>
+        
+        <!-- 状态列 -->
+        <template #status="{ record }">
+          <span class="status-tag" :class="getStatusClass(record.status)">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+            {{ getStatusText(record.status) }}
+          </span>
+        </template>
+        
+        <!-- 电量列 -->
+        <template #battery="{ record }">
+          <a-progress 
+            :percent="record.battery" 
+            :stroke-width="6"
+            :show-text="true"
+            :format="(p) => p + '%'"
+            size="small"
+            :status="record.battery < 20 ? 'danger' : undefined"
+          />
+        </template>
+        
+        <!-- 最后在线列 -->
+        <template #lastOnline="{ record }">
+          <span style="color: #646a73; font-size: 13px;">{{ record.last_online }}</span>
+        </template>
+        
+        <!-- 操作列 -->
+        <template #operations="{ record }">
+          <a-space>
+            <a-tooltip content="查看详情">
+              <a-button type="text" size="mini" @click="viewDetail(record)">👁️</a-button>
+            </a-tooltip>
+            <a-tooltip content="发送指令">
+              <a-button type="text" size="mini" @click="sendCommand(record)">📨</a-button>
+            </a-tooltip>
+            <a-tooltip content="编辑">
+              <a-button type="text" size="mini" @click="editRecord(record)">✏️</a-button>
+            </a-tooltip>
+            <a-tooltip content="删除">
+              <a-button type="text" size="mini" status="danger" @click="deleteRecord(record)">🗑️</a-button>
+            </a-tooltip>
+          </a-space>
+        </template>
+      </a-table>
+      
+      <!-- 底部统计 -->
+      <div class="table-footer">
+        <div class="footer-stats">
+          <span>在线: <span class="online">{{ onlineCount }}</span></span>
+          <span>离线: <span class="offline">{{ offlineCount }}</span></span>
+        </div>
+        <div style="font-size: 13px; color: #969799;">
+          显示 {{ data.length }} 条，共 {{ total }} 条
+        </div>
+      </div>
+    </div>
+
+    <!-- 新增/编辑弹窗 -->
+    <a-modal 
+      v-model:visible="showAddModal" 
+      :title="editId ? '编辑设备' : '新增设备'" 
+      :width="600"
+      @before-ok="submitForm"
+      @cancel="resetForm"
+    >
+      <div class="modal-form">
+        <a-form :model="form" layout="vertical">
+          <div class="form-section">
+            <div class="form-section-title">基本信息</div>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item field="name" label="设备名称" required>
+                  <a-input v-model="form.name" placeholder="请输入设备名称" />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item field="device_id" label="设备ID" required>
+                  <a-input v-model="form.device_id" placeholder="自动生成" :disabled="!!editId" />
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item field="mac_address" label="MAC地址" required>
+                  <a-input v-model="form.mac_address" placeholder="如: AA:BB:CC:DD:EE:FF" />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item field="sn_code" label="序列号" required>
+                  <a-input v-model="form.sn_code" placeholder="请输入序列号" />
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </div>
+          
+          <div class="form-section">
+            <div class="form-section-title">设备信息</div>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item field="hardware_model" label="硬件型号" required>
+                  <a-select v-model="form.hardware_model" placeholder="请选择">
+                    <a-option value="M5Stack Core2">M5Stack Core2</a-option>
+                    <a-option value="M5Stack Basic">M5Stack Basic</a-option>
+                    <a-option value="M5Stack Fire">M5Stack Fire</a-option>
+                    <a-option value="M5Stack Plus">M5Stack Plus</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item field="firmware_version" label="固件版本">
+                  <a-input v-model="form.firmware_version" placeholder="如: v1.2.0" />
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </div>
+          
+          <div class="form-section">
+            <div class="form-section-title">其他信息</div>
+            <a-form-item field="remark" label="备注">
+              <a-textarea v-model="form.remark" placeholder="请输入备注信息" :rows="2" />
+            </a-form-item>
+          </div>
+        </a-form>
+      </div>
+    </a-modal>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive, computed, onMounted } = Vue;
+
+const app = createApp({
+  setup() {
+    const loading = ref(false);
+    const data = ref([]);
+    const total = ref(0);
+    const searchKeyword = ref('');
+    const filterStatus = ref('');
+    const filterModel = ref('');
+    const showAddModal = ref(false);
+    const editId = ref(null);
+    
+    const pagination = reactive({
+      current: 1,
+      pageSize: 10,
+      total: 0,
+      showTotal: true,
+      showPageSize: true
+    });
+
+    const form = reactive({
+      name: '',
+      device_id: '',
+      mac_address: '',
+      sn_code: '',
+      hardware_model: '',
+      firmware_version: '',
+      remark: ''
+    });
+
+    const columns = [
+      { title: '设备信息', slotName: 'device', width: 250 },
+      { title: 'MAC地址', dataIndex: 'mac_address', width: 160 },
+      { title: '硬件型号', dataIndex: 'hardware_model', width: 130 },
+      { title: '固件版本', dataIndex: 'firmware_version', width: 100 },
+      { title: '状态', slotName: 'status', width: 100 },
+      { title: '电量', slotName: 'battery', width: 120 },
+      { title: '最后在线', slotName: 'lastOnline', width: 140 },
+      { title: '操作', slotName: 'operations', width: 180, fixed: 'right' }
+    ];
+
+    // 模拟数据
+    const mockData = [
+      { id: 1, name: 'M5Stack-001', device_id: 'DEV001', mac_address: 'AA:BB:CC:DD:EE:01', hardware_model: 'M5Stack Core2', firmware_version: 'v1.2.0', status: 1, battery: 85, last_online: '2分钟前' },
+      { id: 2, name: 'M5Stack-002', device_id: 'DEV002', mac_address: 'AA:BB:CC:DD:EE:02', hardware_model: 'M5Stack Basic', firmware_version: 'v1.1.5', status: 1, battery: 92, last_online: '5分钟前' },
+      { id: 3, name: 'M5Stack-003', device_id: 'DEV003', mac_address: 'AA:BB:CC:DD:EE:03', hardware_model: 'M5Stack Fire', firmware_version: 'v1.2.0', status: 2, battery: 0, last_online: '2小时前' },
+      { id: 4, name: 'M5Stack-004', device_id: 'DEV004', mac_address: 'AA:BB:CC:DD:EE:04', hardware_model: 'M5Stack Core2', firmware_version: 'v1.0.8', status: 1, battery: 45, last_online: '1分钟前' },
+      { id: 5, name: 'M5Stack-005', device_id: 'DEV005', mac_address: 'AA:BB:CC:DD:EE:05', hardware_model: 'M5Stack Plus', firmware_version: 'v1.1.0', status: 3, battery: 78, last_online: '30分钟前' },
+      { id: 6, name: 'M5Stack-006', device_id: 'DEV006', mac_address: 'AA:BB:CC:DD:EE:06', hardware_model: 'M5Stack Core2', firmware_version: 'v1.2.0', status: 1, battery: 65, last_online: '3分钟前' },
+      { id: 7, name: 'M5Stack-007', device_id: 'DEV007', mac_address: 'AA:BB:CC:DD:EE:07', hardware_model: 'M5Stack Basic', firmware_version: 'v1.1.2', status: 2, battery: 15, last_online: '1天前' },
+      { id: 8, name: 'M5Stack-008', device_id: 'DEV008', mac_address: 'AA:BB:CC:DD:EE:08', hardware_model: 'M5Stack Fire', firmware_version: 'v1.2.0', status: 1, battery: 100, last_online: '刚刚' },
+    ];
+
+    const onlineCount = computed(() => data.value.filter(d => d.status === 1).length);
+    const offlineCount = computed(() => data.value.filter(d => d.status === 2).length);
+
+    const loadData = () => {
+      loading.value = true;
+      setTimeout(() => {
+        data.value = mockData;
+        total.value = mockData.length;
+        pagination.total = mockData.length;
+        loading.value = false;
+      }, 500);
+    };
+
+    const changePage = (page) => {
+      pagination.current = page;
+      loadData();
+    };
+
+    const changePageSize = (size) => {
+      pagination.pageSize = size;
+      loadData();
+    };
+
+    const getStatusClass = (status) => {
+      const map = { 1: 'online', 2: 'offline', 3: 'maintenance' };
+      return map[status] || 'offline';
+    };
+
+    const getStatusText = (status) => {
+      const map = { 1: '在线', 2: '离线', 3: '维护中' };
+      return map[status] || '未知';
+    };
+
+    const viewDetail = (record) => {
+      Arco.Message.info(`查看设备: ${record.name}`);
+    };
+
+    const sendCommand = (record) => {
+      Arco.Message.info(`发送指令到: ${record.name}`);
+    };
+
+    const editRecord = (record) => {
+      Object.assign(form, record);
+      editId.value = record.id;
+      showAddModal.value = true;
+    };
+
+    const deleteRecord = (record) => {
+      Arco.Message.warning(`删除设备: ${record.name}`);
+    };
+
+    const submitForm = (done) => {
+      Arco.Message.success(editId.value ? '更新成功' : '添加成功');
+      showAddModal.value = false;
+      resetForm();
+      loadData();
+      done(true);
+    };
+
+    const resetForm = () => {
+      Object.assign(form, {
+        name: '', device_id: '', mac_address: '', sn_code: '',
+        hardware_model: '', firmware_version: '', remark: ''
+      });
+      editId.value = null;
+    };
+
+    onMounted(() => {
+      loadData();
+    });
+
+    return {
+      loading,
+      data,
+      total,
+      searchKeyword,
+      filterStatus,
+      filterModel,
+      showAddModal,
+      editId,
+      form,
+      columns,
+      pagination,
+      onlineCount,
+      offlineCount,
+      loadData,
+      changePage,
+      changePageSize,
+      getStatusClass,
+      getStatusText,
+      viewDetail,
+      sendCommand,
+      editRecord,
+      deleteRecord,
+      submitForm,
+      resetForm
+    };
+  }
+});
+
+app.use(ArcoVue);
+app.mount('#app');
+</script>
+</body>
+</html>
