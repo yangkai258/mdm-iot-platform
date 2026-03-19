@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -46,13 +48,38 @@ func InitRedis() (*RedisClient, error) {
 		redisURL = "redis://localhost:6379"
 	}
 
-	// 简单解析 redis://host:port
+	// 解析 redis://[user:password@]host:port[/db]
+	// 默认值
 	addr := "localhost:6379"
 	password := ""
 	db := 0
-	fmt.Sscanf(redisURL, "redis://%*s@%s", &addr)
-	// 简化处理
-	addr = "localhost:6379"
+
+	// 去除 redis:// 前缀
+	url := strings.TrimPrefix(redisURL, "redis://")
+
+	// 检查是否有认证信息
+	if idx := strings.Index(url, "@"); idx != -1 {
+		authPart := url[:idx]
+		url = url[idx+1:]
+		if pIdx := strings.Index(authPart, ":"); pIdx != -1 {
+			password = authPart[pIdx+1:]
+		}
+	}
+
+	// 解析 host:port[/db]
+	if hostPort := strings.Split(url, "/")[0]; hostPort != "" {
+		if strings.Contains(hostPort, ":") {
+			parts := strings.SplitN(hostPort, ":", 2)
+			addr = hostPort
+			if len(parts) == 2 {
+				if dbNum, err := strconv.Atoi(parts[1]); err == nil {
+					db = dbNum
+				}
+			}
+		} else {
+			addr = hostPort + ":6379"
+		}
+	}
 
 	return NewRedisClient(addr, password, db)
 }

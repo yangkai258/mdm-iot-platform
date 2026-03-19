@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -9,7 +10,25 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("mdm-secret-key-change-in-production")
+var jwtSecret = []byte(getJWTSecret())
+
+// getJWTSecret 从环境变量获取 JWT 密钥
+func getJWTSecret() string {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		panic("JWT_SECRET environment variable is not set")
+	}
+	return secret
+}
+
+// GetCORSAllowedOrigins 获取 CORS 允许的源列表
+func GetCORSAllowedOrigins() string {
+	origins := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if origins == "" {
+		return "*" // 开发环境默认值
+	}
+	return origins
+}
 
 // JWTClaims JWT 载荷
 type JWTClaims struct {

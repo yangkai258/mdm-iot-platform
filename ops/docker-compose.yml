@@ -1,0 +1,133 @@
+version: "3.8"
+
+networks:
+  mdm-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  emqx_data:
+
+services:
+  # PostgreSQL 15 - 主数据库
+  postgres:
+    image: postgres:15-alpine
+    container_name: mdm-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mdm_user
+      POSTGRES_PASSWORD: mdm_password
+      POSTGRES_DB: mdm_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - mdm-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mdm_user -d mdm_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Redis 7 - 设备影子缓存
+  redis:
+    image: redis:7-alpine
+    container_name: mdm-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --appendfsync everysec
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - mdm-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # EMQX 5.0 - MQTT Broker
+  emqx:
+    image: emqx/emqx:5.0
+    container_name: mdm-emqx
+    restart: unless-stopped
+    environment:
+      EMQX_NAME: mdm-emqx
+      EMQX_HOST: 127.0.0.1
+      EMQX_DASHBOARD__DEFAULT_USERNAME: admin
+      EMQX_DASHBOARD__DEFAULT_PASSWORD: public
+      EMQX_LISTENERS__TCP__DEFAULT: 1883
+      EMQX_LISTENERS__WS__DEFAULT: 8083
+      EMQX_LISTENERS__API__DEFAULT: 18083
+    volumes:
+      - emqx_data:/opt/emqx/data
+      - emqx_data:/opt/emqx/log
+    ports:
+      - "1883:1883"   # MQTT
+      - "8083:8083"   # WebSocket
+      - "18083:18083" # Dashboard
+    networks:
+      - mdm-network
+    healthcheck:
+      test: ["CMD", "emqx", "_ctl", "status"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # MDM Backend - Golang API 服务
+  mdm-backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: mdm-backend
+    restart: unless-stopped
+    environment:
+      # 数据库 - 使用服务名通信（docker-compose 内部网络）
+      DATABASE_URL: postgres://mdm_user:mdm_password@postgres:5432/mdm_db?sslmode=disable
+      # Redis - 使用服务名通信
+      REDIS_URL: redis://redis:6379
+      # JWT 密钥 - 必须通过环境变量注入，禁止硬编码
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set - generate with: openssl rand -base64 32}
+      # CORS 白名单 - 允许的前端域名
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
+      # 服务端口
+      PORT: "8080"
+      # EMQX MQTT Broker 地址
+      EMQX_BROKER_URL: tcp://emqx:1883
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      emqx:
+        condition: service_healthy
+    networks:
+      - mdm-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # MDM Frontend - Vue3 + Nginx
+  mdm-frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    container_name: mdm-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - mdm-backend
+    networks:
+      - mdm-network
