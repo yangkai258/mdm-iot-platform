@@ -56,13 +56,16 @@ EMQX_ADMIN_USER=admin
 
 # API Base URL (前端构建用)
 VITE_API_BASE_URL=https://api.mdm.yourdomain.com
+
+# 应用存储路径 (可选，默认 /data/apps)
+# APP_STORAGE_PATH=/data/apps
 EOF
 ```
 
 ### 4. 创建数据目录
 
 ```bash
-mkdir -p data/postgres data/redis data/emqx data/nginx/logs
+mkdir -p data/postgres data/redis data/emqx data/nginx/logs data/apps
 ```
 
 ### 5. 构建并启动所有服务
@@ -142,6 +145,18 @@ Docker Compose `depends_on` + `condition: service_healthy` 确保以下顺序：
 - **格式**: `tcp://host:1883`
 - **网络**: 使用 Docker 内部服务名 `emqx`
 
+### APP_STORAGE_PATH
+
+- **用途**: 应用安装包存储路径
+- **默认值**: `/data/apps`
+- **说明**: 容器内路径，对应 Docker Volume `app_storage_data`
+
+### MQTT_TOPIC_PREFIX
+
+- **用途**: MQTT Topic 前缀（用于通知下发）
+- **默认值**: `/device`
+- **说明**: 通知使用 `/device/{device_id}/down/notification`，OTA 使用 `/mdm/device/{device_id}/down/cmd`
+
 ## 数据持久化
 
 所有数据卷在 `data/` 目录下：
@@ -155,6 +170,18 @@ data/
 ```
 
 **重要**: 生产环境务必配置外部存储（如云存储挂载），不要只依赖本地目录。
+
+### 应用存储
+
+```
+data/
+└── apps/              # 应用安装包存储（IPA/APK/AAB/MSI）
+    └── {app_code}/
+        └── {version}/
+            └── {package_file}
+```
+
+**生产环境建议**：使用云存储（S3/OSS）或 NFS 共享存储替代本地目录。
 
 ## 日志查看
 
@@ -317,4 +344,175 @@ curl -X POST http://localhost:18083/api/v5/authentication \
 ### 设备影子与 OTA
 
 OTA 期望版本可在设备影子的 `desired_config.desired_firmware` 字段中设置。OTA Worker 会检查该字段并在适当时机触发升级。
+
+---
+
+## 应用管理系统
+
+### 概述
+
+应用管理模块为 MDM 中台提供企业应用分发能力，支持上传和管理企业内部应用（IPA/APK/AAB/MSI），并通过分发策略向设备推送安装、强制更新或卸载。
+
+### 环境变量
+
+| 环境变量 | 说明 | 默认值 |
+|----------|------|--------|
+| `APP_STORAGE_PATH` | 应用安装包存储路径 | `/data/apps` |
+
+### 应用存储配置
+
+应用安装包（IPA/APK/AAB/MSI）存储在 Docker Volume `app_storage_data` 中，容器内路径为 `/data/apps`。
+
+**目录结构：**
+```
+data/
+└── apps/
+    └── {app_code}/
+        └── {version}/
+            └── {package_file}
+```
+
+**生产环境建议：**
+- 使用云存储（如 S3、OSS）替代本地存储
+- 配置 CDN 加速应用包下载
+- 定期备份应用仓库
+
+```bash
+# 生产环境使用对象存储（示例：S3）
+export APP_STORAGE_PATH=s3://mdm-bucket/apps
+# 或使用 NFS 共享存储
+export APP_STORAGE_PATH=/mnt/nfs/apps
+```
+
+### 数据表
+
+应用管理模块使用以下数据表（通过 `db.AutoMigrate()` 自动创建）：
+
+| 表名 | 说明 |
+|------|------|
+| `apps` | 应用主表 |
+| `app_versions` | 应用版本表 |
+| `app_distributions` | 应用分发任务表 |
+| `app_licenses` | 应用许可证表（VPP）|
+| `app_configurations` | 应用托管配置表 |
+| `app_installations` | 应用安装记录表 |
+
+### EMQX 权限配置
+
+应用分发通知通过 MQTT Topic `/device/{device_id}/down/notification` 下发。该 Topic 需要在 EMQX 中配置发布权限。
+
+**EMQX 默认配置已允许所有 Topic。** 生产环境如需精细化配置 ACL，可通过 Dashboard 或 REST API 配置：
+
+```bash
+# 通过 EMQX Dashboard API 配置精细化 ACL
+# 1. 登录 EMQX Dashboard (http://localhost:18083)
+# 2. 访问 访问控制 → ACL > 内置数据库
+# 3. 添加 ACL 规则：
+#    - 允许客户端发布到 /device/%u/down/notification（%u 为用户名）
+#    - 允许客户端订阅 /device/%u/up/#
+
+# 或通过 CLI 创建 ACL 文件
+docker exec mdm-emqx emqx ctl acl reload
+```
+
+---
+
+## 通知管理系统
+
+### 概述
+
+通知与消息模块为 MDM 中台提供多渠道推送能力，支持向设备发送文本通知、企业公告，并提供命令反馈查看能力。
+
+### MQTT Topic 列表
+
+| Topic 模式 | 方向 | 说明 |
+|------------|------|------|
+| `/mdm/device/{device_id}/up/status` | 设备→服务器 | 设备心跳上报 |
+| `/mdm/device/{device_id}/up/property` | 设备→服务器 | 设备属性上报 |
+| `/mdm/device/{device_id}/down/cmd` | 服务器→设备 | 设备指令下发（含OTA指令）|
+| `/mdm/device/{device_id}/down/desired` | 服务器→设备 | 期望状态下发 |
+| `/device/{device_id}/down/notification` | 服务器→设备 | **通知/消息下发** |
+
+### 通知下发 Topic
+
+通知通过 MQTT Topic `/device/{device_id}/down/notification` 下发到设备：
+
+**通知消息格式：**
+```json
+{
+  "notification_id": "notif-uuid-001",
+  "title": "固件升级通知",
+  "content": "有新版本固件可用，请及时更新",
+  "notification_type": "push",
+  "priority": "normal",
+  "timestamp": "2026-03-20T12:00:00Z"
+}
+```
+
+**EMQX 权限要求：**
+- 后端服务（mdm-backend）需要对 `/device/+/down/notification` 有 **发布权限**
+- EMQX 默认配置已允许该 Topic，无需额外配置
+
+```bash
+# 验证 EMQX Topic 权限
+docker exec mdm-emqx emqx ctl brokers
+docker exec mdm-emqx emqx ctl vm
+```
+
+### 数据表
+
+通知管理模块使用以下数据表（通过 `db.AutoMigrate()` 自动创建）：
+
+| 表名 | 说明 |
+|------|------|
+| `notifications` | 通知主表 |
+| `notification_templates` | 通知模板表 |
+| `announcements` | 公告表 |
+| `device_notifications` | 设备通知记录表 |
+
+### 通知发送流程
+
+```
+管理员发送推送通知
+    │
+    ▼
+POST /api/v1/notifications/push
+    │
+    ├─→ 创建 notifications 记录 (status=pending)
+    ├─→ 解析 target_ids 批量创建 device_notifications
+    │
+    ▼
+通知发送 Worker (后台处理)
+    │
+    ▼
+遍历 device_notifications (status=pending)
+    │
+    ├─→ 通过 MQTT 发送到设备 /device/{id}/down/notification
+    │
+    ├─→ 成功 ──► status=delivered, delivered_at=now()
+    │
+    └─→ 失败 ──► status=failed, error_message=...
+    │
+    ▼
+更新 notifications.sent_count / failed_count
+```
+
+### 常见问题
+
+**Q: 设备收不到通知**
+
+1. 检查设备是否在线：
+```bash
+docker exec mdm-redis redis-cli GET "device_shadow:{device_id}"
+```
+
+2. 检查 EMQX 连接状态：
+```bash
+docker exec mdm-emqx emqx ctl client list
+```
+
+3. 检查后端日志：
+```bash
+docker-compose logs mdm-backend | grep notification
+```
 ```

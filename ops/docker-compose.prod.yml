@@ -23,6 +23,12 @@ volumes:
       type: none
       o: bind
       device: ./data/emqx
+  app_storage_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/apps
 
 services:
   postgres:
@@ -165,6 +171,9 @@ services:
       MQTT_BROKER: tcp://emqx:1883
       MQTT_USERNAME: ${EMQX_ADMIN_USER:-admin}
       MQTT_PASSWORD: ${EMQX_ADMIN_PASSWORD}
+      APP_STORAGE_PATH: /data/apps
+    volumes:
+      - app_storage_data:/data/apps
     expose:
       - "8080"
     depends_on:
