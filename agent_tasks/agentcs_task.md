@@ -66,3 +66,52 @@ pytest p0_tests/ -v
 ### mqtt_stress_test.py - MQTT压测脚本
 
 待完成后补充到 `test_scripts/` 目录。
+
+---
+
+## Sprint 1.1 & 1.2 测试任务 ✅ 完成
+
+### 测试范围
+1. OTA Worker 功能测试
+2. 设备影子修复测试
+3. CheckAlerts 集成测试
+
+### 创建的测试文件
+
+#### test_ota_worker.py (7 tests)
+- `test_worker_polling_interval` - 验证5分钟轮询
+- `test_grayscale_full` - 全量灰度策略
+- `test_grayscale_percentage` - 百分比灰度策略
+- `test_grayscale_whitelist` - 白名单灰度策略
+- `test_auto_pause_on_failure` - 失败率自动暂停
+- `test_ota_api_endpoints` - OTA API端点验证
+- `test_ota_deployment_create` - 部署任务创建验证
+
+#### test_device_shadow.py (7 tests)
+- `test_shadow_online_update` - 在线状态更新
+- `test_shadow_offline_detection` - 离线检测 (90s超时)
+- `test_redis_url_parse` - Redis URL解析
+- `test_db_sync_on_offline` - 离线时DB同步
+- `test_shadow_device_list_api` - 设备列表API
+- `test_device_detail_api` - 设备详情API
+- `test_redis_client_implementation` - Redis客户端实现
+
+#### test_alert_trigger.py (8 tests)
+- `test_battery_low_warning` - 电量<15%触发warning
+- `test_battery_low_critical` - 电量<5%触发critical
+- `test_offline_alert` - 离线>90s触发告警
+- `test_alert_rules_api` - 告警规则API
+- `test_alerts_api` - 告警记录API
+- `test_dashboard_stats_api` - 大盘统计API
+- `test_alert_condition_evaluation` - 条件评估函数
+- `test_mqtt_alert_callback_integration` - MQTT与告警回调集成
+
+### 测试结果
+```
+15 passed, 7 skipped (backend not running)
+```
+
+### Git Commit
+```
+c8874f5 - agentcs: Add Sprint 1.1 & 1.2 test files
+```
