@@ -82,6 +82,54 @@ const routes = [
     path: '/notifications/announcements',
     name: 'Announcements',
     component: () => import('../views/notifications/Announcements.vue')
+  },
+  // 策略管理
+  {
+    path: '/policies/list',
+    name: 'PolicyList',
+    component: () => import('../views/policies/PolicyList.vue')
+  },
+  {
+    path: '/policies/configs',
+    name: 'PolicyConfigs',
+    component: () => import('../views/policies/PolicyConfigs.vue')
+  },
+  {
+    path: '/policies/compliance',
+    name: 'ComplianceRules',
+    component: () => import('../views/policies/ComplianceRules.vue')
+  },
+  // 会员管理
+  {
+    path: '/members/points',
+    name: 'MemberPoints',
+    component: () => import('../views/members/MemberPoints.vue')
+  },
+  {
+    path: '/members/coupons',
+    name: 'MemberCoupons',
+    component: () => import('../views/members/MemberCoupons.vue')
+  },
+  {
+    path: '/members/promotions',
+    name: 'MemberPromotions',
+    component: () => import('../views/members/MemberPromotions.vue')
+  },
+  // 告警中心
+  {
+    path: '/alerts/rules',
+    name: 'AlertRules',
+    component: () => import('../views/alerts/AlertRules.vue')
+  },
+  {
+    path: '/alerts/list',
+    name: 'AlertList',
+    component: () => import('../views/alerts/AlertList.vue')
+  },
+  {
+    path: '/alerts/settings',
+    name: 'AlertSettings',
+    component: () => import('../views/alerts/AlertSettings.vue')
   }
 ]
 
