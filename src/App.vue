@@ -66,6 +66,23 @@ const menuItems = [
   { key: '/alert', label: '告警管理' },
   { key: '/system/monitor', label: '服务监控' },
   { key: '/system/logs', label: '操作日志' },
+  {
+    key: '/notifications',
+    label: '通知管理',
+    children: [
+      { key: '/notifications/list', label: '推送通知' },
+      { key: '/notifications/announcements', label: '公告管理' },
+      { key: '/notifications/templates', label: '通知模板' }
+    ]
+  },
+  {
+    key: '/apps',
+    label: '应用管理',
+    children: [
+      { key: '/apps/list', label: '应用列表' },
+      { key: '/apps/distributions', label: '应用分发' }
+    ]
+  },
 ]
 
 onMounted(() => {
