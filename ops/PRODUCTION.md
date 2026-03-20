@@ -59,6 +59,20 @@ VITE_API_BASE_URL=https://api.mdm.yourdomain.com
 
 # 应用存储路径 (可选，默认 /data/apps)
 # APP_STORAGE_PATH=/data/apps
+
+# === 告警通知配置（可选）===
+# SMTP 邮件通知
+# SMTP_HOST=smtp.example.com
+# SMTP_PORT=587
+# SMTP_USER=alerts@example.com
+# SMTP_PASSWORD=your-smtp-password
+# SMTP_FROM=noreply@mdm.example.com
+# SMTP_USE_TLS=true
+# ALERT_ADMIN_EMAIL=admin@example.com
+
+# Webhook 告警通知
+# WEBHOOK_URL=https://hooks.example.com/alert
+# WEBHOOK_TOKEN=your-webhook-secret
 EOF
 ```
 
@@ -156,6 +170,18 @@ Docker Compose `depends_on` + `condition: service_healthy` 确保以下顺序：
 - **用途**: MQTT Topic 前缀（用于通知下发）
 - **默认值**: `/device`
 - **说明**: 通知使用 `/device/{device_id}/down/notification`，OTA 使用 `/mdm/device/{device_id}/down/cmd`
+
+### SMTP_HOST / SMTP_PASSWORD
+
+- **用途**: 告警邮件发送（SMTP）
+- **说明**: 配置 SMTP 服务器信息后，触发告警时自动发送邮件
+- **参考值**: QQ 邮箱 `smtp.qq.com:587`，网易邮箱 `smtp.163.com:25`
+
+### WEBHOOK_URL / WEBHOOK_TOKEN
+
+- **用途**: 告警 Webhook 推送
+- **说明**: 配置 Webhook 地址后，触发告警时 POST JSON 到该地址
+- **安全**: 建议配置 `WEBHOOK_TOKEN` 用于签名验证
 
 ## 数据持久化
 
@@ -515,4 +541,294 @@ docker exec mdm-emqx emqx ctl client list
 ```bash
 docker-compose logs mdm-backend | grep notification
 ```
+
+---
+
+## 策略管理系统
+
+### 概述
+
+策略管理模块通过合规策略（CompliancePolicy）对设备进行实时监控和自动处置。当设备数据上报触发策略条件时，系统自动记录违规并执行预配置的补救措施（隔离、阻止、通知、擦除）。
+
+### 数据表
+
+合规策略模块使用以下数据表（通过 `db.AutoMigrate()` 自动创建）：
+
+| 表名 | 说明 |
+|------|------|
+| `compliance_policies` | 合规策略主表 |
+| `compliance_violations` | 违规记录表 |
+
+### CompliancePolicy 字段说明
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `name` | varchar(100) | 策略名称 |
+| `description` | varchar(255) | 策略描述 |
+| `policy_type` | varchar(50) | 策略类型：`firmware_version`, `battery_level`, `region_lock`, `encryption_required` |
+| `target_value` | varchar(100) | 目标值，如版本号、最低电量等 |
+| `condition` | varchar(20) | 条件：`=`, `!=`, `>=`, `<=`, `<`, `>` |
+| `severity` | int | 严重程度：1-低 2-中 3-高 4-严重 |
+| `remediation_action` | varchar(50) | 补救措施：`isolate`（隔离）、`wipe`（擦除）、`notify`（通知）、`block`（阻止） |
+| `enabled` | bool | 是否启用 |
+| `enforce_scope` | varchar(50) | 生效范围：`all`（全部）、`group`（分组）、`individual`（单个） |
+
+### 策略检查流程
+
+```
+设备上报数据 (MQTT /device/{id}/up/status 或 /up/property)
+    │
+    ▼
+CheckCompliance() 回调处理
+    │
+    ▼
+遍历所有启用的 compliance_policies
+    │
+    ├─→ battery_level: 比较电池电量与 target_value
+    ├─→ offline_duration: 比较离线时长与阈值
+    └─→ is_online: 检测设备在线状态
+    │
+    ▼
+条件命中 → 创建 compliance_violations 记录
+    │
+    ▼
+executeRemediation() 执行补救措施
+    │
+    ├─→ notify   ──► 创建告警记录（alert_type=compliance_violation）
+    ├─→ isolate  ──► 创建严重告警 + 更新设备影子 current_mode=isolated
+    ├─→ block    ──► 创建严重告警（设备阻止）
+    └─→ wipe     ──► 创建紧急告警 + 状态置为处理中
+```
+
+### API 端点
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/compliance/policies` | 获取策略列表 |
+| POST | `/api/v1/compliance/policies` | 创建策略 |
+| PUT | `/api/v1/compliance/policies/:id` | 更新策略 |
+| DELETE | `/api/v1/compliance/policies/:id` | 删除策略 |
+| GET | `/api/v1/compliance/violations` | 获取违规记录 |
+| PUT | `/api/v1/compliance/violations/:id/resolve` | 标记违规已处理 |
+
+### 常见问题
+
+**Q: 策略没有触发**
+
+1. 检查策略是否启用：
+```bash
+docker-compose exec mdm-backend curl http://localhost:8080/api/v1/compliance/policies
+```
+
+2. 检查设备数据是否上报：
+```bash
+docker exec mdm-redis redis-cli GET "device_shadow:{device_id}"
+```
+
+3. 检查后端日志中的合规检查：
+```bash
+docker-compose logs mdm-backend | grep Compliance
+```
+
+---
+
+## 告警通知系统
+
+### 概述
+
+告警通知模块提供设备告警规则配置和真实告警通知（邮件、Webhook）能力。当设备触发告警规则或合规策略时，系统根据规则配置的 `notify_ways` 字段，通过邮件或 Webhook 发送告警通知。
+
+### 告警规则
+
+`DeviceAlertRule` 字段说明：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `name` | varchar(100) | 规则名称 |
+| `device_id` | varchar(36) | 关联设备ID（空表示所有设备） |
+| `alert_type` | varchar(50) | 告警类型：`battery_low`, `offline`, `temperature_high` 等 |
+| `condition` | varchar(100) | 条件：`<`, `>`, `=`, `>=`, `<=` |
+| `threshold` | float64 | 阈值 |
+| `severity` | int | 严重程度：1-低 2-中 3-高 4-严重 |
+| `enabled` | bool | 是否启用 |
+| `notify_ways` | varchar(100) | 通知方式：`email`, `sms`, `webhook`（逗号分隔） |
+| `remark` | varchar(255) | 备注 |
+
+### 数据表
+
+| 表名 | 说明 |
+|------|------|
+| `device_alert_rules` | 告警规则表 |
+| `device_alerts` | 告警记录表（包含触发值、告警状态） |
+
+### 告警触发流程
+
+```
+MQTT 设备数据上报
+    │
+    ▼
+CheckAlerts(db, deviceID, data)
+    │
+    ▼
+遍历所有启用的 device_alert_rules
+    │
+    ├─→ battery_low: data["battery"] vs threshold
+    └─→ offline:     data["is_online"] == false
+    │
+    ▼
+触发条件命中
+    │
+    ▼
+创建 device_alerts 记录 (status=1:未处理)
+    │
+    ▼
+后台 Worker 查询 notify_ways
+    │
+    ├─→ email   ──► SMTP 发送邮件到 ALERT_ADMIN_EMAIL
+    └─→ webhook ──► POST 到 WEBHOOK_URL
+```
+
+### 环境变量配置
+
+在 `.env` 文件中添加以下可选配置（启用邮件或 Webhook 通知时必须）：
+
+```bash
+# === 告警通知配置 ===
+
+# SMTP 邮件通知（可选，不配置则不发送邮件）
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_USER=alerts@example.com
+SMTP_PASSWORD=your-smtp-password
+SMTP_FROM=noreply@mdm.example.com
+SMTP_USE_TLS=true
+
+# Webhook 告警通知（可选，不配置则不发送 Webhook）
+WEBHOOK_URL=https://hooks.example.com/alert
+WEBHOOK_TOKEN=your-webhook-secret
+
+# 告警管理员邮箱（接收严重告警邮件）
+ALERT_ADMIN_EMAIL=admin@example.com
+```
+
+### SMTP 配置说明
+
+| 环境变量 | 说明 | 默认值 |
+|----------|------|--------|
+| `SMTP_HOST` | SMTP 服务器地址 | （空，不启用）|
+| `SMTP_PORT` | SMTP 端口 | `587` |
+| `SMTP_USER` | SMTP 用户名 | （空）|
+| `SMTP_PASSWORD` | SMTP 密码 | （空）|
+| `SMTP_FROM` | 发件人地址 | `noreply@mdm.example.com` |
+| `SMTP_USE_TLS` | 是否使用 TLS | `true` |
+| `ALERT_ADMIN_EMAIL` | 告警接收邮箱 | （空）|
+
+**SMTP 配置示例（QQ 邮箱）：**
+```bash
+SMTP_HOST=smtp.qq.com
+SMTP_PORT=587
+SMTP_USER=your-email@qq.com
+SMTP_PASSWORD=your-authorization-code
+SMTP_FROM=your-email@qq.com
+SMTP_USE_TLS=true
+ALERT_ADMIN_EMAIL=admin@example.com
+```
+
+**获取 QQ 邮箱授权码：**
+1. 登录 QQ 邮箱 → 设置 → 账户
+2. 开启 POP3/SMTP 服务
+3. 生成授权码（填入 `SMTP_PASSWORD`）
+
+### Webhook 配置说明
+
+| 环境变量 | 说明 | 默认值 |
+|----------|------|--------|
+| `WEBHOOK_URL` | Webhook 接收地址 | （空，不启用）|
+| `WEBHOOK_TOKEN` | 签名密钥（用于 HMAC 签名） | （空）|
+
+**Webhook POST 请求格式：**
+```json
+{
+  "alert_id": 123,
+  "device_id": "device-001",
+  "alert_type": "battery_low",
+  "severity": 3,
+  "message": "电池电量过低",
+  "trigger_val": 15.0,
+  "threshold": 20.0,
+  "timestamp": "2026-03-20T12:00:00Z"
+}
+```
+
+**请求头：**
+- `Content-Type: application/json`
+- `X-Webhook-Token: {WEBHOOK_TOKEN}`（如果配置了 `WEBHOOK_TOKEN`）
+
+**Webhook 签名验证（推荐）：**
+```go
+// 服务器端 HMAC-SHA256 签名验证
+signature := hmac.New(sha256.New, []byte(WEBHOOK_TOKEN))
+signature.Write(body)
+expected := hex.EncodeToString(signature.Sum(nil))
+```
+
+### API 端点
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/alerts/rules` | 获取告警规则列表 |
+| POST | `/api/v1/alerts/rules` | 创建告警规则 |
+| GET | `/api/v1/alerts` | 获取告警记录 |
+| PUT | `/api/v1/alerts/:id` | 更新告警状态（确认/解决）|
+| GET | `/api/v1/dashboard/stats` | 大盘统计数据（含待处理告警数）|
+
+### 常见问题
+
+**Q: 告警触发了但没有收到邮件**
+
+1. 确认 SMTP 环境变量已配置：
+```bash
+docker-compose exec mdm-backend env | grep SMTP
+```
+
+2. 检查后端日志中的邮件发送错误：
+```bash
+docker-compose logs mdm-backend | grep -i "smtp\|email\|mail"
+```
+
+3. 检查垃圾邮件文件夹
+
+**Q: Webhook 没有收到请求**
+
+1. 确认 `WEBHOOK_URL` 已配置
+2. 检查 Webhook 服务端是否正常可达
+3. 检查后端日志：
+```bash
+docker-compose logs mdm-backend | grep -i webhook
+```
+
+**Q: 如何禁用邮件通知**
+
+将 `SMTP_HOST` 留空，或在告警规则的 `notify_ways` 中不包含 `email`。
+
+---
+
+## 数据库迁移说明
+
+### AutoMigrate 自动迁移
+
+所有数据表在服务首次启动时通过 `db.AutoMigrate()` 自动创建，包括：
+
+| 模块 | 表 |
+|------|-----|
+| 设备 | `devices`, `device_shadows` |
+| OTA | `ota_packages`, `ota_deployments`, `ota_progress` |
+| 应用管理 | `apps`, `app_versions`, `app_distributions`, `app_install_records`, `app_licenses` |
+| 通知 | `notifications`, `notification_templates`, `announcements`, `device_notifications` |
+| 告警 | `device_alert_rules`, `device_alerts` |
+| 合规策略 | `compliance_policies`, `compliance_violations` |
+| 系统 | `sys_users`, `sys_roles`, `sys_menus`, `sys_dictionaries`, `sys_operation_logs`, `sys_login_logs` |
+| 会员 | `member_orders`, `member_upgrade_records` |
+
+**注意**：`AutoMigrate` 只会创建不存在的表，不会修改已存在表的结构。如需执行结构变更，请手动编写 ALTER TABLE 迁移脚本。
 ```

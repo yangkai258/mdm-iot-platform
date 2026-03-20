@@ -172,6 +172,19 @@ services:
       MQTT_USERNAME: ${EMQX_ADMIN_USER:-admin}
       MQTT_PASSWORD: ${EMQX_ADMIN_PASSWORD}
       APP_STORAGE_PATH: /data/apps
+      # === 告警通知配置 ===
+      # SMTP 邮件通知（可选）
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-noreply@mdm.example.com}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      # Webhook 告警通知（可选）
+      WEBHOOK_URL: ${WEBHOOK_URL:-}
+      WEBHOOK_TOKEN: ${WEBHOOK_TOKEN:-}
+      # 告警通知管理员邮箱（可选，用于接收严重告警邮件）
+      ALERT_ADMIN_EMAIL: ${ALERT_ADMIN_EMAIL:-}
     volumes:
       - app_storage_data:/data/apps
     expose:

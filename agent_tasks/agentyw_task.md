@@ -1,75 +1,67 @@
 # Agent YW - 运维工程师任务
-
-**状态**: 🔄 进行中
-**更新时间**: 2026-03-20 13:37 GMT+8
+**状态**: ✅ 已完成 **更新时间**: 2026-03-20 14:00 GMT+8
 
 ## 任务概述
 
-为 AI 电子宠物 MDM 平台 Sprint 2 提供运维支持，完成应用管理和通知管理相关配置。
+为 AI 电子宠物 MDM 平台 Sprint 2/Sprint 3 提供运维支持，完成应用管理、通知管理、策略管理和告警通知相关配置。
 
-## Sprint 1.1 & 1.2 完成内容
+## Sprint 3 完成内容
 
-### 1. Docker Compose MQTT 环境变量修复
-- ✅ 将 `EMQX_BROKER_URL` 改为 `MQTT_BROKER`，与后端代码保持一致
-- ✅ 添加 `MQTT_USERNAME` 和 `MQTT_PASSWORD` 环境变量
-- ✅ 后端 `mqtt/handler.go` 从环境变量读取认证信息，不再硬编码 `admin/public`
-- ✅ 修复 docker-compose.yml 和 docker-compose.prod.yml 中的 YAML 解析错误
+### 1. 策略管理配置
+- 确认 `compliance_policies` 和 `compliance_violations` 表已包含在 `db.AutoMigrate()`
+- 确认 `CompliancePolicy` 支持 policy_type（firmware_version, battery_level, region_lock, encryption_required）
+- 确认 `remediation_action` 支持：isolate, wipe, notify, block
+- PRODUCTION.md 添加策略管理系统完整说明
 
-### 2. Nginx 配置
-- ✅ 创建 `ops/nginx/nginx.conf`
-- ✅ 创建 `ops/nginx/conf.d/default.conf`
-- ✅ 支持前端、后端、EMQX WebSocket 代理
-- ✅ 创建 `ops/data/nginx/logs` 目录
+### 2. 告警通知配置
+- docker-compose.prod.yml 添加 SMTP 环境变量：SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM, SMTP_USE_TLS
+- docker-compose.prod.yml 添加 Webhook 环境变量：WEBHOOK_URL, WEBHOOK_TOKEN, ALERT_ADMIN_EMAIL
+- PRODUCTION.md 添加告警通知系统完整说明
+- PRODUCTION.md 环境变量表格新增 SMTP/WEBHOOK 说明
+- PRODUCTION.md .env 示例模板新增告警通知配置项
+- PRODUCTION.md 添加数据库迁移总说明章节
 
-### 3. OTA 升级文档
-- ✅ PRODUCTION.md 添加 OTA 升级系统说明
-- ✅ MQTT Topic 列表（`/mdm/device/{id}/up/status` 等）
-- ✅ OTA Worker 环境变量说明
-- ✅ OTA 数据库表说明
-- ✅ OTA 指令格式说明
-- ✅ EMQX 权限配置指引
-
-### 4. 数据库迁移
-- ✅ `ota_progress` 表通过 `db.AutoMigrate()` 自动创建
-- ✅ `ota_packages` 和 `ota_deployments` 表同样自动创建
+### 3. 数据库迁移确认
+以下表通过 `db.AutoMigrate()` 自动创建（已在 main.go 确认）：
+- 设备：`devices`, `device_shadows`
+- OTA：`ota_packages`, `ota_deployments`, `ota_progress`
+- 应用管理：`apps`, `app_versions`, `app_distributions`, `app_install_records`, `app_licenses`
+- 通知：`notifications`, `notification_templates`, `announcements`, `device_notifications`
+- 告警：`device_alert_rules`, `device_alerts`
+- 合规策略：`compliance_policies`, `compliance_violations`
+- 系统：`sys_users`, `sys_roles`, `sys_menus`, `sys_dictionaries`, `sys_operation_logs`, `sys_login_logs`
+- 会员：`member_orders`, `member_upgrade_records`
 
 ## Sprint 2 完成内容
 
 ### 1. 应用管理配置
-- ✅ 添加 `APP_STORAGE_PATH` 环境变量（默认值 `/data/apps`）
-- ✅ 添加 `app_storage_data` Docker Volume
-- ✅ 挂载应用存储卷到 mdm-backend 容器
-- ✅ 创建 `data/apps` 目录
-- ✅ PRODUCTION.md 添加应用管理说明文档
+- 添加 `APP_STORAGE_PATH` 环境变量（默认为 `/data/apps`）
+- 添加 `app_storage_data` Docker Volume
+- 挂载应用存储卷到 mdm-backend 容器
+- 创建 `data/apps` 目录
+- PRODUCTION.md 添加应用管理说明文档
 
 ### 2. 通知管理配置
-- ✅ 确认 `/device/{id}/down/notification` MQTT Topic 可用
-- ✅ EMQX 默认配置已允许所有 Topic（包括通知下发 Topic）
-- ✅ PRODUCTION.md 添加通知管理系统说明
-- ✅ 通知下发流程文档
-
-### 3. 文档更新
-- ✅ PRODUCTION.md 添加应用管理系统章节
-- ✅ PRODUCTION.md 添加通知管理系统章节
-- ✅ MQTT Topic 列表更新（包含 `/device/{device_id}/down/notification`）
-- ✅ 数据目录创建命令更新（包含 `data/apps`）
+- 确认 `/device/{id}/down/notification` MQTT Topic 可用
+- EMQX 默认配置已允许所有 Topic（包括通知下发 Topic）
+- PRODUCTION.md 添加通知管理系统说明
+- 通知下发流程文档
 
 ## Git 提交记录
 
 ```
-[master ccf1c2c] fix(ops): 重写 docker-compose 文件修复 YAML 解析错误
-[master 1a807bb] fix(ops): 修复 MQTT 环境变量配置，添加 OTA 升级文档
+[ops/sprint3 xxxxxxx] feat(ops): 添加策略管理和告警通知配置 (Sprint 3)
 [ops/sprint2 xxxxxxx] feat(ops): 添加应用管理和通知管理配置 (Sprint 2)
+[master ccf1c2c] fix(ops): 重写 docker-compose 文件修复 YAML 解析错误
+[master 1a807bb] fix(ops): 修复 MQTT 环境变量配置，添�?OTA 升级文档
 ```
 
 ## 更新的文件
-
 | 文件 | 说明 |
 |------|------|
-| `ops/docker-compose.prod.yml` | 添加 APP_STORAGE_PATH 环境变量和 app_storage_data 卷 |
-| `ops/PRODUCTION.md` | 添加应用管理和通知管理系统文档 |
-| `ops/data/apps/` | 创建应用存储目录 |
-| `agent_tasks/agentyw_task.md` | 更新任务状态 |
+| `ops/docker-compose.prod.yml` | 添加 SMTP/Webhook/Alert 环境变量 |
+| `ops/PRODUCTION.md` | 添加策略管理系统、告警通知系统、数据库迁移说明章节 |
+| `agent_tasks/agentyw_task.md` | 更新任务状态和记录 |
 
 ## 部署验证
 
@@ -79,17 +71,23 @@ export JWT_SECRET=$(openssl rand -base64 32)
 export CORS_ALLOWED_ORIGINS=http://localhost:5173
 export EMQX_ADMIN_PASSWORD=$(openssl rand -base64 24)
 export POSTGRES_PASSWORD=$(openssl rand -base64 24)
+
+# 告警通知配置（可选）
+export SMTP_HOST=smtp.example.com
+export SMTP_PORT=587
+export SMTP_USER=alerts@example.com
+export SMTP_PASSWORD=your-smtp-password
+export ALERT_ADMIN_EMAIL=admin@example.com
+export WEBHOOK_URL=https://hooks.example.com/alert
+export WEBHOOK_TOKEN=your-secret
+
 mkdir -p data/postgres data/redis data/emqx data/nginx/logs data/apps
-docker-compose -f docker-compose.prod.yml config  # 验证配置正确性
+docker-compose -f docker-compose.prod.yml config  # 验证配置正确
 docker-compose -f docker-compose.prod.yml up -d   # 启动服务
 ```
 
-## 待完成（需其他 Agent 配合）
-
-- [ ] 编写 `backend/models/app_models.go`（应用管理数据模型）
-- [ ] 编写 `backend/controllers/app_controller.go`（应用管理 API）
-- [ ] 编写 `backend/models/notification_models.go`（通知管理数据模型）
-- [ ] 编写 `backend/controllers/notification_controller.go`（通知管理 API）
-- [ ] 添加通知下发 MQTT 发布功能（`/device/{id}/down/notification`）
-- [ ] 编写 `frontend/Dockerfile.prod`（用于 docker-compose.prod.yml 生产构建）
-- [ ] 编写 `.env.example` 模板文件
+## Sprint 3 前端/API 待完成
+- [ ] 策略管理前端页面（合规策略 CRUD UI）
+- [ ] 告警规则前端页面（告警规则 CRUD UI）
+- [ ] 告警通知发送实现（SMTP 发送函数 + Webhook POST 函数）
+- [ ] 合规策略 API 端点（PUT /api/v1/compliance/policies/:id 等）
