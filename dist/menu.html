@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>菜单设置 - MDM控制台</title>
+  <link href="https://cdn.jsdelivr.net/npm/arco-design@2.11.0/dist/arco.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@arco-design/web-vue@2.11.0/dist/arco.min.js"></script>
+  <style>
+    body { margin: 0; background: #f2f3f5; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .header { background: #fff; padding: 16px 20px; border-radius: 4px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .content { display: flex; gap: 16px; }
+    .tree-card { width: 320px; background: #fff; border-radius: 4px; padding: 16px; }
+    .form-card { flex: 1; background: #fff; border-radius: 4px; padding: 20px; }
+    .menu-item { padding: 8px 12px; margin: 4px 0; border-radius: 4px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .menu-item:hover { background: #f2f3f5; }
+    .menu-item.active { background: #e6f7ff; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+    <div class="header">
+      <h2>📑 菜单设置</h2>
+      <a-space>
+        <a-button @click="expandAll">展开全部</a-button>
+        <a-button @click="collapseAll">折叠全部</a-button>
+        <a-button type="primary" @click="addRootMenu">新增根菜单</a-button>
+      </a-space>
+    </div>
+
+    <div class="content">
+      <div class="tree-card">
+        <h3>菜单树</h3>
+        <div v-for="menu in menuTree" :key="menu.id" class="menu-tree-item">
+          <div class="menu-item" :class="{ active: selectedMenu && selectedMenu.id === menu.id }" @click="selectMenu(menu)">
+            <span>{{ menu.icon }} {{ menu.name }}</span>
+            <a-space>
+              <a-link @click.stop="addChildMenu(menu)">+</a-link>
+              <a-link @click.stop="editMenu(menu)">✎</a-link>
+              <a-link @click.stop="deleteMenu(menu)" status="danger">×</a-link>
+            </a-space>
+          </div>
+          <div v-if="menu.children && menu.children.length" style="padding-left: 20px;">
+            <div v-for="child in menu.children" :key="child.id" class="menu-item" :class="{ active: selectedMenu && selectedMenu.id === child.id }" @click="selectMenu(child)">
+              <span>{{ child.icon }} {{ child.name }}</span>
+              <a-space>
+                <a-link @click.stop="editMenu(child)" style="font-size: 10px;">✎</a-link>
+                <a-link @click.stop="deleteMenu(child)" status="danger" style="font-size: 10px;">×</a-link>
+              </a-space>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <h3>{{ isEdit ? '编辑菜单' : '菜单详情' }}</h3>
+        <div v-if="!selectedMenu && !isEdit" style="text-align: center; color: #999; padding: 60px;">
+          请从左侧选择一个菜单进行编辑
+        </div>
+        <a-form v-if="selectedMenu || isEdit" :model="form" layout="vertical">
+          <a-form-item label="菜单名称" required>
+            <a-input v-model="form.name" placeholder="请输入菜单名称" />
+          </a-form-item>
+          <a-form-item label="菜单图标">
+            <a-input v-model="form.icon" placeholder="如: 📱, 🔧" />
+          </a-form-item>
+          <a-form-item label="路由路径">
+            <a-input v-model="form.path" placeholder="如: /devices" />
+          </a-form-item>
+          <a-form-item label="组件路径">
+            <a-input v-model="form.component" placeholder="如: devices.html" />
+          </a-form-item>
+          <a-form-item label="菜单类型">
+            <a-radio-group v-model="form.type">
+              <a-radio :value="1">菜单</a-radio>
+              <a-radio :value="2">按钮</a-radio>
+              <a-radio :value="3">接口</a-radio>
+            </a-radio-group>
+          </a-form-item>
+          <a-form-item label="排序">
+            <a-input-number v-model="form.sort" :min="0" />
+          </a-form-item>
+          <a-form-item label="权限标识">
+            <a-input v-model="form.permission" placeholder="如: system:user:list" />
+          </a-form-item>
+          <a-form-item label="是否显示">
+            <a-switch v-model="form.visible" checked-value="1" unchecked-value="0" />
+          </a-form-item>
+          <a-form-item>
+            <a-space>
+              <a-button type="primary" @click="saveMenu">保存</a-button>
+              <a-button @click="cancelEdit">取消</a-button>
+            </a-space>
+          </a-form-item>
+        </a-form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive } = Vue;
+
+const app = createApp({
+  setup() {
+    const selectedMenu = ref(null);
+    const isEdit = ref(false);
+    
+    const form = reactive({
+      name: '',
+      icon: '',
+      path: '',
+      component: '',
+      type: 1,
+      sort: 0,
+      permission: '',
+      visible: '1',
+      parent_id: null
+    });
+
+    const menuTree = ref([
+      {
+        id: 1, name: '📊 仪表盘', icon: '📊', path: '/dashboard', type: 1, sort: 1,
+        children: []
+      },
+      {
+        id: 2, name: '📱 设备管理', icon: '📱', path: '/devices', type: 1, sort: 2,
+        children: [
+          { id: 21, name: '设备列表', icon: '📋', path: '/devices', component: 'devices.html', type: 1, sort: 1 },
+          { id: 22, name: 'OTA固件', icon: '🔄', path: '/ota', component: 'ota.html', type: 1, sort: 2 },
+        ]
+      },
+      {
+        id: 3, name: '🚨 告警管理', icon: '🚨', path: '/alert', type: 1, sort: 3,
+        children: [
+          { id: 31, name: '告警规则', icon: '⚙️', path: '/alert/rule', component: 'alert.html', type: 1, sort: 1 },
+        ]
+      },
+      {
+        id: 4, name: '🏢 组织管理', icon: '🏢', path: '/org', type: 1, sort: 4,
+        children: [
+          { id: 41, name: '公司管理', icon: '🏢', path: '/org/company', component: 'company.html', type: 1, sort: 1 },
+          { id: 42, name: '部门管理', icon: '📂', path: '/org/department', component: 'department.html', type: 1, sort: 2 },
+          { id: 43, name: '员工管理', icon: '👥', path: '/org/employee', component: 'employee.html', type: 1, sort: 3 },
+        ]
+      },
+      {
+        id: 5, name: '🔐 系统管理', icon: '🔐', path: '/system', type: 1, sort: 5,
+        children: [
+          { id: 51, name: '角色管理', icon: '🔐', path: '/system/role', component: 'role.html', type: 1, sort: 1 },
+          { id: 52, name: '用户管理', icon: '👤', path: '/system/user', component: 'user.html', type: 1, sort: 2 },
+          { id: 53, name: '菜单设置', icon: '📑', path: '/system/menu', component: 'menu.html', type: 1, sort: 3 },
+        ]
+      },
+    ]);
+
+    const selectMenu = (menu) => {
+      selectedMenu.value = menu;
+      isEdit.value = false;
+      Object.assign(form, menu);
+    };
+
+    const editMenu = (menu) => {
+      selectedMenu.value = menu;
+      isEdit.value = true;
+      Object.assign(form, menu);
+    };
+
+    const addRootMenu = () => {
+      selectedMenu.value = null;
+      isEdit.value = true;
+      Object.assign(form, {
+        id: null,
+        name: '',
+        icon: '📁',
+        path: '',
+        component: '',
+        type: 1,
+        sort: 99,
+        permission: '',
+        visible: '1',
+        parent_id: null
+      });
+    };
+
+    const addChildMenu = (parent) => {
+      selectedMenu.value = null;
+      isEdit.value = true;
+      Object.assign(form, {
+        id: null,
+        name: '',
+        icon: '📄',
+        path: '',
+        component: '',
+        type: 1,
+        sort: 99,
+        permission: '',
+        visible: '1',
+        parent_id: parent.id
+      });
+    };
+
+    const deleteMenu = (menu) => {
+      if (confirm('确定要删除菜单 ' + menu.name + ' 吗？')) {
+        Arco.Message.success('删除成功');
+      }
+    };
+
+    const saveMenu = () => {
+      Arco.Message.success('保存成功');
+      isEdit.value = false;
+    };
+
+    const cancelEdit = () => {
+      isEdit.value = false;
+      selectedMenu.value = null;
+    };
+
+    const expandAll = () => {
+      // 展开所有
+    };
+
+    const collapseAll = () => {
+      // 折叠所有
+    };
+
+    return {
+      selectedMenu,
+      isEdit,
+      form,
+      menuTree,
+      selectMenu,
+      editMenu,
+      addRootMenu,
+      addChildMenu,
+      deleteMenu,
+      saveMenu,
+      cancelEdit,
+      expandAll,
+      collapseAll
+    };
+  }
+});
+
+app.use(ArcoVue);
+app.mount('#app');
+</script>
+</body>
+</html>

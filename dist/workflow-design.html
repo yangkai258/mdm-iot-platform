@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>流程设计中心 - MDM控制台</title>
+  <link href="https://cdn.jsdelivr.net/npm/arco-design@2.11.0/dist/arco.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@arco-design/web-vue@2.11.0/dist/arco.min.js"></script>
+  <style>
+    body { margin: 0; background: #f2f3f5; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+    .header { background: #fff; padding: 16px 20px; border-radius: 4px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .content { display: flex; gap: 16px; }
+    .flow-list { width: 280px; background: #fff; border-radius: 4px; padding: 16px; max-height: calc(100vh - 180px); overflow-y: auto; }
+    .canvas { flex: 1; background: #fff; border-radius: 4px; padding: 20px; min-height: 500px; position: relative; }
+    .flow-item { padding: 12px; border-radius: 4px; cursor: pointer; margin-bottom: 8px; border: 1px solid #e5e6eb; transition: all 0.2s; }
+    .flow-item:hover { border-color: #165qff; background: #f7f8fa; }
+    .flow-item.active { border-color: #165qff; background: #e6f7ff; }
+    .flow-item-title { font-weight: 500; margin-bottom: 4px; }
+    .flow-item-meta { font-size: 12px; color: #666; }
+    .canvas-toolbar { position: absolute; top: 10px; right: 10px; display: flex; gap: 8px; }
+    .node { position: absolute; min-width: 120px; padding: 12px 16px; border-radius: 4px; cursor: move; text-align: center; font-size: 13px; }
+    .node-start { background: #00b42a; color: #fff; border-radius: 20px; }
+    .node-end { background: #f53f3f; color: #fff; border-radius: 20px; }
+    .node-task { background: #fff; border: 2px solid #165qff; }
+    .node-approve { background: #ff7d00; color: #fff; }
+    .connector { position: absolute; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="container">
+    <div class="header">
+      <h2>🎨 流程设计中心</h2>
+      <a-space>
+        <a-button @click="loadFlows">刷新</a-button>
+        <a-button type="primary" @click="createFlow">新建流程</a-button>
+      </a-space>
+    </div>
+
+    <div class="content">
+      <div class="flow-list">
+        <h3>流程列表</h3>
+        <div v-for="flow in flows" :key="flow.id" class="flow-item" :class="{ active: currentFlow && currentFlow.id === flow.id }" @click="selectFlow(flow)">
+          <div class="flow-item-title">{{ flow.name }}</div>
+          <div class="flow-item-meta">
+            <span>版本: {{ flow.version }}</span>
+            <span style="margin-left: 8px;">{{ flow.status_text }}</span>
+          </div>
+        </div>
+        <div v-if="flows.length === 0" style="text-align: center; color: #999; padding: 40px;">
+          暂无流程，点击新建
+        </div>
+      </div>
+
+      <div class="canvas">
+        <div v-if="currentFlow" style="position: relative; min-height: 400px;">
+          <div class="canvas-toolbar">
+            <a-button size="small" @click="addNode('start')">+ 开始</a-button>
+            <a-button size="small" @click="addNode('task')">+ 任务</a-button>
+            <a-button size="small" @click="addNode('approve')">+ 审批</a-button>
+            <a-button size="small" @click="addNode('end')">+ 结束</a-button>
+            <a-divider direction="vertical" />
+            <a-button size="small" type="primary" @click="saveFlow">保存</a-button>
+            <a-button size="small" @click="publishFlow">发布</a-button>
+          </div>
+          
+          <!-- 流程节点 -->
+          <div style="position: relative; padding: 60px 40px;">
+            <div v-for="(node, idx) in nodes" :key="idx" class="node" :class="'node-' + node.type" :style="{ left: node.x + 'px', top: node.y + 'px' }">
+              <div>{{ node.label }}</div>
+              <div style="font-size: 11px; opacity: 0.8; margin-top: 4px;">{{ node.type_text }}</div>
+            </div>
+          </div>
+        </div>
+        <div v-else style="text-align: center; color: #999; padding: 100px;">
+          请从左侧选择一个流程进行编辑<br/>或点击"新建流程"创建
+        </div>
+      </div>
+    </div>
+
+    <!-- 新建流程弹窗 -->
+    <a-modal v-model:visible="showCreateModal" title="新建流程" @before-ok="submitCreate" unmount-on-close>
+      <a-form :model="newFlow" layout="vertical">
+        <a-form-item label="流程名称" required>
+          <a-input v-model="newFlow.name" placeholder="如: 设备采购流程" />
+        </a-form-item>
+        <a-form-item label="流程分类">
+          <a-select v-model="newFlow.category" placeholder="请选择分类">
+            <a-option value="device">设备类</a-option>
+            <a-option value="permission">权限类</a-option>
+            <a-option value="ota">OTA类</a-option>
+            <a-option value="other">其他</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="描述">
+          <a-textarea v-model="newFlow.description" placeholder="请输入流程描述" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+  </div>
+</div>
+
+<script>
+const { createApp, ref, reactive } = Vue;
+
+const app = createApp({
+  setup() {
+    const flows = ref([
+      { id: 1, name: '设备采购流程', version: 'v1.2', status: 1, status_text: '已发布' },
+      { id: 2, name: 'OTA升级流程', version: 'v2.0', status: 1, status_text: '已发布' },
+      { id: 3, name: '权限变更流程', version: 'v1.0', status: 0, status_text: '草稿' },
+    ]);
+    const currentFlow = ref(null);
+    const nodes = ref([]);
+    const showCreateModal = ref(false);
+    
+    const newFlow = reactive({
+      name: '',
+      category: '',
+      description: ''
+    });
+
+    const typeMap = { start: '开始', end: '结束', task: '任务节点', approve: '审批节点' };
+
+    const selectFlow = (flow) => {
+      currentFlow.value = flow;
+      // 加载该流程的节点
+      if (flow.id === 1) {
+        nodes.value = [
+          { type: 'start', label: '开始', type_text: '开始', x: 50, y: 50 },
+          { type: 'task', label: '提交申请', type_text: '任务节点', x: 200, y: 50 },
+          { type: 'approve', label: '部门主管', type_text: '审批节点', x: 350, y: 50 },
+          { type: 'approve', label: '管理员', type_text: '审批节点', x: 500, y: 50 },
+          { type: 'end', label: '结束', type_text: '结束', x: 650, y: 50 },
+        ];
+      } else if (flow.id === 2) {
+        nodes.value = [
+          { type: 'start', label: '开始', type_text: '开始', x: 50, y: 50 },
+          { type: 'task', label: '选择设备', type_text: '任务节点', x: 200, y: 50 },
+          { type: 'approve', label: '运维审批', type_text: '审批节点', x: 350, y: 50 },
+          { type: 'task', label: '执行升级', type_text: '任务节点', x: 500, y: 50 },
+          { type: 'end', label: '结束', type_text: '结束', x: 650, y: 50 },
+        ];
+      } else {
+        nodes.value = [];
+      }
+    };
+
+    const createFlow = () => {
+      newFlow.name = '';
+      newFlow.category = '';
+      newFlow.description = '';
+      showCreateModal.value = true;
+    };
+
+    const submitCreate = (done) => {
+      if (!newFlow.name) {
+        Arco.Message.error('请输入流程名称');
+        done(false);
+        return;
+      }
+      const flow = {
+        id: Date.now(),
+        name: newFlow.name,
+        version: 'v1.0',
+        status: 0,
+        status_text: '草稿'
+      };
+      flows.value.push(flow);
+      Arco.Message.success('创建成功');
+      showCreateModal.value = false;
+      done(true);
+    };
+
+    const addNode = (type) => {
+      const offset = nodes.value.length * 150;
+      nodes.value.push({
+        type,
+        label: typeMap[type],
+        type_text: typeMap[type],
+        x: 50 + offset,
+        y: 100
+      });
+    };
+
+    const saveFlow = () => {
+      Arco.Message.success('流程已保存');
+    };
+
+    const publishFlow = () => {
+      Arco.Message.success('流程已发布');
+    };
+
+    const loadFlows = () => {
+      Arco.Message.info('已刷新');
+    };
+
+    return {
+      flows,
+      currentFlow,
+      nodes,
+      showCreateModal,
+      newFlow,
+      selectFlow,
+      createFlow,
+      submitCreate,
+      addNode,
+      saveFlow,
+      publishFlow,
+      loadFlows
+    };
+  }
+});
+
+app.use(ArcoVue);
+app.mount('#app');
+</script>
+</body>
+</html>
