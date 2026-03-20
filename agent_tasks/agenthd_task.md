@@ -1,5 +1,69 @@
 Agent HD - 后端开发任务
 
+## Sprint 2.1: 应用管理基础（已完成 ✅）
+
+| 验收标准 | 状态 | 实现文件 |
+|----------|------|----------|
+| 应用CRUD完整 | ✅ | `models/app.go` + `controllers/app_controller.go` |
+| 版本管理完整 | ✅ | `ListVersions`, `CreateVersion`, `DeleteVersion` |
+| 分发任务支持设备/用户/组 | ✅ | `CreateDistribution`, `GetDistribution`, `CancelDistribution` |
+| 安装统计接口 | ✅ | `GetStats` |
+
+**新增文件:**
+- `models/app.go` - App, AppVersion, AppDistribution, AppInstallRecord, AppLicense
+- `controllers/app_controller.go` - AppController 实现所有接口
+
+**修改文件:**
+- `controllers/device_controller.go` - 注册应用管理路由
+- `main.go` - 添加 App 相关模型自动迁移
+
+**API路由:**
+- `GET /api/v1/apps` - 应用列表
+- `POST /api/v1/apps` - 创建应用
+- `GET /api/v1/apps/:id` - 应用详情
+- `PUT /api/v1/apps/:id` - 更新应用
+- `DELETE /api/v1/apps/:id` - 删除应用
+- `GET /api/v1/apps/:id/versions` - 版本列表
+- `POST /api/v1/apps/:id/versions` - 添加版本
+- `DELETE /api/v1/apps/:id/versions/:version_id` - 删除版本
+- `POST /api/v1/app/distributions` - 创建分发任务
+- `GET /api/v1/app/distributions/:id` - 分发详情
+- `POST /api/v1/app/distributions/:id/cancel` - 取消分发
+- `GET /api/v1/apps/:id/stats` - 安装统计
+
+---
+
+## Sprint 1.1: OTA Worker 实现（已完成 ✅）
+
+| 验收标准 | 状态 | 实现文件 |
+|----------|------|----------|
+| OTA Worker 每5分钟轮询一次 | ✅ | `services/ota_worker.go` |
+| 支持全量/百分比/白名单灰度策略 | ✅ | `SelectTargetDevices()` 方法 |
+| 设备可以通过 MQTT 接收 OTA 指令 | ✅ | `PublishOTACommand()` 发布到 `/device/{device_id}/down/cmd` |
+| 设备上报进度后更新数据库 | ✅ | `DeviceOTAReport()` 回调接口 + `ota_progress` 表 |
+| 成功率<80%自动暂停 | ✅ | `CheckAndAutoPause()` 失败率阈值检查 |
+
+**新增文件:**
+- `services/ota_worker.go` - OTA后台Worker服务
+
+**修改文件:**
+- `controllers/ota_controller.go` - 新增 `SetOTAWorkerRef`, `DeviceOTAReport`, `PauseDeployment`, `ResumeDeployment`, `CancelDeployment`, `GetDeploymentProgress`
+- `controllers/device_controller.go` - 新增 OTA 部署管理路由
+- `main.go` - 集成 `services.NewOTAWorker`
+
+**API路由:**
+- `POST /api/v1/ota/devices/:device_id/report` - 设备回调上报进度
+- `GET /api/v1/ota/deployments` - 部署列表
+- `GET /api/v1/ota/deployments/:id` - 部署详情
+- `POST /api/v1/ota/deployments/:id/pause` - 暂停部署
+- `POST /api/v1/ota/deployments/:id/resume` - 恢复部署
+- `POST /api/v1/ota/deployments/:id/cancel` - 取消部署
+- `GET /api/v1/ota/deployments/:id/progress` - 部署进度详情
+
+**提交:** `dafa4e3` Sprint 1.1: OTA Worker 实现
+
+---
+
 ## P0 修复任务（已完成 ✅）
 
 | # | 问题 | 修复文件 | 修复内容 |

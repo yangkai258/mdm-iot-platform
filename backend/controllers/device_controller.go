@@ -30,6 +30,11 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	roleCtrl := &RoleController{DB: db}
 	memberCtrl := &MemberController{DB: db}
 
+	notifCtrl := &NotificationController{
+		DB:    db,
+		Redis: redisClient,
+	}
+
 	api := r.Group("/api/v1")
 	{
 		// ============ 设备管理 ============
@@ -50,10 +55,20 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/devices/:device_id/commands", cmdCtrl.SendCommand)
 		api.GET("/devices/:device_id/commands", cmdCtrl.GetCommandHistory)
 		
-		// OTA 路由
+		// ============ OTA 路由 ============
+		// 固件包管理
 		api.POST("/ota/packages", otaCtrl.CreatePackage)
 		api.GET("/ota/packages", otaCtrl.ListPackages)
+		// 部署任务管理
 		api.POST("/ota/deployments", otaCtrl.CreateDeployment)
+		api.GET("/ota/deployments", otaCtrl.ListDeployments)
+		api.GET("/ota/deployments/:id", otaCtrl.GetDeployment)
+		api.POST("/ota/deployments/:id/pause", otaCtrl.PauseDeployment)
+		api.POST("/ota/deployments/:id/resume", otaCtrl.ResumeDeployment)
+		api.POST("/ota/deployments/:id/cancel", otaCtrl.CancelDeployment)
+		api.GET("/ota/deployments/:id/progress", otaCtrl.GetDeploymentProgress)
+		// 设备 OTA 回调（设备主动上报进度）
+		api.POST("/ota/devices/:device_id/report", otaCtrl.DeviceOTAReport)
 		api.GET("/ota/devices/:device_id/check", otaCtrl.CheckOTA)
 
 		// ============ 组织管理 ============
@@ -162,6 +177,46 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		
 		// 积分流水
 		api.GET("/member/points/records", memberCtrl.PointsRecordList)
+
+		// ============ 应用管理 ============
+		appCtrl := &AppController{DB: db}
+		// 应用 CRUD
+		api.GET("/apps", appCtrl.List)
+		api.POST("/apps", appCtrl.Create)
+		api.GET("/apps/:id", appCtrl.Get)
+		api.PUT("/apps/:id", appCtrl.Update)
+		api.DELETE("/apps/:id", appCtrl.Delete)
+		// 版本管理
+		api.GET("/apps/:id/versions", appCtrl.ListVersions)
+		api.POST("/apps/:id/versions", appCtrl.CreateVersion)
+		api.DELETE("/apps/:id/versions/:version_id", appCtrl.DeleteVersion)
+		// 分发任务
+		api.POST("/app/distributions", appCtrl.CreateDistribution)
+		api.GET("/app/distributions/:id", appCtrl.GetDistribution)
+		api.POST("/app/distributions/:id/cancel", appCtrl.CancelDistribution)
+		// 统计
+		api.GET("/apps/:id/stats", appCtrl.GetStats)
+
+		// ============ 通知管理 ============
+		// 通知列表和详情
+		api.GET("/notifications", notifCtrl.ListNotifications)
+		api.GET("/notifications/:id", notifCtrl.GetNotification)
+		api.DELETE("/notifications/:id", notifCtrl.DeleteNotification)
+		// 通过设备下发通知（MQTT）
+		api.POST("/devices/:device_id/notifications", notifCtrl.SendNotification)
+
+		// 通知模板 CRUD
+		api.GET("/notification-templates", notifCtrl.ListTemplates)
+		api.POST("/notification-templates", notifCtrl.CreateTemplate)
+		api.PUT("/notification-templates/:id", notifCtrl.UpdateTemplate)
+		api.DELETE("/notification-templates/:id", notifCtrl.DeleteTemplate)
+
+		// 企业公告 CRUD
+		api.GET("/announcements", notifCtrl.ListAnnouncements)
+		api.POST("/announcements", notifCtrl.CreateAnnouncement)
+		api.PUT("/announcements/:id", notifCtrl.UpdateAnnouncement)
+		api.DELETE("/announcements/:id", notifCtrl.DeleteAnnouncement)
+		api.POST("/announcements/:id/publish", notifCtrl.PublishAnnouncement)
 	}
 }
 
