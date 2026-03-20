@@ -53,6 +53,10 @@ func main() {
 		&models.AppDistribution{},
 		&models.AppInstallRecord{},
 		&models.AppLicense{},
+		// 通知表
+		&models.Notification{},
+		&models.NotificationTemplate{},
+		&models.Announcement{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}

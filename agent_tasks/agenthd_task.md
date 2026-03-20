@@ -1,5 +1,38 @@
 Agent HD - 后端开发任务
 
+## Sprint 2.2: 通知管理（已完成 ✅）
+
+| 验收标准 | 状态 | 实现文件 |
+|----------|------|----------|
+| 通知通过MQTT下发到设备 | ✅ | `POST /devices/:device_id/notifications` 发布到 `/device/{id}/down/notification` |
+| 通知模板支持变量替换 | ✅ | `ReplaceTemplateVariables()` 支持 `{{variable}}` 格式替换 |
+| 公告CRUD完整 | ✅ | GET/POST/PUT/DELETE /api/v1/announcements + publish |
+
+**新增文件:**
+- `models/notification.go` - Notification, NotificationTemplate, Announcement
+- `controllers/notification_controller.go` - NotificationController 实现所有接口
+
+**修改文件:**
+- `controllers/device_controller.go` - 注册通知管理路由
+- `main.go` - 添加 Notification/NotificationTemplate/Announcement 自动迁移
+
+**API路由:**
+- `GET /api/v1/notifications` - 通知列表
+- `GET /api/v1/notifications/:id` - 通知详情
+- `DELETE /api/v1/notifications/:id` - 删除通知
+- `POST /api/v1/devices/:device_id/notifications` - 发送通知（MQTT下发）
+- `GET /api/v1/notification-templates` - 模板列表
+- `POST /api/v1/notification-templates` - 创建模板
+- `PUT /api/v1/notification-templates/:id` - 更新模板
+- `DELETE /api/v1/notification-templates/:id` - 删除模板
+- `GET /api/v1/announcements` - 公告列表
+- `POST /api/v1/announcements` - 创建公告
+- `PUT /api/v1/announcements/:id` - 更新公告
+- `DELETE /api/v1/announcements/:id` - 删除公告
+- `POST /api/v1/announcements/:id/publish` - 发布公告
+
+---
+
 ## Sprint 2.1: 应用管理基础（已完成 ✅）
 
 | 验收标准 | 状态 | 实现文件 |
