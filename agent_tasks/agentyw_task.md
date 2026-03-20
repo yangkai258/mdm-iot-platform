@@ -1,66 +1,70 @@
 # Agent YW - 运维工程师任务
 
 **状态**: ✅ 已完成
-**完成时间**: 2026-03-20 07:47 GMT+8
+**完成时间**: 2026-03-20 12:40 GMT+8
 
 ## 任务概述
 
-为 AI 电子宠物 MDM 平台搭建本地/云端运行环境，提供一键启动的生产可用 docker-compose 配置。
+为 AI 电子宠物 MDM 平台 Sprint 1.1 & 1.2 提供运维支持，完成 Docker Compose 配置、OTA 升级文档等任务。
 
-## 完成内容
+## Sprint 1.1 & 1.2 完成内容
 
-### 1. docker-compose.yml（开发/通用）
-- ✅ PostgreSQL 15：`POSTGRES_USER/PASSWORD/DB` 环境变量，数据卷持久化
-- ✅ Redis 7：AOF 持久化（everysec），健康检查
-- ✅ EMQX 5.0：1883/8083/18083 端口暴露，启动顺序控制
-- ✅ mdm-backend：JWT_SECRET、CORS_ALLOWED_ORIGINS、DATABASE_URL、REDIS_URL 环境变量注入
-- ✅ mdm-frontend：Nginx 容器
-- ✅ 统一 `mdm-network` Bridge 网络，服务名互通
-- ✅ `depends_on` + `service_healthy` 确保启动顺序
+### 1. Docker Compose MQTT 环境变量修复
+- ✅ 将 `EMQX_BROKER_URL` 改为 `MQTT_BROKER`，与后端代码保持一致
+- ✅ 添加 `MQTT_USERNAME` 和 `MQTT_PASSWORD` 环境变量
+- ✅ 后端 `mqtt/handler.go` 从环境变量读取认证信息，不再硬编码 `admin/public`
+- ✅ 修复 docker-compose.yml 和 docker-compose.prod.yml 中的 YAML 解析错误
 
-### 2. docker-compose.prod.yml（生产环境）
-- ✅ 资源限制（CPUs/memory）
-- ✅ 本地绑定持久化（`data/postgres`、`data/redis`、`data/emqx`）
-- ✅ 所有密钥必填（JWT_SECRET、EMQX_ADMIN_PASSWORD、POSTGRES_PASSWORD）
-- ✅ CORS_ALLOWED_ORIGINS 必填（禁止通配符）
-- ✅ EMQX 性能调优参数
-- ✅ Nginx 反向代理可选服务
-- ✅ 仅本地端口暴露（127.0.0.1 绑定）
+### 2. Nginx 配置
+- ✅ 创建 `ops/nginx/nginx.conf`
+- ✅ 创建 `ops/nginx/conf.d/default.conf`
+- ✅ 支持前端、后端、EMQX WebSocket 代理
+- ✅ 创建 `ops/data/nginx/logs` 目录
 
-### 3. PRODUCTION.md
-- ✅ 完整部署步骤说明
-- ✅ 密钥生成命令（openssl rand -base64 32）
-- ✅ 环境变量说明文档
-- ✅ 服务启动顺序说明
-- ✅ 健康检查方法
-- ✅ 备份与恢复步骤
-- ✅ 常见问题排查
+### 3. OTA 升级文档
+- ✅ PRODUCTION.md 添加 OTA 升级系统说明
+- ✅ MQTT Topic 列表（`/mdm/device/{id}/up/status` 等）
+- ✅ OTA Worker 环境变量说明
+- ✅ OTA 数据库表说明
+- ✅ OTA 指令格式说明
+- ✅ EMQX 权限配置指引
 
-### 4. 后端代码修复
-- ✅ `middleware/jwt.go`：JWT_SECRET 从环境变量读取（已存在，无需修改）
-- ✅ `middleware/jwt.go`：新增 `GetCORSAllowedOrigins()` 辅助函数
-- ✅ `main.go`：CORS 使用 `CORS_ALLOWED_ORIGINS` 环境变量（已存在，无需修改）
-- ✅ `utils/redis.go`：修复 `REDIS_URL` 解析逻辑（`redis://host:port` 格式），添加 `strconv`、`strings` import
+### 4. 数据库迁移
+- ✅ `ota_progress` 表通过 `db.AutoMigrate()` 自动创建
+- ✅ `ota_packages` 和 `ota_deployments` 表同样自动创建
 
-## 新增文件
+## Git 提交记录
+
+```
+[master ccf1c2c] fix(ops): 重写 docker-compose 文件修复 YAML 解析错误
+[master 1a807bb] fix(ops): 修复 MQTT 环境变量配置，添加 OTA 升级文档
+```
+
+## 完成的文件
 
 | 文件 | 说明 |
 |------|------|
-| `ops/docker-compose.yml` | 开发环境 docker-compose |
-| `ops/docker-compose.prod.yml` | 生产环境 docker-compose |
-| `ops/PRODUCTION.md` | 部署文档 |
+| `ops/docker-compose.yml` | 开发环境 docker-compose（MQTT env 修复）|
+| `ops/docker-compose.prod.yml` | 生产环境 docker-compose（MQTT env 修复）|
+| `ops/PRODUCTION.md` | 部署文档（OTA 说明已添加）|
+| `ops/nginx/nginx.conf` | Nginx 主配置 |
+| `ops/nginx/conf.d/default.conf` | Nginx 服务配置 |
+| `backend/mqtt/handler.go` | MQTT 认证从环境变量读取 |
 
-## 修改文件
+## 部署验证
 
-| 文件 | 变更 |
-|------|------|
-| `backend/utils/redis.go` | 修复 REDIS_URL 解析，新增 strconv/strings import |
-| `backend/middleware/jwt.go` | 新增 GetCORSAllowedOrigins 辅助函数 |
+```bash
+cd mdm-project/ops
+export JWT_SECRET=$(openssl rand -base64 32)
+export CORS_ALLOWED_ORIGINS=http://localhost:5173
+export EMQX_ADMIN_PASSWORD=$(openssl rand -base64 24)
+export POSTGRES_PASSWORD=$(openssl rand -base64 24)
+docker-compose config  # 验证配置正确性
+docker-compose up -d   # 启动服务
+```
 
 ## 待完成（需其他 Agent 配合）
 
 - [ ] 编写 `frontend/Dockerfile.prod`（用于 docker-compose.prod.yml 生产构建）
-- [ ] 编写 `ops/nginx/nginx.conf`（用于 docker-compose.prod.yml nginx-proxy 服务）
-- [ ] 配置 `.env.example` 模板文件
-
-
+- [ ] 编写 `.env.example` 模板文件
+- [ ] EMQX ACL 精细化配置（可选）
