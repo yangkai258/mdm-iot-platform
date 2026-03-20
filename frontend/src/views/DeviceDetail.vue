@@ -1,45 +1,6 @@
 <template>
-  <a-layout class="device-detail">
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo">
-        <span v-if="!collapsed">MDM 控制台</span>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleMenuClick">
-        <a-menu-item key="dashboard">
-          <span>设备大盘</span>
-        </a-menu-item>
-        <a-menu-item key="status">
-          <span>设备状态</span>
-        </a-menu-item>
-        <a-menu-item key="pet">
-          <span>宠物配置</span>
-        </a-menu-item>
-        <a-menu-item key="ota">
-          <span>OTA 固件</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
-
-    <a-layout>
-      <a-layout-header class="header">
-        <div class="header-left">
-          <a-button type="text" @click="goBack">
-            <span>← 返回</span>
-          </a-button>
-          <a-button type="text" @click="collapsed = !collapsed">
-            <span v-if="collapsed">☰</span>
-            <span v-else>✕</span>
-          </a-button>
-        </div>
-        <div class="header-title">
-          <span>设备详情 - {{ deviceId }}</span>
-        </div>
-        <div class="header-right">
-        </div>
-      </a-layout-header>
-
-      <a-layout-content class="content">
-        <a-spin :spinning="loading">
+  <div class="page-container">
+<a-spin :spinning="loading">
           <a-tabs v-model:active-key="activeTab" class="device-tabs">
             <!-- Tab 1: 基本信息 -->
             <a-tab-pane key="info" title="基本信息">
@@ -328,24 +289,18 @@
             </a-tab-pane>
           </a-tabs>
         </a-spin>
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+</div>
+  </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
 const route = useRoute()
-const router = useRouter()
-
 const deviceId = ref(route.params.id || '')
-const collapsed = ref(false)
-const selectedKeys = ref(['dashboard'])
 const loading = ref(false)
 const activeTab = ref('info')
 
@@ -612,13 +567,6 @@ const handleTabChange = (key) => {
 // 辅助函数
 const goBack = () => {
   router.push('/dashboard')
-}
-
-const handleMenuClick = ({ key }) => {
-  if (key === 'dashboard') router.push('/dashboard')
-  else if (key === 'ota') router.push('/ota')
-  else if (key === 'pet') router.push('/pet')
-  else if (key === 'status') router.push('/status')
 }
 
 const getStatusColor = (status) => {

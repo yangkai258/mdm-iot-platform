@@ -7,6 +7,11 @@ const routes = [
     component: () => import('../views/Login.vue')
   },
   {
+    path: '/test-modals',
+    name: 'ModalTest',
+    component: () => import('../views/ModalTest.vue')
+  },
+  {
     path: '/',
     redirect: '/dashboard'
   },
@@ -161,6 +166,31 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// 路由守卫：检查登录状态
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  
+  // 如果访问登录页面，直接放行
+  if (to.path === '/login') {
+    if (token) {
+      // 已登录访问登录页，跳转到dashboard
+      next('/dashboard')
+    } else {
+      next()
+    }
+    return
+  }
+  
+  // 其他页面需要登录
+  if (!token) {
+    next('/login')
+    return
+  }
+  
+  // 已登录，允许访问
+  next()
 })
 
 export default router

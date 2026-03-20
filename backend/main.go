@@ -221,6 +221,10 @@ func main() {
 	miniClawCtrl := &controllers.MiniClawController{}
 	miniClawCtrl.RegisterRoutes(apiV1)
 
+	// 通知路由
+	notifCtrl := &controllers.NotificationController{DB: db}
+	notifCtrl.RegisterRoutes(apiV1)
+
 	// 获取端口
 	port := os.Getenv("PORT")
 	if port == "" {

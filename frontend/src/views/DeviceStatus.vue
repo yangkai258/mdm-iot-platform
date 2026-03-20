@@ -1,42 +1,6 @@
 <template>
-  <a-layout class="device-status">
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo">
-        <span v-if="!collapsed">MDM 控制台</span>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleMenuClick">
-        <a-menu-item key="dashboard">
-          <span>设备大盘</span>
-        </a-menu-item>
-        <a-menu-item key="ota">
-          <span>OTA 固件</span>
-        </a-menu-item>
-        <a-menu-item key="pet">
-          <span>宠物配置</span>
-        </a-menu-item>
-        <a-menu-item key="status">
-          <span>设备状态</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
-
-    <a-layout>
-      <a-layout-header class="header">
-        <div class="header-left">
-          <a-button type="text" @click="collapsed = !collapsed">
-            <span v-if="collapsed">☰</span>
-            <span v-else>✕</span>
-          </a-button>
-        </div>
-        <div class="header-title">
-          <span>设备状态管理</span>
-        </div>
-        <div class="header-right">
-        </div>
-      </a-layout-header>
-
-      <a-layout-content class="content">
-        <a-spin :spinning="loading">
+  <div class="page-container">
+<a-spin :spinning="loading">
           <!-- 状态统计 -->
           <a-row :gutter="16" class="stats-row">
             <a-col :span="4">
@@ -205,21 +169,15 @@
             <a-textarea v-model="batchRemark" placeholder="请输入状态变更原因" :rows="2" />
           </a-modal>
         </a-spin>
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+</div>
+  </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import axios from 'axios'
 
-const router = useRouter()
-
-const collapsed = ref(false)
-const selectedKeys = ref(['status'])
 const loading = ref(false)
 const searchKeyword = ref('')
 const filterStatus = ref(null)
@@ -330,12 +288,6 @@ const calcStatusStats = () => {
 const handleTableChange = (pag) => {
   pagination.current = pag.current
   loadDevices()
-}
-
-const handleMenuClick = ({ key }) => {
-  if (key === 'dashboard') router.push('/dashboard')
-  else if (key === 'ota') router.push('/ota')
-  else if (key === 'pet') router.push('/pet')
 }
 
 const handleSearch = () => {

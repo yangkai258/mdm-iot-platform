@@ -31,11 +31,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 
-	notifCtrl := &NotificationController{
-		DB:    db,
-		Redis: redisClient,
-	}
-
 	api := r.Group("/api/v1")
 	{
 		// ============ 设备管理 ============
@@ -218,27 +213,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/app/distributions/:id/cancel", appCtrl.CancelDistribution)
 		// 统计
 		api.GET("/apps/:id/stats", appCtrl.GetStats)
-
-		// ============ 通知管理 ============
-		// 通知列表和详情
-		api.GET("/notifications", notifCtrl.ListNotifications)
-		api.GET("/notifications/:id", notifCtrl.GetNotification)
-		api.DELETE("/notifications/:id", notifCtrl.DeleteNotification)
-		// 通过设备下发通知（MQTT）
-		api.POST("/devices/:device_id/notifications", notifCtrl.SendNotification)
-
-		// 通知模板 CRUD
-		api.GET("/notification-templates", notifCtrl.ListTemplates)
-		api.POST("/notification-templates", notifCtrl.CreateTemplate)
-		api.PUT("/notification-templates/:id", notifCtrl.UpdateTemplate)
-		api.DELETE("/notification-templates/:id", notifCtrl.DeleteTemplate)
-
-		// 企业公告 CRUD
-		api.GET("/announcements", notifCtrl.ListAnnouncements)
-		api.POST("/announcements", notifCtrl.CreateAnnouncement)
-		api.PUT("/announcements/:id", notifCtrl.UpdateAnnouncement)
-		api.DELETE("/announcements/:id", notifCtrl.DeleteAnnouncement)
-		api.POST("/announcements/:id/publish", notifCtrl.PublishAnnouncement)
 
 		// ============ 策略管理 ============
 		policyCtrl := &PolicyController{DB: db}

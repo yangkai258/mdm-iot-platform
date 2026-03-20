@@ -1,42 +1,6 @@
 <template>
-  <a-layout class="device-dashboard">
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo">
-        <span v-if="!collapsed">MDM 控制台</span>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleMenuClick">
-        <a-menu-item key="dashboard">
-          <span>设备大盘</span>
-        </a-menu-item>
-        <a-menu-item key="status">
-          <span>设备状态</span>
-        </a-menu-item>
-        <a-menu-item key="pet">
-          <span>宠物配置</span>
-        </a-menu-item>
-        <a-menu-item key="ota">
-          <span>OTA 固件</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
-
-    <a-layout>
-      <a-layout-header class="header">
-        <div class="header-left">
-          <a-button type="text" @click="collapsed = !collapsed">
-            <span v-if="collapsed">☰</span>
-            <span v-else>✕</span>
-          </a-button>
-        </div>
-        <div class="header-right">
-          <a-badge :count="warningCount">
-            <span>🔔</span>
-          </a-badge>
-        </div>
-      </a-layout-header>
-
-      <a-layout-content class="content">
-        <a-row :gutter="16" class="stats-row">
+  <div class="page-container">
+<a-row :gutter="16" class="stats-row">
           <a-col :span="8">
             <a-card>
               <a-statistic title="总设备数" :value="stats.total" />
@@ -87,21 +51,15 @@
             </template>
           </a-table>
         </a-card>
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+</div>
+  </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import axios from 'axios'
 
-const router = useRouter()
-
-const collapsed = ref(false)
-const selectedKeys = ref(['dashboard'])
 const devices = ref([])
 const loading = ref(false)
 const warningCount = ref(0)
@@ -183,10 +141,7 @@ const viewDevice = (record) => {
   router.push(`/device/${record.device_id}`)
 }
 
-const handleMenuClick = ({ key }) => {
-  if (key === 'ota') {
-    router.push('/ota')
-  } else if (key === 'pet') {
+else if (key === 'pet') {
     router.push('/pet')
   } else if (key === 'status') {
     router.push('/status')

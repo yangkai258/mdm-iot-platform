@@ -183,6 +183,94 @@ func (c *NotificationController) GetNotification(ctx *gin.Context) {
 	})
 }
 
+// SendNotificationFromTemplate 通过模板发送通知
+func (c *NotificationController) SendNotificationFromTemplate(ctx *gin.Context) {
+	var req SendNotificationFromTemplateRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":       4005,
+			"message":    "参数校验失败",
+			"error_code": "ERR_VALIDATION",
+		})
+		return
+	}
+
+	// 获取模板
+	var tmpl models.NotificationTemplate
+	if err := c.DB.Where("id = ?", req.TemplateID).First(&tmpl).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"code":       4004,
+				"message":    "模板不存在",
+				"error_code": "ERR_NOT_FOUND",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":       5001,
+			"message":    "查询失败",
+			"error_code": "ERR_INTERNAL",
+		})
+		return
+	}
+
+	// 替换变量
+	title := ReplaceTemplateVariables(tmpl.TitleTpl, req.Variables)
+	content := ReplaceTemplateVariables(tmpl.ContentTpl, req.Variables)
+
+	now := time.Now()
+	var notifications []models.Notification
+
+	// 根据目标类型发送
+	switch req.TargetType {
+	case "all":
+		// 向所有设备发送
+		var devices []models.Device
+		c.DB.Find(&devices)
+		for _, device := range devices {
+			notif := c.sendToDevice(device.DeviceID, title, content, req.CreatedBy, &now)
+			notifications = append(notifications, notif)
+		}
+	case "device":
+		for _, deviceID := range req.TargetIDs {
+			notif := c.sendToDevice(deviceID, title, content, req.CreatedBy, &now)
+			notifications = append(notifications, notif)
+		}
+	case "user":
+		// 向用户的所有设备发送
+		var devices []models.Device
+		c.DB.Where("owner_id = ?", req.TargetIDs).Find(&devices)
+		for _, device := range devices {
+			notif := c.sendToDevice(device.DeviceID, title, content, req.CreatedBy, &now)
+			notifications = append(notifications, notif)
+		}
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"sent_count":   len(notifications),
+			"notifications": notifications,
+		},
+	})
+}
+
+func (c *NotificationController) sendToDevice(deviceID, title, content, createdBy string, now *time.Time) models.Notification {
+	notif := models.Notification{
+		DeviceID:  deviceID,
+		Title:     title,
+		Content:   content,
+		Priority:  1,
+		Channel:   "push",
+		Status:    "sent",
+		SentAt:    now,
+		CreatedBy: createdBy,
+	}
+	c.DB.Create(&notif)
+	return notif
+}
+
 // DeleteNotification 删除通知
 func (c *NotificationController) DeleteNotification(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -579,6 +667,41 @@ type SendNotificationRequest struct {
 	TemplateID uint                   `json:"template_id"`
 	Variables  map[string]interface{} `json:"variables"`
 	CreatedBy  string                 `json:"created_by"`
+}
+
+// SendNotificationFromTemplateRequest 通过模板发送通知请求
+type SendNotificationFromTemplateRequest struct {
+	TemplateID uint                   `json:"template_id"`
+	Variables  map[string]interface{} `json:"variables"`
+	TargetType string                 `json:"target_type"` // all, device, user
+	TargetIDs  []string               `json:"target_ids"`
+	CreatedBy  string                 `json:"created_by"`
+}
+
+// RegisterRoutes 注册通知相关路由
+func (c *NotificationController) RegisterRoutes(rg *gin.RouterGroup) {
+	notifications := rg.Group("/notifications")
+	{
+		notifications.GET("", c.ListNotifications)
+		notifications.POST("/push/from-template", c.SendNotificationFromTemplate)
+	}
+
+	notificationTemplates := rg.Group("/notification-templates")
+	{
+		notificationTemplates.GET("", c.ListTemplates)
+		notificationTemplates.POST("", c.CreateTemplate)
+		notificationTemplates.PUT("/:id", c.UpdateTemplate)
+		notificationTemplates.DELETE("/:id", c.DeleteTemplate)
+	}
+
+	announcements := rg.Group("/announcements")
+	{
+		announcements.GET("", c.ListAnnouncements)
+		announcements.POST("", c.CreateAnnouncement)
+		announcements.PUT("/:id", c.UpdateAnnouncement)
+		announcements.DELETE("/:id", c.DeleteAnnouncement)
+		announcements.POST("/:id/publish", c.PublishAnnouncement)
+	}
 }
 
 // ReplaceTemplateVariables 替换模板变量，格式 {{variable}}

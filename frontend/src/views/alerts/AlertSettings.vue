@@ -1,38 +1,6 @@
 <template>
-  <a-layout class="alert-settings">
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo">
-        <span v-if="!collapsed">MDM 控制台</span>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleMenuClick">
-        <a-menu-item key="dashboard">
-          <span>设备大盘</span>
-        </a-menu-item>
-        <a-menu-item key="alerts">
-          <span>告警中心</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
-
-    <a-layout>
-      <a-layout-header class="header">
-        <div class="header-left">
-          <a-button type="text" @click="collapsed = !collapsed">
-            <span v-if="collapsed">☰</span>
-            <span v-else>✕</span>
-          </a-button>
-        </div>
-        <div class="header-title">
-          <a-breadcrumb>
-            <a-breadcrumb-item>告警中心</a-breadcrumb-item>
-            <a-breadcrumb-item>告警设置</a-breadcrumb-item>
-          </a-breadcrumb>
-        </div>
-        <div class="header-right"></div>
-      </a-layout-header>
-
-      <a-layout-content class="content">
-        <a-row :gutter="16">
+  <div class="page-container">
+<a-row :gutter="16">
           <!-- 通知渠道设置 -->
           <a-col :span="12">
             <a-card title="通知渠道设置" class="settings-card">
@@ -205,20 +173,15 @@
             <a-button @click="resetSettings">重置</a-button>
           </a-space>
         </a-card>
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+</div>
+  </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
 
-const router = useRouter()
-const collapsed = ref(false)
-const selectedKeys = ref(['alerts'])
 const loading = ref(false)
 
 const notifySettings = reactive({
@@ -249,9 +212,7 @@ const otherSettings = reactive({
   soundAlert: true
 })
 
-const handleMenuClick = ({ key }) => {
-  const routes = { dashboard: '/dashboard', alerts: '/alerts/settings' }
-  if (routes[key]) router.push(routes[key])
+if (routes[key]) router.push(routes[key])
   selectedKeys.value = [key]
 }
 

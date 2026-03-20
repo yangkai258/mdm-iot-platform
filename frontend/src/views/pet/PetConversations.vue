@@ -1,25 +1,21 @@
-<template>
+﻿<template>
   <div class="pet-conversations">
-    <a-layout-header class="header">
-      <div class="header-title">对话列表</div>
-    </a-layout-header>
-    <a-layout-content class="content">
-      <a-card>
+    
+    <div class="page-content"><a-card>
         <template #title>
           <a-space>
-            <span>对话列表</span>
-            <a-button type="primary" @click="createConversation">新建对话</a-button>
+            <span>瀵硅瘽鍒楄〃</span>
+            <a-button type="primary" @click="createConversation">鏂板缓瀵硅瘽</a-button>
           </a-space>
         </template>
         <a-table :columns="columns" :data="conversations" row-key="id">
           <template #status="{ record }">
             <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
-              {{ record.status === 'active' ? '进行中' : '已结束' }}
+              {{ record.status === 'active' ? '杩涜涓? : '宸茬粨鏉? }}
             </a-tag>
           </template>
         </a-table>
-      </a-card>
-    </a-layout-content>
+      </a-card></div>
   </div>
 </template>
 
@@ -30,17 +26,17 @@ export default {
     return {
       columns: [
         { title: 'ID', dataIndex: 'id' },
-        { title: '设备ID', dataIndex: 'device_id' },
-        { title: '标题', dataIndex: 'title' },
-        { title: '状态', slotName: 'status' },
-        { title: '创建时间', dataIndex: 'created_at' }
+        { title: '璁惧ID', dataIndex: 'device_id' },
+        { title: '鏍囬', dataIndex: 'title' },
+        { title: '鐘舵€?, slotName: 'status' },
+        { title: '鍒涘缓鏃堕棿', dataIndex: 'created_at' }
       ],
       conversations: []
     }
   },
   methods: {
     createConversation() {
-      this.$message.info('创建新对话')
+      this.$message.info('鍒涘缓鏂板璇?)
     }
   }
 }

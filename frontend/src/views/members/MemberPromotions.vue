@@ -1,38 +1,6 @@
 <template>
-  <a-layout class="member-promotions">
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo">
-        <span v-if="!collapsed">MDM 控制台</span>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleMenuClick">
-        <a-menu-item key="dashboard">
-          <span>设备大盘</span>
-        </a-menu-item>
-        <a-menu-item key="members">
-          <span>会员管理</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
-
-    <a-layout>
-      <a-layout-header class="header">
-        <div class="header-left">
-          <a-button type="text" @click="collapsed = !collapsed">
-            <span v-if="collapsed">☰</span>
-            <span v-else>✕</span>
-          </a-button>
-        </div>
-        <div class="header-title">
-          <a-breadcrumb>
-            <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-            <a-breadcrumb-item>促销活动</a-breadcrumb-item>
-          </a-breadcrumb>
-        </div>
-        <div class="header-right"></div>
-      </a-layout-header>
-
-      <a-layout-content class="content">
-        <!-- 统计卡片 -->
+  <div class="page-container">
+<!-- 统计卡片 -->
         <a-row :gutter="16" class="stats-row">
           <a-col :span="6">
             <a-card>
@@ -108,8 +76,7 @@
             </template>
           </a-table>
         </a-card>
-      </a-layout-content>
-    </a-layout>
+</div>
 
     <!-- 创建/编辑活动抽屉 -->
     <a-drawer
@@ -199,18 +166,14 @@
         </a-descriptions>
       </template>
     </a-drawer>
-  </a-layout>
+  </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
 
-const router = useRouter()
-const collapsed = ref(false)
-const selectedKeys = ref(['members'])
 const loading = ref(false)
 const promotionList = ref([])
 const couponList = ref([])
@@ -264,9 +227,7 @@ const columns = [
   { title: '操作', slotName: 'actions', width: 180, fixed: 'right' }
 ]
 
-const handleMenuClick = ({ key }) => {
-  const routes = { dashboard: '/dashboard', members: '/members/promotions' }
-  if (routes[key]) router.push(routes[key])
+if (routes[key]) router.push(routes[key])
   selectedKeys.value = [key]
 }
 

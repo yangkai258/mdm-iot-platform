@@ -1,10 +1,7 @@
-<template>
+﻿<template>
   <div class="pet-console">
-    <a-layout-header class="header">
-      <div class="header-title">宠物对话</div>
-    </a-layout-header>
-    <a-layout-content class="content">
-      <a-card>
+    
+    <div class="page-content"><a-card>
         <div class="chat-container">
           <div v-for="msg in messages" :key="msg.id" :class="['message', msg.role]">
             <div class="message-content">{{ msg.content }}</div>
@@ -12,13 +9,12 @@
         </div>
         <a-input-search
           v-model="inputText"
-          placeholder="输入消息..."
+          placeholder="杈撳叆娑堟伅..."
           @search="sendMessage"
           search-button
           class="input-area"
         />
-      </a-card>
-    </a-layout-content>
+      </a-card></div>
   </div>
 </template>
 
