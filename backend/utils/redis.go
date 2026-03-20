@@ -67,17 +67,27 @@ func InitRedis() (*RedisClient, error) {
 	}
 
 	// 解析 host:port[/db]
-	if hostPort := strings.Split(url, "/")[0]; hostPort != "" {
-		if strings.Contains(hostPort, ":") {
-			parts := strings.SplitN(hostPort, ":", 2)
-			addr = hostPort
-			if len(parts) == 2 {
-				if dbNum, err := strconv.Atoi(parts[1]); err == nil {
-					db = dbNum
-				}
+	// 先按 / 分割，取第一部分作为 host:port
+	hostPortPart := strings.Split(url, "/")[0]
+	
+	if strings.Contains(hostPortPart, ":") {
+		// 有端口号
+		parts := strings.SplitN(hostPortPart, ":", 2)
+		addr = hostPortPart
+		// 端口本身就是端口，不是DB
+		_ = parts // addr已经是完整的 host:port
+	} else {
+		// 没有端口号，默认6379
+		addr = hostPortPart + ":6379"
+	}
+	
+	// 检查是否有 /db 后缀
+	if strings.Contains(url, "/") {
+		dbParts := strings.Split(url, "/")
+		if len(dbParts) > 1 && dbParts[1] != "" {
+			if dbNum, err := strconv.Atoi(dbParts[1]); err == nil {
+				db = dbNum
 			}
-		} else {
-			addr = hostPort + ":6379"
 		}
 	}
 

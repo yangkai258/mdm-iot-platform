@@ -41,8 +41,8 @@ type JWTClaims struct {
 // JWTAuth JWT 认证中间件
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 排除登录接口
-		if c.Request.URL.Path == "/api/v1/auth/login" {
+		// 排除登录接口和健康检查
+		if c.Request.URL.Path == "/api/v1/auth/login" || c.Request.URL.Path == "/health" {
 			c.Next()
 			return
 		}
