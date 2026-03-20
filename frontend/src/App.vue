@@ -75,6 +75,14 @@ const menuItems = [
       { key: '/notifications/templates', label: '通知模板' }
     ]
   },
+  {
+    key: '/apps',
+    label: '应用管理',
+    children: [
+      { key: '/apps/list', label: '应用列表' },
+      { key: '/apps/distributions', label: '应用分发' }
+    ]
+  },
 ]
 
 onMounted(() => {

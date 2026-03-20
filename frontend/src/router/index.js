@@ -55,6 +55,31 @@ const routes = [
     component: () => import('../views/PetConfig.vue')
   },
   {
+    path: '/pet/console',
+    name: 'PetConsole',
+    component: () => import('../views/pet/PetConsole.vue')
+  },
+  {
+    path: '/pet/conversations',
+    name: 'PetConversations',
+    component: () => import('../views/pet/PetConversations.vue')
+  },
+  {
+    path: '/miniclaw/firmwares',
+    name: 'FirmwareList',
+    component: () => import('../views/miniclaw/FirmwareList.vue')
+  },
+  {
+    path: '/knowledge',
+    name: 'KnowledgeList',
+    component: () => import('../views/knowledge/KnowledgeList.vue')
+  },
+  {
+    path: '/owner/profile',
+    name: 'OwnerProfile',
+    component: () => import('../views/owner/OwnerProfile.vue')
+  },
+  {
     path: '/system/monitor',
     name: 'Monitor',
     component: () => import('../views/system/Monitor.vue')
@@ -82,6 +107,54 @@ const routes = [
     path: '/notifications/announcements',
     name: 'Announcements',
     component: () => import('../views/notifications/Announcements.vue')
+  },
+  // 策略管理
+  {
+    path: '/policies/list',
+    name: 'PolicyList',
+    component: () => import('../views/policies/PolicyList.vue')
+  },
+  {
+    path: '/policies/configs',
+    name: 'PolicyConfigs',
+    component: () => import('../views/policies/PolicyConfigs.vue')
+  },
+  {
+    path: '/policies/compliance',
+    name: 'ComplianceRules',
+    component: () => import('../views/policies/ComplianceRules.vue')
+  },
+  // 会员管理
+  {
+    path: '/members/points',
+    name: 'MemberPoints',
+    component: () => import('../views/members/MemberPoints.vue')
+  },
+  {
+    path: '/members/coupons',
+    name: 'MemberCoupons',
+    component: () => import('../views/members/MemberCoupons.vue')
+  },
+  {
+    path: '/members/promotions',
+    name: 'MemberPromotions',
+    component: () => import('../views/members/MemberPromotions.vue')
+  },
+  // 告警中心
+  {
+    path: '/alerts/rules',
+    name: 'AlertRules',
+    component: () => import('../views/alerts/AlertRules.vue')
+  },
+  {
+    path: '/alerts/list',
+    name: 'AlertList',
+    component: () => import('../views/alerts/AlertList.vue')
+  },
+  {
+    path: '/alerts/settings',
+    name: 'AlertSettings',
+    component: () => import('../views/alerts/AlertSettings.vue')
   }
 ]
 

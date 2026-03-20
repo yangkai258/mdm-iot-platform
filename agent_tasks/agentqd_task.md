@@ -8,6 +8,30 @@
 
 ---
 
+## ✅ Sprint 2.1 - 应用管理页面 (已完成)
+
+### 已完成文件：
+- `src/views/apps/AppList.vue` - 应用列表，含统计卡片、筛选、创建应用抽屉、详情抽屉、审核操作
+- `src/views/apps/AppVersions.vue` - 应用版本管理，含版本列表、上传新版本抽屉、版本详情抽屉
+- `src/views/apps/AppDistributions.vue` - 应用分发任务，含统计卡片、分发任务列表、创建分发抽屉、任务详情进度
+- `src/router.js` - 添加 `/apps/*` 路由
+- `src/App.vue` - 添加「应用管理」侧边栏菜单
+
+### API 对接：
+- GET/POST `/api/v1/apps`
+- GET/PUT `/api/v1/apps/:id`
+- POST `/api/v1/apps/:id/approve`
+- POST `/api/v1/apps/:id/reject`
+- GET/POST `/api/v1/apps/:id/versions`
+- DELETE `/api/v1/apps/:id/versions/:version_id`
+- GET/POST `/api/v1/apps/distributions`
+- GET `/api/v1/apps/distributions/:id`
+- POST `/api/v1/apps/distributions/:id/cancel`
+
+### Git Commit: `feat(apps): implement app management pages`
+
+---
+
 ## ✅ Sprint 2.2 - 通知管理页面 (已完成)
 
 ### 已完成文件：

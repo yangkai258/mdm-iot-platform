@@ -29,6 +29,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	permCtrl := &PermissionController{DB: db}
 	roleCtrl := &RoleController{DB: db}
 	memberCtrl := &MemberController{DB: db}
+	memberEnhancedCtrl := NewMemberEnhancedController(db)
 
 	notifCtrl := &NotificationController{
 		DB:    db,
@@ -178,6 +179,27 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 积分流水
 		api.GET("/member/points/records", memberCtrl.PointsRecordList)
 
+		// ============ Sprint 3.2 会员管理增强 ============
+		// 积分引擎
+		api.POST("/members/:id/points/add", memberEnhancedCtrl.AddPoints)
+		api.POST("/members/:id/points/deduct", memberEnhancedCtrl.DeductPoints)
+		api.GET("/members/:id/points/balance", memberEnhancedCtrl.GetBalance)
+		api.GET("/members/:id/points/logs", memberEnhancedCtrl.GetPointsLogs)
+		api.GET("/members/:id/coupons", memberEnhancedCtrl.MemberCouponList)
+
+		// 优惠券（新路径 /api/v1/coupons）
+		api.GET("/coupons", memberEnhancedCtrl.CouponListNew)
+		api.POST("/coupons", memberEnhancedCtrl.CouponCreateNew)
+		api.POST("/coupons/:id/issue", memberEnhancedCtrl.CouponIssue)
+		api.POST("/coupons/:id/use", memberEnhancedCtrl.CouponUse)
+
+		// 促销活动（新路径 /api/v1/promotions）
+		api.GET("/promotions", memberEnhancedCtrl.PromotionListNew)
+		api.POST("/promotions", memberEnhancedCtrl.PromotionCreateNew)
+		api.PUT("/promotions/:id", memberEnhancedCtrl.PromotionUpdateNew)
+		api.DELETE("/promotions/:id", memberEnhancedCtrl.PromotionDeleteNew)
+		api.GET("/promotions/:id", memberEnhancedCtrl.PromotionDetailNew)
+
 		// ============ 应用管理 ============
 		appCtrl := &AppController{DB: db}
 		// 应用 CRUD
@@ -217,6 +239,35 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.PUT("/announcements/:id", notifCtrl.UpdateAnnouncement)
 		api.DELETE("/announcements/:id", notifCtrl.DeleteAnnouncement)
 		api.POST("/announcements/:id/publish", notifCtrl.PublishAnnouncement)
+
+		// ============ 策略管理 ============
+		policyCtrl := &PolicyController{DB: db}
+		complianceCtrl := &ComplianceController{DB: db}
+
+		// 配置文件 CRUD
+		api.GET("/policies/configs", policyCtrl.ListConfigs)
+		api.POST("/policies/configs", policyCtrl.CreateConfig)
+		api.PUT("/policies/configs/:id", policyCtrl.UpdateConfig)
+		api.DELETE("/policies/configs/:id", policyCtrl.DeleteConfig)
+
+		// 策略 CRUD
+		api.GET("/policies", policyCtrl.ListPolicies)
+		api.POST("/policies", policyCtrl.CreatePolicy)
+		api.PUT("/policies/:id", policyCtrl.UpdatePolicy)
+		api.DELETE("/policies/:id", policyCtrl.DeletePolicy)
+		// 策略绑定
+		api.POST("/policies/:id/bind", policyCtrl.BindPolicy)
+		api.DELETE("/policies/:id/unbind", policyCtrl.UnbindPolicy)
+		api.GET("/policies/:id/bindings", policyCtrl.GetPolicyBindings)
+
+		// 合规规则 CRUD
+		api.GET("/compliance/rules", complianceCtrl.ListRules)
+		api.POST("/compliance/rules", complianceCtrl.CreateRule)
+		api.PUT("/compliance/rules/:id", complianceCtrl.UpdateRule)
+		api.DELETE("/compliance/rules/:id", complianceCtrl.DeleteRule)
+		// 违规记录
+		api.GET("/compliance/violations", complianceCtrl.ListViolations)
+		api.PUT("/compliance/violations/:id/resolve", complianceCtrl.ResolveViolation)
 	}
 }
 

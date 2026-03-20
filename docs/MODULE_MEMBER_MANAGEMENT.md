@@ -1,0 +1,386 @@
+# 模块 PRD：会员管理 (Member Management)
+
+**版本：** V1.4
+**模块负责人：** agentcp
+**编制日期：** 2026-03-20
+
+---
+
+## 1. 概述
+
+会员管理模块支持 AI 电子宠物的用户运营能力，包括会员信息管理、会员卡体系、积分/优惠券系统、促销活动和店铺管理。
+
+**业务目标：**
+- 建立完善的会员等级体系
+- 支持积分获取、抵扣和兑换
+- 优惠券发放和核销
+- 促销活动管理
+- 多店铺支持
+
+---
+
+## 2. 功能列表
+
+| 功能 | 描述 | 优先级 | 触发方式 | 前端入口/按钮 |
+|------|------|--------|----------|--------------|
+| 会员信息管理 | 会员CRUD、搜索、筛选 | P0 | 人工 | 「新建会员」/「编辑」/「删除」按钮 |
+| 会员等级管理 | 等级定义、升级规则 | P0 | 人工 | 「新建等级」/「编辑」/「删除」按钮 |
+| 会员标签管理 | 标签定义、批量打标 | P1 | 人工 | 「新建标签」/「编辑」/「删除」/「批量打标」按钮 |
+| 会员卡管理 | 会员卡CRUD、类型配置 | P1 | 人工 | 「新建会员卡」/「编辑」/「删除」按钮 |
+| 积分规则 | 积分获取/抵扣规则配置 | P1 | 人工 | 「新建规则」/「编辑」/「删除」按钮 |
+| 积分流水 | 积分变动追踪 | P1 | 自动 | 无按钮 |
+| 优惠券管理 | 优惠券CRUD、发放、核销 | P1 | 人工 | 「新建优惠券」/「编辑」/「发放」/「核销」按钮 |
+| 促销活动 | 促销活动CRUD | P2 | 人工 | 「新建促销」/「编辑」/「删除」按钮 |
+| 会员订单 | 订单管理、状态流转 | P2 | 人工 | 「新建订单」按钮 |
+| 店铺管理 | 店铺CRUD、区域管理 | P2 | 人工 | 「新建店铺」/「编辑」/「删除」按钮 |
+| 临时会员 | 微信等第三方临时会员 | P2 | 人工 | 「新建临时会员」按钮 |
+
+---
+
+## 3. 数据模型
+
+### 3.1 会员表 (members)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uint | 主键 |
+| member_code | string | 会员编号, unique |
+| member_name | string | 会员名称 |
+| phone | string | 手机号, index |
+| gender | string | 性别 |
+| birth_date | datetime | 生日 |
+| email | string | 邮箱 |
+| avatar | string | 头像 |
+| member_level | int | 会员等级, default 1 |
+| points | int64 | 积分余额, default 0 |
+| balance | float64 | 储值余额, default 0 |
+| card_id | uint | 会员卡ID, FK |
+| store_id | uint | 所属店铺, FK |
+| status | int | 状态 1=正常 0=禁用 |
+| source | string | 会员来源 |
+| remark | string | 备注 |
+| created_at | datetime | 创建时间 |
+| updated_at | datetime | 更新时间 |
+
+### 3.2 会员卡表 (member_cards)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uint | 主键 |
+| card_code | string | 卡号, unique |
+| card_name | string | 卡名称 |
+| card_type | int | 1=储值卡 2=积分卡 3=打折卡 |
+| group_id | uint | 分组ID |
+| discount | float64 | 折扣率0-100 |
+| points_rate | float64 | 积分倍率 |
+| init_points | int | 开卡赠送积分 |
+| init_balance | float64 | 开卡储值 |
+| valid_days | int | 有效期(天), 0=永久 |
+| status | int | 状态 |
+
+### 3.3 会员等级表 (member_levels)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uint | 主键 |
+| level_name | string | 等级名称 |
+| level_code | string | 等级编码 |
+| min_points | int64 | 最低积分门槛 |
+| max_points | int64 | 最高积分门槛 |
+| discount | float64 | 享受折扣率 |
+| points_rate | float64 | 积分倍率 |
+| sort | int | 排序 |
+
+### 3.4 升级规则表 (member_upgrade_rules)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uint | 主键 |
+| from_level | uint | 原等级 |
+| to_level | uint | 目标等级 |
+| points_threshold | int64 | 积分阈值 |
+| amount_threshold | float64 | 消费金额阈值 |
+| points_reward | int64 | 升级赠送积分 |
+| status | int | 状态 |
+
+### 3.5 优惠券表 (coupons)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uint | 主键 |
+| coupon_code | string | 优惠券编码, unique |
+| coupon_name | string | 优惠券名称 |
+| coupon_type | int | 1=满减 2=折扣 3=兑换 |
+| face_value | float64 | 面值 |
+| min_amount | float64 | 最低消费金额 |
+| discount_rate | float64 | 折扣率 |
+| total_stock | int | 总库存 |
+| remain_stock | int | 剩余库存 |
+| valid_days | int | 有效期(天) |
+| start_time | datetime | 开始时间 |
+| end_time | datetime | 结束时间 |
+| status | int | 状态 |
+
+### 3.6 积分规则表 (points_rules)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uint | 主键 |
+| rule_code | string | 规则编码, unique |
+| rule_name | string | 规则名称 |
+| rule_type | int | 1=获取积分 2=抵扣积分 3=不积分 |
+| points | int | 积分值 |
+| amount | float64 | 对应金额 |
+| remark | string | 备注 |
+| status | int | 状态 |
+
+### 3.7 积分流水表 (member_points_records)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uint | 主键 |
+| member_id | uint | 会员ID, index |
+| points | int64 | 积分变动(正负) |
+| points_type | int | 1=消费获得 2=兑换抵扣 3=活动赠送 4=退款返还 |
+| source_type | string | 来源类型 |
+| source_id | string | 来源ID |
+| order_no | string | 关联订单号 |
+| before_balance | int64 | 变动前余额 |
+| after_balance | int64 | 变动后余额 |
+| operator | string | 操作人 |
+| remark | string | 备注 |
+
+### 3.8 会员订单表 (member_orders)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | uint | 主键 |
+| order_no | string | 订单号, unique |
+| member_id | uint | 会员ID, index |
+| order_type | int | 1=消费 2=充值 3=退款 |
+| amount | float64 | 订单金额 |
+| points_earned | int64 | 获得积分 |
+| pay_type | int | 支付方式 |
+| status | int | 订单状态 |
+| remark | string | 备注 |
+
+---
+
+## 4. 接口定义
+
+### 4.1 会员管理
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/members | 会员列表（Query: keyword, level, status, page, page_size） |
+| GET | /api/v1/members/:id | 会员详情 |
+| POST | /api/v1/members | 创建会员 |
+| PUT | /api/v1/members/:id | 更新会员 |
+| DELETE | /api/v1/members/:id | 删除会员 |
+
+### 4.2 会员等级
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/member/levels | 等级列表 |
+| POST | /api/v1/member/levels | 创建等级（level_name, level_code, min_points, max_points, discount, points_rate, sort） |
+
+### 4.3 会员卡
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/member/cards | 会员卡列表 |
+| POST | /api/v1/member/cards | 创建会员卡（card_code, card_name, card_type, discount, points_rate, init_points, init_balance, valid_days） |
+
+### 4.4 优惠券
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/member/coupons | 优惠券列表 |
+| POST | /api/v1/member/coupons | 创建优惠券（coupon_code, coupon_name, coupon_type, face_value, min_amount, total_stock, valid_days） |
+| POST | /api/v1/member/coupons/:id/grant | 发放优惠券（member_ids数组） |
+| POST | /api/v1/member/coupon-grants/:id/use | 核销优惠券 |
+
+### 4.5 积分管理
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/member/points/rules | 积分规则列表 |
+| GET | /api/v1/member/points/records | 积分流水（Query: member_id） |
+| POST | /api/v1/members/:id/points/adjust | 积分调整（points, points_type, remark） |
+
+### 4.6 促销活动
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/member/promotions | 促销列表 |
+| POST | /api/v1/member/promotions | 创建促销（promo_code, promo_name, promo_type, start_time, end_time, rule_config） |
+
+### 4.7 会员订单
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/member/orders | 订单列表（Query: member_id, order_type, status, page, page_size） |
+| POST | /api/v1/member/orders | 创建订单（order_no, member_id, order_type, amount, pay_type） |
+
+### 4.8 店铺管理
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/member/stores | 店铺列表 |
+| POST | /api/v1/member/stores | 创建店铺（store_code, store_name, store_type, province, city, district, address, contact, phone） |
+
+### 4.9 会员标签
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/member/tags | 标签列表 |
+| POST | /api/v1/member/tags | 创建标签（tag_code, tag_name, tag_type, color, icon） |
+| POST | /api/v1/members/:id/tags | 批量打标（tag_ids数组） |
+
+---
+
+## 5. 流程图
+
+（会员管理模块主要依赖CRUD操作，无复杂业务流程图，核心流程包括：会员注册→分配等级→消费获得积分→积分兑换/抵扣）
+
+### 5.1 会员注册流程
+
+```
+新建会员 ──► 填写基本信息 ──► 选择会员卡 ──► 分配等级 ──► 创建成功
+                                                            │
+                                                    开卡赠送积分/储值
+```
+
+### 5.2 积分获取流程
+
+```
+消费/充值 ──► 计算积分(积分规则) ──► 增加积分余额 ──► 记录积分流水
+```
+
+---
+
+## 6. 模块联动
+
+| 联动模块 | 联动方式 | 说明 |
+|----------|----------|------|
+| 设备管理 | 会员绑定设备bind_user_id | 设备与会员关联 |
+| 数据分析 | 会员消费/积分数据统计 | 分析会员价值 |
+| 系统管理 | 运营人员管理会员 | 权限控制 |
+| 组织架构 | 会员归属店铺 | 店铺关联部门 |
+| 应用管理 | target_type=user应用分发 | 应用使用数据关联会员 |
+| 内容管理 | target_type=user内容推送 | 用户可查看收到的文件 |
+| 通知管理 | notification_type=push, target_type=user | 会员消息通知 |
+| 策略管理 | 用户级策略绑定 | 策略可绑定到用户/用户组，会员自动继承 |
+
+---
+
+## 7. 验收标准
+
+### P0 验收标准
+
+| 用例 | 验收条件 | 测试方法 |
+|------|----------|----------|
+| 会员CRUD | 完整增删改查 | 调用各接口验证 |
+| 会员搜索 | 按姓名/手机号/编号搜索 | 模糊匹配验证 |
+| 会员等级 | 等级列表正确展示 | 创建多等级验证排序 |
+| 会员卡 | 正确关联会员 | 创建会员指定card_id |
+| 批量打标 | 一次打多个标签 | 调用批量接口验证 |
+
+### P1 验收标准
+
+| 用例 | 验收条件 | 测试方法 |
+|------|----------|----------|
+| 积分获取 | 消费后正确增加积分 | 创建订单验证 |
+| 积分抵扣 | 积分兑换正确扣减 | 调用积分抵扣接口 |
+| 优惠券发放 | 库存正确扣减 | 发放后检查remain_stock |
+| 优惠券核销 | 核销后状态变更 | 调用核销接口 |
+| 升级规则 | 达到阈值自动升级 | 模拟积分增长验证 |
+
+### P2 验收标准
+
+| 用例 | 验收条件 | 测试方法 |
+|------|----------|----------|
+| 促销计算 | 满足条件自动优惠 | 创建订单验证优惠 |
+| 订单状态 | 状态正确流转 | 创建→支付→完成 |
+| 店铺筛选 | 按区域筛选店铺 | 门店列表接口验证 |
+
+---
+
+## 8. UI设计指引
+
+### 8.1 页面结构
+- **左侧菜单**：会员管理 → 会员列表 / 会员卡 / 优惠券 / 积分 / 促销 / 订单 / 店铺
+- **顶部区域**：统计卡片（会员总数/今日新增/活跃会员/积分余额）
+- **中间区域**：Tab页签：会员信息/会员卡/优惠券/积分/促销/订单/店铺
+- **底部区域**：分页组件
+
+### 8.2 组件选用
+| 组件 | 用途 |
+|------|------|
+| a-table | 各子模块数据列表（会员/卡/券/订单等） |
+| a-card | 顶部统计卡片，4列布局 |
+| a-tabs | 多Tab页面：会员/卡/券/积分/促销/订单/店铺 |
+| a-drawer | 会员详情/编辑、优惠券发放、积分调整 |
+| a-modal | 创建/编辑确认、批量发放优惠券 |
+| a-form | 会员信息表单、优惠券配置表单 |
+| a-input-search | 会员姓名/手机号/编号搜索 |
+| a-select | 会员等级筛选、状态筛选、卡类型筛选 |
+| a-tag | 会员等级标签、状态标签 |
+| a-steps | 订单状态流转步骤条 |
+
+### 8.3 参考模板
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [统计卡片]  会员总数:5,000  今日新增:15  活跃:320  积分余额:1.5M│
+├──────────────────────────────────────────────────────────────┤
+│  [Tab: 会员 | 会员卡 | 优惠券 | 积分 | 促销 | 订单 | 店铺]     │
+├──────────────────────────────────────────────────────────────┤
+│  【会员Tab】                                                 │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ [关键词搜索...    ]  等级▼  状态▼  [+新建会员]        │   │
+│  ├──────────────────────────────────────────────────────┤   │
+│  │ 编号        │ 姓名  │ 手机号   │等级│积分 │状态│操作  │   │
+│  │ M20260320001│ 张三  │138****01 │白银│1500 │正常│详情编辑│   │
+│  │ M20260320002│ 李四  │138****02 │黄金│3200 │正常│详情编辑│   │
+│  └──────────────────────────────────────────────────────┘   │
+│                                                              │
+│  【优惠券Tab】                                               │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │ 券名称        │类型│面值│剩余库存│已发放│有效期  │操作│   │
+│  │ 新人满100减20 │满减│20 │  800   │ 200  │30天    │发放│   │
+│  └──────────────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### 8.4 交互流程
+```
+会员列表页
+    ├── 点击「新建会员」──► a-drawer ──► 填写信息 ──► 创建成功
+    ├── 点击「详情」──► a-drawer ──► 查看完整信息+积分记录+订单
+    ├── 点击「编辑」──► a-drawer ──► 修改信息 ──► 保存
+    └── 点击「积分调整」──► a-modal ──► 输入积分值+原因 ──► 确认
+
+优惠券管理页
+    ├── 点击「发放」──► a-modal ──► 选择会员 ──► 批量发放
+    └── 点击「编辑」──► a-drawer ──► 修改券配置 ──► 保存
+
+会员订单页
+    └── 查看订单列表，a-steps显示订单状态流转
+```
+
+### 8.5 关键状态显示
+- **会员等级**：a-tag按等级显示不同颜色（普通=灰，白银=蓝，黄金=黄，铂金=紫，钻石=金）
+- **会员状态**：a-tag，绿色=正常，红色=禁用
+- **优惠券状态**：a-tag，蓝色=有效，灰色=已用，红色=已过期
+- **订单状态**：a-steps步骤条（已下单→已支付→进行中→已完成）
+
+---
+
+## 附录 B. 修订记录
+
+| 版本 | 日期 | 修订人 | 修订内容 |
+|------|------|--------|----------|
+| V1.0 | 2026-03-20 | agentcp | 初稿，基于MEMBER_REQUIREMENTS.md和代码调研 |
+| V1.2 | 2026-03-20 | agentcp | 修订功能列表，补充触发方式和前端入口按钮列 |
+| V1.4 | 2026-03-20 | agentcp | 重建文档结构，统一使用8章节格式，合并重复的七、八章节

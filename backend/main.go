@@ -208,6 +208,19 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
+	// 知识库路由
+	knowledgeCtrl := &controllers.KnowledgeController{}
+	apiV1 := r.Group("/api/v1")
+	knowledgeCtrl.RegisterRoutes(apiV1)
+
+	// 宠物控制台路由
+	petConsoleCtrl := &controllers.PetConsoleController{}
+	petConsoleCtrl.RegisterRoutes(apiV1)
+
+	// MiniClaw路由
+	miniClawCtrl := &controllers.MiniClawController{}
+	miniClawCtrl.RegisterRoutes(apiV1)
+
 	// 获取端口
 	port := os.Getenv("PORT")
 	if port == "" {
