@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -48,46 +48,38 @@ func InitRedis() (*RedisClient, error) {
 		redisURL = "redis://localhost:6379"
 	}
 
-	// 解析 redis://[user:password@]host:port[/db]
+	// 使用 net/url 正确解析 redis:// URL
+	parsedURL, err := url.Parse(redisURL)
+	if err != nil {
+		return nil, fmt.Errorf("Redis URL 解析失败: %w", err)
+	}
+
 	// 默认值
 	addr := "localhost:6379"
 	password := ""
 	db := 0
 
-	// 去除 redis:// 前缀
-	url := strings.TrimPrefix(redisURL, "redis://")
-
-	// 检查是否有认证信息
-	if idx := strings.Index(url, "@"); idx != -1 {
-		authPart := url[:idx]
-		url = url[idx+1:]
-		if pIdx := strings.Index(authPart, ":"); pIdx != -1 {
-			password = authPart[pIdx+1:]
-		}
+	// 获取 host:port
+	if parsedURL.Host != "" {
+		addr = parsedURL.Host
+	} else if parsedURL.Path != "" {
+		// 没有 Host 时，Path 包含路径
+		addr = parsedURL.Path + ":6379"
 	}
 
-	// 解析 host:port[/db]
-	// 先按 / 分割，取第一部分作为 host:port
-	hostPortPart := strings.Split(url, "/")[0]
-	
-	if strings.Contains(hostPortPart, ":") {
-		// 有端口号
-		parts := strings.SplitN(hostPortPart, ":", 2)
-		addr = hostPortPart
-		// 端口本身就是端口，不是DB
-		_ = parts // addr已经是完整的 host:port
-	} else {
-		// 没有端口号，默认6379
-		addr = hostPortPart + ":6379"
+	// 获取密码
+	if parsedURL.User != nil {
+		password, _ = parsedURL.User.Password()
 	}
-	
-	// 检查是否有 /db 后缀
-	if strings.Contains(url, "/") {
-		dbParts := strings.Split(url, "/")
-		if len(dbParts) > 1 && dbParts[1] != "" {
-			if dbNum, err := strconv.Atoi(dbParts[1]); err == nil {
-				db = dbNum
-			}
+
+	// 获取数据库索引 (path 以 / 开头，需要去掉)
+	path := parsedURL.Path
+	if len(path) > 0 && path[0] == '/' {
+		path = path[1:]
+	}
+	if path != "" {
+		if dbNum, err := strconv.Atoi(path); err == nil {
+			db = dbNum
 		}
 	}
 
@@ -108,6 +100,12 @@ type DeviceShadow struct {
 	LastIP        string     `json:"last_ip"`
 	LastHeartbeat *time.Time `json:"last_heartbeat"`
 	DesiredConfig string     `json:"desired_config"`
+	// 越狱/ROOT检测
+	IsJailbroken bool    `json:"is_jailbroken"`
+	RootStatus   string  `json:"root_status"` // normal, rooted, jailbroken
+	// 地理位置
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
 }
 
 // NewRedisClient 创建 Redis 客户端

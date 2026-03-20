@@ -39,47 +39,12 @@ type DeviceShadow struct {
 	LastIP         string                 `gorm:"type:varchar(45)" json:"last_ip"`
 	LastHeartbeat  *time.Time             `gorm:"index" json:"last_heartbeat"`
 	DesiredConfig  map[string]interface{} `gorm:"type:jsonb" json:"desired_config"`
-}
-
-// OTAPackage OTA固件包
-type OTAPackage struct {
-	ID             uint      `gorm:"primaryKey" json:"id"`
-	VersionCode    string    `gorm:"type:varchar(32);uniqueIndex;not null" json:"version_code"`
-	HardwareModel  string    `gorm:"type:varchar(32);not null" json:"hardware_model"`
-	BinURL        string    `gorm:"type:varchar(255);not null" json:"bin_url"`
-	Md5Hash       string    `gorm:"type:varchar(32);not null" json:"md5_hash"`
-	IsMandatory    bool      `gorm:"default:false" json:"is_mandatory"`
-	ReleaseStatus  int       `gorm:"type:smallint;default:0" json:"release_status"` // 0:测试 1:灰度 2:全量
-	CreatedAt      time.Time `json:"created_at"`
-}
-
-// OTADeployment OTA发布任务
-type OTADeployment struct {
-	ID              uint      `gorm:"primaryKey" json:"id"`
-	PackageID       uint      `gorm:"not null" json:"package_id"`
-	TargetHardware  string    `gorm:"type:varchar(32);not null" json:"target_hardware"`
-	RolloutStrategy string    `gorm:"type:varchar(20);not null" json:"rollout_strategy"` // full, percentage, whitelist
-	Percentage      int       `gorm:"default:0" json:"percentage"`
-	Status          string    `gorm:"type:varchar(20);default:'pending'" json:"status"` // pending, rolling, paused, completed
-	SuccessRate     float64   `gorm:"default:0" json:"success_rate"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
-}
-
-// OTAProgress 设备OTA升级进度
-type OTAProgress struct {
-	ID            uint      `gorm:"primaryKey" json:"id"`
-	DeviceID      string    `gorm:"type:varchar(36);index;not null" json:"device_id"`
-	DeploymentID  uint      `gorm:"not null" json:"deployment_id"`
-	PackageID     uint      `gorm:"not null" json:"package_id"`
-	TargetVersion string    `gorm:"type:varchar(32);not null" json:"target_version"`
-	Status        string    `gorm:"type:varchar(20);default:'pending'" json:"status"` // pending, downloading, verifying, installing, completed, failed
-	Progress      int       `gorm:"default:0" json:"progress"`                          // 0-100
-	ErrorMessage  string    `gorm:"type:varchar(512)" json:"error_message"`
-	StartedAt     *time.Time `json:"started_at"`
-	CompletedAt   *time.Time `json:"completed_at"`
-	CreatedAt     time.Time  `json:"created_at"`
-	UpdatedAt     time.Time  `json:"updated_at"`
+	// 越狱/ROOT检测
+	IsJailbroken bool   `gorm:"default:false" json:"is_jailbroken"`
+	RootStatus   string `gorm:"type:varchar(20);default:'normal'" json:"root_status"` // normal, rooted, jailbroken
+	// 地理位置
+	Latitude  float64 `gorm:"type:decimal(10,7)" json:"latitude"`
+	Longitude float64 `gorm:"type:decimal(10,7)" json:"longitude"`
 }
 
 // CommandHistory 指令历史

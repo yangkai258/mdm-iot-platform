@@ -1,5 +1,44 @@
 Agent HD - 后端开发任务
 
+## Sprint 3.3: 告警系统增强（已完成 ✅）
+
+| 验收标准 | 状态 | 实现文件 |
+|----------|------|----------|
+| 越狱检测告警触发 | ✅ | `mqtt/handler.go` - `JailbreakAlertHandler` + `StatusPayload` 增加 `is_jailbroken/root_status` 字段 |
+| 地理围栏违规告警 | ✅ | `mqtt/handler.go` - `CheckGeofence` + `GeofenceRule` 模型 + Haversine 距离算法 |
+| 告警处理流程完整 | ✅ | `controllers/alert_controller.go` - confirm/resolve/ignore/batchConfirm/batchResolve |
+
+**新增文件:**
+- `models/alert_models.go` - 新增 `GeofenceRule`, `GeofenceAlert`, `AlertNotification` 模型；`DeviceAlert` 增加 `ConfirmedAt/ConfirmedBy/ResolvedAt/ResolvedBy/IgnoredAt/IgnoredBy/ExtraData` 字段
+- `services/notification_service.go` - 告警通知服务，支持 email/webhook/inapp 三种通知方式
+
+**修改文件:**
+- `models/device.go` - `DeviceShadow` 增加 `IsJailbroken`, `RootStatus`, `Latitude`, `Longitude` 字段
+- `utils/redis.go` - `DeviceShadow` 结构体对应增加上述字段
+- `mqtt/handler.go` - `InitMQTT` 增加 `GeofenceCallback`；`SetupSubscriber` 订阅 `jailbreak_alert` 主题；`StatusMessageHandler` 处理越狱和位置数据；新增 `JailbreakAlertHandler`、`CheckGeofence`、`haversineDistance`
+- `controllers/alert_controller.go` - 完整重写，新增所有告警处理 API；`CheckAlerts` 支持 `jailbreak_detected` 类型
+- `main.go` - 注册 `GeofenceRule`、`GeofenceAlert`、`AlertNotification` 模型迁移；`InitMQTT` 传入 `geofenceCallback`；注册新路由
+
+**API路由（新增）:**
+- `POST /api/v1/alerts/:id/confirm` - 确认告警
+- `POST /api/v1/alerts/:id/resolve` - 解决告警
+- `POST /api/v1/alerts/:id/ignore` - 忽略告警
+- `POST /api/v1/alerts/batch/confirm` - 批量确认
+- `POST /api/v1/alerts/batch/resolve` - 批量解决
+- `GET /api/v1/alerts/:id/notifications` - 获取告警通知记录
+- `PUT /api/v1/alerts/rules/:id` - 更新告警规则
+- `DELETE /api/v1/alerts/rules/:id` - 删除告警规则
+- `GET /api/v1/geofence/rules` - 地理围栏规则列表
+- `POST /api/v1/geofence/rules` - 创建地理围栏规则
+- `PUT /api/v1/geofence/rules/:id` - 更新地理围栏规则
+- `DELETE /api/v1/geofence/rules/:id` - 删除地理围栏规则
+- `GET /api/v1/geofence/alerts` - 地理围栏告警记录
+
+**MQTT主题（新增）:**
+- `/mdm/device/+/up/jailbreak_alert` - 订阅设备越狱/ROOT告警上报
+
+---
+
 ## Sprint 2.2: 通知管理（已完成 ✅）
 
 | 验收标准 | 状态 | 实现文件 |
@@ -107,6 +146,7 @@ Agent HD - 后端开发任务
 | 4 | OTA无后台Worker | `main.go` | 添加 `startOTAWorker` goroutine，每5分钟检查 `pending` 部署并通过 MQTT 下发 OTA 指令 |
 | 5 | CheckAlerts从未调用 | `mqtt/handler.go` + `main.go` | 通过 `AlertCallback` 接口将 `controllers.CheckAlerts` 注入到 MQTT 心跳处理中 |
 | 6 | deleteRecord不删数据 | `controllers/device_crud.go` | GORM 软删除实现正确（`DeletedAt` 字段已配置），`db.Delete(&device)` 会设置 `DeletedAt` 时间戳，查询自动过滤 |
+| 7 | fmt.Sscanf解析百分比 | `services/ota_worker.go` | 替换 `fmt.Sscanf` 为 `strconv.Atoi`，避免解析失败时 percentage 保持初始值导致意外行为 |
 
 ---
 

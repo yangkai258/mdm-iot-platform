@@ -41,12 +41,37 @@ func main() {
 		// 告警表
 		&models.DeviceAlertRule{},
 		&models.DeviceAlert{},
+		// 地理围栏表
+		&models.GeofenceRule{},
+		&models.GeofenceAlert{},
+		// 告警通知表
+		&models.AlertNotification{},
 		// 合规表
 		&models.CompliancePolicy{},
 		&models.ComplianceViolation{},
+		// 策略管理表
+		&models.PolicyConfig{},
+		&models.Policy{},
+		&models.PolicyBinding{},
 		// 会员表
 		&models.MemberOrder{},
 		&models.MemberUpgradeRecord{},
+		&models.Member{},
+		&models.MemberCard{},
+		&models.MemberCardGroup{},
+		&models.MemberLevel{},
+		&models.MemberUpgradeRule{},
+		&models.MemberTag{},
+		&models.MemberTagRecord{},
+		&models.Coupon{},
+		&models.CouponGrant{},
+		&models.Promotion{},
+		&models.Store{},
+		&models.PointsRule{},
+		&models.MemberPointsRecord{},
+		&models.MemberOperationRecord{},
+		&models.TempMember{},
+
 		// 应用管理表
 		&models.App{},
 		&models.AppVersion{},
@@ -74,7 +99,10 @@ func main() {
 	complianceCallback := func(db *gorm.DB, deviceID string, data map[string]interface{}) {
 		controllers.CheckCompliance(db, deviceID, data)
 	}
-	mqttHandler, err := mqtt.InitMQTT(db, redisClient, alertCallback, complianceCallback)
+	geofenceCallback := func(db *gorm.DB, deviceID string, lat, lng float64, alertType string) {
+		mqtt.CheckGeofence(db, deviceID, lat, lng, alertType)
+	}
+	mqttHandler, err := mqtt.InitMQTT(db, redisClient, alertCallback, complianceCallback, geofenceCallback)
 	if err != nil {
 		log.Fatalf("Failed to initialize MQTT: %v", err)
 	}
@@ -155,7 +183,23 @@ func main() {
 		alertCtrl := &controllers.AlertController{DB: db}
 		sys.GET("/alerts/rules", alertCtrl.GetRules)
 		sys.POST("/alerts/rules", alertCtrl.CreateRule)
+		sys.PUT("/alerts/rules/:id", alertCtrl.UpdateRule)
+		sys.DELETE("/alerts/rules/:id", alertCtrl.DeleteRule)
 		sys.GET("/alerts", alertCtrl.GetAlerts)
+		sys.POST("/alerts/:id/confirm", alertCtrl.ConfirmAlert)
+		sys.POST("/alerts/:id/resolve", alertCtrl.ResolveAlert)
+		sys.POST("/alerts/:id/ignore", alertCtrl.IgnoreAlert)
+		sys.POST("/alerts/batch/confirm", alertCtrl.BatchConfirmAlerts)
+		sys.POST("/alerts/batch/resolve", alertCtrl.BatchResolveAlerts)
+		sys.GET("/alerts/:id/notifications", alertCtrl.GetAlertNotifications)
+
+		// 地理围栏管理
+		sys.GET("/geofence/rules", alertCtrl.GetGeofenceRules)
+		sys.POST("/geofence/rules", alertCtrl.CreateGeofenceRule)
+		sys.PUT("/geofence/rules/:id", alertCtrl.UpdateGeofenceRule)
+		sys.DELETE("/geofence/rules/:id", alertCtrl.DeleteGeofenceRule)
+		sys.GET("/geofence/alerts", alertCtrl.GetGeofenceAlerts)
+
 		sys.GET("/dashboard/stats", alertCtrl.GetDashboardStats)
 	}
 
