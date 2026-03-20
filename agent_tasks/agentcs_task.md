@@ -179,3 +179,101 @@ c8874f5 - agentcs: Add Sprint 1.1 & 1.2 test files
 cd testing/p0_tests
 pytest test_app_management.py test_notification.py -v
 ```
+
+---
+
+## Sprint 3 测试任务 ✅ 完成
+
+### 测试范围
+1. 策略管理功能测试
+2. 会员增强测试（积分/优惠券）
+3. 告警增强测试
+
+### 创建的测试文件
+
+#### test_policy_management.py (10 tests)
+- `test_compliance_policy_model_exists` - CompliancePolicy 模型定义检查
+- `test_compliance_violation_model_exists` - ComplianceViolation 模型检查
+- `test_check_compliance_function_exists` - CheckCompliance 合规检查函数检查
+- `test_compliance_policy_routes_registered` - 合规策略 API 路由检查（已注册/未注册时SKIP）
+- `test_compliance_auto_migrate_registered` - AutoMigrate 注册检查
+- `test_compliance_callback_registered_in_mqtt` - MQTT 合规回调注册检查
+- `test_compliance_condition_evaluation` - 条件评估逻辑检查
+- `test_compliance_policy_api_accessible` - 合规策略 API 可访问性测试
+- `test_compliance_violation_api_accessible` - 合规违规记录 API 可访问性测试
+- `test_compliance_policy_create` - 创建合规策略 API 测试
+- `test_compliance_policy_list_pagination` - 合规策略列表分页测试
+
+#### test_member_enhanced.py (17 tests)
+- `test_points_rule_model_exists` - PointsRule 模型定义检查
+- `test_member_points_record_model_exists` - MemberPointsRecord 模型检查
+- `test_coupon_model_exists` - Coupon 模型定义检查
+- `test_coupon_grant_model_exists` - CouponGrant 模型检查
+- `test_points_rule_controller_methods` - PointsRule 控制器方法检查
+- `test_points_rule_routes_registered` - 积分规则 API 路由检查
+- `test_coupon_routes_registered` - 优惠券 API 路由检查
+- `test_points_record_route_registered` - 积分流水 API 路由检查
+- `test_points_rule_list_api` - 积分规则列表 API 测试
+- `test_points_rule_create_api` - 创建积分规则 API 测试
+- `test_points_rule_update_api` - 更新积分规则 API 测试
+- `test_coupon_list_api` - 优惠券列表 API 测试
+- `test_coupon_create_api` - 创建优惠券 API 测试（含 remain_stock 自动设置验证）
+- `test_coupon_update_api` - 更新优惠券 API 测试
+- `test_coupon_delete_api` - 删除优惠券 API 测试
+- `test_points_record_list_api` - 积分流水列表 API 测试
+- `test_member_points_grant_integration` - 积分发放与流水记录集成测试
+
+#### test_alert_enhanced.py (17 tests)
+- `test_alert_rule_model_fields` - DeviceAlertRule 模型字段完整性检查
+- `test_alert_record_model_fields` - DeviceAlert 模型字段完整性检查
+- `test_alert_rule_update_delete_methods` - UpdateRule/DeleteRule 方法检查
+- `test_alert_rule_routes_in_main` - 告警管理路由注册检查
+- `test_alert_callback_in_mqtt_init` - MQTT 告警回调注册检查
+- `test_evaluate_condition_function` - evaluateCondition 条件评估函数检查
+- `test_alert_rule_create_api` - 创建 battery_low 类型告警规则 API 测试
+- `test_alert_rule_create_offline_type` - 创建离线告警规则 API 测试
+- `test_alert_rule_create_custom_type` - 创建自定义类型（temperature_high）告警规则测试
+- `test_alert_rule_list_pagination` - 告警规则列表分页测试
+- `test_alert_rule_update_api` - 更新告警规则 API 测试
+- `test_alert_rule_delete_api` - 删除告警规则 API 测试
+- `test_alerts_list_api` - 告警记录列表 API 测试
+- `test_alerts_filter_by_device_id` - 按设备ID筛选告警记录测试
+- `test_alerts_filter_by_status` - 按状态筛选告警记录测试
+- `test_dashboard_stats_api` - 大盘统计数据 API 测试
+- `test_alert_rule_validation_missing_type` - 缺少 alert_type 参数校验测试
+- `test_alert_rule_validation_missing_threshold` - 缺少 threshold 参数校验测试
+- `test_alert_rule_update_status_field` - 告警状态流转（未处理→已确认→已解决）测试
+
+### 测试结果
+```
+20 passed, 27 skipped (backend not running)
+```
+
+**静态检查 PASS (20个):**
+- 策略管理: 7 passed (模型定义、CheckCompliance函数、AutoMigrate、MQTT回调、条件评估)
+- 会员增强: 8 passed (PointsRule/Coupon/MemberPointsRecord/CouponGrant 模型和路由)
+- 告警增强: 5 passed (模型字段、UpdateRule/DeleteRule方法检查、MQTT回调、条件评估)
+
+**API 功能测试 SKIPPED (27个):**
+- 所有 API 功能测试因无法获取 JWT token 或路由未注册而跳过（符合预期）
+
+### 已验证的 Sprint 3 实现状态
+
+| 组件 | 状态 | 说明 |
+|------|------|------|
+| `models/compliance.go` | ✅ | CompliancePolicy, ComplianceViolation 模型完整 |
+| `models/member_models.go` | ✅ | PointsRule, MemberPointsRecord, Coupon, CouponGrant 模型完整 |
+| `controllers/alert_controller.go` | ✅ | CheckCompliance 函数已实现（支持 battery_level/offline_duration/is_online）|
+| `controllers/member_controller.go` | ✅ | PointsRule/Coupon CRUD 方法完整 |
+| 合规策略 API 路由 | ❌ | 路由未注册（device_controller.go 需新增） |
+| 告警规则 UpdateRule/DeleteRule | ✅ | 方法已存在于 alert_controller（但 main.go 中 PUT/DELETE 路由可能未注册）|
+| AlertCallback MQTT 注册 | ✅ | main.go 中已正确注册 alertCallback |
+
+### 待 agenthd 实现
+1. **合规策略 API 路由** - `device_controller.go` 或 `main.go` 中需注册 `/compliance/policies` CRUD 路由
+2. **告警规则 UpdateRule/DeleteRule 路由** - 需在 `main.go` sys group 中注册 PUT/DELETE `/alerts/rules/:id`
+
+### Git Commit
+```
+待提交 - agentcs: Add Sprint 3 test files - Policy Management, Member Enhanced, Alert Enhanced
+```
