@@ -7,13 +7,15 @@ import (
 	"os"
 	"time"
 
+	"mdm-backend/models"
 	"mdm-backend/utils"
 
 	"github.com/eclipse/paho.mqtt.golang"
+	"gorm.io/gorm"
 )
 
 // InitMQTT 初始化 MQTT 客户端
-func InitMQTT(redisClient *utils.RedisClient, alertCB AlertCallback) (mqtt.Client, error) {
+func InitMQTT(db *gorm.DB, redisClient *utils.RedisClient, alertCB AlertCallback, complianceCB ComplianceCallback) (mqtt.Client, error) {
 	broker := os.Getenv("MQTT_BROKER")
 	if broker == "" {
 		broker = "tcp://localhost:1883"
@@ -36,8 +38,8 @@ func InitMQTT(redisClient *utils.RedisClient, alertCB AlertCallback) (mqtt.Clien
 
 	log.Printf("[MQTT] 已连接到: %s", broker)
 
-	// 设置订阅处理器（传入告警回调）
-	handler := NewHandler(redisClient, alertCB)
+	// 设置订阅处理器（传入告警回调和合规回调）
+	handler := NewHandler(db, redisClient, alertCB, complianceCB)
 	handler.SetupSubscriber(client)
 	handler.StartHeartbeatChecker()
 
@@ -55,10 +57,15 @@ type MQTTConfig struct {
 // AlertCallback 告警回调接口，避免循环导入
 type AlertCallback func(deviceID string, data map[string]interface{})
 
+// ComplianceCallback 合规检查回调接口
+type ComplianceCallback func(db *gorm.DB, deviceID string, data map[string]interface{})
+
 // Handler MQTT 消息处理
 type Handler struct {
+	DB           *gorm.DB
 	Redis        *utils.RedisClient
 	AlertCB      AlertCallback
+	ComplianceCB ComplianceCallback
 }
 
 // GlobalMQTTClient 全局 MQTT 客户端，供其他包注入使用
@@ -89,10 +96,12 @@ type PropertyPayload struct {
 }
 
 // NewHandler 创建 MQTT 处理器
-func NewHandler(redisClient *utils.RedisClient, alertCB AlertCallback) *Handler {
+func NewHandler(db *gorm.DB, redisClient *utils.RedisClient, alertCB AlertCallback, complianceCB ComplianceCallback) *Handler {
 	return &Handler{
-		Redis:   redisClient,
-		AlertCB: alertCB,
+		DB:           db,
+		Redis:        redisClient,
+		AlertCB:      alertCB,
+		ComplianceCB: complianceCB,
 	}
 }
 
@@ -154,17 +163,29 @@ func (h *Handler) StatusMessageHandler(client mqtt.Client, msg mqtt.Message) {
 		return
 	}
 
+	// 同步更新 PostgreSQL 设备影子表
+	h.syncShadowToDB(payload.DeviceID, isOnline, payload.BatteryLevel, payload.CurrentMode, &timestamp)
+
 	log.Printf("[MQTT] 设备 %s 心跳更新: online=%v, battery=%d%%, mode=%s",
 		payload.DeviceID, isOnline, payload.BatteryLevel, payload.CurrentMode)
 
+	// 构建告警检查数据
+	alertData := map[string]interface{}{
+		"battery":      float64(payload.BatteryLevel),
+		"is_online":    isOnline,
+		"mode":         payload.CurrentMode,
+		"battery_low":  payload.BatteryLevel < 15,
+		"battery_critical": payload.BatteryLevel < 5,
+	}
+
 	// 触发告警检查
 	if h.AlertCB != nil {
-		alertData := map[string]interface{}{
-			"battery":   float64(payload.BatteryLevel),
-			"is_online": isOnline,
-			"mode":      payload.CurrentMode,
-		}
 		h.AlertCB(payload.DeviceID, alertData)
+	}
+
+	// 触发合规检查
+	if h.ComplianceCB != nil {
+		h.ComplianceCB(h.DB, payload.DeviceID, alertData)
 	}
 }
 
@@ -178,9 +199,49 @@ func (h *Handler) PropertyMessageHandler(client mqtt.Client, msg mqtt.Message) {
 		return
 	}
 
-	// 可以在这里处理属性更新，比如更新设备固件版本等信息
+	// 处理属性更新，更新设备固件版本等信息
 	log.Printf("[MQTT] 设备 %s 属性更新: firmware=%s, model=%s",
 		payload.DeviceID, payload.FirmwareVersion, payload.HardwareModel)
+
+	// 更新设备影子中的 IP 信息
+	if payload.LastIPAddress != "" {
+		shadow, err := h.Redis.GetDeviceShadow(payload.DeviceID)
+		if err == nil && shadow != nil {
+			shadow.LastIP = payload.LastIPAddress
+			h.Redis.SetDeviceShadow(payload.DeviceID, *shadow, 90*time.Second)
+		}
+	}
+}
+
+// syncShadowToDB 同步设备影子到 PostgreSQL
+func (h *Handler) syncShadowToDB(deviceID string, isOnline bool, batteryLevel int, currentMode string, lastHeartbeat *time.Time) {
+	if h.DB == nil {
+		return
+	}
+
+	var shadow models.DeviceShadow
+	result := h.DB.Where("device_id = ?", deviceID).First(&shadow)
+
+	if result.Error == gorm.ErrRecordNotFound {
+		// 记录不存在，创建新记录
+		shadow = models.DeviceShadow{
+			DeviceID:      deviceID,
+			IsOnline:      isOnline,
+			BatteryLevel:  batteryLevel,
+			CurrentMode:   currentMode,
+			LastHeartbeat: lastHeartbeat,
+		}
+		h.DB.Create(&shadow)
+	} else if result.Error == nil {
+		// 记录存在，更新字段（但 lifecycle_status 不变）
+		updates := map[string]interface{}{
+			"is_online":     isOnline,
+			"battery_level": batteryLevel,
+			"current_mode":  currentMode,
+			"last_heartbeat": lastHeartbeat,
+		}
+		h.DB.Model(&shadow).Updates(updates)
+	}
 }
 
 // StartHeartbeatChecker 启动心跳检查器（检测离线设备）
@@ -215,16 +276,46 @@ func (h *Handler) checkOfflineDevices() {
 				// 标记为离线
 				shadow.IsOnline = false
 				h.Redis.SetDeviceShadow(shadow.DeviceID, *shadow, 0)
+
+				// 同步离线状态到 DB（只更新 last_heartbeat，不改 lifecycle_status）
+				h.syncOfflineToDB(shadow.DeviceID)
+
 				log.Printf("[MQTT] 设备 %s 心跳超时，标记为离线", shadow.DeviceID)
+
 				// 触发离线告警检查
 				if h.AlertCB != nil {
 					h.AlertCB(shadow.DeviceID, map[string]interface{}{
 						"is_online": false,
+						"offline":   true,
+						"elapsed":   elapsed.Seconds(),
+					})
+				}
+
+				// 触发合规检查
+				if h.ComplianceCB != nil {
+					h.ComplianceCB(h.DB, shadow.DeviceID, map[string]interface{}{
+						"is_online":   false,
+						"offline":     true,
+						"elapsed":     elapsed.Seconds(),
+						"battery":     float64(shadow.BatteryLevel),
 					})
 				}
 			}
 		}
 	}
+}
+
+// syncOfflineToDB 同步离线状态到 DB（只更新 last_heartbeat）
+func (h *Handler) syncOfflineToDB(deviceID string) {
+	if h.DB == nil {
+		return
+	}
+
+	now := time.Now()
+	h.DB.Model(&models.DeviceShadow{}).Where("device_id = ?", deviceID).Updates(map[string]interface{}{
+		"is_online":     false,
+		"last_heartbeat": now,
+	})
 }
 
 // PublishCommand 下发指令到设备

@@ -247,3 +247,74 @@ docker-compose down -v
 # 生产环境优雅停止
 docker-compose -f docker-compose.prod.yml down
 ```
+
+## OTA 升级系统
+
+### 概述
+
+OTA（Over-The-Air）固件升级模块已集成到 `mdm-backend` 服务中，作为后台 goroutine 运行。每 5 分钟检查一次待下发的部署任务。
+
+### MQTT Topic 列表
+
+| Topic 模式 | 方向 | 说明 |
+|------------|------|------|
+| `/mdm/device/{device_id}/up/status` | 设备→服务器 | 设备心跳上报 |
+| `/mdm/device/{device_id}/up/property` | 设备→服务器 | 设备属性上报 |
+| `/mdm/device/{device_id}/down/cmd` | 服务器→设备 | 设备指令下发（含OTA指令）|
+| `/mdm/device/{device_id}/down/desired` | 服务器→设备 | 期望状态下发 |
+
+### OTA Worker 配置
+
+OTA Worker 通过以下环境变量与 Redis 通信：
+
+| 环境变量 | 说明 | 默认值 |
+|----------|------|--------|
+| `REDIS_URL` | Redis 连接地址 | `redis://redis:6379` |
+| `MQTT_BROKER` | MQTT Broker 地址 | `tcp://localhost:1883` |
+| `MQTT_USERNAME` | MQTT 认证用户名 | `admin` |
+| `MQTT_PASSWORD` | MQTT 认证密码 | `public` |
+
+### OTA 数据库表
+
+以下表在 `db.AutoMigrate()` 时自动创建：
+
+- `ota_packages` - 固件包记录
+- `ota_deployments` - 部署任务
+- `ota_progress` - 设备升级进度
+
+### OTA 指令格式
+
+通过 MQTT 下发的 OTA 指令：
+
+```json
+{
+  "cmd_id": "ota-{deployment_id}-{device_id}",
+  "cmd_type": "ota",
+  "ota": {
+    "version": "v1.3.0",
+    "url": "https://cdn.example.com/firmware/v1.3.0.bin",
+    "md5": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "timestamp": "2026-03-20T12:00:00Z"
+}
+```
+
+### EMQX 权限配置
+
+EMQX 默认配置已允许上述 Topic。生产环境如需精细化配置 ACL，可通过 Dashboard 或 REST API 配置：
+
+```bash
+# 通过 EMQX Dashboard API 创建 ACL 规则
+curl -X POST http://localhost:18083/api/v5/authentication \
+  -u admin:your-password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "acl_file",
+    "enabled": true
+  }'
+```
+
+### 设备影子与 OTA
+
+OTA 期望版本可在设备影子的 `desired_config.desired_firmware` 字段中设置。OTA Worker 会检查该字段并在适当时机触发升级。
+```
