@@ -13,7 +13,7 @@ import (
 )
 
 // InitMQTT 初始化 MQTT 客户端
-func InitMQTT(redisClient *utils.RedisClient) (mqtt.Client, error) {
+func InitMQTT(redisClient *utils.RedisClient, alertCB AlertCallback) (mqtt.Client, error) {
 	broker := os.Getenv("MQTT_BROKER")
 	if broker == "" {
 		broker = "tcp://localhost:1883"
@@ -36,8 +36,8 @@ func InitMQTT(redisClient *utils.RedisClient) (mqtt.Client, error) {
 
 	log.Printf("[MQTT] 已连接到: %s", broker)
 
-	// 设置订阅处理器
-	handler := NewHandler(redisClient)
+	// 设置订阅处理器（传入告警回调）
+	handler := NewHandler(redisClient, alertCB)
 	handler.SetupSubscriber(client)
 	handler.StartHeartbeatChecker()
 
@@ -52,9 +52,21 @@ type MQTTConfig struct {
 	Password string
 }
 
+// AlertCallback 告警回调接口，避免循环导入
+type AlertCallback func(deviceID string, data map[string]interface{})
+
 // Handler MQTT 消息处理
 type Handler struct {
-	Redis *utils.RedisClient
+	Redis        *utils.RedisClient
+	AlertCB      AlertCallback
+}
+
+// GlobalMQTTClient 全局 MQTT 客户端，供其他包注入使用
+var GlobalMQTTClient mqtt.Client
+
+// SetGlobalMQTTClient 设置全局 MQTT 客户端
+func SetGlobalMQTTClient(client mqtt.Client) {
+	GlobalMQTTClient = client
 }
 
 // StatusPayload 心跳上报 JSON 结构
@@ -77,9 +89,10 @@ type PropertyPayload struct {
 }
 
 // NewHandler 创建 MQTT 处理器
-func NewHandler(redisClient *utils.RedisClient) *Handler {
+func NewHandler(redisClient *utils.RedisClient, alertCB AlertCallback) *Handler {
 	return &Handler{
-		Redis: redisClient,
+		Redis:   redisClient,
+		AlertCB: alertCB,
 	}
 }
 
@@ -143,6 +156,16 @@ func (h *Handler) StatusMessageHandler(client mqtt.Client, msg mqtt.Message) {
 
 	log.Printf("[MQTT] 设备 %s 心跳更新: online=%v, battery=%d%%, mode=%s",
 		payload.DeviceID, isOnline, payload.BatteryLevel, payload.CurrentMode)
+
+	// 触发告警检查
+	if h.AlertCB != nil {
+		alertData := map[string]interface{}{
+			"battery":   float64(payload.BatteryLevel),
+			"is_online": isOnline,
+			"mode":      payload.CurrentMode,
+		}
+		h.AlertCB(payload.DeviceID, alertData)
+	}
 }
 
 // PropertyMessageHandler 属性消息处理
@@ -193,6 +216,12 @@ func (h *Handler) checkOfflineDevices() {
 				shadow.IsOnline = false
 				h.Redis.SetDeviceShadow(shadow.DeviceID, *shadow, 0)
 				log.Printf("[MQTT] 设备 %s 心跳超时，标记为离线", shadow.DeviceID)
+				// 触发离线告警检查
+				if h.AlertCB != nil {
+					h.AlertCB(shadow.DeviceID, map[string]interface{}{
+						"is_online": false,
+					})
+				}
 			}
 		}
 	}

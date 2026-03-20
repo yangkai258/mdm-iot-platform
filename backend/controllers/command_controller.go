@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"mdm-backend/models"
+	"mdm-backend/mqtt"
 	"mdm-backend/utils"
 
 	"github.com/gin-gonic/gin"
@@ -18,12 +19,6 @@ import (
 type CommandController struct {
 	DB    *gorm.DB
 	Redis *utils.RedisClient
-	MQTT  interface {
-		Publish(topic string, qos byte, retained bool, payload interface{}) interface {
-			Wait() bool
-			Error() error
-		}
-	}
 }
 
 // SendCommandRequest 下发指令请求
@@ -93,10 +88,10 @@ func (c *CommandController) SendCommand(ctx *gin.Context) {
 	}
 
 	// 通过 MQTT 下发
-	if c.MQTT != nil {
+	if mqtt.GlobalMQTTClient != nil {
 		topic := fmt.Sprintf("/mdm/device/%s/down/cmd", deviceID)
 		payload, _ := json.Marshal(cmd)
-		token := c.MQTT.Publish(topic, 0, false, payload)
+		token := mqtt.GlobalMQTTClient.Publish(topic, 0, false, payload)
 		token.Wait()
 		if token.Error() != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{

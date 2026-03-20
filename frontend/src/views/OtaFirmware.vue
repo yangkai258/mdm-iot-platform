@@ -221,7 +221,7 @@ const tasks = ref([
   { id: 2, firmware_version: 'v1.2.0', target_devices: 100, status: 2, progress: 45, create_time: '2026-03-19 10:00:00' }
 ])
 
-const API_BASE = 'http://localhost:8080/api/v1'
+const API_BASE = '/api/v1'
 
 const loadFirmwares = async () => {
   loading.value = true

@@ -128,7 +128,7 @@ const loadData = async () => {
   try {
     const token = localStorage.getItem('token')
     
-    const res = await fetch('http://localhost:8080/api/v1/alerts/rules', {
+    const res = await fetch('/api/v1/alerts/rules', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
@@ -136,7 +136,7 @@ const loadData = async () => {
       rules.value = data.data.list || []
     }
 
-    const alertRes = await fetch('http://localhost:8080/api/v1/alerts', {
+    const alertRes = await fetch('/api/v1/alerts', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const alertData = await alertRes.json()
@@ -157,7 +157,7 @@ const showAddModal = () => {
 const addRule = async () => {
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('http://localhost:8080/api/v1/alerts/rules', {
+    const res = await fetch('/api/v1/alerts/rules', {
       method: 'POST',
       headers: { 
         'Authorization': `Bearer ${token}`,

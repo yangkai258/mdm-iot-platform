@@ -85,7 +85,7 @@ let timer = null
 const fetchStatus = async () => {
   try {
     // Check backend health
-    const res = await fetch('http://localhost:8080/health')
+    const res = await fetch('/health')
     if (res.ok) {
       services.value[0].status = 'running'
     }

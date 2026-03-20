@@ -131,7 +131,7 @@ const columns = [
   { title: '操作', slotName: 'actions', width: 100 }
 ]
 
-const API_BASE = 'http://localhost:8080/api/v1'
+const API_BASE = '/api/v1'
 
 const loadDevices = async () => {
   loading.value = true

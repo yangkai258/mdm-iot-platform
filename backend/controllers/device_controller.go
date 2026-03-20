@@ -24,7 +24,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	cmdCtrl := &CommandController{
 		DB:    db,
 		Redis: redisClient,
-		MQTT:  nil,
 	}
 	orgCtrl := &OrgController{DB: db}
 	permCtrl := &PermissionController{DB: db}

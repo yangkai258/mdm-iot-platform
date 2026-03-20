@@ -78,7 +78,7 @@ const loadLogs = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('http://localhost:8080/api/v1/logs/operations', {
+    const res = await fetch('/api/v1/logs/operations', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()

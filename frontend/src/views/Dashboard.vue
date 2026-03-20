@@ -92,7 +92,7 @@ const getSeverityColor = (severity) => {
 const loadStats = async () => {
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('http://localhost:8080/api/v1/dashboard/stats', {
+    const res = await fetch('/api/v1/dashboard/stats', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
@@ -101,7 +101,7 @@ const loadStats = async () => {
     }
     
     // Load recent alerts
-    const alertRes = await fetch('http://localhost:8080/api/v1/alerts?status=1', {
+    const alertRes = await fetch('/api/v1/alerts?status=1', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const alertData = await alertRes.json()

@@ -21,7 +21,13 @@
         </a-form-item>
         
         <a-form-item field="password" label="密码">
-          <a-input v-model="form.password" placeholder="请输入密码" password allow-clear>
+          <a-input
+            v-model="form.password"
+            placeholder="请输入密码"
+            password
+            allow-clear
+            @keyup.enter="handleLogin"
+          >
             <template #prefix>
               <span>🔒</span>
             </template>
@@ -64,7 +70,7 @@ const handleLogin = async () => {
   
   loading.value = true
   try {
-    const res = await fetch('http://localhost:8080/api/v1/auth/login', {
+    const res = await fetch('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form)

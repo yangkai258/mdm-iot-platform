@@ -225,7 +225,7 @@ const logs = ref([
   { id: 3, time: '2026-03-18 14:20:00', message: '设备重启完成', color: 'gray' }
 ])
 
-const API_BASE = 'http://localhost:8080/api/v1'
+const API_BASE = '/api/v1'
 
 const loadDeviceDetail = async () => {
   if (!deviceId.value) return
