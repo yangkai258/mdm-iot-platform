@@ -115,3 +115,67 @@ pytest p0_tests/ -v
 ```
 c8874f5 - agentcs: Add Sprint 1.1 & 1.2 test files
 ```
+
+---
+
+## Sprint 2 测试任务 ✅ 完成
+
+### 测试范围
+1. 应用管理功能测试
+2. 通知管理功能测试
+
+### 创建的测试文件
+
+#### test_app_management.py (8 tests)
+- `test_app_model_exists` - App/AppVersion 模型定义检查
+- `test_app_controller_exists` - AppController 方法检查
+- `test_app_routes_registered` - App API 路由注册检查
+- `test_app_service_exists` - AppService 业务逻辑层检查
+- `test_app_crud` - 应用 CRUD API 功能测试
+- `test_app_version_crud` - 应用版本 CRUD API 测试
+- `test_app_distribution` - 应用分发任务 API 测试
+- `test_app_list_filter` - 应用列表筛选与分页测试
+
+#### test_notification.py (8 tests)
+- `test_notification_model_exists` - Notification/Template/Announcement 模型检查
+- `test_notification_controller_exists` - NotificationController 方法检查
+- `test_notification_routes_registered` - 通知 API 路由注册检查
+- `test_mqtt_notification_handler_exists` - MQTT 通知下发逻辑检查
+- `test_notification_send` - 发送通知 API 测试
+- `test_notification_template` - 通知模板 CRUD API 测试
+- `test_announcement_crud` - 公告 CRUD API 测试
+- `test_mqtt_notification` - MQTT 通知下发功能验证
+
+### 测试结果
+```
+8 passed, 1 failed, 7 skipped (backend not running)
+```
+
+**FAILED (预期 - 待 agenthd 实现):**
+- `test_app_service_exists` - `services/app_service.go` 文件不存在（业务逻辑目前写在 Controller 中）
+
+**SKIPPED (后端未运行):**
+- 所有 API 功能测试因无法获取 JWT token 而跳过
+
+### 已验证的 Sprint 2 实现状态
+
+| 组件 | 状态 | 说明 |
+|------|------|------|
+| `models/app.go` | ✅ | App, AppVersion, AppDistribution, AppInstallRecord, AppLicense |
+| `models/notification.go` | ✅ | Notification, NotificationTemplate, Announcement |
+| `controllers/app_controller.go` | ✅ | 完整的 CRUD + 版本管理 + 分发 |
+| `controllers/notification_controller.go` | ✅ | 完整通知/模板/公告管理 |
+| `services/app_service.go` | ❌ | 文件不存在（待实现） |
+| API 路由注册 | ✅ | 已在 `device_controller.go` RegisterRoutes 中注册 |
+| MQTT 通知下发 | ✅ | NotificationController.SendNotification 通过 GlobalMQTTClient.Publish |
+
+### Git Commit
+```
+14f1ffe - agentcs: Add Sprint 2 test files - App Management & Notification
+```
+
+### 运行测试
+```bash
+cd testing/p0_tests
+pytest test_app_management.py test_notification.py -v
+```
