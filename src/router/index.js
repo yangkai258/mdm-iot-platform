@@ -27,8 +27,17 @@ const routes = [
   },
   {
     path: '/ota',
-    name: 'OTA',
-    component: () => import('../views/OtaFirmware.vue')
+    redirect: '/ota/packages'
+  },
+  {
+    path: '/ota/packages',
+    name: 'OtaPackages',
+    component: () => import('../views/ota/OtaPackages.vue')
+  },
+  {
+    path: '/ota/deployments',
+    name: 'OtaDeployments',
+    component: () => import('../views/ota/OtaDeployments.vue')
   },
   {
     path: '/alert',
