@@ -191,6 +191,18 @@ const routes = [
     path: '/portal/dashboard',
     name: 'PortalDashboard',
     component: () => import('../views/portal/Dashboard.vue')
+  },
+
+  // 系统管理路由
+  {
+    path: '/system/settings',
+    name: 'SystemSettings',
+    component: () => import('../views/system/SystemSettings.vue')
+  },
+  {
+    path: '/system/email-templates',
+    name: 'EmailTemplates',
+    component: () => import('../views/system/EmailTemplates.vue')
   }
 ]
 
