@@ -138,12 +138,12 @@ func OperationLog(db *gorm.DB) gin.HandlerFunc {
 			ResourceName: resourceName,
 			IP:           c.ClientIP(),
 			UserAgent:    c.GetHeader("User-Agent"),
-			Details: map[string]interface{}{
-				"method":   c.Request.Method,
-				"path":     c.Request.URL.Path,
-				"duration": time.Since(start).Milliseconds(),
-			},
 		}
+		activityLog.SetDetails(map[string]interface{}{
+			"method":   c.Request.Method,
+			"path":     c.Request.URL.Path,
+			"duration": time.Since(start).Milliseconds(),
+		})
 
 		// 异步写入日志
 		go func() {

@@ -1,0 +1,18 @@
+# Minimal runtime using cached golang:1.21-alpine
+FROM golang:1.21-alpine
+
+ARG BUILD_TS
+
+WORKDIR /app
+
+# Copy the pre-built Linux binary
+COPY mdm-server-linux.exe ./mdm-server
+
+RUN chmod +x mdm-server
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget -q -O- http://localhost:8080/health || exit 1
+
+CMD ["./mdm-server"]

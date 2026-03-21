@@ -14,7 +14,7 @@ type ActivityLog struct {
 	ResourceType string               `gorm:"type:varchar(64);index" json:"resource_type"`        // device/member/role/config
 	ResourceID   uint                 `gorm:"index" json:"resource_id"`                            // 资源ID
 	ResourceName string               `gorm:"type:varchar(255)" json:"resource_name"`            // 资源名称（冗余，便于展示）
-	Details      map[string]interface{} `gorm:"type:jsonb" json:"details"`                      // 详细信息（JSON）
+	Details      []byte               `gorm:"type:jsonb" json:"-"`                               // 详细信息（JSON），存储为字节切片
 	IP           string               `gorm:"type:varchar(32)" json:"ip"`
 	UserAgent    string               `gorm:"type:varchar(255)" json:"user_agent"`
 	TenantID     string               `gorm:"index" json:"tenant_id"`
@@ -41,16 +41,24 @@ type LoginLog struct {
 
 func (LoginLog) TableName() string { return "login_logs" }
 
-// SetDetails 将 Details 字段序列化为 JSON 字符串
+// SetDetails 将 Details 字段序列化为 JSON 并存储到 []byte
 func (a *ActivityLog) SetDetails(data map[string]interface{}) {
-	a.Details = data
+	if data == nil {
+		a.Details = []byte("{}")
+		return
+	}
+	b, _ := json.Marshal(data)
+	a.Details = b
 }
 
-// GetDetailsJSON 返回 Details 的 JSON 字符串
-func (a *ActivityLog) GetDetailsJSON() string {
-	if a.Details == nil {
-		return "{}"
+// GetDetails 返回 Details 的 map[string]interface{}
+func (a *ActivityLog) GetDetails() map[string]interface{} {
+	if a.Details == nil || len(a.Details) == 0 {
+		return make(map[string]interface{})
 	}
-	b, _ := json.Marshal(a.Details)
-	return string(b)
+	var result map[string]interface{}
+	if err := json.Unmarshal(a.Details, &result); err != nil {
+		return make(map[string]interface{})
+	}
+	return result
 }

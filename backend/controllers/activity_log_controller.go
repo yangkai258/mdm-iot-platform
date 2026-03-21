@@ -77,11 +77,30 @@ func (c *ActivityLogController) List(ctx *gin.Context) {
 		return
 	}
 
+	// 转换 Details []byte 为 map 以便 JSON 序列化
+	logMaps := make([]map[string]interface{}, len(logs))
+	for i, log := range logs {
+		logMaps[i] = map[string]interface{}{
+			"id":            log.ID,
+			"user_id":       log.UserID,
+			"username":      log.Username,
+			"action":        log.Action,
+			"resource_type": log.ResourceType,
+			"resource_id":   log.ResourceID,
+			"resource_name": log.ResourceName,
+			"details":       log.GetDetails(),
+			"ip":            log.IP,
+			"user_agent":    log.UserAgent,
+			"tenant_id":     log.TenantID,
+			"created_at":    log.CreatedAt,
+		}
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"message": "success",
 		"data": gin.H{
-			"list":      logs,
+			"list":      logMaps,
 			"total":     total,
 			"page":      page,
 			"page_size": pageSize,
@@ -102,7 +121,20 @@ func (c *ActivityLogController) Get(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": log})
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": map[string]interface{}{
+		"id":            log.ID,
+		"user_id":       log.UserID,
+		"username":      log.Username,
+		"action":        log.Action,
+		"resource_type": log.ResourceType,
+		"resource_id":   log.ResourceID,
+		"resource_name": log.ResourceName,
+		"details":       log.GetDetails(),
+		"ip":            log.IP,
+		"user_agent":    log.UserAgent,
+		"tenant_id":     log.TenantID,
+		"created_at":    log.CreatedAt,
+	}})
 }
 
 // GetStatistics 获取活动统计
@@ -151,10 +183,10 @@ func RecordActivity(db *gorm.DB, userID uint, username, action, resourceType str
 		ResourceType: resourceType,
 		ResourceID:   resourceID,
 		ResourceName: resourceName,
-		Details:      details,
 		IP:           ip,
 		TenantID:     tenantID,
 	}
+	log.SetDetails(details)
 	db.Create(&log)
 }
 
