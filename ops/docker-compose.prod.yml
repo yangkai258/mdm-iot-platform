@@ -157,6 +157,11 @@ services:
       - 127.0.0.1:18083:18083
     networks:
       - mdm-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
     healthcheck:
       test: ["CMD", "emqx", "_ctl", "status"]
       interval: 20s
@@ -230,6 +235,11 @@ services:
         reservations:
           cpus: "0.5"
           memory: 256M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "100m"
+        max-file: "10"
 
   mdm-frontend:
     build:
@@ -253,6 +263,11 @@ services:
         reservations:
           cpus: "0.25"
           memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
 
   nginx-proxy:
     image: nginx:alpine
