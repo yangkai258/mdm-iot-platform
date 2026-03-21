@@ -58,16 +58,31 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 
 ### 开发流程
 ```
-开发完成：agenthd/qd 提交代码
+需求 → agentcp产出PRD → zg架构师评审 ✅
     ↓
-状态设为：Pending Review
+开发 (agenthd/agentqd)
     ↓
-强制审计：自动唤醒 agentcs 运行测试套件
+Code Review (zg或指定Reviewer)
     ↓
-若 agentcs 报告 Fail → 自动 @开发Agent并附带错误日志，任务打回
+Pending Review → agentcs 运行测试套件
     ↓
-若 agentcs 报告 Pass → 自动唤醒 agentyw 执行部署
+若 agentcs 报告 Fail → 打回开发Agent修复
+    ↓
+若 agentcs 报告 Pass → agentyw 执行部署
 ```
+
+### Code Review 流程
+
+**Review 时需要检查：**
+1. **代码规范** - 风格一致、命名规范、注释完整
+2. **架构合规** - 符合PRD设计、无违背模块联动
+3. **安全审查** - 无硬编码密码/SQL注入/敏感信息泄露
+4. **性能检查** - 无N+1查询、无大循环、无阻塞操作
+5. **测试覆盖** - 核心功能有对应测试用例
+
+**Review 结果：**
+- ✅ Approved → 进入测试
+- ❌ Request Changes → 附具体问题 → 开发Agent修复 → 再次Review
 
 ### 协作效能公式
 $$E = \frac{Dev\_Time}{Test\_Cycles + Fix\_Time}$$

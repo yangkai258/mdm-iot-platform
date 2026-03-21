@@ -100,3 +100,28 @@
 - `src/views/PetConfig.vue`
 - `src/views/system/Logs.vue`
 - `src/views/system/Monitor.vue`
+
+---
+
+## Sprint 3 前端任务 (2026-03-20 14:00 GMT+8) - ? 已完成
+
+### 3.1 策略管理页面
+- **PolicyConfigs.vue** (新建): src/views/policies/PolicyConfigs.vue
+- **PolicyList.vue** (新建): src/views/policies/PolicyList.vue
+- **ComplianceRules.vue** (新建): src/views/policies/ComplianceRules.vue
+
+### 3.2 会员管理增强页面
+- **MemberPoints.vue** (新建): src/views/members/MemberPoints.vue
+- **MemberCoupons.vue** (新建): src/views/members/MemberCoupons.vue
+- **MemberPromotions.vue** (新建): src/views/members/MemberPromotions.vue
+
+### 3.3 告警页面增强
+- **AlertRules.vue** (新建): src/views/alerts/AlertRules.vue
+- **AlertList.vue** (新建): src/views/alerts/AlertList.vue
+- **AlertSettings.vue** (新建): src/views/alerts/AlertSettings.vue
+
+### 路由更新
+- 更新了 src/router/index.js，添加了9条新路由
+
+### Git Commit
+- 待提交（网络问题）
