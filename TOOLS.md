@@ -1,67 +1,60 @@
-# TOOLS.md - agentqd 工具箱
+# TOOLS.md - agenthd 工具箱
 
 ## 开发工具
 
 ### IDE
-- **VSCode** - 首选，轻量可扩展
-- **WebStorm** - 功能强大但重
-- **Volar** - Vue 3 专用支持
+- **GoLand** - 推荐，功能强大
+- **VSCode** - 轻量级，需要插件
+- **Sublime** - 极快
 
 ### 必备插件
-- Vue - Official
-- Tailwind CSS IntelliSense
-- Prettier
-- ESLint
-- Auto Close Tag
-- Path IntelliSense
+- Go Extension
+- Go Doc
+- File Icons
+- GitLens
+
+### API 测试
+- **Postman** - 功能完整
+- **Insomnia** - 轻量美观
+- **curl** - 命令行快速测试
+
+## 数据库工具
+
+### PostgreSQL
+- **pgAdmin** - 官方客户端
+- **DBeaver** - 通用数据库工具
+- **DataGrip** - JetBrains 全家桶
+
+### Redis
+- **Redis Desktop Manager** - 图形化
+- **RedisInsight** - 官方工具
 
 ## 调试工具
 
-### 浏览器
-- **Chrome DevTools** - 必备
-- **Vue DevTools** - Vue调试
-- **React DevTools** - 如用到
-
-### 网络
-- F12 Network 面板
-- Postman
-- REST Client (VSCode插件)
-
-## UI 工具
-
-### 组件库
-- **Arco Design** - 当前使用
-- Ant Design Vue
-- Element Plus
-
-### 图标
-- **Arco Icons**
-- Heroicons
-- Remix Icon
-
-### 配色
-- Arco Design 色板
-- Coolors 配色工具
-- Material Design 色彩
-
-## 构建工具
-
-### Vite
+### 日志
 ```bash
-npm create vite@latest
-npm run dev      # 开发
-npm run build    # 构建
-npm run preview  # 预览
+# 实时查看日志
+tail -f logs/app.log
+
+# 搜索错误
+grep -i error logs/app.log
 ```
 
-### 常用命令
+### 性能分析
 ```bash
-npm install          # 安装
-npm update           # 更新
-npm run lint         # 检查
-npm run format       # 格式化
+# CPU Profile
+go tool pprof http://localhost:8080/debug/pprof/profile
+
+# Memory Profile
+go tool pprof http://localhost:8080/debug/pprof/heap
 ```
+
+## 部署工具
+
+- **Docker** - 容器化
+- **Docker Compose** - 多容器编排
+- **Nginx** - 反向代理
 
 ---
 
-_工具顺手，效率翻倍。_
+_选对工具，事半功倍。_

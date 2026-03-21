@@ -1,73 +1,52 @@
-# AGENTS.md - 前端开发团队协作规范
+# AGENTS.md - 后端开发团队协作规范
 
 ## 代码规范
 
-### Vue 3 规范
-- 使用 Composition API (`<script setup>`)
-- 组件文件：`PascalCase.vue`
-- 样式：使用 Scoped CSS
-- 状态：使用 Pinia
+### Go 语言规范
+- 使用 `go fmt` 格式化代码
+- 变量命名遵循 Go 惯例
+- 错误处理：`if err != nil` 必须检查
+- 注释：导出函数必须注释
 
-### 命名规范
-- 组件：`MemberList.vue`
-- 变量：`camelCase`
-- 常量：`UPPER_SNAKE_CASE`
-- CSS 类：`kebab-case`
+### API 设计规范
+- 路径：`/api/v1/module/action`
+- 方法：RESTful
+- 认证：JWT Bearer Token
+- 限流：重要接口加限流中间件
 
-### Arco Design 使用
-- 优先使用 Arco 组件
-- 自定义样式要克制
-- 主题变量要统一
+### Git 规范
+- 分支命名：`feature/xxx` / `fix/xxx`
+- Commit Message：`feat: | fix: | docs: | refactor:`
+- PR 必须有代码审查
 
-## 目录结构
+## 数据库规范
+
+### 表设计
+- 主键：`id` 使用 uint 自动递增
+- 软删除：`deleted_at` timestamp
+- 时间戳：`created_at`, `updated_at`
+- 索引：高频查询字段必须加索引
+
+### 命名
+- 表名单数：`member` 不是 `members`
+- 字段下划线：`member_name` 不是 `memberName`
+- 布尔字段：`is_xxx` / `has_xxx`
+
+## 中间件顺序
 ```
-frontend/
-├── src/
-│   ├── components/    # 公共组件
-│   ├── views/         # 页面
-│   ├── stores/        # 状态管理
-│   ├── utils/         # 工具函数
-│   └── api/           # API 调用
-└── dist/              # 静态输出
-```
-
-## 页面开发规范
-
-### 新增页面
-1. 在 `views/` 创建 `.vue` 文件
-2. 路由添加到 `router/index.js`
-3. 菜单添加到侧边栏配置
-4. API 接口文档同步更新
-
-### 组件规范
-```vue
-<template>
-  <div class="component-name">
-    <!-- 模板 -->
-  </div>
-</template>
-
-<script setup>
-// 逻辑
-</script>
-
-<style scoped>
-/* 样式 */
-</style>
+1. Logger
+2. Recovery
+3. CORS
+4. JWT Auth
+5. Rate Limit
+6. Router
 ```
 
-## 性能优化
-
-### 首屏加载
-- 路由懒加载
-- 图片懒加载
-- Gzip 压缩
-
-### 交互响应
-- 骨架屏loading
-- 防抖节流
-- 虚拟滚动
+## 依赖管理
+- 使用 Go Modules
+- 定期 `go mod tidy`
+- 锁定版本号
 
 ---
 
-_用户体验是产品的生命线。_
+_代码是给人读的，顺便能在机器上运行。_

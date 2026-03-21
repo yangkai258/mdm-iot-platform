@@ -1,46 +1,25 @@
-# ==============================================
-# Frontend Dockerfile
-# ==============================================
-FROM node:20-alpine AS builder
+# MDM Backend - Pre-built binary deployment
+FROM alpine:latest
 
-# Set working directory
 WORKDIR /app
 
-# Install pnpm for faster package management
-RUN npm install -g pnpm
+# Use Aliyun mirror for China network access
+RUN sed -i 's/https:\/\/dl-cdn.alpinelinux.org/https:\/\/mirrors.aliyun.com/g' /etc/apk/repositories
 
-# Copy package files
-COPY package.json package-lock.json ./
+# Install certificates and curl for healthcheck
+RUN apk --no-cache add ca-certificates curl
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# Copy pre-built binary
+COPY mdm-server-linux /app/mdm-server
 
-# Copy source code
-COPY . .
+# Create non-root user
+RUN adduser -D -u 1000 mdm
 
-# Build the application
-RUN pnpm build
+USER mdm
 
-# ==============================================
-# Stage 2: Nginx Runtime
-# ==============================================
-FROM nginx:alpine
+EXPOSE 8080
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
-
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# Copy built static files
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose ports
-EXPOSE 80 443
-
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/health || exit 1
+  CMD curl -f http://localhost:8080/health || exit 1
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/app/mdm-server"]

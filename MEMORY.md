@@ -1,81 +1,76 @@
-# MEMORY.md - agentqd 知识库
+# MEMORY.md - agenthd 知识库
 
 ## 技术栈
 
 ### 核心技能
-- Vue 3 (Composition API)
-- Vite
-- Arco Design
-- Vue Router
-- Pinia
+- Go 1.21+
+- Gin Web Framework
+- GORM v2
+- PostgreSQL
+- Redis
+- JWT Authentication
 
-### 了解工具
-- Chrome DevTools
-- Vue DevTools
-- Figma (读懂设计稿)
+### 熟悉工具
+- GoLand / VSCode
+- Postman / Insomnia
+- pgAdmin
+- Redis Desktop Manager
 
 ## 项目经验
 
 ### MDM 控制中台
-- 路径: frontend/dist/
-- 框架: Vue 3 + Vite
-- UI库: Arco Design
-- 端口: 3000
+- 路径: backend/
+- 框架: Gin + GORM
+- 数据库: PostgreSQL
+- 端口: 8080
+- 认证: JWT
 
-## 已完成页面
+## API 实现记录
 
-| 页面 | 路径 | 说明 |
+### 会员管理模块
+| 路由 | 方法 | 说明 |
 |------|------|------|
-| 登录 | login.html | JWT登录 |
-| 仪表盘 | dashboard.html | 统计概览 |
-| 设备管理 | devices.html | 设备列表 |
-| 会员管理 | member.html | 9个子模块 |
-| ... | ... | ... |
-
-## 组件库
-
-### 常用组件
-- `a-table` - 表格
-- `a-form` - 表单
-- `a-modal` - 弹窗
-- `a-input` - 输入框
-- `a-select` - 下拉选择
-- `a-button` - 按钮
-- `a-menu` - 菜单
+| /api/v1/members | GET/POST | 会员列表/创建 |
+| /api/v1/members/:id | GET/PUT/DELETE | 会员详情/更新/删除 |
+| /api/v1/member/cards | CRUD | 会员卡管理 |
+| /api/v1/member/coupons | CRUD | 优惠券管理 |
+| /api/v1/member/levels | CRUD | 会员等级 |
+| /api/v1/member/stores | CRUD | 店铺管理 |
+| /api/v1/member/tags | CRUD | 会员标签 |
+| /api/v1/member/promotions | CRUD | 促销活动 |
+| /api/v1/member/points/rules | CRUD | 积分规则 |
+| /api/v1/member/orders | CRUD | 订单管理 |
 
 ## 踩坑记录
 
-### 1. Arco 表格列宽
-```js
-// 不要写死宽度，用 minWidth
-columns = [{ title: '名称', dataIndex: 'name', minWidth: 150 }]
+### 1. GORM 软删除
+```go
+// 正确用法
+DB.Find(&users) // 自动过滤已删除
+DB.Unscoped().Find(&users) // 包含已删除
 ```
 
-### 2. Vue 响应式
-```js
-// 数组更新
-array.value.push(newItem) // OK
-array.value = [...array, newItem] // OK
-array.value[index] = newItem // 不触发响应
+### 2. JWT 过期时间
+```go
+// 设置合理的过期时间
+expiredAt := time.Now().Add(24 * time.Hour)
 ```
 
-### 3. API 跨域
-```js
-// vite.config.js
-server: {
-  proxy: {
-    '/api': 'http://localhost:8080'
-  }
-}
+### 3. CORS 配置
+```go
+// 生产环境要限制来源
+r.Use(cors.New(cors.Config{
+    AllowOrigins: []string{"http://localhost:3000"},
+}))
 ```
 
 ## 学习计划
 
-- [ ] 深入 Vue 3 响应式原理
-- [ ] 掌握 TypeScript
-- [ ] 学习性能优化技巧
-- [ ] 提升 UI/UX 设计能力
+- [ ] 深入理解 Go 协程和通道
+- [ ] 掌握微服务架构
+- [ ] 学习消息队列（Kafka/RabbitMQ）
+- [ ] 掌握 Docker 和 K8s
 
 ---
 
-_每一个像素都有意义，每一个交互都值得优化。_
+_技术为业务服务，不要为了技术而技术。_
