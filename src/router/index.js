@@ -170,6 +170,27 @@ const routes = [
     path: '/admin/tenant-approvals',
     name: 'TenantApprovals',
     component: () => import('../views/tenants/TenantApproval.vue')
+  },
+
+  // 门户管理路由
+  {
+    path: '/portal',
+    redirect: '/portal/workbench'
+  },
+  {
+    path: '/portal/workbench',
+    name: 'Workbench',
+    component: () => import('../views/portal/Workbench.vue')
+  },
+  {
+    path: '/portal/personal',
+    name: 'PersonalDesktop',
+    component: () => import('../views/portal/PersonalDesktop.vue')
+  },
+  {
+    path: '/portal/dashboard',
+    name: 'PortalDashboard',
+    component: () => import('../views/portal/Dashboard.vue')
   }
 ]
 
