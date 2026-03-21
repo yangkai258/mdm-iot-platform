@@ -113,6 +113,10 @@ func main() {
 		&models.RolePermissionGroup{},
 		// 数据权限表
 		&models.DataScope{},
+		// 流程管理表
+		&models.FlowDefinition{},
+		&models.FlowInstance{},
+		&models.FlowTask{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -376,6 +380,10 @@ func main() {
 	apiV1.POST("/compliance-rules", complianceCtrlExtra.CreateRule)
 	apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
 	apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
+
+	// 流程管理路由（BPMN）
+	flowCtrl := controllers.NewFlowController(db)
+	flowCtrl.RegisterRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")
