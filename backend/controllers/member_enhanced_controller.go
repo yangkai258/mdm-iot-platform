@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"mdm-backend/models"
 	"mdm-backend/services"
@@ -365,4 +366,97 @@ func (c *MemberEnhancedController) PromotionDetailNew(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": promo})
+}
+
+// ListMemberPoints 获取会员积分列表（带统计）
+// GET /api/v1/members/points
+func (c *MemberEnhancedController) ListMemberPoints(ctx *gin.Context) {
+	var members []models.Member
+	query := c.DB.Model(&models.Member{})
+
+	if keyword := ctx.Query("keyword"); keyword != "" {
+		query = query.Where("member_name ILIKE ? OR phone ILIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+	}
+	if level := ctx.Query("level"); level != "" {
+		query = query.Where("member_level = ?", level)
+	}
+
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	var total int64
+	query.Count(&total)
+
+	query.Order("id DESC").Offset(offset).Limit(pageSize).Find(&members)
+
+	// 统计
+	var stats struct {
+		Total       int64 `json:"total"`
+		TodayNew    int64 `json:"today_new"`
+		TotalPoints int64 `json:"total_points"`
+		MonthUsed   int64 `json:"month_used"`
+	}
+	c.DB.Model(&models.Member{}).Count(&stats.Total)
+	c.DB.Model(&models.Member{}).Where("created_at >= ?", time.Now().Truncate(24*time.Hour)).Count(&stats.TodayNew)
+	c.DB.Model(&models.Member{}).Select("COALESCE(SUM(points), 0)").Find(&stats.TotalPoints)
+	// MonthUsed: 积分抵扣（points_type=2），取绝对值
+	c.DB.Model(&models.MemberPointsRecord{}).Where("points_type = 2 AND created_at >= ?", time.Now().AddDate(0, 0, -30)).Select("COALESCE(SUM(ABS(points)), 0)").Find(&stats.MonthUsed)
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": gin.H{
+		"list":  members,
+		"total": total,
+		"page":  page,
+		"stats": stats,
+	}})
+}
+
+// AdjustMemberPoints 调整会员积分（通用入口）
+// POST /api/v1/members/points/adjust
+func (c *MemberEnhancedController) AdjustMemberPoints(ctx *gin.Context) {
+	var req struct {
+		MemberID uint   `json:"member_id" binding:"required"`
+		Type     string `json:"type" binding:"required"` // add / deduct
+		Points   int64  `json:"points" binding:"required,min=1"`
+		Reason   string `json:"reason"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	if req.Type == "add" {
+		record, err := c.PointsEngine.AddPoints(services.AddPointsReq{
+			MemberID:   req.MemberID,
+			Points:     req.Points,
+			Type:       2, // 活动赠送
+			SourceType: "admin_adjust",
+			Remark:     req.Reason,
+			Operator:   ctx.GetString("user_id"),
+		})
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": record})
+	} else {
+		record, err := c.PointsEngine.DeductPoints(services.DeductPointsReq{
+			MemberID:   req.MemberID,
+			Points:     req.Points,
+			SourceType: "admin_adjust",
+			Remark:     req.Reason,
+			Operator:   ctx.GetString("user_id"),
+		})
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": record})
+	}
 }

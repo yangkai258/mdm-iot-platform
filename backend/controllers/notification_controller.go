@@ -704,6 +704,127 @@ func (c *NotificationController) RegisterRoutes(rg *gin.RouterGroup) {
 	}
 }
 
+// PushNotification 发送推送通知
+// POST /api/v1/notifications/push
+func (c *NotificationController) PushNotification(ctx *gin.Context) {
+	var req struct {
+		Title      string   `json:"title" binding:"required"`
+		Content    string   `json:"content" binding:"required"`
+		TargetType string   `json:"target_type" binding:"required"` // all, device, user
+		TargetIDs  []string `json:"target_ids"`
+		CreatedBy  string   `json:"created_by"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	now := time.Now()
+	var notifications []models.Notification
+	deviceIDs := req.TargetIDs
+
+	if req.TargetType == "all" {
+		var devices []models.Device
+		c.DB.Find(&devices)
+		for _, d := range devices {
+			deviceIDs = append(deviceIDs, d.DeviceID)
+		}
+	}
+
+	for _, deviceID := range deviceIDs {
+		notif := models.Notification{
+			DeviceID:  deviceID,
+			Title:     req.Title,
+			Content:   req.Content,
+			Priority:  1,
+			Channel:   "push",
+			Status:    "sent",
+			SentAt:    &now,
+			CreatedBy: req.CreatedBy,
+		}
+		c.DB.Create(&notif)
+		notifications = append(notifications, notif)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"sent_count": len(notifications),
+		},
+	})
+}
+
+// BatchDeleteNotifications 批量删除通知
+// POST /api/v1/notifications/batch-delete
+func (c *NotificationController) BatchDeleteNotifications(ctx *gin.Context) {
+	var req struct {
+		IDs []uint `json:"ids"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil || len(req.IDs) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "请提供要删除的通知ID列表"})
+		return
+	}
+
+	if err := c.DB.Delete(&models.Notification{}, req.IDs).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "删除失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "删除成功"})
+}
+
+// WithdrawAnnouncement 撤回公告
+// POST /api/v1/announcements/:id/withdraw
+func (c *NotificationController) WithdrawAnnouncement(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var ann models.Announcement
+	if err := c.DB.First(&ann, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "公告不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	if ann.Status != "published" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "只能撤回已发布的公告"})
+		return
+	}
+
+	updates := map[string]interface{}{
+		"status": "withdrawn",
+	}
+
+	if err := c.DB.Model(&ann).Updates(updates).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "撤回失败"})
+		return
+	}
+
+	c.DB.First(&ann, id)
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": ann})
+}
+
+// GetAnnouncement 获取公告详情
+// GET /api/v1/announcements/:id
+func (c *NotificationController) GetAnnouncement(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var ann models.Announcement
+	if err := c.DB.First(&ann, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "公告不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": ann})
+}
+
 // ReplaceTemplateVariables 替换模板变量，格式 {{variable}}
 func ReplaceTemplateVariables(template string, vars map[string]interface{}) string {
 	if template == "" || len(vars) == 0 {

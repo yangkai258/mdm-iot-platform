@@ -369,6 +369,42 @@ func (c *AppController) DeleteVersion(ctx *gin.Context) {
 
 // ===== 分发任务 =====
 
+// ListDistributions 获取分发任务列表
+func (c *AppController) ListDistributions(ctx *gin.Context) {
+	var distributions []models.AppDistribution
+	query := c.DB.Model(&models.AppDistribution{})
+
+	if status := ctx.Query("status"); status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	var total int64
+	query.Count(&total)
+
+	query.Order("id DESC").Offset(offset).Limit(pageSize).Find(&distributions)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"list":      distributions,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		},
+	})
+}
+
 // CreateDistribution 创建分发任务
 func (c *AppController) CreateDistribution(ctx *gin.Context) {
 	var req CreateDistributionRequest

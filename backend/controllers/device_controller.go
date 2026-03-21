@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"mdm-backend/models"
+	"mdm-backend/mqtt"
 	"mdm-backend/utils"
 
 	"github.com/gin-gonic/gin"
@@ -26,10 +27,15 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		Redis: redisClient,
 	}
 	orgCtrl := &OrgController{DB: db}
+	companyCtrl := &CompanyController{DB: db}
+	deptCtrl := &DepartmentController{DB: db}
+	postCtrl := &PostController{DB: db}
+	empCtrl := &EmployeeController{DB: db}
 	permCtrl := &PermissionController{DB: db}
-	roleCtrl := &RoleController{DB: db}
+	roleCtrl := &OldRoleController{DB: db}
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
+	positionTemplateCtrl := &PositionTemplateController{DB: db}
 
 	api := r.Group("/api/v1")
 	{
@@ -49,6 +55,8 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.GET("/devices/:device_id/profile", profileCtrl.GetProfile)
 		api.PUT("/devices/:device_id/profile", profileCtrl.UpdateProfile)
 		api.POST("/devices/:device_id/commands", cmdCtrl.SendCommand)
+		api.GET("/devices/:device_id/desired-state", GetDesiredState(db))
+		api.PUT("/devices/:device_id/desired-state", SetDesiredState(db, mqtt.GlobalMQTTClient))
 		api.GET("/devices/:device_id/commands", cmdCtrl.GetCommandHistory)
 		
 		// ============ OTA 路由 ============
@@ -73,45 +81,91 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/org/companies", orgCtrl.CompanyCreate)
 		api.PUT("/org/companies/:id", orgCtrl.CompanyUpdate)
 		api.DELETE("/org/companies/:id", orgCtrl.CompanyDelete)
-		
+
 		// 部门管理
 		api.GET("/org/departments", orgCtrl.DepartmentList)
 		api.GET("/org/departments/tree", orgCtrl.DepartmentTree)
 		api.POST("/org/departments", orgCtrl.DepartmentCreate)
 		api.PUT("/org/departments/:id", orgCtrl.DepartmentUpdate)
 		api.DELETE("/org/departments/:id", orgCtrl.DepartmentDelete)
-		
+
 		// 岗位管理
 		api.GET("/org/positions", orgCtrl.PositionList)
 		api.POST("/org/positions", orgCtrl.PositionCreate)
 		api.PUT("/org/positions/:id", orgCtrl.PositionUpdate)
 		api.DELETE("/org/positions/:id", orgCtrl.PositionDelete)
-		
+		// posts 别名（与 /org/positions 等效）
+		api.GET("/org/posts", orgCtrl.PositionList)
+		api.POST("/org/posts", orgCtrl.PositionCreate)
+		api.PUT("/org/posts/:id", orgCtrl.PositionUpdate)
+		api.DELETE("/org/posts/:id", orgCtrl.PositionDelete)
+
 		// 员工管理
 		api.GET("/org/employees", orgCtrl.EmployeeList)
 		api.POST("/org/employees", orgCtrl.EmployeeCreate)
 		api.PUT("/org/employees/:id", orgCtrl.EmployeeUpdate)
 		api.DELETE("/org/employees/:id", orgCtrl.EmployeeDelete)
+
+		// ============ Sprint 5: 租户隔离的组织管理 API ============
+		// 公司管理（租户隔离）
+		tenantGroup := api.Group("/tenants/:tenant_id")
+		{
+			tenantGroup.GET("/companies", companyCtrl.CompanyList)
+			tenantGroup.POST("/companies", companyCtrl.CompanyCreate)
+			tenantGroup.GET("/companies/:id", companyCtrl.CompanyGet)
+			tenantGroup.PUT("/companies/:id", companyCtrl.CompanyUpdate)
+			tenantGroup.DELETE("/companies/:id", companyCtrl.CompanyDelete)
+
+			// 部门管理（租户隔离）
+			tenantGroup.GET("/departments", deptCtrl.DepartmentList)
+			tenantGroup.GET("/departments/tree", deptCtrl.DepartmentTree)
+			tenantGroup.POST("/departments", deptCtrl.DepartmentCreate)
+			tenantGroup.GET("/departments/:id", deptCtrl.DepartmentGet)
+			tenantGroup.PUT("/departments/:id", deptCtrl.DepartmentUpdate)
+			tenantGroup.DELETE("/departments/:id", deptCtrl.DepartmentDelete)
+
+			// 岗位管理（租户隔离）
+			tenantGroup.GET("/posts", postCtrl.PostList)
+			tenantGroup.POST("/posts", postCtrl.PostCreate)
+			tenantGroup.GET("/posts/:id", postCtrl.PostGet)
+			tenantGroup.PUT("/posts/:id", postCtrl.PostUpdate)
+			tenantGroup.DELETE("/posts/:id", postCtrl.PostDelete)
+
+			// 员工管理（租户隔离）
+			tenantGroup.GET("/employees", empCtrl.EmployeeList)
+			tenantGroup.POST("/employees/onboard", empCtrl.EmployeeOnboard)
+			tenantGroup.GET("/employees/:id", empCtrl.EmployeeGet)
+			tenantGroup.PUT("/employees/:id/leave", empCtrl.EmployeeLeave)
+		}
 		
 		// 基准岗位管理
 		api.GET("/org/standard-positions", orgCtrl.StandardPositionList)
 		api.POST("/org/standard-positions", orgCtrl.StandardPositionCreate)
 		api.PUT("/org/standard-positions/:id", orgCtrl.StandardPositionUpdate)
 		api.DELETE("/org/standard-positions/:id", orgCtrl.StandardPositionDelete)
+		api.POST("/org/standard-positions/:id/enable", orgCtrl.StandardPositionEnable)
+		api.POST("/org/standard-positions/:id/disable", orgCtrl.StandardPositionDisable)
 
-		// ============ 权限管理 ============
-		api.GET("/permissions", permCtrl.List)
-		api.POST("/permissions", permCtrl.Create)
-		api.PUT("/permissions/:id", permCtrl.Update)
-		api.DELETE("/permissions/:id", permCtrl.Delete)
+		// ============ 基准岗位模板 ============
+		api.GET("/position-templates", positionTemplateCtrl.PositionTemplateList)
+		api.POST("/position-templates", positionTemplateCtrl.PositionTemplateCreate)
+		api.GET("/position-templates/:id", positionTemplateCtrl.PositionTemplateGet)
+		api.PUT("/position-templates/:id", positionTemplateCtrl.PositionTemplateUpdate)
+		api.DELETE("/position-templates/:id", positionTemplateCtrl.PositionTemplateDelete)
+		api.POST("/position-templates/:id/enable", positionTemplateCtrl.PositionTemplateEnable)
+		api.POST("/position-templates/:id/disable", positionTemplateCtrl.PositionTemplateDisable)
+		api.POST("/position-templates/:id/clone", positionTemplateCtrl.PositionTemplateClone)
+		api.POST("/position-templates/:id/copy", positionTemplateCtrl.PositionTemplateCopy)
 
 		// ============ 角色管理 ============
 		api.GET("/roles", roleCtrl.List)
 		api.POST("/roles", roleCtrl.Create)
+		api.GET("/roles/:id", roleCtrl.Get)
 		api.PUT("/roles/:id", roleCtrl.Update)
 		api.DELETE("/roles/:id", roleCtrl.Delete)
-		api.GET("/roles/:id/perms", roleCtrl.GetPerms)
-		api.PUT("/roles/:id/perms", roleCtrl.SetPerms)
+		api.GET("/roles/:id/permissions", roleCtrl.GetPermissions)
+		api.POST("/roles/:id/permissions", roleCtrl.AssignPermissions)
+		api.GET("/permissions", roleCtrl.ListPermissions)
 
 		// ============ 会员管理 ============
 		// 会员信息
@@ -180,6 +234,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/members/:id/points/deduct", memberEnhancedCtrl.DeductPoints)
 		api.GET("/members/:id/points/balance", memberEnhancedCtrl.GetBalance)
 		api.GET("/members/:id/points/logs", memberEnhancedCtrl.GetPointsLogs)
+		// 会员积分列表（/api/v1/members/points）
+		api.GET("/members/points", memberEnhancedCtrl.ListMemberPoints)
+		api.POST("/members/points/adjust", memberEnhancedCtrl.AdjustMemberPoints)
 		api.GET("/members/:id/coupons", memberEnhancedCtrl.MemberCouponList)
 
 		// 优惠券（新路径 /api/v1/coupons）
@@ -208,9 +265,12 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/apps/:id/versions", appCtrl.CreateVersion)
 		api.DELETE("/apps/:id/versions/:version_id", appCtrl.DeleteVersion)
 		// 分发任务
+		api.GET("/app/distributions", appCtrl.ListDistributions)
 		api.POST("/app/distributions", appCtrl.CreateDistribution)
 		api.GET("/app/distributions/:id", appCtrl.GetDistribution)
 		api.POST("/app/distributions/:id/cancel", appCtrl.CancelDistribution)
+		// 分发任务（/apps/distributions 路径别名，供前端使用）
+		api.GET("/apps/distributions", appCtrl.ListDistributions)
 		// 统计
 		api.GET("/apps/:id/stats", appCtrl.GetStats)
 

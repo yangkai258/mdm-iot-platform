@@ -493,3 +493,35 @@ func (c *OrgController) StandardPositionDelete(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
 }
+
+// StandardPositionEnable 启用基准岗位
+// POST /api/v1/org/standard-positions/:id/enable
+func (c *OrgController) StandardPositionEnable(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var position models.StandardPosition
+	if err := c.DB.First(&position, id).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "基准岗位不存在"})
+		return
+	}
+	if err := c.DB.Model(&position).Update("status", 1).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "启用失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": gin.H{"id": position.ID, "status": 1}})
+}
+
+// StandardPositionDisable 禁用基准岗位
+// POST /api/v1/org/standard-positions/:id/disable
+func (c *OrgController) StandardPositionDisable(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var position models.StandardPosition
+	if err := c.DB.First(&position, id).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "基准岗位不存在"})
+		return
+	}
+	if err := c.DB.Model(&position).Update("status", 0).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "禁用失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": gin.H{"id": position.ID, "status": 0}})
+}

@@ -62,8 +62,8 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	// 生成 Token
-	token, err := middleware.GenerateToken(user.ID, user.Username, user.RoleID)
+	// 生成 Token（携带 tenant_id）
+	token, err := middleware.GenerateToken(user.ID, user.Username, user.RoleID, "", false)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"code":    500,

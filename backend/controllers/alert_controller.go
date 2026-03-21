@@ -88,6 +88,24 @@ func (c *AlertController) DeleteRule(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "删除成功"})
 }
 
+// BatchDeleteAlertRules 批量删除告警规则
+func (c *AlertController) BatchDeleteAlertRules(ctx *gin.Context) {
+	var req struct {
+		IDs []uint `json:"ids"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil || len(req.IDs) == 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "请提供要删除的规则ID列表"})
+		return
+	}
+
+	if err := c.DB.Delete(&models.DeviceAlertRule{}, req.IDs).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "删除失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "删除成功"})
+}
+
 // GetAlerts 获取告警记录
 func (c *AlertController) GetAlerts(ctx *gin.Context) {
 	query := c.DB.Model(&models.DeviceAlert{})
@@ -418,11 +436,44 @@ func CheckAlerts(db *gorm.DB, deviceID string, data map[string]interface{}) {
 	}
 }
 
-// SendAlertNotifications 发送告警通知（stub实现）
+// SendAlertNotifications 发送告警通知（调用 services 层实现）
 func SendAlertNotifications(db *gorm.DB, alert *models.DeviceAlert, notifyWays string) {
-	// TODO: implement alert notification sending
-	_ = notifyWays
-	_ = alert
+	// 调用 services 层的通知服务实现（支持邮件/Webhook/站内通知）
+	// 通过控制器注入 db 以避免循环依赖
+	notificationServiceSend(db, alert, notifyWays)
+}
+
+// notificationServiceSend 桥接到 services.SendAlertNotifications
+// 在 main.go 初始化时通过回调注入
+var notificationServiceSend func(db *gorm.DB, alert *models.DeviceAlert, notifyWays string)
+
+// RegisterNotificationService 注册通知服务（供 main.go 调用）
+func RegisterNotificationService(sendFn func(db *gorm.DB, alert *models.DeviceAlert, notifyWays string)) {
+	notificationServiceSend = sendFn
+}
+
+// defaultNotificationSend 默认的通知发送（降级实现，当未注册时使用）
+func defaultNotificationSend(db *gorm.DB, alert *models.DeviceAlert, notifyWays string) {
+	if notifyWays == "" {
+		notifyWays = "inapp"
+	}
+	// 记录到 alert_notifications 表
+	record := models.AlertNotification{
+		AlertID:   alert.ID,
+		AlertType: "inapp",
+		Status:    "sent",
+		Recipient: "in-app",
+		Subject:   alert.Message,
+		Content:   alert.Message,
+	}
+	now := time.Now()
+	record.SentAt = &now
+	db.Create(&record)
+}
+
+func init() {
+	// 默认使用降级实现
+	notificationServiceSend = defaultNotificationSend
 }
 
 func evaluateCondition(cond string, val, threshold float64) bool {
@@ -594,7 +645,8 @@ func (c *AlertController) GetDashboardStats(ctx *gin.Context) {
 
 	// 设备统计
 	c.DB.Model(&models.Device{}).Count(&stats.TotalDevices)
-	c.DB.Model(&models.Device{}).Where("is_online = ?", true).Count(&stats.OnlineDevices)
+	// 在线设备数需要从DeviceShadow表查询
+	c.DB.Model(&models.DeviceShadow{}).Where("is_online = ?", true).Count(&stats.OnlineDevices)
 	stats.OfflineDevices = stats.TotalDevices - stats.OnlineDevices
 
 	// 告警统计
