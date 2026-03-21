@@ -1,6 +1,13 @@
 <template>
-  <div class="dashboard-container">
-    <a-row :gutter="16">
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>工作台</a-breadcrumb-item>
+    </a-breadcrumb>
+
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
       <a-col :span="6">
         <a-card class="stat-card">
           <a-statistic title="总设备数" :value="stats.total_devices">
@@ -31,6 +38,7 @@
       </a-col>
     </a-row>
 
+    <!-- 最近告警卡片 -->
     <a-row :gutter="16" style="margin-top: 16px;">
       <a-col :span="12">
         <a-card title="设备状态分布">
@@ -97,16 +105,24 @@ const loadStats = async () => {
     })
     const data = await res.json()
     if (data.code === 0) {
-      stats.value = data.data
+      const d = data.data || {}
+      // 兼容后端可能返回的不同字段名
+      stats.value = {
+        total_devices: d.total_devices ?? d.total ?? d.device_total ?? 0,
+        online_devices: d.online_devices ?? d.online ?? d.device_online ?? 0,
+        offline_devices: d.offline_devices ?? d.offline ?? d.device_offline ?? 0,
+        total_alerts: d.total_alerts ?? d.alerts_total ?? d.alert_total ?? 0,
+        pending_alerts: d.pending_alerts ?? d.pending ?? d.alerts_pending ?? 0
+      }
     }
-    
+
     // Load recent alerts
     const alertRes = await fetch('/api/v1/alerts?status=1', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const alertData = await alertRes.json()
     if (alertData.code === 0) {
-      recentAlerts.value = (alertData.data.list || []).slice(0, 5)
+      recentAlerts.value = (alertData.data?.list || alertData.data || []).slice(0, 5)
     }
   } catch (e) {
     console.error('加载统计失败:', e)
@@ -119,8 +135,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.dashboard-container {
-  padding: 16px;
+.page-container {
+  padding: 20px 24px;
+  min-height: calc(100vh - 64px);
+  background: #f5f7fa;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.stats-row {
+  margin-bottom: 16px;
 }
 
 .stat-card {

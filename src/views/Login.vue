@@ -10,7 +10,7 @@
       <a-form
         :model="form"
         :rules="rules"
-        @submit="handleLogin"
+        @submit.prevent="handleLogin"
       >
         <a-form-item field="username" label="用户名">
           <a-input v-model="form.username" placeholder="请输入用户名" allow-clear>
@@ -26,7 +26,6 @@
             placeholder="请输入密码"
             password
             allow-clear
-            @keyup.enter="handleLogin"
           >
             <template #prefix>
               <span>🔒</span>
