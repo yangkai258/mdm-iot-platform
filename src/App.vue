@@ -99,6 +99,8 @@ const menuItems = [
     key: '/members',
     label: '会员管理',
     children: [
+      { key: '/members/list', label: '会员列表' },
+      { key: '/members/levels', label: '会员等级' },
       { key: '/members/points', label: '积分管理' },
       { key: '/members/coupons', label: '优惠券' },
       { key: '/members/promotions', label: '促销活动' }
