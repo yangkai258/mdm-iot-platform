@@ -123,10 +123,12 @@ const menuItems = [
   },
   {
     key: '/permissions',
-    label: '多维权限',
+    label: '权限管理',
     children: [
-      { key: '/permissions/groups', label: '权限组管理' },
-      { key: '/permissions/data-config', label: '数据权限配置' }
+      { key: '/permissions/roles', label: '角色管理' },
+      { key: '/permissions/menus', label: '菜单管理' },
+      { key: '/permissions/api-permissions', label: 'API权限配置' },
+      { key: '/permissions/groups', label: '权限组管理' }
     ]
   },
   {

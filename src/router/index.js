@@ -99,6 +99,28 @@ const routes = [
     component: () => import('../views/ModalTest.vue')
   },
 
+  // 权限管理路由
+  {
+    path: '/permissions/roles',
+    name: 'PermissionRoles',
+    component: () => import('../views/permissions/Roles.vue')
+  },
+  {
+    path: '/permissions/menus',
+    name: 'PermissionMenus',
+    component: () => import('../views/permissions/Menus.vue')
+  },
+  {
+    path: '/permissions/api-permissions',
+    name: 'ApiPermissions',
+    component: () => import('../views/permissions/ApiPermissions.vue')
+  },
+  {
+    path: '/permissions/groups',
+    name: 'PermissionGroups',
+    component: () => import('../views/permissions/PermissionGroups.vue')
+  },
+
   // 租户入驻路由
   {
     path: '/tenant/apply',
