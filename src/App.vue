@@ -85,7 +85,16 @@ const menuItems = [
       { key: '/ota/deployments', label: '部署任务' }
     ]
   },
-  { key: '/alert', label: '告警管理' },
+  {
+    key: '/alert',
+    label: '告警管理',
+    children: [
+      { key: '/alert/rules', label: '告警规则' },
+      { key: '/alert/list', label: '告警列表' },
+      { key: '/alert/settings', label: '告警设置' },
+      { key: '/alert/channels', label: '通知渠道' }
+    ]
+  },
   {
     key: '/members',
     label: '会员管理',

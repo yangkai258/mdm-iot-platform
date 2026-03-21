@@ -56,6 +56,9 @@ func main() {
 		&models.GeofenceAlert{},
 		// 告警通知表
 		&models.AlertNotification{},
+		// 告警设置表
+		&models.AlertSettings{},
+		&models.NotificationChannel{},
 		// 合规表
 		&models.CompliancePolicy{},
 		&models.ComplianceViolation{},
@@ -310,6 +313,21 @@ func main() {
 		sys.PUT("/geofence/rules/:id", alertCtrl.UpdateGeofenceRule)
 		sys.DELETE("/geofence/rules/:id", alertCtrl.DeleteGeofenceRule)
 		sys.GET("/geofence/alerts", alertCtrl.GetGeofenceAlerts)
+
+		// 告警设置
+		alertSettingsCtrl := &controllers.AlertSettingsController{DB: db}
+		sys.GET("/alerts/settings", alertSettingsCtrl.GetAlertSettings)
+		sys.PUT("/alerts/settings", alertSettingsCtrl.UpdateAlertSettings)
+
+		// 通知渠道配置
+		notifChannelCtrl := &controllers.NotificationChannelController{DB: db}
+		sys.GET("/notification-channels", notifChannelCtrl.ListChannels)
+		sys.POST("/notification-channels", notifChannelCtrl.CreateChannel)
+		sys.GET("/notification-channels/:id", notifChannelCtrl.GetChannel)
+		sys.PUT("/notification-channels/:id", notifChannelCtrl.UpdateChannel)
+		sys.DELETE("/notification-channels/:id", notifChannelCtrl.DeleteChannel)
+		sys.POST("/notification-channels/:id/toggle", notifChannelCtrl.ToggleChannel)
+		sys.POST("/notification-channels/:id/test", notifChannelCtrl.TestChannel)
 
 		// Dashboard 统计（使用独立的 DashboardController）
 		dashboardCtrl := &controllers.DashboardController{DB: db}
