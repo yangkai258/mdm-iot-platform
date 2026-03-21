@@ -117,6 +117,11 @@ func main() {
 		&models.FlowDefinition{},
 		&models.FlowInstance{},
 		&models.FlowTask{},
+		// 基础管理表（档案/调度/字典）
+		&models.SysDictType{},
+		&models.SysDictItem{},
+		&models.SysNumberRule{},
+		&models.SysScheduleJob{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -305,6 +310,42 @@ func main() {
 		sys.GET("/dicts/:type", dictCtrl.GetDictByType)
 		sys.GET("/logs/operations", logCtrl.GetOperationLogs)
 		sys.GET("/logs/login", logCtrl.GetLoginLogs)
+
+		// ========== 基础管理路由（档案/调度/字典）==========
+		// 字典类型
+		dictTypeCtrl := &controllers.DictTypeController{DB: db}
+		sys.GET("/dict-types", dictTypeCtrl.List)
+		sys.GET("/dict-types/:id", dictTypeCtrl.Get)
+		sys.POST("/dict-types", dictTypeCtrl.Create)
+		sys.PUT("/dict-types/:id", dictTypeCtrl.Update)
+		sys.DELETE("/dict-types/:id", dictTypeCtrl.Delete)
+
+		// 字典项
+		dictItemCtrl := &controllers.DictItemController{DB: db}
+		sys.GET("/dict-items", dictItemCtrl.List)
+		sys.GET("/dict-items/:id", dictItemCtrl.Get)
+		sys.POST("/dict-items", dictItemCtrl.Create)
+		sys.PUT("/dict-items/:id", dictItemCtrl.Update)
+		sys.DELETE("/dict-items/:id", dictItemCtrl.Delete)
+		sys.GET("/dict-items-by-type/:type", dictItemCtrl.GetByType)
+
+		// 编号规则
+		numberRuleCtrl := &controllers.NumberRuleController{DB: db}
+		sys.GET("/number-rules", numberRuleCtrl.List)
+		sys.GET("/number-rules/:id", numberRuleCtrl.Get)
+		sys.POST("/number-rules", numberRuleCtrl.Create)
+		sys.PUT("/number-rules/:id", numberRuleCtrl.Update)
+		sys.DELETE("/number-rules/:id", numberRuleCtrl.Delete)
+		sys.POST("/number-rules/generate", numberRuleCtrl.Generate)
+
+		// 调度任务
+		scheduleJobCtrl := &controllers.ScheduleJobController{DB: db}
+		sys.GET("/schedule-jobs", scheduleJobCtrl.List)
+		sys.GET("/schedule-jobs/:id", scheduleJobCtrl.Get)
+		sys.POST("/schedule-jobs", scheduleJobCtrl.Create)
+		sys.PUT("/schedule-jobs/:id", scheduleJobCtrl.Update)
+		sys.DELETE("/schedule-jobs/:id", scheduleJobCtrl.Delete)
+		sys.POST("/schedule-jobs/:id/execute", scheduleJobCtrl.Execute)
 
 		// 告警管理
 		alertCtrl := &controllers.AlertController{DB: db}

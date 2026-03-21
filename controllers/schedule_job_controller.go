@@ -20,7 +20,6 @@ type ScheduleJobController struct {
 	DB *gorm.DB
 }
 
-// List 获取调度任务列表
 func (c *ScheduleJobController) List(ctx *gin.Context) {
 	var items []models.SysScheduleJob
 	query := c.DB.Model(&models.SysScheduleJob{})
@@ -45,20 +44,9 @@ func (c *ScheduleJobController) List(ctx *gin.Context) {
 	pageSize := defaultPageSize(ctx)
 	query.Order("id DESC").Offset((page-1)*pageSize).Limit(pageSize).Find(&items)
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"data": gin.H{
-			"list": items,
-			"pagination": gin.H{
-				"total":    total,
-				"current":  page,
-				"pageSize": pageSize,
-			},
-		},
-	})
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{"list": items, "pagination": gin.H{"total": total, "current": page, "pageSize": pageSize}}})
 }
 
-// Get 获取单个调度任务
 func (c *ScheduleJobController) Get(ctx *gin.Context) {
 	id := parseUint(ctx.Param("id"))
 	var item models.SysScheduleJob
@@ -73,7 +61,6 @@ func (c *ScheduleJobController) Get(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": item})
 }
 
-// Create 创建调度任务
 func (c *ScheduleJobController) Create(ctx *gin.Context) {
 	var req struct {
 		JobName    string `json:"job_name" binding:"required"`
@@ -103,16 +90,9 @@ func (c *ScheduleJobController) Create(ctx *gin.Context) {
 	}
 
 	item := models.SysScheduleJob{
-		JobName:    req.JobName,
-		JobType:    req.JobType,
-		CronExpr:   req.CronExpr,
-		ApiUrl:     req.ApiUrl,
-		HttpMethod: req.HttpMethod,
-		Headers:    req.Headers,
-		BodyTpl:    req.BodyTpl,
-		Enabled:    req.Enabled,
-		Remark:     req.Remark,
-		Status:     "idle",
+		JobName: req.JobName, JobType: req.JobType, CronExpr: req.CronExpr,
+		ApiUrl: req.ApiUrl, HttpMethod: req.HttpMethod, Headers: req.Headers,
+		BodyTpl: req.BodyTpl, Enabled: req.Enabled, Remark: req.Remark, Status: "idle",
 	}
 
 	if err := c.DB.Create(&item).Error; err != nil {
@@ -122,7 +102,6 @@ func (c *ScheduleJobController) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": item, "message": "创建成功"})
 }
 
-// Update 更新调度任务
 func (c *ScheduleJobController) Update(ctx *gin.Context) {
 	id := parseUint(ctx.Param("id"))
 	var item models.SysScheduleJob
@@ -194,7 +173,6 @@ func (c *ScheduleJobController) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": item, "message": "更新成功"})
 }
 
-// Delete 删除调度任务
 func (c *ScheduleJobController) Delete(ctx *gin.Context) {
 	id := parseUint(ctx.Param("id"))
 	var item models.SysScheduleJob
@@ -213,7 +191,6 @@ func (c *ScheduleJobController) Delete(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "删除成功"})
 }
 
-// Execute 手动执行任务
 func (c *ScheduleJobController) Execute(ctx *gin.Context) {
 	id := parseUint(ctx.Param("id"))
 	var job models.SysScheduleJob
@@ -226,13 +203,8 @@ func (c *ScheduleJobController) Execute(ctx *gin.Context) {
 		return
 	}
 
-	// 更新状态为运行中
-	c.DB.Model(&job).Updates(map[string]interface{}{
-		"status":     "running",
-		"status_msg": "执行中...",
-	})
+	c.DB.Model(&job).Updates(map[string]interface{}{"status": "running", "status_msg": "执行中..."})
 
-	// 异步执行HTTP任务
 	go func() {
 		result, err := executeJob(&job)
 		status := "success"
@@ -253,18 +225,9 @@ func (c *ScheduleJobController) Execute(ctx *gin.Context) {
 		log.Printf("[ScheduleJob] id=%d name=%s status=%s", job.ID, job.JobName, status)
 	}()
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "任务已触发执行",
-		"data": gin.H{
-			"job_id":    job.ID,
-			"job_name":  job.JobName,
-			"triggered": true,
-		},
-	})
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "任务已触发执行", "data": gin.H{"job_id": job.ID, "job_name": job.JobName, "triggered": true}})
 }
 
-// executeJob 执行HTTP任务
 func executeJob(job *models.SysScheduleJob) (string, error) {
 	if job.JobType != "http" {
 		return "", fmt.Errorf("unsupported job type: %s", job.JobType)
@@ -305,7 +268,6 @@ func executeJob(job *models.SysScheduleJob) (string, error) {
 	return result, nil
 }
 
-// truncateStr 截断字符串
 func truncateStr(s string, maxLen int) string {
 	if len(s) <= maxLen {
 		return s

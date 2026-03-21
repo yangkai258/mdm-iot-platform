@@ -17,7 +17,6 @@ type NumberRuleController struct {
 	DB *gorm.DB
 }
 
-// List 获取编号规则列表
 func (c *NumberRuleController) List(ctx *gin.Context) {
 	var items []models.SysNumberRule
 	query := c.DB.Model(&models.SysNumberRule{})
@@ -36,20 +35,9 @@ func (c *NumberRuleController) List(ctx *gin.Context) {
 	pageSize := defaultPageSize(ctx)
 	query.Order("id DESC").Offset((page-1)*pageSize).Limit(pageSize).Find(&items)
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"data": gin.H{
-			"list": items,
-			"pagination": gin.H{
-				"total":    total,
-				"current":  page,
-				"pageSize": pageSize,
-			},
-		},
-	})
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{"list": items, "pagination": gin.H{"total": total, "current": page, "pageSize": pageSize}}})
 }
 
-// Get 获取单个编号规则
 func (c *NumberRuleController) Get(ctx *gin.Context) {
 	id := parseUint(ctx.Param("id"))
 	var item models.SysNumberRule
@@ -64,7 +52,6 @@ func (c *NumberRuleController) Get(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": item})
 }
 
-// Create 创建编号规则
 func (c *NumberRuleController) Create(ctx *gin.Context) {
 	var req struct {
 		RuleName   string `json:"rule_name" binding:"required"`
@@ -80,22 +67,13 @@ func (c *NumberRuleController) Create(ctx *gin.Context) {
 		return
 	}
 
-	// 检查规则名是否重复
 	var exist models.SysNumberRule
 	if err := c.DB.Where("rule_name = ?", req.RuleName).First(&exist).Error; err == nil {
 		ctx.JSON(http.StatusConflict, gin.H{"code": 409, "message": "规则名称已存在"})
 		return
 	}
 
-	item := models.SysNumberRule{
-		RuleName:   req.RuleName,
-		Prefix:     req.Prefix,
-		DateFormat: req.DateFormat,
-		SeqFormat:  req.SeqFormat,
-		Increment:  req.Increment,
-		Status:     req.Status,
-		Remark:     req.Remark,
-	}
+	item := models.SysNumberRule{RuleName: req.RuleName, Prefix: req.Prefix, DateFormat: req.DateFormat, SeqFormat: req.SeqFormat, Increment: req.Increment, Status: req.Status, Remark: req.Remark}
 	if item.Increment == 0 {
 		item.Increment = 1
 	}
@@ -109,7 +87,6 @@ func (c *NumberRuleController) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": item, "message": "创建成功"})
 }
 
-// Update 更新编号规则
 func (c *NumberRuleController) Update(ctx *gin.Context) {
 	id := parseUint(ctx.Param("id"))
 	var item models.SysNumberRule
@@ -165,7 +142,6 @@ func (c *NumberRuleController) Update(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": item, "message": "更新成功"})
 }
 
-// Delete 删除编号规则
 func (c *NumberRuleController) Delete(ctx *gin.Context) {
 	id := parseUint(ctx.Param("id"))
 	var item models.SysNumberRule
@@ -184,7 +160,6 @@ func (c *NumberRuleController) Delete(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "删除成功"})
 }
 
-// Generate 生成编号
 func (c *NumberRuleController) Generate(ctx *gin.Context) {
 	var req struct {
 		RuleName string `json:"rule_name" binding:"required"`
@@ -204,12 +179,11 @@ func (c *NumberRuleController) Generate(ctx *gin.Context) {
 		return
 	}
 
-	// 原子递增当前序号
 	if err := c.DB.Model(&rule).Update("current_value", gorm.Expr("current_value + ?", rule.Increment)).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "生成编号失败"})
 		return
 	}
-	// 重新加载获取最新值（First 会重新查询数据库）
+
 	var fresh models.SysNumberRule
 	if err := c.DB.First(&fresh, rule.ID).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "生成编号失败"})
@@ -217,33 +191,17 @@ func (c *NumberRuleController) Generate(ctx *gin.Context) {
 	}
 
 	number := buildNumber(&fresh)
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"data": gin.H{
-			"rule_name":     fresh.RuleName,
-			"number":        number,
-			"current_value": fresh.CurrentValue,
-		},
-	})
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{"rule_name": fresh.RuleName, "number": number, "current_value": fresh.CurrentValue}})
 }
 
-// buildNumber 根据规则拼接编号
-// 格式: [Prefix][Date][Sequence]
-// 例如: DEV-20260322-0001
 func buildNumber(rule *models.SysNumberRule) string {
 	var sb strings.Builder
-
-	// 前缀
 	if rule.Prefix != "" {
 		sb.WriteString(rule.Prefix)
 	}
-
-	// 日期部分
 	if rule.DateFormat != "" {
 		sb.WriteString(time.Now().Format(rule.DateFormat))
 	}
-
-	// 序号部分（补零）
 	if rule.SeqFormat != "" {
 		seqLen := len(rule.SeqFormat)
 		if seqLen == 0 {
@@ -252,6 +210,5 @@ func buildNumber(rule *models.SysNumberRule) string {
 		seq := fmt.Sprintf("%0"+fmt.Sprintf("%d", seqLen)+"d", rule.CurrentValue)
 		sb.WriteString(seq)
 	}
-
 	return sb.String()
 }
