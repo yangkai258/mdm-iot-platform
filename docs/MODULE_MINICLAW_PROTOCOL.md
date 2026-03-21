@@ -1,8 +1,8 @@
 # MiniClaw通信协议
 
-**版本：** V1.0  
+**版本：** V1.1  
 **模块负责人：** agentcp  
-**编制日期：** 2026-03-20  
+**编制日期：** 2026-03-22  
 
 ---
 
@@ -43,8 +43,8 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
 ```
 
 **方向定义：**
-- `up` - 设备上行（设备→云端）
-- `down` - 云端下行（云端→设备）
+- `up` - 设备上行（设备 -> 云端）
+- `down` - 云端下行（云端 -> 设备）
 
 ### 3.2 Topic详细定义
 
@@ -54,10 +54,18 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
 | `/miniclaw/{device_id}/up/sensor` | up | 传感器数据上报 | 1 | 否 |
 | `/miniclaw/{device_id}/up/status` | up | 设备状态上报 | 1 | 是 |
 | `/miniclaw/{device_id}/up/ack` | up | 命令执行结果确认 | 1 | 否 |
+| `/miniclaw/{device_id}/up/log` | up | 设备日志上报 | 1 | 否 |
 | `/miniclaw/{device_id}/down/action` | down | 云端动作指令下发 | 1 | 否 |
 | `/miniclaw/{device_id}/down/speech` | down | 云端语音内容下发 | 1 | 否 |
 | `/miniclaw/{device_id}/down/config` | down | 云端配置参数下发 | 1 | 否 |
 | `/miniclaw/{device_id}/down/ping` | down | 心跳ping请求 | 1 | 否 |
+
+### 3.3 通用Topic（无需device_id）
+
+| Topic | 方向 | 描述 | QoS |
+|-------|------|------|-----|
+| `/miniclaw/broadcast/system` | down | 系统广播消息 | 1 |
+| `/miniclaw/broadcast/ota` | down | OTA全量推送 | 1 |
 
 ---
 
@@ -78,9 +86,42 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
 }
 ```
 
-### 4.2 语音识别上报 (up/voice)
+### 4.2 协议帧格式
 
-**设备 → 云端**
+**完整协议帧结构：**
+
+```
+[帧头(2B)] [长度(2B)] [版本(1B)] [类型(1B)] [序列号(4B)] [Payload(N)] [校验(2B)]
+```
+
+| 字段 | 长度 | 说明 |
+|------|------|------|
+| 帧头 | 2字节 | 固定值 0xAA 0x55 |
+| 长度 | 2字节 | 帧总长度（不含帧头和校验） |
+| 版本 | 1字节 | 协议版本号，当前1.0 |
+| 类型 | 1字节 | 消息类型（见下表） |
+| 序列号 | 4字节 | 消息序号，用于追踪和ACK |
+| Payload | N字节 | 实际数据内容 |
+| 校验 | 2字节 | CRC16校验 |
+
+**消息类型定义：**
+
+| 类型值 | 类型名称 | 方向 | 说明 |
+|--------|----------|------|------|
+| 0x01 | STATUS_REPORT | up | 设备状态上报 |
+| 0x02 | VOICE_DATA | up | 语音数据上报 |
+| 0x03 | SENSOR_DATA | up | 传感器数据上报 |
+| 0x04 | ACK | up | 命令确认 |
+| 0x05 | LOG_REPORT | up | 日志上报 |
+| 0x11 | ACTION_CMD | down | 动作指令 |
+| 0x12 | SPEECH_CMD | down | 语音播报指令 |
+| 0x13 | CONFIG_CMD | down | 配置指令 |
+| 0x14 | PING_REQ | down | 心跳请求 |
+| 0x15 | PING_RSP | down | 心跳响应 |
+
+### 4.3 语音识别上报 (up/voice)
+
+**设备 -> 云端**
 
 ```json
 {
@@ -98,9 +139,9 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
 }
 ```
 
-### 4.3 传感器数据上报 (up/sensor)
+### 4.4 传感器数据上报 (up/sensor)
 
-**设备 → 云端**
+**设备 -> 云端**
 
 ```json
 {
@@ -128,15 +169,20 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
         "value": 85,
         "unit": "%",
         "timestamp": 1710902400000
+      },
+      {
+        "type": "touch",
+        "value": true,
+        "timestamp": 1710902400000
       }
     ]
   }
 }
 ```
 
-### 4.4 设备状态上报 (up/status)
+### 4.5 设备状态上报 (up/status)
 
-**设备 → 云端**
+**设备 -> 云端**
 
 ```json
 {
@@ -162,9 +208,9 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
 }
 ```
 
-### 4.5 命令执行确认 (up/ack)
+### 4.6 命令执行确认 (up/ack)
 
-**设备 → 云端**
+**设备 -> 云端**
 
 ```json
 {
@@ -184,9 +230,9 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
 }
 ```
 
-### 4.6 动作指令下发 (down/action)
+### 4.7 动作指令下发 (down/action)
 
-**云端 → 设备**
+**云端 -> 设备**
 
 ```json
 {
@@ -209,9 +255,9 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
 }
 ```
 
-### 4.7 语音播报下发 (down/speech)
+### 4.8 语音播报下发 (down/speech)
 
-**云端 → 设备**
+**云端 -> 设备**
 
 ```json
 {
@@ -230,9 +276,9 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
 }
 ```
 
-### 4.8 配置更新下发 (down/config)
+### 4.9 配置更新下发 (down/config)
 
-**云端 → 设备**
+**云端 -> 设备**
 
 ```json
 {
@@ -249,6 +295,26 @@ MiniClaw通信协议定义了MDM中台与MiniClaw设备之间的MQTT通信规范
       "ota_version": "1.3.0",
       "ota_checksum": "d41d8cd98f00b204e9800998ecf8427e",
       "ota_file_size": 1048576
+    }
+  }
+}
+```
+
+**常规配置下发：**
+```json
+{
+  "msg_id": "cmd-uuid-004",
+  "device_id": "pet-001",
+  "timestamp": 1710902400000,
+  "type": "config",
+  "version": "1.0",
+  "payload": {
+    "config_type": "general",
+    "config": {
+      "heartbeat_interval": 30,
+      "sensor_report_interval": 1000,
+      "expression": "happy",
+      "volume": 80
     }
   }
 }
@@ -342,6 +408,14 @@ Value: {
 POST /api/v1/devices/{device_id}/auth
 ```
 
+**请求参数：**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| device_secret | string | 是 | 设备密钥 |
+| firmware_version | string | 是 | 固件版本 |
+| hardware_version | string | 是 | 硬件版本 |
+
 **请求示例：**
 ```json
 {
@@ -413,6 +487,22 @@ POST /api/v1/devices/{device_id}/commands/speech
 }
 ```
 
+### 7.5 下发配置
+
+```
+POST /api/v1/devices/{device_id}/commands/config
+```
+
+**请求示例：**
+```json
+{
+  "config": {
+    "heartbeat_interval": 30,
+    "volume": 80
+  }
+}
+```
+
 ---
 
 ## 8. 流程图
@@ -420,80 +510,64 @@ POST /api/v1/devices/{device_id}/commands/speech
 ### 8.1 完整通信流程
 
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  用户输入    │     │  控制台/云端  │     │  MQTT Broker │
-│  (语音/文字) │────>│              │────>│              │
-└──────────────┘     └──────────────┘     └──────┬───────┘
-                                                   │
-                                    ┌──────────────┼──────────────┐
-                                    ▼              ▼              ▼
-                           ┌────────────┐  ┌────────────┐  ┌────────────┐
-                           │ /down/     │  │ /down/      │  │ /down/     │
-                           │  speech    │  │  action     │  │  config    │
-                           │  语音下发   │  │  动作下发   │  │  配置下发  │
-                           └─────┬──────┘  └─────┬──────┘  └─────┬──────┘
-                                 │               │               │
-                                 └───────────────┼───────────────┘
-                                                 │
-                                                 ▼
-                                    ┌────────────────────────┐
-                                    │    MiniClaw 设备        │
-                                    │    - TTS 语音播放       │
-                                    │    - 执行动作           │
-                                    │    - 传感器采集         │
-                                    └───────────┬────────────┘
-                                                │
-                           ┌────────────────────┼────────────────────┐
-                           ▼                    ▼                    ▼
-                   ┌────────────┐        ┌────────────┐        ┌────────────┐
-                   │ /up/voice │        │ /up/sensor │        │ /up/status │
-                   │  语音识别  │        │  传感器数据 │        │  状态上报  │
-                   │   结果     │        │            │        │            │
-                   └─────┬──────┘        └─────┬──────┘        └─────┬──────┘
-                         │                    │                    │
-                         └────────────────────┴────────────────────┘
-                                              │
-                                              ▼
-                                   ┌────────────────────────┐
-                                   │     OpenClaw AI层      │
-                                   │  - 对话引擎            │
-                                   │  - 行为引擎            │
-                                   │  - 记忆库              │
-                                   └────────────────────────┘
+用户输入 -> 控制台/云端 -> MQTT Broker
+                          |
+           ┌──────────────┼──────────────┐
+           ▼              ▼              ▼
+      /down/speech   /down/action   /down/config
+        语音下发       动作下发        配置下发
+           │              │              │
+           └──────────────┼──────────────┘
+                          │
+                          ▼
+               ┌────────────────────────┐
+               │    MiniClaw 设备        │
+               │    - TTS 语音播放       │
+               │    - 执行动作           │
+               │    - 传感器采集         │
+               └───────────┬────────────┘
+                           │
+          ┌────────────────┼────────────────┐
+          ▼                ▼                ▼
+    /up/voice         /up/sensor        /up/status
+      语音识别          传感器数据         状态上报
+          │                │                │
+          └────────────────┴────────────────┘
+                            │
+                            ▼
+                 ┌────────────────────────┐
+                 │     OpenClaw AI层     │
+                 │  - 对话引擎            │
+                 │  - 行为引擎            │
+                 │  - 记忆库              │
+                 └────────────────────────┘
 ```
 
 ### 8.2 心跳在线管理流程
 
 ```
-┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-│  MiniClaw   │     │ MQTT Broker  │     │    Redis     │
-│    设备      │     │              │     │   设备影子    │
-└──────┬───────┘     └──────┬───────┘     └──────┬───────┘
-       │                    │                    │
-       │ MQTT CONNECT       │                    │
-       │───────────────────>│                    │
-       │                    │                    │
-       │ PUBLISH /up/status │ SET device_shadow  │
-       │ (online:true)      │───────────────────>│ (TTL:120s)
-       │───────────────────>│                    │
-       │                    │                    │
-       │ [每30秒]           │                    │
-       │ PUBLISH /up/status │                    │
-       │───────────────────>│ EXPIRE更新         │
-       │                    │───────────────────>│
-       │                    │                    │
-       │ [设备关机]          │                    │
-       │ PUBLISH /up/status  │                    │
-       │ (online:false)     │                    │
-       │───────────────────>│ DEL device_shadow  │
-       │                    │───────────────────>│
-       │ MQTT DISCONNECT    │                    │
-       │───────────────────>│                    │
-       │                    │                    │
-       │ [90秒无心跳]        │                    │
-       │                    │ GET device_shadow  │
-       │                    │───────────────────>│ (nil)
-       │                    │ 判定离线，告警      │
+MiniClaw设备 -> MQTT Broker -> Redis设备影子
+       │
+       MQTT CONNECT
+       │
+       PUBLISH /up/status (online:true)
+       │
+       SET device_shadow (TTL:120s)
+       │
+       [每30秒重复]
+       │
+       PUBLISH /up/status
+       │
+       EXPIRE更新
+       │
+       [设备关机]
+       PUBLISH /up/status (online:false)
+       │
+       DEL device_shadow
+       │
+       [90秒无心跳]
+       GET device_shadow (nil)
+       判定离线，告警
 ```
 
 ---
@@ -503,34 +577,26 @@ POST /api/v1/devices/{device_id}/commands/speech
 ### 9.1 与固件管理(MINICLAW_FIRMWARE)联动
 
 - **触发时机：** OTA升级时
-- **联动内容：**
-  - 固件管理通过 `/down/config` 下发OTA配置
-  - 设备通过 `/up/status` 上报升级进度
-- **数据流向：** 固件管理 → MQTT Broker → MiniClaw
+- **联动内容：** 固件管理通过 `/down/config` 下发OTA配置，设备通过 `/up/status` 上报升级进度
+- **数据流向：** 固件管理 -> MQTT Broker -> MiniClaw
 
 ### 9.2 与行为引擎(PET_BEHAVIOR_ENGINE)联动
 
 - **触发时机：** 动作下发时
-- **联动内容：**
-  - 行为引擎通过 `/down/action` 下发动作指令
-  - 接收设备 `/up/ack` 确认执行结果
-- **数据流向：** 行为引擎 → MQTT Broker → MiniClaw
+- **联动内容：** 行为引擎通过 `/down/action` 下发动作指令，接收设备 `/up/ack` 确认执行结果
+- **数据流向：** 行为引擎 -> MQTT Broker -> MiniClaw
 
 ### 9.3 与对话引擎联动
 
 - **触发时机：** 语音播报时
-- **联动内容：**
-  - 对话引擎通过 `/down/speech` 下发TTS文本
-  - 设备通过 `/up/voice` 上报用户语音
-- **数据流向：** 对话引擎 ↔ MQTT Broker ↔ MiniClaw
+- **联动内容：** 对话引擎通过 `/down/speech` 下发TTS文本，设备通过 `/up/voice` 上报用户语音
+- **数据流向：** 对话引擎 <-> MQTT Broker <-> MiniClaw
 
 ### 9.4 与记忆库(PET_MEMORY)联动
 
 - **触发时机：** 传感器数据上报时
-- **联动内容：**
-  - 记忆库记录传感器时序数据
-  - 用于上下文理解和长期学习
-- **数据流向：** MiniClaw → MQTT → 记忆库
+- **联动内容：** 记忆库记录传感器时序数据，用于上下文理解和长期学习
+- **数据流向：** MiniClaw -> MQTT -> 记忆库
 
 ---
 
@@ -541,15 +607,15 @@ POST /api/v1/devices/{device_id}/commands/speech
 | 功能 | 验收条件 |
 |------|----------|
 | MQTT连接 | 设备可在5秒内完成连接认证 |
-| 心跳维持 | 设备在线状态准确率≥99.9% |
+| 心跳维持 | 设备在线状态准确率>=99.9% |
 | 指令下发 | QoS=1保证指令可靠到达 |
 | 命令确认 | 设备在3秒内返回ACK |
-| 语音上报 | 语音识别结果延迟≤500ms |
+| 语音上报 | 语音识别结果延迟<=500ms |
 
 ### 10.2 性能验收
 
 - MQTT消息吞吐量：10000 msg/s
-- 单设备消息延迟：≤100ms
+- 单设备消息延迟：<=100ms
 - 支持同时在线设备：100000台
 
 ### 10.3 安全性验收
@@ -577,7 +643,20 @@ POST /api/v1/devices/{device_id}/commands/speech
 
 | 类型 | 限制 |
 |------|------|
-| 单设备Topic数 | ≤100 |
-| 单用户订阅数 | ≤500 |
+| 单设备Topic数 | <=100 |
+| 单用户订阅数 | <=500 |
 | Topic最大长度 | 256字符 |
 | 消息最大Payload | 64KB |
+
+### 11.3 传感器类型定义
+
+| 类型 | 说明 | 单位 |
+|------|------|------|
+| ultrasonic | 超声波测距 | cm |
+| accelerometer | 加速度计 | m/s² |
+| gyroscope | 陀螺仪 | deg/s |
+| battery | 电池电量 | % |
+| temperature | 温度 | ℃ |
+| touch | 触摸传感器 | bool |
+| fall | 跌落检测 | bool |
+| collision | 碰撞检测 | bool |

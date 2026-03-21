@@ -1,8 +1,8 @@
 # 宠物记忆库
 
-**版本：** V1.0  
+**版本：** V1.1  
 **模块负责人：** agentcp  
-**编制日期：** 2026-03-20  
+**编制日期：** 2026-03-22  
 
 ---
 
@@ -41,8 +41,8 @@
 |------|------|------|------|
 | id | uint | 主键 | PK, auto_increment |
 | memory_id | string | 记忆唯一标识 | unique, not null |
-| device_id | string | 设备ID | FK -> devices, not null |
-| user_id | uint | 用户ID | FK -> sys_users, not null |
+| device_id | string | 设备ID | FK to devices, not null |
+| user_id | uint | 用户ID | FK to sys_users, not null |
 | session_id | string | 会话ID | not null |
 | message_id | string | 关联消息ID | nullable |
 | memory_type | string | 记忆类型 | intent/emotion/fact/action/event |
@@ -59,8 +59,8 @@
 |------|------|------|------|
 | id | uint | 主键 | PK, auto_increment |
 | memory_id | string | 记忆唯一标识 | unique, not null |
-| device_id | string | 设备ID | FK -> devices, not null |
-| user_id | uint | 用户ID | FK -> sys_users, not null |
+| device_id | string | 设备ID | FK to devices, not null |
+| user_id | uint | 用户ID | FK to sys_users, not null |
 | memory_category | string | 记忆分类 | person/place/thing/event/preference/skill |
 | content | json | 记忆内容 | not null |
 | keywords | json | 关键词索引 | nullable |
@@ -80,7 +80,7 @@
 |------|------|------|------|
 | id | uint | 主键 | PK, auto_increment |
 | index_id | string | 索引唯一标识 | unique, not null |
-| memory_id | string | 关联记忆ID | FK -> long_term_memory, not null |
+| memory_id | string | 关联记忆ID | FK to long_term_memory, not null |
 | index_type | string | 索引类型 | keyword/entity/time/location |
 | index_key | string | 索引键 | not null |
 | index_value | json | 索引值 | not null |
@@ -93,8 +93,8 @@
 |------|------|------|------|
 | id | uint | 主键 | PK, auto_increment |
 | record_id | string | 记录唯一标识 | unique, not null |
-| device_id | string | 设备ID | FK -> devices, not null |
-| user_id | uint | 用户ID | FK -> sys_users, not null |
+| device_id | string | 设备ID | FK to devices, not null |
+| user_id | uint | 用户ID | FK to sys_users, not null |
 | skill_type | string | 技能类型 | language/trick/recognition/response |
 | skill_name | string | 技能名称 | not null |
 | learning_stage | int | 学习阶段 | 1=初学 2=练习 3=掌握 4=熟练 |
@@ -107,6 +107,21 @@
 | created_at | datetime | 创建时间 | auto |
 | updated_at | datetime | 更新时间 | auto |
 
+### 3.5 对话历史表 (conversation_history)
+
+| 字段 | 类型 | 说明 | 约束 |
+|------|------|------|------|
+| id | uint | 主键 | PK, auto_increment |
+| history_id | string | 历史记录ID | unique, not null |
+| device_id | string | 设备ID | FK to devices, not null |
+| user_id | uint | 用户ID | FK to sys_users, not null |
+| conversation_id | string | 会话ID | FK to conversations |
+| messages | json | 消息列表 | not null |
+| summary | string | 对话摘要 | nullable |
+| context_window | int | 上下文窗口大小 | default 20 |
+| created_at | datetime | 创建时间 | auto |
+| updated_at | datetime | 更新时间 | auto |
+
 ---
 
 ## 4. 接口定义
@@ -116,6 +131,18 @@
 ```
 POST /api/v1/memory/short-term
 ```
+
+**请求参数：**
+
+| 参数 | 类型 | 位置 | 必填 | 说明 |
+|------|------|------|------|------|
+| device_id | string | body | 是 | 设备ID |
+| user_id | uint | body | 是 | 用户ID |
+| session_id | string | body | 是 | 会话ID |
+| message_id | string | body | 否 | 关联消息ID |
+| memory_type | string | body | 是 | 记忆类型 |
+| content | json | body | 是 | 记忆内容 |
+| importance | float | body | 否 | 重要程度 0-1 |
 
 **请求示例：**
 ```json
@@ -141,7 +168,7 @@ POST /api/v1/memory/short-term
   "message": "success",
   "data": {
     "memory_id": "stm-001",
-    "expires_at": "2026-03-27T10:00:00Z"
+    "expires_at": "2026-03-29T10:00:00Z"
   }
 }
 ```
@@ -151,6 +178,14 @@ POST /api/v1/memory/short-term
 ```
 GET /api/v1/memory/context/{device_id}
 ```
+
+**请求参数：**
+
+| 参数 | 类型 | 位置 | 必填 | 说明 |
+|------|------|------|------|------|
+| device_id | string | path | 是 | 设备ID |
+| session_id | string | query | 否 | 会话ID，不传则获取最新会话 |
+| limit | int | query | 否 | 返回条数，默认20 |
 
 **响应示例：**
 ```json
@@ -175,6 +210,18 @@ GET /api/v1/memory/context/{device_id}
 POST /api/v1/memory/long-term
 ```
 
+**请求参数：**
+
+| 参数 | 类型 | 位置 | 必填 | 说明 |
+|------|------|------|------|------|
+| device_id | string | body | 是 | 设备ID |
+| user_id | uint | body | 是 | 用户ID |
+| memory_category | string | body | 是 | 记忆分类 |
+| content | json | body | 是 | 记忆内容 |
+| keywords | json | body | 否 | 关键词索引 |
+| confidence | float | body | 否 | 置信度 0-1 |
+| is_locked | bool | body | 否 | 是否锁定 |
+
 **请求示例：**
 ```json
 {
@@ -192,11 +239,37 @@ POST /api/v1/memory/long-term
 }
 ```
 
+**响应示例：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "memory_id": "ltm-001",
+    "memory_category": "preference",
+    "confidence": 0.85,
+    "created_at": "2026-03-22T10:00:00Z"
+  }
+}
+```
+
 ### 4.4 检索长期记忆
 
 ```
 GET /api/v1/memory/long-term/search
 ```
+
+**请求参数：**
+
+| 参数 | 类型 | 位置 | 必填 | 说明 |
+|------|------|------|------|------|
+| device_id | string | query | 是 | 设备ID |
+| keyword | string | query | 否 | 关键词搜索 |
+| category | string | query | 否 | 记忆分类 |
+| start_date | string | query | 否 | 开始日期 |
+| end_date | string | query | 否 | 结束日期 |
+| page | int | query | 否 | 页码 |
+| page_size | int | query | 否 | 每页条数 |
 
 **响应示例：**
 ```json
@@ -209,7 +282,9 @@ GET /api/v1/memory/long-term/search
         "memory_id": "ltm-001",
         "memory_category": "preference",
         "content": { "type": "favorite_topic", "value": "宠物训练" },
-        "confidence": 0.85
+        "confidence": 0.85,
+        "reinforcement_count": 3,
+        "created_at": "2026-03-15T10:00:00Z"
       }
     ],
     "pagination": { "page": 1, "page_size": 20, "total": 45, "total_pages": 3 }
@@ -228,11 +303,30 @@ POST /api/v1/memory/{memory_id}/reinforce
 {
   "code": 0,
   "message": "success",
-  "data": { "memory_id": "ltm-001", "reinforcement_count": 5, "confidence": 0.92 }
+  "data": { 
+    "memory_id": "ltm-001", 
+    "reinforcement_count": 5, 
+    "confidence": 0.92 
+  }
 }
 ```
 
-### 4.6 获取学习记录
+### 4.6 删除记忆
+
+```
+DELETE /api/v1/memory/{memory_id}
+```
+
+**响应示例：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": { "memory_id": "ltm-001", "deleted": true }
+}
+```
+
+### 4.7 获取学习记录
 
 ```
 GET /api/v1/memory/learning/{device_id}
@@ -254,6 +348,72 @@ GET /api/v1/memory/learning/{device_id}
 }
 ```
 
+### 4.8 更新学习记录
+
+```
+PUT /api/v1/memory/learning/{record_id}
+```
+
+**请求示例：**
+```json
+{
+  "practice_count": 10,
+  "success_rate": 0.85
+}
+```
+
+### 4.9 保存对话历史
+
+```
+POST /api/v1/memory/conversation-history
+```
+
+**请求参数：**
+
+| 参数 | 类型 | 位置 | 必填 | 说明 |
+|------|------|------|------|------|
+| device_id | string | body | 是 | 设备ID |
+| user_id | uint | body | 是 | 用户ID |
+| conversation_id | string | body | 是 | 会话ID |
+| messages | json | body | 是 | 消息列表 |
+
+**请求示例：**
+```json
+{
+  "device_id": "pet-001",
+  "user_id": 10001,
+  "conversation_id": "conv-001",
+  "messages": [
+    { "sender_type": 1, "content": "今天天气怎么样？", "created_at": "2026-03-22T10:00:00Z" },
+    { "sender_type": 2, "content": "今天天气晴朗！", "created_at": "2026-03-22T10:00:05Z" }
+  ]
+}
+```
+
+### 4.10 获取对话历史
+
+```
+GET /api/v1/memory/conversation-history
+```
+
+**请求参数：**
+
+| 参数 | 类型 | 位置 | 必填 | 说明 |
+|------|------|------|------|------|
+| device_id | string | query | 是 | 设备ID |
+| conversation_id | string | query | 否 | 会话ID |
+| page | int | query | 否 | 页码 |
+
+### 4.11 错误码定义
+
+| 错误码 | 说明 |
+|--------|------|
+| 0 | 成功 |
+| 30001 | 记忆不存在 |
+| 30002 | 记忆写入失败 |
+| 30003 | 检索参数错误 |
+| 30004 | 学习记录不存在 |
+
 ---
 
 ## 5. 流程图
@@ -262,46 +422,43 @@ GET /api/v1/memory/learning/{device_id}
 
 ```
 用户消息 -> 对话引擎 -> 记忆库
-                              |
-                              v
-                    1. 写入短期记忆
-                    - 记忆类型识别
-                    - 重要性评分
-                    - 设置过期时间(7天)
-                              |
-                              v
-                    2. 更新上下文窗口
-                    - 保留最近20轮
-                    - 更新last_accessed
-                              |
-                              v
-                    3. 判断是否转入长期
-                    - 重要性>0.8?
-                    - 重复出现3次以上?
-                    - 是主人偏好信息?
-                              |
-              +---------------+---------------+
-              v                               v
-     转入长期记忆                      保持短期记忆
-     - 生成embedding                  - 等待自然遗忘
-     - 建立关键词索引                 - 或被强化
+       │
+       ▼
+1. 写入短期记忆
+   - 记忆类型识别
+   - 重要性评分
+   - 设置过期时间(7天)
+       │
+       ▼
+2. 更新上下文窗口
+   - 保留最近20轮
+   - 更新last_accessed
+       │
+       ▼
+3. 判断是否转入长期
+   - 重要性>0.8?
+   - 重复出现3次以上?
+   - 是主人偏好信息?
+       │
+       ├─ 是 -> 转入长期记忆
+       │    - 生成embedding
+       │    - 建立关键词索引
+       └─ 否 -> 保持短期记忆
+            - 等待自然遗忘
+            - 或被强化
 ```
 
 ### 5.2 记忆遗忘与强化流程
 
 ```
 定时任务(每日)
-      |
-      v
+       │
+       ▼
 扫描短期记忆过期项
 expires_at < now
-      |
-      +-------v-------+
-      v               v
-重要性 >= 0.7    重要性 < 0.7
-      |               |
-      v               v
-转入长期记忆     直接删除
+       │
+       ├─ 重要性 >= 0.7 -> 转入长期记忆
+       └─ 重要性 < 0.7 -> 直接删除
 ```
 
 ---
@@ -311,33 +468,25 @@ expires_at < now
 ### 6.1 与对话引擎联动
 
 - **触发时机：** 每次对话时
-- **联动内容：**
-  - 写入短期记忆保存对话内容
-  - 加载上下文理解当前对话
+- **联动内容：** 写入短期记忆保存对话内容，加载上下文理解当前对话
 - **数据流向：** 对话引擎 -> 记忆库 -> 对话引擎
 
 ### 6.2 与主人画像库(OWNER_PROFILE)联动
 
 - **触发时机：** 识别到主人偏好时
-- **联动内容：**
-  - 记忆库中的偏好信息同步到画像库
-  - 画像库更新偏好规则
+- **联动内容：** 记忆库中的偏好信息同步到画像库，画像库更新偏好规则
 - **数据流向：** 记忆库 -> 主人画像库
 
 ### 6.3 与行为引擎(PET_BEHAVIOR_ENGINE)联动
 
 - **触发时机：** 动作执行完成时
-- **联动内容：**
-  - 记录动作执行结果到记忆库
-  - 用于学习动作效果
+- **联动内容：** 记录动作执行结果到记忆库，用于学习动作效果
 - **数据流向：** 行为引擎 -> 记忆库
 
 ### 6.4 与知识库(KNOWLEDGE_BASE)联动
 
 - **触发时机：** 知识查询时
-- **联动内容：**
-  - 记忆库提供上下文辅助理解问题
-  - 知识库结果存入长期记忆
+- **联动内容：** 记忆库提供上下文辅助理解问题，知识库结果存入长期记忆
 - **数据流向：** 知识库 <-> 记忆库
 
 ---
@@ -353,6 +502,7 @@ expires_at < now
 | 长期记忆 | 重要记忆永久保存，支持检索 |
 | 记忆遗忘 | 7天后自动过期清理 |
 | 记忆强化 | 重复出现3次以上自动强化 |
+| 对话历史 | 自动保存会话消息，支持分页查询 |
 
 ### 7.2 性能验收
 
@@ -367,7 +517,7 @@ expires_at < now
 
 ---
 
-## 8. UI设计指引
+## 8. 前端页面设计
 
 ### 8.1 记忆查询界面
 
@@ -376,10 +526,10 @@ expires_at < now
 | 记忆查询                                                       |
 +---------------------------------------------------------------+
 | 设备: [pet-001 v]  分类: [全部 v]  关键词: [____________] [搜索]|
-| 日期: [2026-03-01] - [2026-03-20]                            |
+| 日期: [2026-03-01] - [2026-03-22]                            |
 +---------------------------------------------------------------+
 |                                                               |
-| [v] 长期记忆  [ ] 短期记忆  [ ] 学习记录                       |
+| [v] 长期记忆  [v] 短期记忆  [ ] 学习记录                       |
 |                                                               |
 +---------------------------------------------------------------+
 | 检索结果: 12条                                                 |
@@ -394,7 +544,7 @@ expires_at < now
 | +-----------------------------------------------------------+ |
 | | 事件 - 生日                                                | |
 | | 内容: 今天是我的生日                                        | |
-| | 置信度: 85% | 来源: 短期记忆转入 | 创建: 2026-03-20        | |
+| | 置信度: 85% | 来源: 短期记忆转入 | 创建: 2026-03-22        | |
 | | [查看详情] [强化] [删除]                                   | |
 | +-----------------------------------------------------------+ |
 +---------------------------------------------------------------+
@@ -414,7 +564,7 @@ expires_at < now
 | | 认识主人    [████████████████████] 95%  熟练              | |
 | | 日常对话    [██████████████░░░░░░] 78%  掌握              | |
 | | 情绪识别    [██████████░░░░░░░░░░░] 55%  练习中            | |
-| | 定点动作    [██████░░░░░░░░░░░░░░░] 35%  初学              | |
+| | 定点动作    [██████░░░░░░░░░░░░░░░░] 35%  初学              | |
 | +-----------------------------------------------------------+ |
 |                                                               |
 | 学习里程碑                                                     |
