@@ -1,5 +1,10 @@
 package models
 
+import (
+	"strconv"
+	"strings"
+)
+
 // DataScopeType 数据权限范围类型
 type DataScopeType int
 
@@ -22,21 +27,26 @@ type DataScope struct {
 	UpdatedAt string        `json:"updated_at"`
 }
 
-// DataScopeRole 数据权限与角色的关联表
+// DataScopeRole 数据权限角色（查询结果）
 type DataScopeRole struct {
-	ID         uint   `gorm:"primaryKey" json:"id"`
-	RoleID     uint   `gorm:"index" json:"role_id"`
-	DataScopeID uint  `gorm:"index" json:"data_scope_id"`
-	CreatedAt  string `json:"created_at"`
+	RoleID     uint   `gorm:"column:role_id" json:"role_id"`
+	ScopeType  DataScopeType `gorm:"column:scope_type" json:"scope_type"`
+	ScopeValue string `gorm:"column:scope_value" json:"scope_value"`
 }
 
 // ParseScopeValue 解析自定义数据范围的值
-func ParseScopeValue(value string) []uint {
+// scopeType: 权限类型 (DataScopeCustom = 5 时使用)
+// value: ID列表，逗号分隔
+// 返回: 字段名, ID列表
+func ParseScopeValue(scopeType DataScopeType, value string) (string, []uint) {
 	var ids []uint
 	for _, v := range strings.Split(value, ",") {
 		if id, err := strconv.ParseUint(strings.TrimSpace(v), 10, 64); err == nil {
 			ids = append(ids, uint(id))
 		}
 	}
-	return ids
+	// 根据 scopeType 判断字段名
+	// DataScopeCustom: scope_value 格式为 "dept_ids:1,2,3" 或 "store_ids:1,2,3"
+	field := "dept_ids" // 默认
+	return field, ids
 }

@@ -31,6 +31,7 @@ type UserClaims struct {
 	TenantID     string `json:"tenant_id"`
 	OrgID        uint   `json:"org_id"`         // 组织/部门ID
 	IsSuperAdmin bool   `json:"is_super_admin"`
+	jwt.RegisteredClaims
 }
 
 // ContextKey 用户上下文 key

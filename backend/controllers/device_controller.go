@@ -31,7 +31,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	deptCtrl := &DepartmentController{DB: db}
 	postCtrl := &PostController{DB: db}
 	empCtrl := &EmployeeController{DB: db}
-	permCtrl := &PermissionController{DB: db}
 	roleCtrl := &OldRoleController{DB: db}
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
