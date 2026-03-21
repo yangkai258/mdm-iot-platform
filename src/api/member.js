@@ -154,3 +154,113 @@ export async function getPointsFlow(params = {}) {
 export async function getPointsBalance(memberId) {
   return request(`${API_BASE}/points/balance/${memberId}`)
 }
+
+// ─── 会员卡类型 ──────────────────────────────────────────────
+
+/** 会员卡类型列表 */
+export async function getCardTypeList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/card-types?${qs}`)
+}
+
+/** 创建会员卡类型 */
+export async function createCardType(data) {
+  return request(`${API_BASE}/card-types`, { method: 'POST', body: JSON.stringify(data) })
+}
+
+/** 更新会员卡类型 */
+export async function updateCardType(id, data) {
+  return request(`${API_BASE}/card-types/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+}
+
+/** 删除会员卡类型 */
+export async function deleteCardType(id) {
+  return request(`${API_BASE}/card-types/${id}`, { method: 'DELETE' })
+}
+
+// ─── 会员卡分组 ──────────────────────────────────────────────
+
+/** 会员卡分组列表 */
+export async function getCardGroupList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/card-groups?${qs}`)
+}
+
+/** 创建会员卡分组 */
+export async function createCardGroup(data) {
+  return request(`${API_BASE}/card-groups`, { method: 'POST', body: JSON.stringify(data) })
+}
+
+/** 更新会员卡分组 */
+export async function updateCardGroup(id, data) {
+  return request(`${API_BASE}/card-groups/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+}
+
+/** 删除会员卡分组 */
+export async function deleteCardGroup(id) {
+  return request(`${API_BASE}/card-groups/${id}`, { method: 'DELETE' })
+}
+
+// ─── 会员参数设置 ────────────────────────────────────────────
+
+/** 获取会员参数设置 */
+export async function getMemberSettings() {
+  return request(`${API_BASE}/settings`)
+}
+
+/** 更新会员参数设置 */
+export async function updateMemberSettings(data) {
+  return request(`${API_BASE}/settings`, { method: 'PUT', body: JSON.stringify(data) })
+}
+
+// ─── 会员订单 ────────────────────────────────────────────────
+
+/** 会员订单列表 */
+export async function getMemberOrderList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/orders?${qs}`)
+}
+
+/** 订单详情 */
+export async function getMemberOrderDetail(id) {
+  return request(`${API_BASE}/orders/${id}`)
+}
+
+// ─── 从业类型 ────────────────────────────────────────────────
+
+/** 从业类型列表 */
+export async function getOccupationTypeList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/occupation-types?${qs}`)
+}
+
+/** 创建从业类型 */
+export async function createOccupationType(data) {
+  return request(`${API_BASE}/occupation-types`, { method: 'POST', body: JSON.stringify(data) })
+}
+
+/** 更新从业类型 */
+export async function updateOccupationType(id, data) {
+  return request(`${API_BASE}/occupation-types/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+}
+
+/** 删除从业类型 */
+export async function deleteOccupationType(id) {
+  return request(`${API_BASE}/occupation-types/${id}`, { method: 'DELETE' })
+}
+
+// ─── 优惠券库存 ──────────────────────────────────────────────
+
+/** 优惠券库存列表 */
+export async function getCouponInventoryList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/coupon/inventory?${qs}`)
+}
+
+// ─── 优惠消息流水 ────────────────────────────────────────────
+
+/** 优惠消息流水列表 */
+export async function getCouponMessageList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/coupon/messages?${qs}`)
+}
