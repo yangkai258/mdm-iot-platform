@@ -33,12 +33,16 @@ type SysRolePermission struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
+func (SysRolePermission) TableName() string { return "sys_role_permissions" }
+
 // SysUserRole 用户角色关联
 type SysUserRole struct {
-	ID      uint      `gorm:"primaryKey"`
-	UserID uint      `gorm:"index"`
-	RoleID uint      `gorm:"index"`
+	ID     uint `gorm:"primaryKey"`
+	UserID uint `gorm:"index"`
+	RoleID uint `gorm:"index"`
 }
+
+func (SysUserRole) TableName() string { return "sys_user_roles" }
 
 // WorkflowProcess 流程定义
 type WorkflowProcess struct {

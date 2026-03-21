@@ -26,6 +26,7 @@ type SysRole struct {
 	Name        string    `gorm:"type:varchar(50);uniqueIndex;not null" json:"name"`
 	Code        string    `gorm:"type:varchar(50);uniqueIndex;not null" json:"code"`
 	Description string    `gorm:"type:varchar(255)" json:"description"`
+	Sort        int       `gorm:"default:0" json:"sort"`
 	Status      int       `gorm:"default:1" json:"status"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
@@ -104,3 +105,16 @@ type SysLoginLog struct {
 }
 
 func (SysLoginLog) TableName() string { return "sys_login_logs" }
+
+// Knowledge 知识库条目
+type Knowledge struct {
+	ID       uint      `gorm:"primaryKey" json:"id"`
+	Category string    `gorm:"type:varchar(50);index" json:"category"`
+	Question string    `gorm:"type:text;not null" json:"question"`
+	Answer   string    `gorm:"type:text;not null" json:"answer"`
+	Status   int       `gorm:"default:1" json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func (Knowledge) TableName() string { return "knowledge" }

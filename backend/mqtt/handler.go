@@ -437,6 +437,74 @@ func (h *Handler) syncShadowToDB(deviceID string, isOnline bool, batteryLevel in
 		}
 		h.DB.Model(&shadow).Updates(updates)
 	}
+
+	// 设备上线时，同步期望状态（NRD/免打扰）到设备
+	if isOnline {
+		h.syncDesiredStateToDevice(deviceID)
+	}
+}
+
+// syncDesiredStateToDevice 设备上线时同步期望状态
+func (h *Handler) syncDesiredStateToDevice(deviceID string) {
+	if h.DB == nil {
+		return
+	}
+
+	var shadow models.DeviceShadow
+	if err := h.DB.Where("device_id = ?", deviceID).First(&shadow).Error; err != nil {
+		return
+	}
+
+	// 检查是否有期望状态需要同步
+	hasDesiredState := shadow.DesiredNRDEnabled || shadow.DesiredDNDEnabled ||
+		shadow.DesiredVolume != nil || shadow.DesiredBrightness != nil ||
+		shadow.DesiredPowerSave || shadow.DesiredVersion != ""
+
+	if !hasDesiredState {
+		return
+	}
+
+	// 构建期望状态同步指令
+	desiredCmd := map[string]interface{}{
+		"cmd_id":    fmt.Sprintf("desired-sync-%s-%d", deviceID, time.Now().Unix()),
+		"cmd_type":  "desired_sync",
+		"timestamp": time.Now().Format(time.RFC3339),
+	}
+
+	config := map[string]interface{}{}
+	if shadow.DesiredNRDEnabled {
+		config["nrd_enabled"] = true
+		config["nrd_start"] = shadow.DesiredNRDStart
+		config["nrd_end"] = shadow.DesiredNRDEnd
+	}
+	if shadow.DesiredDNDEnabled {
+		config["dnd_enabled"] = true
+		config["dnd_start"] = shadow.DesiredDNDStart
+		config["dnd_end"] = shadow.DesiredDNDEnd
+	}
+	if shadow.DesiredVolume != nil {
+		config["volume"] = *shadow.DesiredVolume
+	}
+	if shadow.DesiredBrightness != nil {
+		config["brightness"] = *shadow.DesiredBrightness
+	}
+	if shadow.DesiredPowerSave {
+		config["power_save"] = true
+	}
+	if shadow.DesiredVersion != "" {
+		config["desired_version"] = shadow.DesiredVersion
+	}
+
+	desiredCmd["config"] = config
+
+	// 通过 MQTT 下发到设备
+	if GlobalMQTTClient != nil {
+		if err := h.PublishCommand(GlobalMQTTClient, deviceID, desiredCmd); err != nil {
+			log.Printf("[MQTT] 同步期望状态到设备 %s 失败: %v", deviceID, err)
+		} else {
+			log.Printf("[MQTT] 设备 %s 上线，已同步期望状态: NRD=%v DND=%v", deviceID, shadow.DesiredNRDEnabled, shadow.DesiredDNDEnabled)
+		}
+	}
 }
 
 // StartHeartbeatChecker 启动心跳检查器（检测离线设备）
