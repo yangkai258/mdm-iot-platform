@@ -374,6 +374,12 @@ func main() {
 	apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
 	apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
 
+	// 合规策略 API（/api/v1/compliance/policies，标准 REST 端点）
+	apiV1.GET("/compliance/policies", complianceCtrlExtra.ListRules)
+	apiV1.POST("/compliance/policies", complianceCtrlExtra.CreateRule)
+	apiV1.PUT("/compliance/policies/:id", complianceCtrlExtra.UpdateRule)
+	apiV1.DELETE("/compliance/policies/:id", complianceCtrlExtra.DeleteRule)
+
 	// ============ 数据导入导出路由 ============
 	importExportCtrl := &controllers.ImportExportController{DB: db}
 	// 设备导入导出
