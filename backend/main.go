@@ -111,6 +111,9 @@ func main() {
 		&models.RolePermissionGroup{},
 		// 数据权限表
 		&models.DataScope{},
+		// 活动日志表
+		&models.ActivityLog{},
+		&models.LoginLog{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -166,6 +169,10 @@ func main() {
 	allowedOrigins := []string{
 		"http://localhost:3000",
 		"http://127.0.0.1:3000",
+		"http://localhost:5173",
+		"http://localhost:5174",
+		"http://127.0.0.1:5173",
+		"http://127.0.0.1:5174",
 	}
 	// 支持从环境变量扩展白名单，逗号分隔
 	if extra := os.Getenv("CORS_ALLOWED_ORIGINS"); extra != "" {
@@ -300,7 +307,19 @@ func main() {
 		sys.DELETE("/geofence/rules/:id", alertCtrl.DeleteGeofenceRule)
 		sys.GET("/geofence/alerts", alertCtrl.GetGeofenceAlerts)
 
-		sys.GET("/dashboard/stats", alertCtrl.GetDashboardStats)
+		// Dashboard 统计（使用独立的 DashboardController）
+		dashboardCtrl := &controllers.DashboardController{DB: db}
+		sys.GET("/dashboard/stats", dashboardCtrl.GetStats)
+		sys.GET("/dashboard/stats/simple", dashboardCtrl.GetStatsSimple)
+		sys.GET("/dashboard/activity-summary", dashboardCtrl.GetActivitySummary)
+
+		// 活动日志（审计日志）
+		activityLogCtrl := &controllers.ActivityLogController{DB: db}
+		loginLogCtrl := &controllers.LoginLogController{DB: db}
+		sys.GET("/activity-logs", activityLogCtrl.List)
+		sys.GET("/activity-logs/statistics", activityLogCtrl.GetStatistics)
+		sys.GET("/activity-logs/:id", activityLogCtrl.Get)
+		sys.GET("/login-logs", loginLogCtrl.List)
 	}
 
 	// 健康检查

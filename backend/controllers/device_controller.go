@@ -465,10 +465,12 @@ func (c *DeviceController) Bind(ctx *gin.Context) {
 type ListRequest struct {
 	Page            int    `form:"page"`
 	PageSize        int    `form:"page_size"`
-	Status          string `form:"status"`
-	LifecycleStatus int    `form:"lifecycle_status"`
+	Status          string `form:"status"`           // online/offline
+	LifecycleStatus int    `form:"lifecycle_status"` // 1:待激活 2:服役中 3:维修 4:报废
 	HardwareModel   string `form:"hardware_model"`
-	Search          string `form:"search"`
+	Search          string `form:"search"`           // 关键词搜索（device_id/sn_code/mac_address）
+	StartTime       string `form:"start_time"`      // 创建时间范围-开始
+	EndTime         string `form:"end_time"`        // 创建时间范围-结束
 }
 
 // List 获取设备列表（带分页和筛选）
@@ -497,7 +499,19 @@ func (c *DeviceController) List(ctx *gin.Context) {
 	}
 	if req.Search != "" {
 		search := "%" + req.Search + "%"
-		query = query.Where("device_id LIKE ? OR sn_code LIKE ?", search, search)
+		query = query.Where("device_id LIKE ? OR sn_code LIKE ? OR mac_address LIKE ?", search, search, search)
+	}
+
+	// 时间范围筛选
+	if req.StartTime != "" {
+		if t, err := time.Parse("2006-01-02 15:04:05", req.StartTime); err == nil {
+			query = query.Where("created_at >= ?", t)
+		}
+	}
+	if req.EndTime != "" {
+		if t, err := time.Parse("2006-01-02 15:04:05", req.EndTime); err == nil {
+			query = query.Where("created_at <= ?", t)
+		}
 	}
 
 	// 获取总数

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"mdm-backend/middleware"
 	"mdm-backend/models"
@@ -82,6 +83,23 @@ func (c *AuthController) Login(ctx *gin.Context) {
 	}
 	c.DB.Create(&loginLog)
 
+	// 记录活动日志（ActivityLog）
+	RecordActivity(c.DB, user.ID, user.Username, "login", "auth", user.ID, user.Username, map[string]interface{}{
+		"browser": ctx.GetHeader("User-Agent"),
+	}, ctx.ClientIP())
+
+	// 记录到独立 login_logs 表
+	loginLog2 := models.LoginLog{
+		UserID:    user.ID,
+		Username:  user.Username,
+		IP:        ctx.ClientIP(),
+		Status:    1,
+		Msg:       "登录成功",
+		TenantID:  user.TenantID,
+		LoginTime: time.Now(),
+	}
+	c.DB.Create(&loginLog2)
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"message": "success",
@@ -100,18 +118,34 @@ func (c *AuthController) Login(ctx *gin.Context) {
 
 // Logout 登出
 func (c *AuthController) Logout(ctx *gin.Context) {
-	userID, _ := ctx.Get("user_id")
-	username, _ := ctx.Get("username")
+	userIDVal, _ := ctx.Get("user_id")
+	usernameVal, _ := ctx.Get("username")
+	uid := uint(userIDVal.(int))
+	uname := usernameVal.(string)
 
 	// 记录登出日志
 	loginLog := models.SysLoginLog{
-		UserID:   uint(userID.(int)),
-		Username: username.(string),
+		UserID:   uid,
+		Username: uname,
 		IP:       ctx.ClientIP(),
 		Status:   1,
 		Msg:      "退出登录",
 	}
 	c.DB.Create(&loginLog)
+
+	// 记录活动日志
+	RecordActivity(c.DB, uid, uname, "logout", "auth", uid, uname, nil, ctx.ClientIP())
+
+	// 记录到独立 login_logs 表
+	loginLog2 := models.LoginLog{
+		UserID:    uid,
+		Username:  uname,
+		IP:        ctx.ClientIP(),
+		Status:    1,
+		Msg:       "退出登录",
+		LoginTime: time.Now(),
+	}
+	c.DB.Create(&loginLog2)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    0,
