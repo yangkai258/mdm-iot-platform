@@ -51,8 +51,22 @@ const routes = [
   },
   {
     path: '/pet',
-    name: 'Pet',
+    redirect: '/pet/config'
+  },
+  {
+    path: '/pet/config',
+    name: 'PetConfig',
     component: () => import('../views/PetConfig.vue')
+  },
+  {
+    path: '/pet/console',
+    name: 'PetConsole',
+    component: () => import('../views/pet/PetConsole.vue')
+  },
+  {
+    path: '/pet/conversations',
+    name: 'PetConversations',
+    component: () => import('../views/pet/PetConversations.vue')
   },
   {
     path: '/notifications',
