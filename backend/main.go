@@ -167,21 +167,24 @@ func main() {
 	r := gin.Default()
 
 	// CORS 白名单中间件
-	allowedOrigins := []string{
-		"http://localhost:3000",
-		"http://127.0.0.1:3000",
-		"http://localhost:5173",
-		"http://localhost:5174",
-		"http://127.0.0.1:5173",
-		"http://127.0.0.1:5174",
-	}
-	// 支持从环境变量扩展白名单，逗号分隔
+	// 优先从环境变量 CORS_ALLOWED_ORIGINS 读取（逗号分隔），为空时使用默认值
+	var allowedOrigins []string
 	if extra := os.Getenv("CORS_ALLOWED_ORIGINS"); extra != "" {
 		for _, o := range strings.Split(extra, ",") {
 			o = strings.TrimSpace(o)
 			if o != "" {
 				allowedOrigins = append(allowedOrigins, o)
 			}
+		}
+	} else {
+		// 开发环境默认值
+		allowedOrigins = []string{
+			"http://localhost:3000",
+			"http://127.0.0.1:3000",
+			"http://localhost:5173",
+			"http://localhost:5174",
+			"http://127.0.0.1:5173",
+			"http://127.0.0.1:5174",
 		}
 	}
 	r.Use(func(c *gin.Context) {
