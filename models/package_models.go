@@ -24,9 +24,46 @@ type Package struct {
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
+
+	// 兼容旧 API 响应（由 FillCompatFields 填充）
+	PlanCode    string `json:"plan_code,omitempty"`
+	PlanName    string `json:"plan_name,omitempty"`
+	UserQuota   int    `json:"user_quota,omitempty"`
+	DeviceQuota int    `json:"device_quota,omitempty"`
+	DeptQuota   int    `json:"dept_quota,omitempty"`
+	StoreQuota  int    `json:"store_quota,omitempty"`
 }
 
 func (Package) TableName() string { return "packages" }
+
+// FillCompatFields 填充兼容字段（用于 API 响应）
+// 修复：从 QuotaConfig JSONB 提取配额填充到兼容字段
+func (p *Package) FillCompatFields() {
+	p.PlanCode = p.PackageCode
+	p.PlanName = p.PackageName
+	if p.QuotaConfig != nil {
+		if v, ok := p.QuotaConfig["users"]; ok {
+			if f, ok := v.(float64); ok {
+				p.UserQuota = int(f)
+			}
+		}
+		if v, ok := p.QuotaConfig["devices"]; ok {
+			if f, ok := v.(float64); ok {
+				p.DeviceQuota = int(f)
+			}
+		}
+		if v, ok := p.QuotaConfig["departments"]; ok {
+			if f, ok := v.(float64); ok {
+				p.DeptQuota = int(f)
+			}
+		}
+		if v, ok := p.QuotaConfig["stores"]; ok {
+			if f, ok := v.(float64); ok {
+				p.StoreQuota = int(f)
+			}
+		}
+	}
+}
 
 // PackageQuota 套餐配额表（多租户版本）
 type PackageQuota struct {

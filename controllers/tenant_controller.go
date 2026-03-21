@@ -109,8 +109,9 @@ func (tc *TenantController) CreateTenant(c *gin.Context) {
 	}
 
 	// 验证套餐是否存在
-	var plan models.Plan
-	if err := tc.DB.Where("plan_code = ? AND is_active = ?", planCode, true).First(&plan).Error; err != nil {
+	// 修复：查询 packages 表，使用 package_code 字段
+	var pkg models.Package
+	if err := tc.DB.Where("package_code = ? AND is_active = ?", planCode, true).First(&pkg).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusBadRequest, gin.H{"code": "INVALID_PLAN", "message": "套餐不存在或未激活"})
 			return
@@ -119,12 +120,14 @@ func (tc *TenantController) CreateTenant(c *gin.Context) {
 		return
 	}
 
-	// 初始化租户配额
-	defaultQuota := models.TenantQuota{
-		UserCount:   plan.UserQuota,
-		DeviceCount: plan.DeviceQuota,
-		DeptCount:   plan.DeptQuota,
-		StoreCount:  plan.StoreQuota,
+	// 从 quota_config JSONB 提取配额
+	// 修复：package_quotas 表是每种配额类型一行，需要创建多条记录
+	quotaConfig := pkg.QuotaConfig
+	quotas := []models.TenantQuota{
+		{TenantID: "", PackageID: pkg.ID, QuotaType: "user", QuotaLimit: getQuotaFromConfig(quotaConfig, "users", 5), QuotaUsed: 0},
+		{TenantID: "", PackageID: pkg.ID, QuotaType: "device", QuotaLimit: getQuotaFromConfig(quotaConfig, "devices", 10), QuotaUsed: 0},
+		{TenantID: "", PackageID: pkg.ID, QuotaType: "dept", QuotaLimit: getQuotaFromConfig(quotaConfig, "departments", 1), QuotaUsed: 0},
+		{TenantID: "", PackageID: pkg.ID, QuotaType: "store", QuotaLimit: getQuotaFromConfig(quotaConfig, "stores", 1), QuotaUsed: 0},
 	}
 
 	// 解析过期时间
@@ -155,9 +158,11 @@ func (tc *TenantController) CreateTenant(c *gin.Context) {
 		return
 	}
 
-	// 创建租户配额记录
-	defaultQuota.TenantID = tenant.ID
-	if err := tc.DB.Create(&defaultQuota).Error; err != nil {
+	// 修复：创建多条租户配额记录（每种配额类型一行）
+	for i := range quotas {
+		quotas[i].TenantID = tenant.ID
+	}
+	if err := tc.DB.Create(&quotas).Error; err != nil {
 		// 配额创建失败不影响租户创建，只记录日志
 		c.JSON(http.StatusInternalServerError, gin.H{"code": "DB_ERROR", "message": "租户创建成功但配额初始化失败"})
 		return
@@ -168,7 +173,7 @@ func (tc *TenantController) CreateTenant(c *gin.Context) {
 		"message": "租户创建成功",
 		"data": gin.H{
 			"tenant": tenant,
-			"quota":  defaultQuota,
+			"quotas": quotas,
 		},
 	})
 }
@@ -469,8 +474,9 @@ func (tc *TenantController) ChangePlan(c *gin.Context) {
 		return
 	}
 
-	var plan models.Plan
-	if err := tc.DB.Where("id = ?", req.PlanID).First(&plan).Error; err != nil {
+	// 修复：查询 packages 表（不是 plans 表）
+	var pkg models.Package
+	if err := tc.DB.Where("id = ?", req.PlanID).First(&pkg).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"code": "PLAN_NOT_FOUND", "message": "套餐不存在"})
 			return
@@ -495,7 +501,8 @@ func (tc *TenantController) ChangePlan(c *gin.Context) {
 	}
 
 	if effectiveType == "immediate" {
-		if err := tc.DB.Model(&tenant).Update("plan", plan.PlanCode).Error; err != nil {
+		// 修复：使用 package_code（Tenant.Plan 存储 package_code）
+		if err := tc.DB.Model(&tenant).Update("plan", pkg.PackageCode).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"code": "DB_ERROR", "message": "变更失败"})
 			return
 		}
@@ -506,15 +513,18 @@ func (tc *TenantController) ChangePlan(c *gin.Context) {
 		settings = make(map[string]interface{})
 	}
 	settings["pending_plan_id"] = req.PlanID
-	settings["pending_plan_code"] = plan.PlanCode
+	settings["pending_plan_code"] = pkg.PackageCode
 	settings["effective_type"] = effectiveType
 	tc.DB.Model(&tenant).Update("settings", settings)
+
+	// 填充兼容字段用于响应
+	pkg.FillCompatFields()
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "套餐变更已提交",
 		"data": gin.H{
-			"plan_code":      plan.PlanCode,
+			"plan_code":      pkg.PackageCode,
 			"effective_type": effectiveType,
 		},
 	})
@@ -522,10 +532,14 @@ func (tc *TenantController) ChangePlan(c *gin.Context) {
 
 // ListPlans 获取套餐列表
 func (tc *TenantController) ListPlans(c *gin.Context) {
-	var plans []models.Plan
+	var plans []models.Package
 	if err := tc.DB.Where("is_active = ?", true).Order("sort_order ASC, id ASC").Find(&plans).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": "DB_ERROR", "message": "查询失败"})
 		return
+	}
+	// 填充兼容字段用于 API 响应
+	for i := range plans {
+		plans[i].FillCompatFields()
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": 0,
@@ -534,3 +548,17 @@ func (tc *TenantController) ListPlans(c *gin.Context) {
 }
 
 // ==================== 辅助函数 ====================
+
+// getQuotaFromConfig 从 quota_config JSONB 中提取配额值
+// 修复：从 JSONB 字段提取配额，而不是使用独立字段
+func getQuotaFromConfig(config map[string]interface{}, key string, defaultValue int) int {
+	if v, ok := config[key]; ok {
+		switch val := v.(type) {
+		case float64:
+			return int(val)
+		case int:
+			return val
+		}
+	}
+	return defaultValue
+}
