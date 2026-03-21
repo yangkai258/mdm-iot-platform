@@ -124,6 +124,8 @@ func main() {
 		&models.SysScheduleJob{},
 		// 报表记录表
 		&models.ReportRecord{},
+		// 邮件模板表
+		&models.EmailTemplate{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -317,6 +319,29 @@ func main() {
 		sys.GET("/dicts/:type", dictCtrl.GetDictByType)
 		sys.GET("/logs/operations", logCtrl.GetOperationLogs)
 		sys.GET("/logs/login", logCtrl.GetLoginLogs)
+
+		// ========== 系统参数配置 ==========
+		sysConfigCtrl := &controllers.SystemConfigController{DB: db}
+		if err := sysConfigCtrl.InitDefaultConfigs(); err != nil {
+			log.Printf("WARN: Init default configs failed: %v", err)
+		}
+		sys.GET("/system-configs", sysConfigCtrl.GetConfigs)
+		sys.GET("/system-configs/:key", sysConfigCtrl.GetConfigByKey)
+		sys.PUT("/system-configs", sysConfigCtrl.UpdateConfigs)
+		sys.DELETE("/system-configs/:key", sysConfigCtrl.DeleteConfig)
+
+		// ========== 邮件模板管理 ==========
+		emailTemplateService := services.NewEmailTemplateService(db)
+		if err := emailTemplateService.InitDefaultTemplates(); err != nil {
+			log.Printf("WARN: Init default email templates failed: %v", err)
+		}
+		emailTemplateCtrl := controllers.NewEmailTemplateController(emailTemplateService)
+		sys.GET("/email-templates", emailTemplateCtrl.List)
+		sys.GET("/email-templates/:id", emailTemplateCtrl.Get)
+		sys.POST("/email-templates", emailTemplateCtrl.Create)
+		sys.PUT("/email-templates/:id", emailTemplateCtrl.Update)
+		sys.DELETE("/email-templates/:id", emailTemplateCtrl.Delete)
+		sys.POST("/email-templates/preview", emailTemplateCtrl.RenderPreview)
 
 		// ========== 基础管理路由（档案/调度/字典）==========
 		// 字典类型

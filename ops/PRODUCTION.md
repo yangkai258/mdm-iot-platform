@@ -831,4 +831,432 @@ docker-compose logs mdm-backend | grep -i webhook
 | 会员 | `member_orders`, `member_upgrade_records` |
 
 **注意**：`AutoMigrate` 只会创建不存在的表，不会修改已存在表的结构。如需执行结构变更，请手动编写 ALTER TABLE 迁移脚本。
+
+---
+
+## 多租户部署说明
+
+### 概述
+
+MDM 平台支持多租户部署模式，通过 `tenant_id` 字段实现数据隔离。每个租户拥有独立的设备、会员、告警等数据，API 层面通过中间件自动注入租户上下文。
+
+### 租户隔离机制
+
+| 隔离维度 | 实现方式 |
+|----------|----------|
+| 数据隔离 | 所有数据表含 `tenant_id` 字段，GORM Scope 自动过滤 |
+| MQTT Topic | `/mdm/tenant/{tenant_id}/device/{device_id}/...` |
+| API 隔离 | 中间件从 JWT claims 提取 `tenant_id` |
+
+### 租户 API 请求示例
+
+```bash
+# 登录时获取租户 token
+curl -X POST http://localhost:8080/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"tenant_admin","password":"xxx","tenant_id":"tenant_001"}'
+
+# 请求时携带租户上下文
+curl http://localhost:8080/api/v1/devices \
+  -H "Authorization: Bearer <token>"
+# JWT Payload 中包含: { "tenant_id": "tenant_001", "user_id": "...", "role": "tenant_admin" }
+```
+
+### 部署多租户模式
+
+#### 方式一：共享 PostgreSQL + Schema 隔离（推荐）
+
+```bash
+# docker-compose.prod.yml 中配置多数据库
+services:
+  postgres:
+    environment:
+      POSTGRES_USER: mdm_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: mdm_db
+    command:
+      - postgres
+      - "-c"
+      - "search_path=public,tenant_a,tenant_b"
+```
+
+#### 方式二：独立 PostgreSQL 实例（高隔离需求）
+
+```bash
+# 为每个租户创建独立数据库
+docker exec mdm-postgres psql -U mdm_user -d mdm_db -c \
+  "CREATE DATABASE tenant_a_db;"
+docker exec mdm-postgres psql -U mdm_user -d mdm_db -c \
+  "CREATE DATABASE tenant_b_db;"
+```
+
+#### 方式三：多租户共用 Schema（成本优先）
+
+```bash
+# 通过 tenant_id 字段隔离，共用数据库实例
+# 环境变量配置
+TENANT_ISOLATION_MODE=shared_schema
+DEFAULT_TENANT_ID=default
+```
+
+### 环境变量说明
+
+| 环境变量 | 说明 | 可选值 |
+|----------|------|--------|
+| `TENANT_ISOLATION_MODE` | 租户隔离模式 | `shared_schema`(默认), `schema_per_tenant`, `db_per_tenant` |
+| `DEFAULT_TENANT_ID` | 默认租户 ID | `default` |
+| `MAX_TENANTS` | 最大租户数限制 | `100` |
+
+### 租户管理 API
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/tenants` | 获取租户列表 |
+| POST | `/api/v1/tenants` | 创建租户 |
+| GET | `/api/v1/tenants/:id` | 获取租户详情 |
+| PUT | `/api/v1/tenants/:id` | 更新租户配置 |
+| DELETE | `/api/v1/tenants/:id` | 删除租户 |
+| GET | `/api/v1/tenants/:id/stats` | 租户统计数据 |
+
+### 租户设备 Topic 规范
+
+```
+# 设备上报
+/mdm/tenant/{tenant_id}/device/{device_id}/up/status
+/mdm/tenant/{tenant_id}/device/{device_id}/up/property
+
+# 服务下发
+/mdm/tenant/{tenant_id}/device/{device_id}/down/cmd
+/mdm/tenant/{tenant_id}/device/{device_id}/down/notification
+/mdm/tenant/{tenant_id}/device/{device_id}/down/desired
+```
+
+### 常见问题
+
+**Q: 租户间数据泄露**
+
+确认所有 API 查询均通过 GORM Scope 过滤：
+```go
+// 正确：在查询时强制注入 tenant_id
+func ListDevices(db *gorm.DB, tenantID string) []Device {
+    return db.Scopes(TenantScope(tenantID)).Find(&devices)
+}
+
+// 错误：直接查询未过滤
+func ListDevices(db *gorm.DB) []Device {
+    return db.Find(&devices) // 危险！
+}
+```
+
+---
+
+## 单元测试运行说明
+
+### 概述
+
+MDM 平台使用 pytest 作为 Python 测试框架，P0 测试覆盖核心功能回归。测试代码位于 `testing/p0_tests/` 目录。
+
+### 前置条件
+
+```bash
+# 确保已在宿主机安装 Python 3.8+ 和 pip
+python --version   # >= 3.8
+
+# 安装测试依赖
+cd C:\Users\YKing\.openclaw\workspace\mdm-project\backend\testing\p0_tests
+pip install -r requirements.txt
+```
+
+### 运行测试
+
+#### 方式一：直接运行（需要 MDM 服务已启动）
+
+```bash
+# 方式一：直接运行（需要 MDM 服务已启动）
+
+# 设置环境变量（可选，有默认值）
+set MDM_API_BASE_URL=http://localhost:8080
+set TEST_USERNAME=admin
+set TEST_PASSWORD=admin123
+
+# 运行所有 P0 测试
+pytest p0_tests/ -v
+
+# 运行单个测试文件
+pytest p0_tests/test_jwt_config.py -v
+pytest p0_tests/test_cors.py -v
+pytest p0_tests/test_mqtt_command.py -v
+pytest p0_tests/test_login_enter_key.py -v
+
+# 带详细输出
+pytest p0_tests/ -v --tb=short
+
+# 生成 HTML 报告
+pytest p0_tests/ -v --html=report.html --self-contained-html
+```
+
+#### 方式二：Docker 容器内运行
+
+```bash
+# 启动测试容器（需要服务已启动）
+docker run --rm \
+  -v C:\Users\YKing\.openclaw\workspace\mdm-project\backend:/app \
+  -w /app/testing/p0_tests \
+  -e MDM_API_BASE_URL=http://host.docker.internal:8080 \
+  python:3.11-slim \
+  sh -c "pip install -r requirements.txt && pytest . -v"
+```
+
+#### 方式三：通过 docker-compose 自动运行
+
+```bash
+# 在项目根目录执行
+docker-compose -f docker-compose.prod.yml up -d
+docker-compose -f docker-compose.prod.yml exec backend \
+  sh -c "cd /app/testing/p0_tests && pytest . -v"
+```
+
+### 环境变量
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `MDM_API_BASE_URL` | `http://localhost:8080` | 后端 API 地址 |
+| `MDM_BACKEND_PATH` | `项目目录/backend` | 后端源码路径 |
+| `TEST_USERNAME` | `admin` | 测试用户名 |
+| `TEST_PASSWORD` | `admin123` | 测试密码 |
+| `MQTT_BROKER` | `tcp://localhost:1883` | MQTT Broker 地址 |
+| `MQTT_USERNAME` | `admin` | MQTT 用户名 |
+| `MQTT_PASSWORD` | `public` | MQTT 密码 |
+
+### 测试用例说明
+
+| 测试文件 | 测试目标 | 覆盖范围 |
+|----------|----------|----------|
+| `test_jwt_config.py` | JWT 密钥配置 | 硬编码密钥检测、环境变量生效验证 |
+| `test_cors.py` | CORS 安全配置 | 跨域响应头检查、预检请求验证 |
+| `test_mqtt_command.py` | MQTT 指令下发 | 离线设备处理、指令参数校验 |
+| `test_login_enter_key.py` | 登录页 Enter 键 | Vue 事件绑定分析 |
+| `test_device_shadow.py` | 设备影子 | Redis 设备状态读写 |
+| `test_alert_trigger.py` | 告警触发 | 告警规则条件匹配 |
+| `test_notification.py` | 通知下发 | MQTT 通知发送 |
+| `test_policy_management.py` | 合规策略 | 策略 CRUD 和执行 |
+
+### CI/CD 集成
+
+在 CI pipeline 中集成测试：
+
+```yaml
+# .github/workflows/test.yml
+- name: Run P0 Tests
+  run: |
+    docker-compose -f docker-compose.prod.yml up -d
+    sleep 30  # 等待服务就绪
+    pytest testing/p0_tests/ -v --junitxml=report.xml
+  env:
+    MDM_API_BASE_URL: http://localhost:8080
+```
+
+### 常见问题
+
+**Q: 测试提示 "connection refused"**
+
+确认 MDM 后端服务已启动并监听 8080 端口：
+```bash
+docker-compose ps
+curl http://localhost:8080/health
+```
+
+**Q: JWT 测试失败**
+
+确认环境变量 `JWT_SECRET` 已正确设置（非默认值）：
+```bash
+docker-compose exec backend env | grep JWT_SECRET
+```
+
+---
+
+## 日志配置说明
+
+### 日志架构
+
+MDM 平台采用分层日志架构：
+
+```
+应用日志 (Gin/Zap)
+    ↓
+标准输出 (stdout)
+    ↓
+Docker 日志驱动 (json-file)
+    ↓
+宿主机日志文件 /var/lib/docker/containers/
+```
+
+### 日志级别配置
+
+| 环境变量 | 可选值 | 默认值 | 说明 |
+|----------|--------|--------|------|
+| `GIN_MODE` | `debug`, `release`, `test` | `release` | Gin 框架模式 |
+| `LOG_LEVEL` | `debug`, `info`, `warn`, `error` | `info` | 应用日志级别 |
+| `LOG_FORMAT` | `json`, `console` | `json` | 日志输出格式 |
+
+### 配置示例
+
+```bash
+# .env 文件中添加
+GIN_MODE=release
+LOG_LEVEL=info
+LOG_FORMAT=json
+```
+
+### 应用日志配置
+
+```go
+// Gin 中间件日志配置 (main.go)
+import "github.com/gin-contrib/zap"
+
+logger, _ := zap.NewProduction()
+defer logger.Sync()
+
+router.Use(zap.Ginzap(logger, time.RFC3339, true))
+router.Use(zap.RecoveryWithZap(logger, true))
+```
+
+### 日志字段规范
+
+所有日志使用 JSON 格式，包含以下标准字段：
+
+```json
+{
+  "level": "info",
+  "ts": "2026-03-22T00:40:00.000+08:00",
+  "caller": "handler.go:42",
+  "msg": "device command sent",
+  "tenant_id": "tenant_001",
+  "device_id": "device-abc-123",
+  "trace_id": "trace-xyz-789",
+  "duration_ms": 15
+}
+```
+
+### 查看日志
+
+```bash
+# 宿主机层面查看容器日志
+docker logs mdm-backend --tail=100 -f
+
+# 使用 docker-compose 查看
+docker-compose logs -f mdm-backend
+docker-compose logs --tail=200 mdm-backend | grep "error"
+
+# 过滤特定租户/设备日志
+docker-compose logs -f mdm-backend | grep "tenant_001"
+
+# 导出日志到文件
+docker-compose logs mdm-backend > backend.log 2>&1
+```
+
+### Nginx 日志配置
+
+```nginx
+# nginx/conf.d/default.conf
+
+http {
+    # 访问日志格式
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for" '
+                    'rt=$request_time uct="$upstream_connect_time" '
+                    'uht="$upstream_header_time" urt="$upstream_response_time"';
+
+    access_log /var/log/nginx/access.log main;
+
+    # 错误日志级别
+    error_log /var/log/nginx/error.log warn;
+
+    # 日志轮转（通过 logrotate 配置）
+    # /etc/logrotate.d/nginx
+}
+```
+
+### 日志轮转配置
+
+```bash
+# /etc/logrotate.d/mdm
+/data/logs/*.log {
+    daily
+    missingok
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    create 0640 root root
+    sharedscripts
+    postrotate
+        docker-compose -f /path/to/docker-compose.yml kill -s USR1 mdm-nginx-proxy
+    endscript
+}
+```
+
+### 结构化日志分析
+
+```bash
+# 使用 jq 分析 JSON 日志
+docker-compose logs -f mdm-backend --tail=500 | jq '. | select(.level=="error")'
+
+# 统计错误类型
+docker-compose logs mdm-backend --since=1h | jq -r '.msg' | sort | uniq -c | sort -rn
+
+# 慢请求分析（>1s）
+docker-compose logs mdm-backend --since=1h | jq -r 'select(.duration_ms > 1000) | .msg'
+```
+
+### ELK/Grafana Loki 集成
+
+```yaml
+# docker-compose.prod.yml 添加日志收集
+services:
+  # ... 其他服务 ...
+
+  # Loki 日志收集（替代默认 json-file 驱动）
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./logs:/var/log/mdm
+      - ./promtail.yaml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+```
+
+```yaml
+# promtail.yaml
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: mdm-backend
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: mdm-backend
+          __path__: /var/log/mdm/backend/*.log
+```
+
+### 日志保留策略
+
+| 日志类型 | 保留时间 | 存储位置 |
+|----------|----------|----------|
+| 应用日志 | 30 天 | `/data/logs/app/` |
+| Nginx 访问日志 | 90 天 | `/data/logs/nginx/` |
+| Nginx 错误日志 | 90 天 | `/data/logs/nginx/` |
+| EMQX 日志 | 7 天 | `/data/emqx/log/` |
+| Docker 容器日志 | 7 天 | `/var/lib/docker/containers/` |
+
+**注意**：生产环境建议将日志推送至对象存储（S3/OSS）或日志服务（ELK、Grafana Loki），不要仅依赖本地磁盘存储。
 ```

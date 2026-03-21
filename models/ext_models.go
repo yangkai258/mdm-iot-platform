@@ -94,12 +94,30 @@ type WorkflowHistory struct {
 
 // SysConfig 系统配置
 type SysConfig struct {
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	ConfigKey   string    `gorm:"size:100;uniqueIndex" json:"config_key"`
+	ConfigVal   string    `gorm:"type:text" json:"config_val"`
+	ConfigType  string    `gorm:"size:20" json:"config_type"` // string/int/json/boolean
+	Category    string    `gorm:"size:20;index;default:'basic'" json:"category"` // basic/email/sms/push
+	Remark      string    `gorm:"size:255" json:"remark"`
+	Status      int       `gorm:"default:1" json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+// EmailTemplate 邮件模板
+type EmailTemplate struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
-	ConfigKey string    `gorm:"size:100;uniqueIndex" json:"config_key"`
-	ConfigVal string    `gorm:"type:text" json:"config_val"`
-	ConfigType string   `gorm:"size:20" json:"config_type"` // string/int/json/boolean
+	TenantID  string    `gorm:"type:uuid;index" json:"tenant_id"`
+	Name      string    `gorm:"size:100;not null" json:"name"`
+	Code      string    `gorm:"size:50;uniqueIndex;not null" json:"code"` // 模板编码，如 "device_alert"
+	Subject   string    `gorm:"size:255;not null" json:"subject"`         // 邮件主题，支持变量 {{.username}}
+	Body      string    `gorm:"type:text;not null" json:"body"`          // 邮件正文，支持变量
+	Variables string    `gorm:"type:text" json:"variables"`              // 变量列表，JSON 格式如 ["username","device_name"]
+	Status    int       `gorm:"default:1" json:"status"`                 // 1:启用 0:禁用
 	Remark    string    `gorm:"size:255" json:"remark"`
-	Status    int       `gorm:"default:1" json:"status"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+func (EmailTemplate) TableName() string { return "email_templates" }
