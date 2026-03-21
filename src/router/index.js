@@ -44,10 +44,35 @@ const routes = [
     name: 'Alert',
     component: () => import('../views/Alert.vue')
   },
+  // 会员管理路由
   {
     path: '/members',
-    name: 'Members',
-    component: () => import('../views/Member.vue')
+    redirect: '/members/list'
+  },
+  {
+    path: '/members/list',
+    name: 'MemberList',
+    component: () => import('../views/members/MemberList.vue')
+  },
+  {
+    path: '/members/levels',
+    name: 'MemberLevels',
+    component: () => import('../views/members/MemberLevels.vue')
+  },
+  {
+    path: '/members/coupons',
+    name: 'MemberCoupons',
+    component: () => import('../views/members/MemberCoupons.vue')
+  },
+  {
+    path: '/members/points',
+    name: 'MemberPoints',
+    component: () => import('../views/members/MemberPoints.vue')
+  },
+  {
+    path: '/members/promotions',
+    name: 'MemberPromotions',
+    component: () => import('../views/members/MemberPromotions.vue')
   },
   {
     path: '/pet',
