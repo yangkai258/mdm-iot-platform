@@ -105,6 +105,24 @@ const menuItems = [
     ]
   },
   {
+    key: '/tenants',
+    label: '系统管理',
+    children: [
+      { key: '/tenants/approval', label: '租户入驻审核' },
+      { key: '/tenants/management', label: '租户系统管理' },
+      { key: '/tenants/public-archives', label: '公共档案' },
+      { key: '/tenants/system-info', label: '系统信息' }
+    ]
+  },
+  {
+    key: '/permissions',
+    label: '多维权限',
+    children: [
+      { key: '/permissions/groups', label: '权限组管理' },
+      { key: '/permissions/data-config', label: '数据权限配置' }
+    ]
+  },
+  {
     key: '/notifications',
     label: '通知管理',
     children: [

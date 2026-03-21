@@ -1,6 +1,13 @@
 <template>
-  <div class="dashboard-container">
-    <a-row :gutter="16">
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>工作台</a-breadcrumb-item>
+    </a-breadcrumb>
+
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
       <a-col :span="6">
         <a-card class="stat-card">
           <a-statistic title="总设备数" :value="stats.total_devices">
@@ -31,6 +38,7 @@
       </a-col>
     </a-row>
 
+    <!-- 最近告警卡片 -->
     <a-row :gutter="16" style="margin-top: 16px;">
       <a-col :span="12">
         <a-card title="设备状态分布">
@@ -99,7 +107,7 @@ const loadStats = async () => {
     if (data.code === 0) {
       stats.value = data.data
     }
-    
+
     // Load recent alerts
     const alertRes = await fetch('/api/v1/alerts?status=1', {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -119,8 +127,18 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.dashboard-container {
-  padding: 16px;
+.page-container {
+  padding: 20px 24px;
+  min-height: calc(100vh - 64px);
+  background: #f5f7fa;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.stats-row {
+  margin-bottom: 16px;
 }
 
 .stat-card {

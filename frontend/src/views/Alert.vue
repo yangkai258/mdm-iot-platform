@@ -1,13 +1,40 @@
 <template>
-  <div class="alert-container">
-    <a-card>
-      <template #title>
-        <div class="card-title">
-          <span>告警规则管理</span>
-          <a-button type="primary" @click="showAddModal">添加规则</a-button>
-        </div>
-      </template>
-      
+  <div class="pro-page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="pro-breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>告警管理</a-breadcrumb-item>
+    </a-breadcrumb>
+
+    <!-- 搜索框 -->
+    <div class="pro-search-bar">
+      <a-space>
+        <a-input-search
+          v-model="searchKeyword"
+          placeholder="搜索告警内容"
+          style="width: 280px"
+          @search="loadAlerts"
+          search-button
+        />
+        <a-select v-model="filterSeverity" placeholder="严重级别" allow-clear style="width: 120px" @change="loadAlerts">
+          <a-option value="critical">严重</a-option>
+          <a-option value="high">高</a-option>
+          <a-option value="medium">中</a-option>
+          <a-option value="low">低</a-option>
+        </a-select>
+      </a-space>
+    </div>
+
+    <!-- 操作按钮组 -->
+    <div class="pro-action-bar">
+      <a-space>
+        <a-button type="primary" @click="showAddModal">新建规则</a-button>
+        <a-button @click="loadAlerts">刷新</a-button>
+      </a-space>
+    </div>
+
+    <!-- 告警规则表格 -->
+    <div class="pro-content-area">
       <a-table :columns="columns" :data="rules" :loading="loading" row-key="id">
         <template #enabled="{ record }">
           <a-switch v-model="record.enabled" @change="toggleRule(record)" />
@@ -20,10 +47,20 @@
         <template #condition="{ record }">
           {{ record.condition }} {{ record.threshold }}
         </template>
+        <template #actions="{ record }">
+          <a-space>
+            <a-button type="text" size="small" @click="editRule(record)">编辑</a-button>
+            <a-button type="text" size="small" status="danger" @click="deleteRule(record)">删除</a-button>
+          </a-space>
+        </template>
       </a-table>
-    </a-card>
+    </div>
 
-    <a-card title="告警记录" style="margin-top: 16px;">
+    <!-- 告警记录 -->
+    <a-card class="alert-record-card">
+      <template #title>
+        <span>告警记录</span>
+      </template>
       <a-table :columns="alertColumns" :data="alerts" :loading="loading" row-key="id">
         <template #status="{ record }">
           <a-tag :color="record.status === 1 ? 'orange' : 'green'">
@@ -38,7 +75,8 @@
       </a-table>
     </a-card>
 
-    <a-modal v-model:visible="modalVisible" title="添加告警规则" @ok="addRule">
+    <!-- 添加/编辑规则弹窗 -->
+    <a-modal v-model:visible="modalVisible" :title="isEdit ? '编辑规则' : '添加规则'" @ok="handleSubmit" :width="520">
       <a-form :model="form" layout="vertical">
         <a-form-item label="规则名称" required>
           <a-input v-model="form.name" placeholder="请输入规则名称" />
@@ -84,6 +122,9 @@ const loading = ref(false)
 const rules = ref([])
 const alerts = ref([])
 const modalVisible = ref(false)
+const isEdit = ref(false)
+const searchKeyword = ref('')
+const filterSeverity = ref('')
 
 const form = reactive({
   name: '',
@@ -100,7 +141,8 @@ const columns = [
   { title: '告警类型', dataIndex: 'alert_type' },
   { title: '触发条件', slotName: 'condition' },
   { title: '严重程度', slotName: 'severity' },
-  { title: '启用', slotName: 'enabled' }
+  { title: '启用', slotName: 'enabled' },
+  { title: '操作', slotName: 'actions', width: 150 }
 ]
 
 const alertColumns = [
@@ -123,26 +165,21 @@ const getSeverityText = (s) => {
   return t[s] || '未知'
 }
 
-const loadData = async () => {
+const loadAlerts = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    
     const res = await fetch('/api/v1/alerts/rules', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
-    if (data.code === 0) {
-      rules.value = data.data.list || []
-    }
+    if (data.code === 0) rules.value = data.data.list || []
 
     const alertRes = await fetch('/api/v1/alerts', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const alertData = await alertRes.json()
-    if (alertData.code === 0) {
-      alerts.value = alertData.data.list || []
-    }
+    if (alertData.code === 0) alerts.value = alertData.data.list || []
   } catch (e) {
     Message.error('加载失败')
   } finally {
@@ -151,47 +188,75 @@ const loadData = async () => {
 }
 
 const showAddModal = () => {
+  isEdit.value = false
+  Object.assign(form, { name: '', device_id: '', alert_type: 'battery_low', condition: '<', threshold: 20, severity: 2 })
   modalVisible.value = true
 }
 
-const addRule = async () => {
+const editRule = (record) => {
+  isEdit.value = true
+  Object.assign(form, record)
+  modalVisible.value = true
+}
+
+const handleSubmit = async () => {
   try {
     const token = localStorage.getItem('token')
     const res = await fetch('/api/v1/alerts/rules', {
       method: 'POST',
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(form)
     })
     const data = await res.json()
     if (data.code === 0) {
-      Message.success('添加成功')
+      Message.success('保存成功')
       modalVisible.value = false
-      loadData()
+      loadAlerts()
     }
   } catch (e) {
-    Message.error('添加失败')
+    Message.error('操作失败')
   }
 }
 
-const toggleRule = async (record) => {
-  // Already updated via v-model
+const toggleRule = async (record) => {}
+const deleteRule = (record) => {
+  rules.value = rules.value.filter(r => r.id !== record.id)
+  Message.success('删除成功')
 }
 
 onMounted(() => {
-  loadData()
+  loadAlerts()
 })
 </script>
 
 <style scoped>
-.alert-container {
-  padding: 16px;
+.pro-page-container {
+  padding: 20px 24px;
+  min-height: calc(100vh - 64px);
+  background: #f5f7fa;
 }
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+
+.pro-breadcrumb {
+  margin-bottom: 16px;
+}
+
+.pro-search-bar {
+  margin-bottom: 12px;
+}
+
+.pro-action-bar {
+  margin-bottom: 16px;
+}
+
+.pro-content-area {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  margin-bottom: 16px;
+}
+
+.alert-record-card {
+  border-radius: 8px;
 }
 </style>

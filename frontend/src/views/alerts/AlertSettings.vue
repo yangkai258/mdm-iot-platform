@@ -1,275 +1,142 @@
 <template>
-  <div class="page-container">
-<a-row :gutter="16">
-          <!-- 通知渠道设置 -->
-          <a-col :span="12">
-            <a-card title="通知渠道设置" class="settings-card">
-              <a-form :model="notifySettings" layout="vertical">
-                <a-form-item label="邮件通知">
-                  <a-switch v-model="notifySettings.email.enabled" />
-                </a-form-item>
-                <a-form-item v-if="notifySettings.email.enabled" label="收件邮箱">
-                  <a-input v-model="notifySettings.email.recipients" placeholder="多个邮箱用逗号分隔" />
-                </a-form-item>
-                <a-form-item v-if="notifySettings.email.enabled" label="SMTP 服务器">
-                  <a-input v-model="notifySettings.email.smtp_host" placeholder="smtp.example.com" />
-                </a-form-item>
-                <a-form-item v-if="notifySettings.email.enabled" label="SMTP 端口">
-                  <a-input-number v-model="notifySettings.email.smtp_port" :min="1" :max="65535" placeholder="587" style="width: 100%" />
-                </a-form-item>
+  <div class="pro-page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="pro-breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>告警管理</a-breadcrumb-item>
+      <a-breadcrumb-item>告警设置</a-breadcrumb-item>
+    </a-breadcrumb>
 
-                <a-divider />
+    <!-- 搜索框 -->
+    <div class="pro-search-bar">
+      <a-input-search v-model="searchKeyword" placeholder="搜索设置项" style="width: 280px" search-button @search="loadSettings" />
+    </div>
 
-                <a-form-item label="短信通知">
-                  <a-switch v-model="notifySettings.sms.enabled" />
-                </a-form-item>
-                <a-form-item v-if="notifySettings.sms.enabled" label="接收手机号">
-                  <a-input v-model="notifySettings.sms.recipients" placeholder="多个手机号用逗号分隔" />
-                </a-form-item>
-                <a-form-item v-if="notifySettings.sms.enabled" label="短信服务商">
-                  <a-select v-model="notifySettings.sms.provider">
-                    <a-option value="aliyun">阿里云</a-option>
-                    <a-option value="tencent">腾讯云</a-option>
-                    <a-option value="huawei">华为云</a-option>
-                  </a-select>
-                </a-form-item>
+    <!-- 操作按钮组 -->
+    <div class="pro-action-bar">
+      <a-space>
+        <a-button type="primary" @click="showAddModal">新增设置</a-button>
+        <a-button @click="loadSettings">刷新</a-button>
+      </a-space>
+    </div>
 
-                <a-divider />
-
-                <a-form-item label="Webhook 通知">
-                  <a-switch v-model="notifySettings.webhook.enabled" />
-                </a-form-item>
-                <a-form-item v-if="notifySettings.webhook.enabled" label="Webhook URL">
-                  <a-input v-model="notifySettings.webhook.url" placeholder="https://your-webhook-endpoint.com/alerts" />
-                </a-form-item>
-                <a-form-item v-if="notifySettings.webhook.enabled" label="Webhook 密钥">
-                  <a-input-password v-model="notifySettings.webhook.secret" placeholder="用于签名验证" />
-                </a-form-item>
-
-                <a-divider />
-
-                <a-form-item label="应用内通知">
-                  <a-switch v-model="notifySettings.inApp.enabled" />
-                </a-form-item>
-              </a-form>
-            </a-card>
-          </a-col>
-
-          <!-- 告警策略设置 -->
-          <a-col :span="12">
-            <a-card title="告警策略设置" class="settings-card">
-              <a-form :model="policySettings" layout="vertical">
-                <a-form-item label="告警升级">
-                  <a-switch v-model="policySettings.escalation.enabled" />
-                </a-form-item>
-                <a-form-item v-if="policySettings.escalation.enabled" label="升级时间 (分钟)">
-                  <a-input-number v-model="policySettings.escalation.timeout" :min="5" :max="1440" style="width: 100%" />
-                  <template #extra>告警未处理超过此时间后自动升级</template>
-                </a-form-item>
-                <a-form-item v-if="policySettings.escalation.enabled" label="升级通知">
-                  <a-checkbox-group v-model="policySettings.escalation.notify_levels">
-                    <a-checkbox value="manager">主管</a-checkbox>
-                    <a-checkbox value="admin">管理员</a-checkbox>
-                    <a-checkbox value="all">所有人</a-checkbox>
-                  </a-checkbox-group>
-                </a-form-item>
-
-                <a-divider />
-
-                <a-form-item label="告警抑制 (相同告警)">
-                  <a-switch v-model="policySettings.suppression.enabled" />
-                </a-form-item>
-                <a-form-item v-if="policySettings.suppression.enabled" label="抑制时间 (分钟)">
-                  <a-input-number v-model="policySettings.suppression.minutes" :min="1" :max="1440" style="width: 100%" />
-                  <template #extra>相同告警在此时间内不会重复通知</template>
-                </a-form-item>
-
-                <a-divider />
-
-                <a-form-item label="告警静默期">
-                  <a-switch v-model="policySettings.silentPeriod.enabled" />
-                </a-form-item>
-                <a-form-item v-if="policySettings.silentPeriod.enabled" label="静默开始时间">
-                  <a-time-picker v-model="policySettings.silentPeriod.start" format="HH:mm" style="width: 100%" />
-                </a-form-item>
-                <a-form-item v-if="policySettings.silentPeriod.enabled" label="静默结束时间">
-                  <a-time-picker v-model="policySettings.silentPeriod.end" format="HH:mm" style="width: 100%" />
-                </a-form-item>
-              </a-form>
-            </a-card>
-          </a-col>
-        </a-row>
-
-        <a-row :gutter="16" style="margin-top: 16px;">
-          <!-- 告警阈值设置 -->
-          <a-col :span="12">
-            <a-card title="告警阈值设置" class="settings-card">
-              <a-form :model="thresholdSettings" layout="vertical">
-                <a-form-item label="设备离线告警">
-                  <a-switch v-model="thresholdSettings.deviceOffline.enabled" />
-                </a-form-item>
-                <a-form-item v-if="thresholdSettings.deviceOffline.enabled" label="离线时间阈值 (秒)">
-                  <a-input-number v-model="thresholdSettings.deviceOffline.threshold" :min="30" :max="3600" style="width: 100%" />
-                </a-form-item>
-
-                <a-divider />
-
-                <a-form-item label="CPU 使用率告警">
-                  <a-switch v-model="thresholdSettings.cpuUsage.enabled" />
-                </a-form-item>
-                <a-form-item v-if="thresholdSettings.cpuUsage.enabled" label="CPU 使用率阈值 (%)">
-                  <a-input-number v-model="thresholdSettings.cpuUsage.threshold" :min="50" :max="100" style="width: 100%" />
-                </a-form-item>
-
-                <a-divider />
-
-                <a-form-item label="内存使用率告警">
-                  <a-switch v-model="thresholdSettings.memoryUsage.enabled" />
-                </a-form-item>
-                <a-form-item v-if="thresholdSettings.memoryUsage.enabled" label="内存使用率阈值 (%)">
-                  <a-input-number v-model="thresholdSettings.memoryUsage.threshold" :min="50" :max="100" style="width: 100%" />
-                </a-form-item>
-
-                <a-divider />
-
-                <a-form-item label="磁盘使用率告警">
-                  <a-switch v-model="thresholdSettings.diskUsage.enabled" />
-                </a-form-item>
-                <a-form-item v-if="thresholdSettings.diskUsage.enabled" label="磁盘使用率阈值 (%)">
-                  <a-input-number v-model="thresholdSettings.diskUsage.threshold" :min="50" :max="100" style="width: 100%" />
-                </a-form-item>
-              </a-form>
-            </a-card>
-          </a-col>
-
-          <!-- 其他设置 -->
-          <a-col :span="12">
-            <a-card title="其他设置" class="settings-card">
-              <a-form :model="otherSettings" layout="vertical">
-                <a-form-item label="告警历史保留天数">
-                  <a-input-number v-model="otherSettings.retentionDays" :min="7" :max="365" style="width: 100%" />
-                </a-form-item>
-                <a-form-item label="每日告警报告">
-                  <a-switch v-model="otherSettings.dailyReport" />
-                </a-form-item>
-                <a-form-item v-if="otherSettings.dailyReport" label="报告发送时间">
-                  <a-time-picker v-model="otherSettings.reportTime" format="HH:mm" style="width: 100%" />
-                </a-form-item>
-                <a-form-item label="允许移动端查看告警">
-                  <a-switch v-model="otherSettings.mobileAccess" />
-                </a-form-item>
-                <a-form-item label="告警声音提醒">
-                  <a-switch v-model="otherSettings.soundAlert" />
-                </a-form-item>
-              </a-form>
-            </a-card>
-          </a-col>
-        </a-row>
-
-        <!-- 保存按钮 -->
-        <a-card class="save-card">
+    <!-- 数据表格 -->
+    <div class="pro-content-area">
+      <a-table :columns="columns" :data="settings" :loading="loading" row-key="id">
+        <template #enabled="{ record }">
+          <a-switch v-model="record.enabled" @change="toggleSetting(record)" />
+        </template>
+        <template #type="{ record }">
+          <a-tag :color="getTypeColor(record.type)">{{ getTypeText(record.type) }}</a-tag>
+        </template>
+        <template #actions="{ record }">
           <a-space>
-            <a-button type="primary" @click="saveSettings">保存设置</a-button>
-            <a-button @click="resetSettings">重置</a-button>
+            <a-button type="text" size="small" @click="editSetting(record)">编辑</a-button>
+            <a-button type="text" size="small" status="danger" @click="deleteSetting(record)">删除</a-button>
           </a-space>
-        </a-card>
-</div>
+        </template>
+      </a-table>
+    </div>
+
+    <!-- 添加/编辑设置弹窗 -->
+    <a-modal v-model:visible="modalVisible" :title="isEdit ? '编辑设置' : '新增设置'" @ok="handleSubmit" :width="520">
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="设置名称" required>
+          <a-input v-model="form.name" placeholder="请输入设置名称" />
+        </a-form-item>
+        <a-form-item label="设置类型" required>
+          <a-select v-model="form.type" placeholder="选择类型">
+            <a-option value="email">邮件通知</a-option>
+            <a-option value="sms">短信通知</a-option>
+            <a-option value="webhook">Webhook</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="配置值">
+          <a-input v-model="form.config_value" placeholder="请输入配置值" />
+        </a-form-item>
+        <a-form-item label="描述">
+          <a-textarea v-model="form.description" placeholder="请输入描述" :rows="3" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
+const settings = ref([])
+const modalVisible = ref(false)
+const isEdit = ref(false)
+const searchKeyword = ref('')
 
-const notifySettings = reactive({
-  email: { enabled: true, recipients: '', smtp_host: '', smtp_port: 587 },
-  sms: { enabled: false, recipients: '', provider: 'aliyun' },
-  webhook: { enabled: false, url: '', secret: '' },
-  inApp: { enabled: true }
+const form = reactive({
+  name: '', type: 'email', config_value: '', description: ''
 })
 
-const policySettings = reactive({
-  escalation: { enabled: false, timeout: 30, notify_levels: ['admin'] },
-  suppression: { enabled: true, minutes: 5 },
-  silentPeriod: { enabled: false, start: '', end: '' }
-})
+const columns = [
+  { title: '设置名称', dataIndex: 'name' },
+  { title: '类型', slotName: 'type', width: 120 },
+  { title: '配置值', dataIndex: 'config_value', ellipsis: true },
+  { title: '描述', dataIndex: 'description', ellipsis: true },
+  { title: '启用', slotName: 'enabled', width: 100 },
+  { title: '操作', slotName: 'actions', width: 150 }
+]
 
-const thresholdSettings = reactive({
-  deviceOffline: { enabled: true, threshold: 90 },
-  cpuUsage: { enabled: true, threshold: 80 },
-  memoryUsage: { enabled: true, threshold: 85 },
-  diskUsage: { enabled: true, threshold: 90 }
-})
-
-const otherSettings = reactive({
-  retentionDays: 90,
-  dailyReport: false,
-  reportTime: '',
-  mobileAccess: true,
-  soundAlert: true
-})
-
-if (routes[key]) router.push(routes[key])
-  selectedKeys.value = [key]
-}
+const getTypeColor = (t) => ({ email: 'blue', sms: 'green', webhook: 'purple' }[t] || 'gray')
+const getTypeText = (t) => ({ email: '邮件通知', sms: '短信通知', webhook: 'Webhook' }[t] || t)
 
 const loadSettings = async () => {
   loading.value = true
   try {
-    const res = await axios.get('/api/v1/alerts/settings')
-    const data = res.data
-    if (data.code === 0 && data.data) {
-      const settings = data.data
-      if (settings.notify) Object.assign(notifySettings, settings.notify)
-      if (settings.policy) Object.assign(policySettings, settings.policy)
-      if (settings.threshold) Object.assign(thresholdSettings, settings.threshold)
-      if (settings.other) Object.assign(otherSettings, settings.other)
-    }
-  } catch (err) {
-    Message.error('加载告警设置失败')
-  } finally {
-    loading.value = false
-  }
+    const token = localStorage.getItem('token')
+    const res = await fetch('/api/v1/alerts/settings', { headers: { 'Authorization': `Bearer ${token}` } })
+    const data = await res.json()
+    if (data.code === 0) settings.value = data.data.list || []
+  } catch (e) { Message.error('加载失败') }
+  finally { loading.value = false }
 }
 
-const saveSettings = async () => {
+const showAddModal = () => {
+  isEdit.value = false
+  Object.assign(form, { name: '', type: 'email', config_value: '', description: '' })
+  modalVisible.value = true
+}
+
+const editSetting = (record) => {
+  isEdit.value = true
+  Object.assign(form, record)
+  modalVisible.value = true
+}
+
+const handleSubmit = async () => {
   try {
-    const settings = {
-      notify: notifySettings,
-      policy: policySettings,
-      threshold: thresholdSettings,
-      other: otherSettings
-    }
-    const res = await axios.put('/api/v1/alerts/settings', settings)
-    if (res.data.code === 0) {
-      Message.success('设置保存成功')
-    } else {
-      Message.error(res.data.message || '保存失败')
-    }
-  } catch (err) {
-    Message.error('保存失败')
-  }
+    const token = localStorage.getItem('token')
+    const res = await fetch('/api/v1/alerts/settings', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    })
+    const data = await res.json()
+    if (data.code === 0) { Message.success('保存成功'); modalVisible.value = false; loadSettings() }
+  } catch (e) { Message.error('操作失败') }
 }
 
-const resetSettings = () => {
-  loadSettings()
-  Message.info('已重置为保存的设置')
-}
+const toggleSetting = async (record) => {}
+const deleteSetting = (record) => { settings.value = settings.value.filter(s => s.id !== record.id); Message.success('删除成功') }
 
-onMounted(() => {
-  loadSettings()
-})
+onMounted(() => { loadSettings() })
 </script>
 
 <style scoped>
-.alert-settings { min-height: 100vh; }
-.header { background: #fff; padding: 0 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-.header-left { display: flex; align-items: center; }
-.header-title { font-size: 16px; font-weight: 500; }
-.content { padding: 16px; background: #f0f2f5; }
-.settings-card { margin-bottom: 16px; }
-.save-card { margin-top: 16px; }
+.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.pro-breadcrumb { margin-bottom: 16px; }
+.pro-search-bar { margin-bottom: 12px; }
+.pro-action-bar { margin-bottom: 16px; }
+.pro-content-area {
+  background: #fff; border-radius: 8px; padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
 </style>

@@ -77,7 +77,6 @@
             </template>
           </a-table>
         </a-card>
-</div>
 
     <!-- 创建/编辑规则抽屉 -->
     <a-drawer
@@ -212,10 +211,6 @@ const columns = [
   { title: '更新时间', slotName: 'updatedAt', width: 160 },
   { title: '操作', slotName: 'actions', width: 180, fixed: 'right' }
 ]
-
-if (routes[key]) router.push(routes[key])
-  selectedKeys.value = [key]
-}
 
 const loadRules = async () => {
   loading.value = true

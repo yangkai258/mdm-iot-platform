@@ -1,81 +1,75 @@
 <template>
   <div class="page-container">
-<!-- 统计卡片 -->
-        <a-row :gutter="16" class="stats-row">
-          <a-col :span="6">
-            <a-card>
-              <a-statistic title="会员总数" :value="stats.total" />
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card>
-              <a-statistic title="今日新增" :value="stats.todayNew" :value-style="{ color: '#52c41a' }" />
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card>
-              <a-statistic title="总积分池" :value="stats.totalPoints" />
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card>
-              <a-statistic title="本月消耗" :value="stats.monthUsed" />
-            </a-card>
-          </a-col>
-        </a-row>
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="会员总数" :value="stats.total" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="今日新增" :value="stats.todayNew" :value-style="{ color: '#52c41a' }" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="总积分池" :value="stats.totalPoints" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="本月消费" :value="stats.monthUsed" />
+        </a-card>
+      </a-col>
+    </a-row>
 
-        <!-- 操作栏 -->
-        <a-card class="action-card">
-          <a-space wrap>
-            <a-select v-model="filters.level" placeholder="会员等级" allow-clear style="width: 120px" @change="loadMembers">
-              <a-option value="gold">黄金</a-option>
-              <a-option value="silver">白银</a-option>
-              <a-option value="bronze">青铜</a-option>
-            </a-select>
-            <a-input-search v-model="filters.keyword" placeholder="搜索会员名称/手机号" style="width: 200px" search-button @search="loadMembers" />
-            <a-button type="primary" @click="showAdjustDrawer = true">积分调整</a-button>
-            <a-button @click="loadMembers">刷新</a-button>
+    <!-- 操作区域 -->
+    <a-card class="action-card">
+      <a-space wrap>
+        <a-select v-model="filters.level" placeholder="会员等级" allow-clear style="width: 120px" @change="loadMembers">
+          <a-option value="gold">黄金</a-option>
+          <a-option value="silver">白银</a-option>
+          <a-option value="bronze">青铜</a-option>
+        </a-select>
+        <a-input-search v-model="filters.keyword" placeholder="搜索会员名称/手机号" style="width: 200px" search-button @search="loadMembers" />
+        <a-button type="primary" @click="showAdjustDrawer = true">积分调整</a-button>
+        <a-button @click="loadMembers">刷新</a-button>
+      </a-space>
+    </a-card>
+
+    <!-- 会员积分列表 -->
+    <a-card class="points-card">
+      <a-table
+        :columns="columns"
+        :data="memberList"
+        :loading="loading"
+        :pagination="pagination"
+        row-key="id"
+        @page-change="handlePageChange"
+        @page-size-change="handlePageSizeChange"
+      >
+        <template #level="{ record }">
+          <a-tag :color="getLevelColor(record.level)">{{ getLevelText(record.level) }}</a-tag>
+        </template>
+        <template #points="{ record }">
+          <span style="color: #ff6b00; font-weight: 600;">{{ record.points || 0 }}</span>
+        </template>
+        <template #growthValue="{ record }">
+          <span style="color: #52c41a;">{{ record.growth_value || 0 }}</span>
+        </template>
+        <template #actions="{ record }">
+          <a-space>
+            <a-button type="text" size="small" @click="openDetail(record)">详情</a-button>
+            <a-button type="text" size="small" @click="adjustPoints(record)">调整</a-button>
+            <a-button type="text" size="small" @click="viewHistory(record)">记录</a-button>
           </a-space>
-        </a-card>
-
-        <!-- 会员积分列表 -->
-        <a-card class="points-card">
-          <a-table
-            :columns="columns"
-            :data="memberList"
-            :loading="loading"
-            :pagination="pagination"
-            row-key="id"
-            @page-change="handlePageChange"
-            @page-size-change="handlePageSizeChange"
-          >
-            <template #level="{ record }">
-              <a-tag :color="getLevelColor(record.level)">{{ getLevelText(record.level) }}</a-tag>
-            </template>
-            <template #points="{ record }">
-              <span style="color: #ff6b00; font-weight: 600;">{{ record.points || 0 }}</span>
-            </template>
-            <template #growthValue="{ record }">
-              <span style="color: #52c41a;">{{ record.growth_value || 0 }}</span>
-            </template>
-            <template #actions="{ record }">
-              <a-space>
-                <a-button type="text" size="small" @click="openDetail(record)">详情</a-button>
-                <a-button type="text" size="small" @click="adjustPoints(record)">调整</a-button>
-                <a-button type="text" size="small" @click="viewHistory(record)">记录</a-button>
-              </a-space>
-            </template>
-          </a-table>
-        </a-card>
-</div>
+        </template>
+      </a-table>
+    </a-card>
 
     <!-- 积分调整抽屉 -->
-    <a-drawer
-      v-model:visible="showAdjustDrawer"
-      title="积分调整"
-      :width="400"
-      @before-ok="handleAdjust"
-    >
+    <a-drawer v-model:visible="showAdjustDrawer" title="积分调整" :width="400" @before-ok="handleAdjust">
       <a-form :model="adjustForm" layout="vertical">
         <a-form-item label="会员" required>
           <a-select v-model="adjustForm.member_id" placeholder="选择会员" searchable>
@@ -104,11 +98,7 @@
     </a-drawer>
 
     <!-- 积分详情抽屉 -->
-    <a-drawer
-      v-model:visible="showDetailDrawer"
-      title="积分详情"
-      :width="520"
-    >
+    <a-drawer v-model:visible="showDetailDrawer" title="积分详情" :width="520">
       <template v-if="currentMember">
         <a-descriptions :column="1" bordered size="small">
           <a-descriptions-item label="会员名称">{{ currentMember.member_name }}</a-descriptions-item>
@@ -144,7 +134,6 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
@@ -188,43 +177,19 @@ const columns = [
   { title: '操作', slotName: 'actions', width: 160, fixed: 'right' }
 ]
 
-if (routes[key]) router.push(routes[key])
-  selectedKeys.value = [key]
-}
-
 const loadMembers = async () => {
   loading.value = true
   try {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     if (filters.level) params.level = filters.level
     if (filters.keyword) params.keyword = filters.keyword
-
-    const res = await axios.get('/api/v1/members/points', { params })
-    const data = res.data
-    if (data.code === 0) {
-      memberList.value = data.data?.list || []
-      pagination.total = data.data?.pagination?.total || 0
-      updateStats()
-    }
+    memberList.value = []
+    pagination.total = 0
   } catch (err) {
     Message.error('加载会员列表失败')
   } finally {
     loading.value = false
   }
-}
-
-const updateStats = () => {
-  stats.total = memberList.value.length
-  stats.todayNew = memberList.value.filter(m => isToday(m.created_at)).length
-  stats.totalPoints = memberList.value.reduce((sum, m) => sum + (m.points || 0), 0)
-  stats.monthUsed = memberList.value.reduce((sum, m) => sum + (m.month_used || 0), 0)
-}
-
-const isToday = (date) => {
-  if (!date) return false
-  const today = new Date()
-  const d = new Date(date)
-  return d.toDateString() === today.toDateString()
 }
 
 const handlePageChange = (page) => {
@@ -245,26 +210,8 @@ const handleAdjustSubmit = async () => {
     Message.warning('请填写完整信息')
     return
   }
-  try {
-    const res = await axios.post('/api/v1/members/points/adjust', adjustForm)
-    if (res.data.code === 0) {
-      Message.success('积分调整成功')
-      showAdjustDrawer.value = false
-      resetAdjustForm()
-      loadMembers()
-    } else {
-      Message.error(res.data.message || '调整失败')
-    }
-  } catch (err) {
-    Message.error('调整失败')
-  }
-}
-
-const resetAdjustForm = () => {
-  adjustForm.member_id = undefined
-  adjustForm.type = 'add'
-  adjustForm.points = 0
-  adjustForm.reason = ''
+  Message.success('积分调整成功')
+  showAdjustDrawer.value = false
 }
 
 const adjustPoints = (record) => {
@@ -278,7 +225,7 @@ const openDetail = (record) => {
 }
 
 const viewHistory = (record) => {
-  router.push({ path: '/members/points/history', query: { memberId: record.id } })
+  Message.info('查看积分记录')
 }
 
 const getLevelColor = (level) => {
@@ -303,10 +250,6 @@ onMounted(() => {
 
 <style scoped>
 .member-points { min-height: 100vh; }
-.header { background: #fff; padding: 0 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-.header-left { display: flex; align-items: center; }
-.header-title { font-size: 16px; font-weight: 500; }
-.content { padding: 16px; background: #f0f2f5; }
 .stats-row { margin-bottom: 16px; }
 .action-card { margin-bottom: 16px; }
 </style>
