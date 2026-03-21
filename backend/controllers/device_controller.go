@@ -469,8 +469,11 @@ type ListRequest struct {
 	Status          string `form:"status"`           // online/offline
 	LifecycleStatus int    `form:"lifecycle_status"` // 1:待激活 2:服役中 3:维修 4:报废
 	HardwareModel   string `form:"hardware_model"`
-	Search          string `form:"search"`           // 关键词搜索（device_id/sn_code/mac_address）
-	StartTime       string `form:"start_time"`      // 创建时间范围-开始
+	DeviceType      string `form:"device_type"`     // 设备类型筛选（M5Stack, ESP32等）
+	OnlineStatus    string `form:"online_status"`   // 在线状态筛选: online/offline
+	TenantID        string `form:"tenant_id"`       // 租户筛选
+	Search          string `form:"search"`          // 关键词搜索（device_id/sn_code/mac_address）
+	StartTime       string `form:"start_time"`     // 创建时间范围-开始
 	EndTime         string `form:"end_time"`        // 创建时间范围-结束
 }
 
@@ -497,6 +500,13 @@ func (c *DeviceController) List(ctx *gin.Context) {
 	}
 	if req.HardwareModel != "" {
 		query = query.Where("hardware_model = ?", req.HardwareModel)
+	}
+	// device_type 是 hardware_model 的别名
+	if req.DeviceType != "" {
+		query = query.Where("hardware_model = ?", req.DeviceType)
+	}
+	if req.TenantID != "" {
+		query = query.Where("tenant_id = ?", req.TenantID)
 	}
 	if req.Search != "" {
 		search := "%" + req.Search + "%"
@@ -549,13 +559,17 @@ func (c *DeviceController) List(ctx *gin.Context) {
 		}
 	}
 
-	// 如果有 status 筛选，内存过滤
-	if req.Status != "" {
+	// 如果有 status 或 online_status 筛选，内存过滤
+	onlineStatusFilter := req.Status
+	if req.OnlineStatus != "" {
+		onlineStatusFilter = req.OnlineStatus
+	}
+	if onlineStatusFilter != "" {
 		filtered := make([]DeviceWithShadow, 0)
 		for _, d := range result {
-			if req.Status == "online" && d.IsOnline {
+			if onlineStatusFilter == "online" && d.IsOnline {
 				filtered = append(filtered, d)
-			} else if req.Status == "offline" && !d.IsOnline {
+			} else if onlineStatusFilter == "offline" && !d.IsOnline {
 				filtered = append(filtered, d)
 			}
 		}

@@ -26,8 +26,23 @@ func (c *MemberController) MemberList(ctx *gin.Context) {
 	if keyword := ctx.Query("keyword"); keyword != "" {
 		query = query.Where("member_name LIKE ? OR member_code LIKE ? OR phone LIKE ?", "%"+keyword+"%", "%"+keyword+"%", "%"+keyword+"%")
 	}
+	// 会员等级筛选（支持 level 和 member_level 两种参数名）
 	if level := ctx.Query("level"); level != "" {
 		query = query.Where("member_level = ?", level)
+	}
+	if memberLevel := ctx.Query("member_level"); memberLevel != "" {
+		query = query.Where("member_level = ?", memberLevel)
+	}
+	// 积分范围筛选
+	if pointsMin := ctx.Query("points_min"); pointsMin != "" {
+		if p, err := strconv.ParseInt(pointsMin, 10, 64); err == nil {
+			query = query.Where("points >= ?", p)
+		}
+	}
+	if pointsMax := ctx.Query("points_max"); pointsMax != "" {
+		if p, err := strconv.ParseInt(pointsMax, 10, 64); err == nil {
+			query = query.Where("points <= ?", p)
+		}
 	}
 	if status := ctx.Query("status"); status != "" {
 		query = query.Where("status = ?", status)

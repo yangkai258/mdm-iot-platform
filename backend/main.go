@@ -12,6 +12,7 @@ import (
 	plugins "mdm-backend/plugins"
 	"mdm-backend/services"
 	"mdm-backend/utils"
+	"mdm-backend/websocket"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -327,6 +328,10 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
+	// WebSocket 实时通知路由
+	websocket.GetHub() // 初始化Hub
+	r.GET("/ws/notifications", controllers.HandleWebSocket)
+
 	// 知识库路由
 	knowledgeCtrl := &controllers.KnowledgeController{}
 	apiV1 := r.Group("/api/v1")
@@ -365,6 +370,24 @@ func main() {
 	apiV1.POST("/compliance-rules", complianceCtrlExtra.CreateRule)
 	apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
 	apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
+
+	// ============ 数据导入导出路由 ============
+	importExportCtrl := &controllers.ImportExportController{DB: db}
+	// 设备导入导出
+	apiV1.GET("/devices/export", importExportCtrl.ExportDevices)
+	apiV1.POST("/devices/import", importExportCtrl.ImportDevices)
+	// 会员导入导出
+	apiV1.GET("/members/export", importExportCtrl.ExportMembers)
+	apiV1.POST("/members/import", importExportCtrl.ImportMembers)
+	// 活动日志导出
+	apiV1.GET("/activity-logs/export", importExportCtrl.ExportActivityLogs)
+
+	// ============ 批量操作路由 ============
+	// 设备批量操作
+	apiV1.POST("/devices/batch-delete", importExportCtrl.BatchDeleteDevices)
+	apiV1.POST("/devices/batch-status", importExportCtrl.BatchUpdateDeviceStatus)
+	// 会员批量操作
+	apiV1.POST("/members/batch-delete", importExportCtrl.BatchDeleteMembers)
 
 	// 获取端口
 	port := os.Getenv("PORT")
