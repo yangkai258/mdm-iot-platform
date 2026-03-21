@@ -26,38 +26,42 @@ type Tenant struct {
 
 func (Tenant) TableName() string { return "tenants" }
 
-// TenantQuota 租户配额表
+// TenantQuota 租户配额表（对应 package_quotas 表）
 type TenantQuota struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	TenantID    string    `gorm:"type:uuid;uniqueIndex;not null" json:"tenant_id"`
-	UserCount   int       `gorm:"default:0" json:"user_count"`
-	DeviceCount int       `gorm:"default:0" json:"device_count"`
-	DeptCount   int       `gorm:"default:0" json:"dept_count"`
-	StoreCount  int       `gorm:"default:0" json:"store_count"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID         uint      `gorm:"primaryKey" json:"id"`
+	TenantID   string    `gorm:"type:uuid;not null" json:"tenant_id"`
+	PackageID  uint      `gorm:"not null" json:"package_id"`
+	QuotaType  string    `gorm:"type:varchar(50);not null" json:"quota_type"` // user, device, store, dept, ota_deployment, app, notification, alert
+	QuotaLimit int       `gorm:"default:0" json:"quota_limit"`                 // 配额上限，0表示无限制(-1)
+	QuotaUsed  int       `gorm:"default:0" json:"quota_used"`                  // 当前使用量
+	QuotaWarnAt int      `gorm:"default:80" json:"quota_warn_at"`              // 警告阈值（百分比）
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
-func (TenantQuota) TableName() string { return "tenant_quotas" }
+func (TenantQuota) TableName() string { return "package_quotas" }
 
-// Plan 套餐表
-type Plan struct {
+// Package 套餐表（对应 packages 表）
+// 修复：表名从 plans 改为 packages，字段名从 plan_code 改为 package_code，
+// 配额从独立字段改为 JSONB quota_config
+type Package struct {
 	ID           uint                   `gorm:"primaryKey" json:"id"`
-	PlanName     string                 `gorm:"type:varchar(20);not null" json:"plan_name"`
-	PlanCode     string                 `gorm:"type:varchar(20);uniqueIndex;not null" json:"plan_code"`
+	PackageCode  string                 `gorm:"type:varchar(50);uniqueIndex;not null" json:"package_code"`
+	PackageName  string                 `gorm:"type:varchar(100);not null" json:"package_name"`
+	PlanType     string                 `gorm:"type:varchar(20);default:'free'" json:"plan_type"`
+	Description  string                 `gorm:"type:varchar(500)" json:"description"`
 	PriceMonthly float64                `gorm:"type:decimal(10,2)" json:"price_monthly"`
 	PriceYearly  float64                `gorm:"type:decimal(10,2)" json:"price_yearly"`
-	UserQuota    int                    `gorm:"default:5" json:"user_quota"`
-	DeviceQuota  int                    `gorm:"default:10" json:"device_quota"`
-	DeptQuota    int                    `gorm:"default:1" json:"dept_quota"`
-	StoreQuota   int                    `gorm:"default:1" json:"store_quota"`
-	Features     map[string]interface{} `gorm:"type:jsonb;default:'{}'" json:"features"`
-	SortOrder    int                    `gorm:"default:0" json:"sort_order"`
 	IsActive     bool                   `gorm:"default:true" json:"is_active"`
+	IsDefault    bool                   `gorm:"default:false" json:"is_default"`
+	SortOrder    int                    `gorm:"default:0" json:"sort_order"`
+	Features     map[string]interface{} `gorm:"type:jsonb;default:'{}'" json:"features"`
+	QuotaConfig  map[string]interface{} `gorm:"type:jsonb;default:'{}'" json:"quota_config"` // JSONB: {"devices":10, "users":5, ...}
+	Settings     map[string]interface{} `gorm:"type:jsonb;default:'{}'" json:"settings"`
 	CreatedAt    time.Time              `json:"created_at"`
 	UpdatedAt    time.Time              `json:"updated_at"`
 }
 
-func (Plan) TableName() string { return "plans" }
+func (Package) TableName() string { return "packages" }
 
 // TenantApplication 租户申请记录
 type TenantApplication struct {
@@ -98,10 +102,11 @@ func (ApprovalHistory) TableName() string { return "approval_histories" }
 
 // ==================== 配额辅助函数 ====================
 
-// GetQuota 获取当前租户的配额
-func GetQuota(db *gorm.DB, tenantID string) (*TenantQuota, error) {
+// GetQuota 获取当前租户的指定类型配额
+// 修复：添加 quotaType 参数，因为 package_quotas 表是按类型分行的
+func GetQuota(db *gorm.DB, tenantID string, quotaType string) (*TenantQuota, error) {
 	var quota TenantQuota
-	err := db.Where("tenant_id = ?", tenantID).First(&quota).Error
+	err := db.Where("tenant_id = ? AND quota_type = ?", tenantID, quotaType).First(&quota).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -109,35 +114,21 @@ func GetQuota(db *gorm.DB, tenantID string) (*TenantQuota, error) {
 }
 
 // IncrementQuota 原子增加配额计数
+// 修复：使用 package_quotas 表和 quota_used 字段
 func IncrementQuota(db *gorm.DB, tenantID, quotaType string) error {
-	fieldMap := map[string]string{
-		"user":   "user_count",
-		"device": "device_count",
-		"dept":   "dept_count",
-		"store":  "store_count",
-	}
-	field, ok := fieldMap[quotaType]
-	if !ok {
-		return nil
-	}
 	return db.Exec(
-		"INSERT INTO tenant_quotas (tenant_id, "+field+", updated_at) VALUES (?, 1, NOW()) "+
-			"ON CONFLICT (tenant_id) DO UPDATE SET "+field+" = tenant_quotas."+field+" + 1, updated_at = NOW()",
-		tenantID,
+		"UPDATE package_quotas SET quota_used = quota_used + 1, updated_at = NOW() WHERE tenant_id = ? AND quota_type = ?",
+		tenantID, quotaType,
 	).Error
 }
 
 // DecrementQuota 原子减少配额计数
+// 修复：使用 package_quotas 表和 quota_used 字段
 func DecrementQuota(db *gorm.DB, tenantID, quotaType string) error {
-	fieldMap := map[string]string{
-		"user":   "user_count",
-		"device": "device_count",
-		"dept":   "dept_count",
-		"store":  "store_count",
-	}
-	field, ok := fieldMap[quotaType]
-	if !ok {
-		return nil
+	return db.Exec(
+		"UPDATE package_quotas SET quota_used = GREATEST(quota_used - 1, 0), updated_at = NOW() WHERE tenant_id = ? AND quota_type = ?",
+		tenantID, quotaType,
+	).Error
 	}
 	return db.Exec(
 		"UPDATE tenant_quotas SET "+field+" = GREATEST("+field+" - 1, 0), updated_at = NOW() WHERE tenant_id = ?",
