@@ -262,33 +262,132 @@ _持续更新，记录项目的成长轨迹。_
 
 ---
 
-## 2026-03-23 工作计划
+## 2026-03-23 工作计划 (Sprint 9-20)
 
-### Sprint 9: OpenClaw 核心功能 (P0优先)
+### Sprint 9: OpenClaw 核心功能 Phase 1
 
-| 功能 | 优先级 | 说明 |
-|------|--------|------|
-| 设备影子 (desired/reported) | P0 | MQTT 状态同步 |
-| 宠物行为引擎 API | P0 | AI决策→设备动作 |
-| 宠物记忆 API | P0 | 对话/状态持久化 |
-| OTA Worker | P0 | 后台自动下发升级 |
-| 设备配对流程 | P0 | 首次开机配对 |
-| AI 版本管理 | P0 | 模型版本控制 |
-| 固件兼容性矩阵 | P0 | AI版本vs固件版本 |
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 设备影子 (desired/reported) | P0 | agenthd |
+| 宠物行为引擎 API | P0 | agenthd |
+| 宠物记忆 API | P0 | agenthd |
+| OTA Worker 实现 | P0 | agenthd |
+| 设备配对流程 | P0 | agenthd |
+| AI 版本管理 API | P0 | agenthd |
+| 固件兼容性矩阵 | P0 | agenthd |
+| 设备影子前端 | P0 | agentqd |
+| 宠物控制台完善 | P0 | agentqd |
 
-### Sprint 10: OpenClaw 完善 + P1 功能
+### Sprint 10: OpenClaw 核心功能 Phase 2
 
-| 功能 | 优先级 |
-|------|--------|
-| 告警通知渠道 (SMTP/SMS) | P1 |
-| 宠物交互频率 | P1 |
-| 会员卡管理前端 | P1 |
-| 权限分配 UI | P1 |
-| 数据权限前端 | P1 |
-| 传感器事件处理 | P1 |
-| 动作库管理 | P1 |
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 传感器事件处理 | P1 | agenthd |
+| 动作库管理 API | P1 | agenthd |
+| 告警规则引擎完善 | P1 | agenthd |
+| 批量操作 API | P1 | agenthd |
+| 设备监控面板前端 | P1 | agentqd |
+| 设备日志前端 | P1 | agentqd |
+| 远程调试前端 | P1 | agentqd |
+| 动作库管理前端 | P1 | agentqd |
 
-### PRD 完善
-- [ ] 确认所有 PRD 文档 UI 规范完整
-- [ ] 验收 API 接口定义
-- [ ] 验收数据库设计
+### Sprint 11: 告警与通知
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| SMTP 邮件通知 | P1 | agenthd |
+| SMS 短信通知 | P1 | agenthd |
+| Webhook 通知 | P1 | agenthd |
+| 告警通知配置前端 | P1 | agentqd |
+| 告警历史管理 | P1 | agentqd |
+
+### Sprint 12: 企业安全
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| LDAP/AD 集成 | P1 | agenthd |
+| 证书管理 API | P1 | agenthd |
+| 远程锁定/擦除 API | P1 | agenthd |
+| 权限分配 UI | P1 | agentqd |
+| 数据权限前端 | P1 | agentqd |
+
+### Sprint 13: 全球化
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 多区域数据库架构 | P1 | agenthd |
+| 区域 AI 节点 | P1 | agenthd |
+| 多时区支持 | P1 | agenthd |
+| 数据驻留配置前端 | P1 | agentqd |
+| 时区设置前端 | P1 | agentqd |
+
+### Sprint 14: AI 系统工程
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| AI 行为监控 | P1 | agenthd |
+| 模型热回滚 | P1 | agenthd |
+| AI 沙箱测试 | P1 | agenthd |
+| AI 质量仪表盘前端 | P1 | agentqd |
+| 模型版本管理前端 | P1 | agentqd |
+
+### Sprint 15: 宠物生态
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 宠物登记 API | P1 | agenthd |
+| 寻回网络 | P1 | agenthd |
+| 多宠物管理 API | P1 | agenthd |
+| 宠物登记前端 | P1 | agentqd |
+| 多宠物管理前端 | P1 | agentqd |
+
+### Sprint 16: 商业化
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 订阅管理 API | P1 | agenthd |
+| 用量计费 | P2 | agenthd |
+| Webhook 事件系统 | P1 | agenthd |
+| 订阅管理前端 | P1 | agentqd |
+| 发票账单前端 | P2 | agentqd |
+
+### Sprint 17: 情感计算
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 情绪识别 API | P1 | agenthd |
+| 情绪响应 API | P1 | agenthd |
+| 情绪日志 | P2 | agenthd |
+| 情绪识别配置前端 | P1 | agentqd |
+| 情绪日志查看 | P2 | agentqd |
+
+### Sprint 18: 数字孪生
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 实时生命体征 API | P1 | agenthd |
+| 行为预测 | P2 | agenthd |
+| 历史回放 | P2 | agenthd |
+| 生命体征仪表盘前端 | P1 | agentqd |
+| 历史回放前端 | P2 | agentqd |
+
+### Sprint 19: 健康医疗
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 早期疾病预警 | P1 | agenthd |
+| 运动追踪 API | P1 | agenthd |
+| 睡眠分析 API | P1 | agenthd |
+| 健康预警前端 | P1 | agentqd |
+| 运动统计前端 | P1 | agentqd |
+| 睡眠分析前端 | P1 | agentqd |
+
+### Sprint 20: 家庭场景
+
+| 功能 | 优先级 | 负责人 |
+|------|--------|--------|
+| 儿童模式 | P1 | agentqd |
+| 老人陪伴模式 | P2 | agentqd |
+| 家庭相册 | P2 | agentqd |
+| 多用户交互 | P1 | agenthd |
+| 家庭成员管理前端 | P1 | agentqd |
