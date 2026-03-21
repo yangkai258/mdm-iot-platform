@@ -95,6 +95,8 @@ func main() {
 		&models.Tenant{},
 		&models.TenantQuota{},
 		&models.Plan{},
+		&models.Package{},
+		&models.PackageQuota{},
 		// 租户申请表
 		&models.TenantApplication{},
 		&models.ApprovalHistory{},
@@ -229,6 +231,9 @@ func main() {
 	tenantCtrl := &controllers.TenantController{DB: db}
 	adminGroup := sys.Group("/admin")
 	tenantCtrl.RegisterTenantRoutes(adminGroup)
+
+	// 租户 CRUD API（/api/v1/tenants 路径，超管可用）
+	tenantCtrl.RegisterTenantAPIRoutes(sys)
 
 	// 租户申请审批路由（/api/v1/tenant-approvals）
 	tenantApprovalCtrl := &controllers.TenantApprovalController{DB: db}

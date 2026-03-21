@@ -72,6 +72,7 @@ func (SysDictionary) TableName() string { return "sys_dictionaries" }
 // SysOperationLog 操作日志
 type SysOperationLog struct {
 	ID         uint      `gorm:"primaryKey" json:"id"`
+	TenantID   string    `gorm:"type:uuid;index" json:"tenant_id"` // 租户ID
 	UserID     uint      `json:"user_id"`
 	Username   string    `gorm:"type:varchar(50)" json:"username"`
 	Module     string    `gorm:"type:varchar(50)" json:"module"`
@@ -93,6 +94,7 @@ func (SysOperationLog) TableName() string { return "sys_operation_logs" }
 // SysLoginLog 登录日志
 type SysLoginLog struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
+	TenantID  string    `gorm:"type:uuid;index" json:"tenant_id"` // 租户ID
 	UserID    uint      `json:"user_id"`
 	Username  string    `gorm:"type:varchar(50)" json:"username"`
 	IP        string    `gorm:"type:varchar(50)" json:"ip"`
@@ -109,13 +111,14 @@ func (SysLoginLog) TableName() string { return "sys_login_logs" }
 
 // Knowledge 知识库条目
 type Knowledge struct {
-	ID       uint      `gorm:"primaryKey" json:"id"`
-	Category string    `gorm:"type:varchar(50);index" json:"category"`
-	Question string    `gorm:"type:text;not null" json:"question"`
-	Answer   string    `gorm:"type:text;not null" json:"answer"`
-	Status   int       `gorm:"default:1" json:"status"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID         uint      `gorm:"primaryKey" json:"id"`
+	TenantID   string    `gorm:"type:uuid;index" json:"tenant_id"` // 租户ID
+	Category   string    `gorm:"type:varchar(50);index" json:"category"`
+	Question   string    `gorm:"type:text;not null" json:"question"`
+	Answer     string    `gorm:"type:text;not null" json:"answer"`
+	Status     int       `gorm:"default:1" json:"status"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 func (Knowledge) TableName() string { return "knowledge" }
