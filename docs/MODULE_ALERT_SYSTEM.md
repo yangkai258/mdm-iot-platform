@@ -105,30 +105,172 @@ GET /api/v1/alerts/stats
 
 ## 5. 流程图
 
-### 5.1 告警触发流程
+### 5.1 CheckAlerts 触发时机
+
+`CheckAlerts` 函数在以下时机被调用：
 
 ```
-设备MQTT心跳上报
+┌──────────────────────────────────────────────────────────────┐
+│                    CheckAlerts 触发时机                        │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  触发点 1：设备 MQTT 心跳上报                                 │
+│  ───────────────────────────────────────────                 │
+│  Topic: /device/{device_id}/up/status                        │
+│  Handler: StatusMessageHandler()                             │
+│  调用链: StatusMessageHandler() → CheckAlerts(db, deviceID, payload)
+│  触发频率: 设备心跳间隔（默认30秒）                           │
+│  检查内容: battery_low, temperature_high, signal_weak 等     │
+│                                                              │
+│  触发点 2：设备离线检测（定时任务）                           │
+│  ───────────────────────────────────────────                 │
+│  Cron: 每 60 秒执行一次                                       │
+│  检查逻辑: devices 表中 last_heartbeat < now-90s 的设备     │
+│  针对规则: alert_type='offline' 的告警规则                   │
+│                                                              │
+│  触发点 3：定时合规检测（策略引擎）                           │
+│  ───────────────────────────────────────────                 │
+│  Cron: 每 5 分钟执行一次                                       │
+│  检查逻辑: 合规策略违规 (compliance_violation, geofence_violation)
+│  调用方: PolicyEngine 或 ComplianceChecker                   │
+│                                                              │
+│  触发点 4：OTA 升级失败回调                                  │
+│  ───────────────────────────────────────────                 │
+│  调用方: OTAProgressHandler 或 OTA Worker                    │
+│  检查内容: alert_type='ota_failure'（自动创建）             │
+│                                                              │
+│  触发点 5：手动触发（API）                                    │
+│  ───────────────────────────────────────────                 │
+│  POST /api/v1/alerts/devices/:device_id/check                │
+│  用途: 手动对指定设备执行一次告警规则检查                     │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**防抖机制：**
+- 同一 device_id + alert_type 组合，在 `cooldown_minutes`（默认 30 分钟）内不重复创建告警
+- 已解决（status=3）的告警不计入防抖
+
+### 5.2 通知渠道配置
+
+通知渠道在系统级别配置，支持多渠道叠加。
+
+#### 5.2.1 配置存储
+
+通知配置存储于 `system_config` 表（或独立 `notification_channels` 表）：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| channel_type | string | email / webhook / sms |
+| config | jsonb | 渠道配置 |
+| enabled | bool | 是否启用 |
+| updated_at | datetime | 更新时间 |
+
+**config 示例：**
+
+```json
+// email 渠道
+{
+  "smtp_host": "smtp.example.com",
+  "smtp_port": 465,
+  "smtp_user": "alerts@example.com",
+  "smtp_password": "encrypted_xxx",
+  "from_address": "alerts@example.com",
+  "to_addresses": ["admin@example.com", "ops@example.com"],
+  "use_tls": true
+}
+
+// webhook 渠道
+{
+  "url": "https://hooks.example.com/alert",
+  "method": "POST",
+  "headers": {
+    "Authorization": "Bearer xxx",
+    "Content-Type": "application/json"
+  },
+  "template": "json",
+  "timeout_seconds": 10
+}
+
+// sms 渠道（以阿里云为例）
+{
+  "provider": "aliyun",
+  "access_key_id": "xxx",
+  "access_key_secret": "encrypted_xxx",
+  "sign_name": "MDM告警",
+  "template_code": "SMS_xxx",
+  "phone_numbers": ["13800138000"]
+}
+```
+
+#### 5.2.2 通知发送流程
+
+```
+告警触发
     │
     ▼
-StatusMessageHandler() → CheckAlerts(db, deviceID, payload)
+查询告警规则的 notify_ways（email,webhook,sms）
     │
-    ├─► 查询所有启用规则 WHERE enabled=true AND (device_id='' OR device_id=:deviceID)
+    ▼
+对每个渠道并行发送：
     │
-    ├─► 遍历规则，检查条件
-    │       battery_low: payload.battery < threshold?
-    │       offline: payload.is_online=false AND condition='='?
-    │       temperature_high: payload.temperature > threshold?
+    ├─► email ── 构建邮件内容（告警类型/设备/触发值/时间）
+    │           ── SMTP发送 ── 运营人员邮箱
+    │           ── 记录 notification_logs（成功/失败）
     │
-    ├─► 条件满足 ──创建告警记录──► device_alerts表
+    ├─► webhook ── 构造POST Body（JSON格式）
+    │            ── HTTP POST ── Webhook URL
+    │            ── 记录 notification_logs（含响应状态码）
     │
-    └─► 根据notify_ways发送通知
-            ├─► email ──SMTP──► 运营人员邮箱
-            ├─► webhook ──HTTP POST──► 配置的Webhook URL
-            └─► sms ──短信网关──► 运营人员手机
+    └─► sms ── 按模板替换变量（设备ID/告警类型/触发值）
+             ── 短信网关API发送
+             ── 记录 notification_logs
 ```
 
-### 5.2 告警处理流程
+#### 5.2.3 通知模板
+
+**邮件主题格式：**
+```
+【MDM告警】{severity_label} - {alert_type_label} - {device_id}
+```
+
+**邮件正文模板：**
+```
+设备管理系统告警通知
+
+告警级别：{severity_label}
+告警类型：{alert_type_label}
+设备ID：{device_id}
+触发时间：{created_at}
+触发值：{trigger_val}
+阈值：{threshold}
+告警消息：{message}
+
+请及时处理。
+```
+
+**Webhook POST Body：**
+```json
+{
+  "alert_id": 1,
+  "device_id": "550e8400-e29b-41d4-a716-446655440000",
+  "alert_type": "battery_low",
+  "severity": 2,
+  "message": "设备电量低于15%",
+  "trigger_val": 12.5,
+  "threshold": 15.0,
+  "created_at": "2026-03-20T12:05:00Z",
+  "severity_label": "中"
+}
+```
+
+#### 5.2.4 通知失败重试
+
+- 重试次数：3 次
+- 重试间隔：30 秒、60 秒、180 秒（指数退避）
+- 重试仍失败：记录 `notification_logs.status=failed`，不阻塞告警创建
+
+### 5.3 告警处理流程
 
 ```
 告警产生 → [1:未处理] → 确认告警 PUT /alerts/:id/confirm → [2:已确认]
@@ -258,4 +400,5 @@ StatusMessageHandler() → CheckAlerts(db, deviceID, payload)
 |------|------|--------|----------|
 | V1.0 | 2026-03-20 | agentcp | 初稿，基于代码调研 |
 | V1.2 | 2026-03-20 | agentcp | 修订功能列表，补充触发方式和前端入口按钮列 |
-| V1.4 | 2026-03-20 | agentcp | 重建文档结构，统一使用8章节格式，合并重复的八、九章节
+| V1.4 | 2026-03-20 | agentcp | 重建文档结构，统一使用8章节格式，合并重复的八、九章节 |
+| V1.5 | 2026-03-21 | agentcp | 补充 CheckAlerts 触发时机（5.1）、通知渠道配置（5.2，含模板和重试） |

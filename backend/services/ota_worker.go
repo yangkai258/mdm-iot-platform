@@ -1,11 +1,10 @@
-﻿package services
+package services
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
-	"strconv"
 	"time"
 
 	"mdm-backend/models"
@@ -14,13 +13,17 @@ import (
 	"gorm.io/gorm"
 )
 
-// DefaultPollInterval 默认轮询间隔
-const DefaultPollInterval = 5 * time.Minute
+// DefaultPollInterval 默认轮询间隔（30秒）
+const DefaultPollInterval = 30 * time.Second
 
 // DefaultPauseThreshold 默认暂停阈值（成功率低于此值则自动暂停）
 const DefaultPauseThreshold = 0.80
 
 // OTAWorker OTA后台Worker
+// 职责：
+//   1. 轮询 ota_deployments 表（每30秒），向 pending/running 部署下发 MQTT OTA 指令
+//   2. 订阅 /device/+/up/ota_progress 主题，接收设备上报的 OTA 进度
+//   3. 更新部署状态为 in_progress/completed/failed
 type OTAWorker struct {
 	DB             *gorm.DB
 	MQTTClient     pahomqtt.Client
@@ -33,16 +36,35 @@ type OTAWorker struct {
 func NewOTAWorker(db *gorm.DB, mqttClient pahomqtt.Client) *OTAWorker {
 	return &OTAWorker{
 		DB:             db,
-		MQTTClient:     mqttClient,
-		PollInterval:   DefaultPollInterval,
-		PauseThreshold: DefaultPauseThreshold,
-		stopCh:         make(chan struct{}),
+		MQTTClient:      mqttClient,
+		PollInterval:    DefaultPollInterval,
+		PauseThreshold:  DefaultPauseThreshold,
+		stopCh:          make(chan struct{}),
 	}
 }
 
-// Start 启动OTA Worker轮询
+// Start 启动OTA Worker：MQTT订阅 + 轮询
 func (w *OTAWorker) Start() {
-	log.Printf("[OTA-Worker] 启动OTA后台Worker，轮询间隔: %v", w.PollInterval)
+	log.Printf("[OTA-Worker] 启动 OTA 后台 Worker，轮询间隔: %v", w.PollInterval)
+
+	// 启动 MQTT OTA 进度订阅
+	w.subscribeOTAProgress()
+
+	// 启动轮询 goroutine
+	go w.pollLoop()
+
+	// 立即执行一次（避免等待第一个 tick）
+	go w.CheckPendingDeployments()
+}
+
+// Stop 停止OTA Worker
+func (w *OTAWorker) Stop() {
+	close(w.stopCh)
+	log.Printf("[OTA-Worker] 已停止")
+}
+
+// pollLoop 轮询循环
+func (w *OTAWorker) pollLoop() {
 	ticker := time.NewTicker(w.PollInterval)
 	defer ticker.Stop()
 
@@ -51,15 +73,117 @@ func (w *OTAWorker) Start() {
 		case <-ticker.C:
 			w.CheckPendingDeployments()
 		case <-w.stopCh:
-			log.Printf("[OTA-Worker] 已停止")
 			return
 		}
 	}
 }
 
-// Stop 停止OTA Worker
-func (w *OTAWorker) Stop() {
-	close(w.stopCh)
+// subscribeOTAProgress 订阅设备 OTA 进度上报主题
+// Topic: /device/{device_id}/up/ota_progress
+func (w *OTAWorker) subscribeOTAProgress() {
+	if w.MQTTClient == nil {
+		log.Printf("[OTA-Worker] MQTT 客户端未初始化，跳过 OTA 进度订阅")
+		return
+	}
+
+	topic := "/device/+/up/ota_progress"
+	token := w.MQTTClient.Subscribe(topic, 0, w.otaProgressHandler)
+	if token.Wait() && token.Error() != nil {
+		log.Printf("[OTA-Worker] 订阅 OTA 进度主题失败: %v", token.Error())
+		return
+	}
+	log.Printf("[OTA-Worker] 已订阅 OTA 进度主题: %s", topic)
+}
+
+// OTAProgressPayload 设备上报的 OTA 进度消息
+type OTAProgressPayload struct {
+	DeviceID     string `json:"device_id"`
+	DeploymentID uint   `json:"deployment_id"`
+	Status       string `json:"status"`    // downloading/verifying/flashing/success/failed
+	Progress     int    `json:"progress"`   // 0-100
+	Message      string `json:"message"`
+	Version      string `json:"version"`
+	ErrorCode    string `json:"error_code"`
+}
+
+// otaProgressHandler MQTT OTA 进度消息处理
+func (w *OTAWorker) otaProgressHandler(client pahomqtt.Client, msg pahomqtt.Message) {
+	log.Printf("[OTA-Worker] 收到 OTA 进度消息: %s", msg.Topic())
+
+	var payload OTAProgressPayload
+	if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
+		log.Printf("[OTA-Worker] 解析 OTA 进度消息失败: %v", err)
+		return
+	}
+
+	log.Printf("[OTA-Worker] 设备 %s OTA 进度: deployment=%d status=%s progress=%d%%",
+		payload.DeviceID, payload.DeploymentID, payload.Status, payload.Progress)
+
+	// 更新 ota_progress 记录
+	w.updateOTAProgress(payload.DeviceID, payload.DeploymentID, payload.Status, payload.Progress, payload.Message)
+
+	// 根据状态更新部署统计
+	if payload.Status == "success" || payload.Status == "failed" {
+		w.updateDeploymentStats(payload.DeploymentID)
+	}
+}
+
+// updateOTAProgress 更新 OTA 进度记录
+func (w *OTAWorker) updateOTAProgress(deviceID string, deploymentID uint, status string, progress int, message string) {
+	updates := map[string]interface{}{
+		"ota_status":  status,
+		"progress":    progress,
+		"ota_message": message,
+	}
+
+	now := time.Now()
+	if status == "success" || status == "failed" {
+		updates["completed_at"] = &now
+	}
+
+	err := w.DB.Model(&models.OTAProgress{}).
+		Where("device_id = ? AND deployment_id = ?", deviceID, deploymentID).
+		Updates(updates).Error
+	if err != nil {
+		log.Printf("[OTA-Worker] 更新 OTA 进度失败: %v", err)
+	}
+}
+
+// updateDeploymentStats 更新部署任务统计
+func (w *OTAWorker) updateDeploymentStats(deploymentID uint) {
+	var stats struct {
+		Total   int64
+		Success int64
+		Failed  int64
+	}
+
+	w.DB.Model(&models.OTAProgress{}).
+		Where("deployment_id = ?", deploymentID).
+		Count(&stats.Total)
+
+	w.DB.Model(&models.OTAProgress{}).
+		Where("deployment_id = ? AND ota_status = ?", deploymentID, "success").
+		Count(&stats.Success)
+
+	w.DB.Model(&models.OTAProgress{}).
+		Where("deployment_id = ? AND ota_status = ?", deploymentID, "failed").
+		Count(&stats.Failed)
+
+	updates := map[string]interface{}{
+		"success_count": stats.Success,
+		"failed_count":  stats.Failed,
+		"running_count": stats.Total - stats.Success - stats.Failed,
+	}
+
+	// 全部完成时标记部署为 completed
+	if stats.Total > 0 && stats.Success+stats.Failed >= stats.Total {
+		now := time.Now()
+		updates["status"] = "completed"
+		updates["completed_at"] = &now
+		log.Printf("[OTA-Worker] 部署 #%d 已全部完成: 成功=%d 失败=%d", deploymentID, stats.Success, stats.Failed)
+	}
+
+	w.DB.Model(&models.OTADeployment{}).Where("id = ?", deploymentID).Updates(updates)
 }
 
 // CheckPendingDeployments 检查并处理所有待下发的部署任务
@@ -102,21 +226,22 @@ func (w *OTAWorker) processDeployment(dep *models.OTADeployment) {
 		return
 	}
 
-	// 更新部署状态为 running，并记录目标设备数量
+	// 首次处理时，更新状态为 running 并记录目标数量
 	if dep.Status == "pending" {
 		w.DB.Model(&models.OTADeployment{}).Where("id = ?", dep.ID).Updates(map[string]interface{}{
-			"status":              "running",
+			"status":               "running",
 			"target_device_count": len(devices),
 		})
+		log.Printf("[OTA-Worker] 部署 #%d 已启动，目标设备: %d 台", dep.ID, len(devices))
 	}
 
 	for _, device := range devices {
-		// 跳过已是最新版本的设备
-		if device.FirmwareVersion == pkg.Version {
+		// 跳过已是最新版本且不允许降级的设备
+		if !pkg.AllowDowngrade && device.FirmwareVersion == pkg.Version {
 			continue
 		}
 
-		// 检查是否已有 progress 记录且已完成
+		// 检查是否已有进行中的进度记录
 		var existing models.OTAProgress
 		err := w.DB.Where("deployment_id = ? AND device_id = ?", dep.ID, device.DeviceID).First(&existing).Error
 		if err == nil {
@@ -146,10 +271,9 @@ func (w *OTAWorker) processDeployment(dep *models.OTADeployment) {
 			continue
 		}
 
-		// 创建或更新 ota_progress 记录
+		// 记录或更新 OTA 进度
 		now := time.Now()
 		if err == nil && existing.ID > 0 {
-			// 更新已有记录
 			w.DB.Model(&existing).Updates(map[string]interface{}{
 				"ota_status":   "pending",
 				"to_version":   pkg.Version,
@@ -157,7 +281,6 @@ func (w *OTAWorker) processDeployment(dep *models.OTADeployment) {
 				"progress":     0,
 			})
 		} else {
-			// 创建新记录
 			progress := models.OTAProgress{
 				DeploymentID: dep.ID,
 				DeviceID:     device.DeviceID,
@@ -204,7 +327,8 @@ func (w *OTAWorker) SelectTargetDevices(dep *models.OTADeployment) ([]models.Dev
 		// strategy_config 存储的是百分比数字（如 "30" 表示 30%）
 		percentage := 100
 		if dep.StrategyConfig != "" {
-			if p, err := strconv.Atoi(dep.StrategyConfig); err == nil {
+			var p int
+			if _, err := fmt.Sscanf(dep.StrategyConfig, "%d", &p); err == nil {
 				percentage = p
 			}
 		}

@@ -207,6 +207,158 @@ GET /api/v1/ota/deployments/:id/progress
 
 ### 5.1 OTA Worker工作流程
 
+（已在上方"2. 功能列表"章节中描述，此处略）
+
+### 5.2 设备升级状态机
+
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                        设备 OTA 升级状态机                               │
+│                                                                         │
+│  ┌──────────┐     收到OTA指令      ┌──────────────┐                     │
+│  │  IDLE    │ ──────────────────► │  PENDING     │                     │
+│  │  (空闲)  │                     │  (待下载)     │                     │
+│  └──────────┘                     └──────┬───────┘                     │
+│                                          │                              │
+│                              开始下载固件 │                              │
+│                                          ▼                              │
+│                                 ┌──────────────┐   下载失败             │
+│                                 │ DOWNLOADING  │────────────────────┐   │
+│                                 │  (下载中)    │                     │   │
+│                                 └──────┬───────┘                     │   │
+│                                        │  下载成功                    │   │
+│                                        ▼                              │   │
+│                                 ┌──────────────┐   验证失败           │   │
+│                                 │  VERIFYING   │────────────────────┤   │
+│                                 │  (验证中)    │                     │   │
+│                                 └──────┬───────┘                     │   │
+│                                        │  验证成功                    │   │
+│                                        ▼                              │   │
+│                                 ┌──────────────┐   刷写失败           │   │
+│                                 │  FLASHING    │────────────────────┤   │
+│                                 │  (刷写中)    │                     │   │
+│                                 └──────┬───────┘                     │   │
+│                                        │  刷写成功                    │   │
+│                                        ▼                              │   │
+│                                 ┌──────────────┐                     │   │
+│                                 │   SUCCESS    │ ◄──── 重试成功      │   │
+│                                 │  (升级成功)  │                     │   │
+│                                 └──────────────┘                     │   │
+│                                                                         │
+│  ┌──────────┐                       ┌──────────────┐                   │
+│  │  FAILED  │ ◄──────────────────── │              │   重试次数超限   │
+│  │  (升级失败)│    第3次重试失败     │              │ ────────────────┘
+│  └──────────┘                       └──────────────┘
+│                                                                         │
+│  ┌──────────┐   强制升级 │ 重试成功                                      
+│  │ DOWNLOADING/VERIFYING/FLASHING │ ────► IDLE (重新开始)
+│  └─────────────────────────────────┘
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+**状态说明：**
+
+| 状态 | ota_status 值 | 说明 | 超时处理 |
+|------|--------------|------|---------|
+| IDLE | - | 设备空闲，无升级任务 | - |
+| PENDING | pending | 已收到指令，等待下载 | 30s无进展→FAILED |
+| DOWNLOADING | downloading | 正在下载固件 | 120s无进展→重试 |
+| VERIFYING | verifying | MD5验证固件完整性 | 30s无进展→重试 |
+| FLASHING | flashing | 正在刷写固件 | 180s无进展→重试 |
+| SUCCESS | success | 升级完成，设备重启 | - |
+| FAILED | failed | 升级失败，已达最大重试次数 | - |
+
+**重试策略：**
+- 最大重试次数：`retry_count < 3`
+- 重试间隔：10秒
+- 强制升级（is_mandatory=true）时，设备不能跳过升级，即使在 FAILED 状态也会被要求重试
+
+### 5.3 OTA回调接口规范
+
+设备在 OTA 升级过程中，通过 MQTT Topic 向服务端回调状态。服务端 also 提供 HTTP API 供设备轮询。
+
+#### 5.3.1 MQTT 回调 Topic
+
+**设备上行 Topic（设备 → 服务端）：**
+```
+/device/{device_id}/up/ota
+```
+
+**Payload 格式：**
+```json
+{
+  "type": "ota_callback",
+  "deployment_id": 1,
+  "ota_status": "downloading",
+  "progress_percent": 45,
+  "ota_message": "正在下载固件...",
+  "retry_count": 0,
+  "timestamp": "2026-03-20T12:05:00Z"
+}
+```
+
+**ota_status 取值：** pending | downloading | verifying | flashing | success | failed
+
+#### 5.3.2 服务端 MQTT 下行 Topic（指令）
+
+**服务端下行 Topic（服务端 → 设备）：**
+```
+/device/{device_id}/down/cmd
+```
+
+**OTA 指令 Payload：**
+```json
+{
+  "cmd_type": "ota",
+  "cmd_id": "cmd_uuid_xxx",
+  "deployment_id": 1,
+  "package": {
+    "version": "1.3.0",
+    "file_url": "https://cdn.example.com/firmware/v1.3.0.bin",
+    "file_md5": "d41d8cd98f00b204e9800998ecf8427e",
+    "file_size": 1048576,
+    "is_mandatory": false
+  },
+  "timestamp": "2026-03-20T12:00:00Z"
+}
+```
+
+#### 5.3.3 HTTP 轮询接口（备用）
+
+当 MQTT 连接不稳定时，设备可使用 HTTP 接口主动拉取 OTA 状态：
+
+```
+GET /api/v1/ota/devices/:device_id/status
+```
+
+**响应：**
+```json
+{
+  "device_id": "550e8400-e29b-41d4-a716-446655440000",
+  "ota_status": "downloading",
+  "progress_percent": 45,
+  "retry_count": 0,
+  "last_updated": "2026-03-20T12:05:00Z"
+}
+```
+
+```
+POST /api/v1/ota/devices/:device_id/report
+```
+
+**请求体：**
+```json
+{
+  "deployment_id": 1,
+  "ota_status": "downloading",
+  "progress_percent": 45,
+  "ota_message": "正在下载固件...",
+  "retry_count": 0
+}
+```
+
+### 5.4 设备OTA升级流程
+
 ```
 OTA Worker (后台goroutine, 每30s轮询)
     │
@@ -377,4 +529,4 @@ OTA部署任务列表页
 |------|------|--------|----------|
 | V1.0 | 2026-03-20 | agentcp | 初稿，基于代码调研 |
 | V1.2 | 2026-03-20 | agentcp | 修订功能列表，补充触发方式和前端入口按钮列 |
-| V1.4 | 2026-03-20 | agentcp | 重建文档结构，统一使用8章节格式，合并重复的八、九章节
+| V1.4 | 2026-03-20 | agentcp | 重建文档结构，统一使用8章节格式，合并重复的八、九章节| V1.5 | 2026-03-21 | agentcp | 补充设备升级状态机（5.2）、OTA回调接口规范（5.3 MQTT+HTTP） |

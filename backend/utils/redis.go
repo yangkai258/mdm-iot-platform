@@ -106,6 +106,18 @@ type DeviceShadow struct {
 	// 地理位置
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
+
+	// 设备影子期望状态（NRD/免打扰）
+	DesiredNRDEnabled bool   `json:"desired_nrd_enabled"`
+	DesiredNRDStart   string `json:"desired_nrd_start"`
+	DesiredNRDEnd     string `json:"desired_nrd_end"`
+	DesiredDNDEnabled bool   `json:"desired_dnd_enabled"`
+	DesiredDNDStart   string `json:"desired_dnd_start"`
+	DesiredDNDEnd     string `json:"desired_dnd_end"`
+	DesiredVolume     *int   `json:"desired_volume"`
+	DesiredBrightness *int   `json:"desired_brightness"`
+	DesiredPowerSave  bool   `json:"desired_power_save"`
+	DesiredVersion    string `json:"desired_version"`
 }
 
 // NewRedisClient 创建 Redis 客户端

@@ -32,9 +32,11 @@ func GetCORSAllowedOrigins() string {
 
 // JWTClaims JWT 载荷
 type JWTClaims struct {
-	UserID   uint   `json:"user_id"`
-	Username string `json:"username"`
-	RoleID   uint   `json:"role_id"`
+	UserID       uint   `json:"user_id"`
+	Username     string `json:"username"`
+	RoleID       uint   `json:"role_id"`
+	TenantID     string `json:"tenant_id"`
+	IsSuperAdmin bool   `json:"is_super_admin"`
 	jwt.RegisteredClaims
 }
 
@@ -81,17 +83,27 @@ func JWTAuth() gin.HandlerFunc {
 		c.Set("user_id", claims.UserID)
 		c.Set("username", claims.Username)
 		c.Set("role_id", claims.RoleID)
+		c.Set("tenant_id", claims.TenantID)
+		c.Set("claims", map[string]interface{}{
+			"user_id":       claims.UserID,
+			"username":      claims.Username,
+			"role_id":       claims.RoleID,
+			"tenant_id":     claims.TenantID,
+			"is_super_admin": claims.IsSuperAdmin,
+		})
 
 		c.Next()
 	}
 }
 
-// GenerateToken 生成 Token
-func GenerateToken(userID uint, username string, roleID uint) (string, error) {
+// GenerateToken 生成 Token（支持 tenant_id 和 is_super_admin）
+func GenerateToken(userID uint, username string, roleID uint, tenantID string, isSuperAdmin bool) (string, error) {
 	claims := JWTClaims{
-		UserID:   userID,
-		Username: username,
-		RoleID:   roleID,
+		UserID:       userID,
+		Username:     username,
+		RoleID:       roleID,
+		TenantID:     tenantID,
+		IsSuperAdmin: isSuperAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)), // 24小时过期
 			IssuedAt:  jwt.NewNumericDate(time.Now()),

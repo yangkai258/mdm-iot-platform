@@ -45,6 +45,19 @@ type DeviceShadow struct {
 	// 地理位置
 	Latitude  float64 `gorm:"type:decimal(10,7)" json:"latitude"`
 	Longitude float64 `gorm:"type:decimal(10,7)" json:"longitude"`
+
+	// ============ 设备影子期望状态（NRD/免打扰） ============
+	// 期望状态由管理平台下发，设备上线时同步
+	DesiredNRDEnabled bool   `gorm:"default:false" json:"desired_nrd_enabled"` // NRD（夜间休息模式）是否启用
+	DesiredNRDStart   string `gorm:"type:varchar(8);default:'23:00'" json:"desired_nrd_start"` // NRD 开始时间 (HH:MM)
+	DesiredNRDEnd     string `gorm:"type:varchar(8);default:'07:00'" json:"desired_nrd_end"`   // NRD 结束时间 (HH:MM)
+	DesiredDNDEnabled bool   `gorm:"default:false" json:"desired_dnd_enabled"` // 免打扰模式是否启用
+	DesiredDNDStart   string `gorm:"type:varchar(8)" json:"desired_dnd_start"` // 免打扰开始时间 (HH:MM)
+	DesiredDNDEnd     string `gorm:"type:varchar(8)" json:"desired_dnd_end"`   // 免打扰结束时间 (HH:MM)
+	DesiredVolume     *int   `gorm:"type:smallint" json:"desired_volume"`     // 期望音量 (0-100)
+	DesiredBrightness *int   `gorm:"type:smallint" json:"desired_brightness"` // 期望亮度 (0-100)
+	DesiredPowerSave  bool   `gorm:"default:false" json:"desired_power_save"` // 节能模式
+	DesiredVersion    string `gorm:"type:varchar(32)" json:"desired_version"` // 期望固件版本（用于OTA指令）
 }
 
 // CommandHistory 指令历史

@@ -9,6 +9,7 @@ import (
 	"mdm-backend/middleware"
 	"mdm-backend/models"
 	"mdm-backend/mqtt"
+	plugins "mdm-backend/plugins"
 	"mdm-backend/services"
 	"mdm-backend/utils"
 
@@ -26,6 +27,7 @@ func main() {
 	// 自动迁移数据库表
 	if err := db.AutoMigrate(
 		&models.Device{},
+		&models.DeviceShadow{},
 		&models.PetProfile{},
 		&models.OTAPackage{},
 		&models.OTADeployment{},
@@ -35,9 +37,16 @@ func main() {
 		&models.SysUser{},
 		&models.SysRole{},
 		&models.SysMenu{},
+		&models.SysPermission{},
+		&models.SysRolePermission{},
+		&models.SysUserRole{},
+		&models.SysUserExt{},
 		&models.SysDictionary{},
+		&models.SysConfig{},
 		&models.SysOperationLog{},
 		&models.SysLoginLog{},
+		// 知识库表
+		&models.Knowledge{},
 		// 告警表
 		&models.DeviceAlertRule{},
 		&models.DeviceAlert{},
@@ -82,8 +91,38 @@ func main() {
 		&models.Notification{},
 		&models.NotificationTemplate{},
 		&models.Announcement{},
+		// 租户相关表
+		&models.Tenant{},
+		&models.TenantQuota{},
+		&models.Plan{},
+		// 租户申请表
+		&models.TenantApplication{},
+		&models.ApprovalHistory{},
+		// 基准岗位模板
+		&models.PositionTemplate{},
+
+		// 权限系统表（多租户版本）
+		&models.Menu{},
+		&models.ApiPermission{},
+		&models.Role{},
+		&models.PermissionGroup{},
+		&models.RoleMenu{},
+		&models.RoleApiPermission{},
+		&models.RolePermissionGroup{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
+	}
+
+	// 注册租户隔离 GORM 插件
+	tenantPlugin := &plugins.TenantScopePlugin{}
+	if err := tenantPlugin.Initialize(db); err != nil {
+		log.Fatalf("Failed to initialize tenant plugin: %v", err)
+	}
+
+	// 注册数据权限范围 GORM 插件
+	dataScopePlugin := &plugins.DataScopePlugin{}
+	if err := dataScopePlugin.Initialize(db); err != nil {
+		log.Fatalf("Failed to initialize data scope plugin: %v", err)
 	}
 
 	// 初始化 Redis
@@ -114,6 +153,9 @@ func main() {
 	otaWorker := services.NewOTAWorker(db, mqttHandler)
 	controllers.SetOTAWorkerRef(otaWorker)
 	go otaWorker.Start()
+
+	// 注册通知服务（支持邮件/Webhook/站内通知）
+	controllers.RegisterNotificationService(services.SendAlertNotifications)
 
 	// 初始化 Gin 路由
 	r := gin.Default()
@@ -161,6 +203,12 @@ func main() {
 	// JWT 中间件
 	r.Use(middleware.JWTAuth())
 
+	// 租户上下文中间件：从 JWT 解析 tenant_id
+	r.Use(middleware.TenantContext())
+
+	// 数据权限范围中间件：自动根据用户角色过滤数据
+	r.Use(plugins.DataScopeMiddleware(db))
+
 	// 操作日志中间件
 	r.Use(middleware.OperationLog(db))
 
@@ -168,13 +216,53 @@ func main() {
 	controllers.RegisterRoutes(r, db, redisClient)
 
 	// 注册系统管理路由
-	menuCtrl := &controllers.MenuController{DB: db}
+	sys := r.Group("/api/v1")
 	dictCtrl := &controllers.DictController{DB: db}
 	logCtrl := &controllers.LogController{DB: db}
 
-	sys := r.Group("/api/v1")
+	// 租户管理路由（超管）
+	tenantCtrl := &controllers.TenantController{DB: db}
+	adminGroup := sys.Group("/admin")
+	tenantCtrl.RegisterTenantRoutes(adminGroup)
+
+	// 租户申请审批路由（/api/v1/tenant-approvals）
+	tenantApprovalCtrl := &controllers.TenantApprovalController{DB: db}
+	tenantApprovalCtrl.RegisterRoutes(sys)
+
 	{
-		sys.GET("/menus/tree", menuCtrl.GetMenuTree)
+		// 权限系统路由（多租户版本）
+		menuCtrl := &controllers.TenantMenuController{DB: db}
+		apiPermCtrl := &controllers.ApiPermissionController{DB: db}
+		newRoleCtrl := &controllers.NewRoleController{DB: db}
+		permGroupCtrl := &controllers.PermissionGroupController{DB: db}
+
+		sys.GET("/menus", menuCtrl.List)
+		sys.GET("/menus/:id", menuCtrl.Get)
+		sys.POST("/menus", menuCtrl.Create)
+		sys.PUT("/menus/:id", menuCtrl.Update)
+		sys.DELETE("/menus/:id", menuCtrl.Delete)
+
+		sys.GET("/api-permissions", apiPermCtrl.List)
+		sys.POST("/api-permissions", apiPermCtrl.Create)
+		sys.PUT("/api-permissions/:id", apiPermCtrl.Update)
+		sys.DELETE("/api-permissions/:id", apiPermCtrl.Delete)
+		sys.POST("/api-permissions/import", apiPermCtrl.Import)
+		sys.GET("/api-permissions/export", apiPermCtrl.Export)
+
+		sys.GET("/roles", newRoleCtrl.List)
+		sys.POST("/roles", newRoleCtrl.Create)
+		sys.PUT("/roles/:id", newRoleCtrl.Update)
+		sys.DELETE("/roles/:id", newRoleCtrl.Delete)
+		sys.GET("/roles/:id/permissions", newRoleCtrl.GetPermissions)
+		sys.PUT("/roles/:id/permissions", newRoleCtrl.SetPermissions)
+
+		sys.GET("/permission-groups", permGroupCtrl.List)
+		sys.GET("/permission-groups/:id", permGroupCtrl.Get)
+		sys.POST("/permission-groups", permGroupCtrl.Create)
+		sys.PUT("/permission-groups/:id", permGroupCtrl.Update)
+		sys.DELETE("/permission-groups/:id", permGroupCtrl.Delete)
+
+		sys.GET("/menus/tree", menuCtrl.List) // 复用 List 返回树形
 		sys.GET("/dicts/:type", dictCtrl.GetDictByType)
 		sys.GET("/logs/operations", logCtrl.GetOperationLogs)
 		sys.GET("/logs/login", logCtrl.GetLoginLogs)
@@ -192,6 +280,13 @@ func main() {
 		sys.POST("/alerts/batch/confirm", alertCtrl.BatchConfirmAlerts)
 		sys.POST("/alerts/batch/resolve", alertCtrl.BatchResolveAlerts)
 		sys.GET("/alerts/:id/notifications", alertCtrl.GetAlertNotifications)
+
+		// 告警规则别名路由（/api/v1/alert-rules，供前端使用）
+		sys.GET("/alert-rules", alertCtrl.GetRules)
+		sys.POST("/alert-rules", alertCtrl.CreateRule)
+		sys.PUT("/alert-rules/:id", alertCtrl.UpdateRule)
+		sys.DELETE("/alert-rules/:id", alertCtrl.DeleteRule)
+		sys.POST("/alert-rules/batch-delete", alertCtrl.BatchDeleteAlertRules)
 
 		// 地理围栏管理
 		sys.GET("/geofence/rules", alertCtrl.GetGeofenceRules)
@@ -211,7 +306,7 @@ func main() {
 	// 知识库路由
 	knowledgeCtrl := &controllers.KnowledgeController{}
 	apiV1 := r.Group("/api/v1")
-	knowledgeCtrl.RegisterRoutes(apiV1)
+	knowledgeCtrl.RegisterRoutesWithDB(apiV1, db)
 
 	// 宠物控制台路由
 	petConsoleCtrl := &controllers.PetConsoleController{}
@@ -224,6 +319,28 @@ func main() {
 	// 通知路由
 	notifCtrl := &controllers.NotificationController{DB: db}
 	notifCtrl.RegisterRoutes(apiV1)
+
+	// 补充通知路由（push 和 batch-delete）
+	apiV1.POST("/notifications/push", notifCtrl.PushNotification)
+	apiV1.POST("/notifications/batch-delete", notifCtrl.BatchDeleteNotifications)
+
+	// 补充公告路由（withdraw）
+	apiV1.POST("/announcements/:id/withdraw", notifCtrl.WithdrawAnnouncement)
+	apiV1.GET("/announcements/:id", notifCtrl.GetAnnouncement)
+
+	// 策略配置别名路由（/api/v1/policy-configs，供前端使用）
+	policyCtrlExtra := &controllers.PolicyController{DB: db}
+	complianceCtrlExtra := &controllers.ComplianceController{DB: db}
+	apiV1.GET("/policy-configs", policyCtrlExtra.ListConfigs)
+	apiV1.POST("/policy-configs", policyCtrlExtra.CreateConfig)
+	apiV1.PUT("/policy-configs/:id", policyCtrlExtra.UpdateConfig)
+	apiV1.DELETE("/policy-configs/:id", policyCtrlExtra.DeleteConfig)
+
+	// 合规规则别名路由（/api/v1/compliance-rules，供前端使用）
+	apiV1.GET("/compliance-rules", complianceCtrlExtra.ListRules)
+	apiV1.POST("/compliance-rules", complianceCtrlExtra.CreateRule)
+	apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
+	apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
 
 	// 获取端口
 	port := os.Getenv("PORT")
