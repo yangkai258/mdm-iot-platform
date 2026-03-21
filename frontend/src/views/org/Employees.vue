@@ -99,7 +99,7 @@
         <a-descriptions-item label="姓名">{{ currentRecord?.emp_name }}</a-descriptions-item>
         <a-descriptions-item label="性别">{{ currentRecord?.gender === 'male' ? '男' : currentRecord?.gender === 'female' ? '女' : '-' }}</a-descriptions-item>
         <a-descriptions-item label="手机号">{{ currentRecord?.phone || '-' }}</a-descriptions-item>
-        <a-descriptions-item label="邮箱">{{ currentRecord?.email || '-' }}</a-descri
+        <a-descriptions-item label="邮箱">{{ currentRecord?.email || '-' }}</a-descriptions-item>
 
 ptions-item>
         <a-descriptions-item label="身份证号">{{ currentRecord?.id_card || '-' }}</a-descriptions-item>

@@ -647,14 +647,3 @@ onMounted(() => {
   background: #f2f3f5;
 }
 </style>
-ht: 500;
-}
-.plan-card {
-  margin-bottom: 12px;
-  cursor: pointer;
-}
-.plan-card-selected {
-  border-color: #1650ff;
-  background: #f2f3f5;
-}
-</style>

@@ -129,21 +129,90 @@ const routes = [
     name: 'ComplianceRules',
     component: () => import('../views/policies/ComplianceRules.vue')
   },
-  // 会员管理
+  // 会员管理 - 会员积分
   {
     path: '/members/points',
     name: 'MemberPoints',
     component: () => import('../views/members/MemberPoints.vue')
   },
   {
+    path: '/members/points/rules',
+    name: 'PointsRules',
+    component: () => import('../views/members/PointsRules.vue')
+  },
+  {
+    path: '/members/points/inventory',
+    name: 'PointsInventory',
+    component: () => import('../views/members/PointsInventory.vue')
+  },
+  {
+    path: '/members/points/records',
+    name: 'PointsRecords',
+    component: () => import('../views/members/PointsRecords.vue')
+  },
+  {
+    path: '/members/points/settings',
+    name: 'PointsSettings',
+    component: () => import('../views/members/PointsSettings.vue')
+  },
+  {
+    path: '/members/points/exclude',
+    name: 'PointsExclude',
+    component: () => import('../views/members/PointsExclude.vue')
+  },
+  // 会员管理 - 优惠券
+  {
     path: '/members/coupons',
     name: 'MemberCoupons',
     component: () => import('../views/members/MemberCoupons.vue')
   },
+  // 会员管理 - 促销
   {
     path: '/members/promotions',
     name: 'MemberPromotions',
     component: () => import('../views/members/MemberPromotions.vue')
+  },
+  // 会员管理 - 店铺管理
+  {
+    path: '/members/stores',
+    name: 'MemberStores',
+    component: () => import('../views/members/MemberStores.vue')
+  },
+  {
+    path: '/members/store-sources',
+    name: 'StoreSources',
+    component: () => import('../views/members/StoreSources.vue')
+  },
+  {
+    path: '/members/store-locations',
+    name: 'StoreLocations',
+    component: () => import('../views/members/StoreLocations.vue')
+  },
+  {
+    path: '/members/channels',
+    name: 'MemberChannels',
+    component: () => import('../views/members/MemberChannels.vue')
+  },
+  {
+    path: '/members/miniprogram',
+    name: 'MiniProgram',
+    component: () => import('../views/members/MiniProgram.vue')
+  },
+  {
+    path: '/members/printers',
+    name: 'Printers',
+    component: () => import('../views/members/Printers.vue')
+  },
+  // 会员管理 - 临时会员
+  {
+    path: '/members/temp-members',
+    name: 'TempMembers',
+    component: () => import('../views/members/TempMembers.vue')
+  },
+  {
+    path: '/members/temp-coupons',
+    name: 'TempCoupons',
+    component: () => import('../views/members/TempCoupons.vue')
   },
   // 告警中心
   {
