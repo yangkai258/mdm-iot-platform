@@ -54,6 +54,8 @@ type OTADeployment struct {
 	CancelledAt              *time.Time     `json:"cancelled_at"`
 	CompletedAt              *time.Time     `json:"completed_at"`
 	CreatedBy                string         `gorm:"type:varchar(64);not null" json:"created_by"`
+	CreateUserID             uint           `gorm:"index" json:"create_user_id"` // 创建人ID（用于数据权限）
+	OrgID                    uint           `gorm:"index" json:"org_id"`          // 组织ID（用于数据权限）
 	CreatedAt                time.Time      `json:"created_at"`
 	UpdatedAt                time.Time      `json:"updated_at"`
 	DeletedAt                gorm.DeletedAt `gorm:"index" json:"-"`

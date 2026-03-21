@@ -17,6 +17,8 @@ type Device struct {
 	FirmwareVersion string         `gorm:"type:varchar(32);not null" json:"firmware_version"`
 	BindUserID      *string        `gorm:"type:varchar(36);index" json:"bind_user_id"`
 	LifecycleStatus int            `gorm:"type:smallint;default:1" json:"lifecycle_status"` // 1:待激活 2:服役中 3:维修 4:报废
+	OrgID           uint           `gorm:"index" json:"org_id"`                              // 组织ID（用于数据权限）
+	CreateUserID    uint           `gorm:"index" json:"create_user_id"`                      // 创建人ID（用于数据权限）
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`

@@ -192,6 +192,26 @@ func (h *Handler) StatusMessageHandler(client mqtt.Client, msg mqtt.Message) {
 	h.syncShadowToDB(payload.DeviceID, isOnline, payload.BatteryLevel, payload.CurrentMode, &timestamp,
 		payload.IsJailbroken, payload.RootStatus, payload.Latitude, payload.Longitude)
 
+	// 心跳时检查 Redis 中的 desired_config 是否存在，存在则通过 MQTT 下发
+	if shadow, err := h.Redis.GetDeviceShadow(payload.DeviceID); err == nil && shadow != nil && shadow.DesiredConfig != "" {
+		var desiredCfg map[string]interface{}
+		if err := json.Unmarshal([]byte(shadow.DesiredConfig), &desiredCfg); err == nil && len(desiredCfg) > 0 {
+			cmd := map[string]interface{}{
+				"cmd_id":    fmt.Sprintf("desired-%s-%d", payload.DeviceID, time.Now().Unix()),
+				"cmd_type":  "desired_config",
+				"timestamp": time.Now().Format(time.RFC3339),
+				"config":    desiredCfg,
+			}
+			if GlobalMQTTClient != nil {
+				if pubErr := h.PublishCommand(GlobalMQTTClient, payload.DeviceID, cmd); pubErr != nil {
+					log.Printf("[MQTT] 下发 desired_config 到设备 %s 失败: %v", payload.DeviceID, pubErr)
+				} else {
+					log.Printf("[MQTT] 心跳时下发 desired_config 到设备 %s", payload.DeviceID)
+				}
+			}
+		}
+	}
+
 	log.Printf("[MQTT] 设备 %s 心跳更新: online=%v, battery=%d%%, mode=%s, jailbreak=%v, root=%s, lat=%.4f, lng=%.4f",
 		payload.DeviceID, isOnline, payload.BatteryLevel, payload.CurrentMode,
 		payload.IsJailbroken, payload.RootStatus, payload.Latitude, payload.Longitude)

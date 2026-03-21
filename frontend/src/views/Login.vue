@@ -26,7 +26,7 @@
             placeholder="请输入密码"
             password
             allow-clear
-            @keyup.enter="handleLogin"
+            @keydown.enter="handleLogin"
           >
             <template #prefix>
               <span>🔒</span>

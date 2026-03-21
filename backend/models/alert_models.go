@@ -42,6 +42,8 @@ type DeviceAlert struct {
 	IgnoredAt    *time.Time `json:"ignored_at"`
 	IgnoredBy    string     `gorm:"type:varchar(36)" json:"ignored_by"`
 	ExtraData    string     `gorm:"type:jsonb" json:"extra_data"` // 附加数据（地理位置、越狱详情等）
+	OrgID        uint       `gorm:"index" json:"org_id"`          // 组织ID（用于数据权限）
+	CreateUserID uint       `gorm:"index" json:"create_user_id"` // 创建人ID（用于数据权限）
 	CreatedAt    time.Time  `json:"created_at"`
 }
 

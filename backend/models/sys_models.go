@@ -14,6 +14,7 @@ type SysUser struct {
 	Phone     string    `gorm:"type:varchar(20)" json:"phone"`
 	Status    int       `gorm:"default:1" json:"status"`
 	RoleID    uint      `json:"role_id"`
+	TenantID  string    `gorm:"index" json:"tenant_id"` // 租户ID
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

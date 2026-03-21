@@ -109,6 +109,8 @@ func main() {
 		&models.RoleMenu{},
 		&models.RoleApiPermission{},
 		&models.RolePermissionGroup{},
+		// 数据权限表
+		&models.DataScope{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -202,6 +204,9 @@ func main() {
 
 	// JWT 中间件
 	r.Use(middleware.JWTAuth())
+
+	// 用户上下文中间件：从 JWT 提取用户ID/OrgID 存入 Context
+	r.Use(middleware.UserContext())
 
 	// 租户上下文中间件：从 JWT 解析 tenant_id
 	r.Use(middleware.TenantContext())
