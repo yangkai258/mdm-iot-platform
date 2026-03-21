@@ -10,6 +10,7 @@ import (
 	"mdm-backend/mqtt"
 	"mdm-backend/utils"
 
+	pahomqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -17,8 +18,14 @@ import (
 
 // CommandController 指令控制
 type CommandController struct {
-	DB    *gorm.DB
-	Redis *utils.RedisClient
+	DB           *gorm.DB
+	Redis        *utils.RedisClient
+	mqttClient   pahomqtt.Client // 注入的 MQTT 客户端，避免直接使用全局变量
+}
+
+// SetMQTTClient 设置 MQTT 客户端（供 main.go 初始化时调用）
+func (c *CommandController) SetMQTTClient(client pahomqtt.Client) {
+	c.mqttClient = client
 }
 
 // SendCommandRequest 下发指令请求
@@ -87,11 +94,15 @@ func (c *CommandController) SendCommand(ctx *gin.Context) {
 		cmd["ota"] = req.OTA
 	}
 
-	// 通过 MQTT 下发
-	if mqtt.GlobalMQTTClient != nil {
+	// 通过 MQTT 下发（优先使用注入的客户端，降级到全局客户端）
+	mqttClient := c.mqttClient
+	if mqttClient == nil {
+		mqttClient = mqtt.GlobalMQTTClient
+	}
+	if mqttClient != nil {
 		topic := fmt.Sprintf("/mdm/device/%s/down/cmd", deviceID)
 		payload, _ := json.Marshal(cmd)
-		token := mqtt.GlobalMQTTClient.Publish(topic, 0, false, payload)
+		token := mqttClient.Publish(topic, 0, false, payload)
 		token.Wait()
 		if token.Error() != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -101,6 +112,13 @@ func (c *CommandController) SendCommand(ctx *gin.Context) {
 			})
 			return
 		}
+	} else {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":      5001,
+			"message":   "MQTT 客户端未初始化",
+			"error_code": "ERR_MQTT_NOT_INIT",
+		})
+		return
 	}
 
 	// 记录指令历史
