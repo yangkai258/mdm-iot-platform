@@ -31,7 +31,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	deptCtrl := &DepartmentController{DB: db}
 	postCtrl := &PostController{DB: db}
 	empCtrl := &EmployeeController{DB: db}
-	roleCtrl := &OldRoleController{DB: db}
+	// roleCtrl 已迁移到 NewRoleController (main.go)
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 	positionTemplateCtrl := &PositionTemplateController{DB: db}
@@ -157,14 +157,15 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/position-templates/:id/copy", positionTemplateCtrl.PositionTemplateCopy)
 
 		// ============ 角色管理 ============
-		api.GET("/roles", roleCtrl.List)
-		api.POST("/roles", roleCtrl.Create)
-		api.GET("/roles/:id", roleCtrl.Get)
-		api.PUT("/roles/:id", roleCtrl.Update)
-		api.DELETE("/roles/:id", roleCtrl.Delete)
-		api.GET("/roles/:id/permissions", roleCtrl.GetPermissions)
-		api.POST("/roles/:id/permissions", roleCtrl.AssignPermissions)
-		api.GET("/permissions", roleCtrl.ListPermissions)
+		// (已迁移到 main.go NewRoleController)
+		// api.GET("/roles", roleCtrl.List)
+		// api.POST("/roles", roleCtrl.Create)
+		// api.GET("/roles/:id", roleCtrl.Get)
+		// api.PUT("/roles/:id", roleCtrl.Update)
+		// api.DELETE("/roles/:id", roleCtrl.Delete)
+		// api.GET("/roles/:id/permissions", roleCtrl.GetPermissions)
+		// api.POST("/roles/:id/permissions", roleCtrl.AssignPermissions)
+		// api.GET("/permissions", roleCtrl.ListPermissions)
 
 		// ============ 会员管理 ============
 		// 会员信息
