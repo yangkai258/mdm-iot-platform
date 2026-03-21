@@ -210,7 +210,7 @@ func main() {
 	})
 
 	// 注册认证路由 (不需要 JWT)
-	authCtrl := &controllers.AuthController{DB: db}
+	authCtrl := &controllers.AuthController{DB: db, Redis: redisClient}
 	r.POST("/api/v1/auth/login", authCtrl.Login)
 
 	// JWT 中间件

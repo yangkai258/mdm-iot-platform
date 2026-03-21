@@ -99,6 +99,11 @@ type RedisClient struct {
 	client *redis.Client
 }
 
+// Client 返回底层的 redis.Client（用于限流等操作）
+func (r *RedisClient) Client() *redis.Client {
+	return r.client
+}
+
 // DeviceShadow 设备影子结构
 type DeviceShadow struct {
 	DeviceID      string     `json:"device_id"`
