@@ -97,6 +97,18 @@ const routes = [
     path: '/test-modals',
     name: 'TestModals',
     component: () => import('../views/ModalTest.vue')
+  },
+
+  // 租户入驻路由
+  {
+    path: '/tenant/apply',
+    name: 'TenantApplication',
+    component: () => import('../views/tenants/TenantApplication.vue')
+  },
+  {
+    path: '/admin/tenant-approvals',
+    name: 'TenantApprovals',
+    component: () => import('../views/tenants/TenantApproval.vue')
   }
 ]
 

@@ -114,13 +114,11 @@ const menuItems = [
     ]
   },
   {
-    key: '/tenants',
-    label: '系统管理',
+    key: '/tenant',
+    label: '租户入驻',
     children: [
-      { key: '/tenants/approval', label: '租户入驻审核' },
-      { key: '/tenants/management', label: '租户系统管理' },
-      { key: '/tenants/public-archives', label: '公共档案' },
-      { key: '/tenants/system-info', label: '系统信息' }
+      { key: '/tenant/apply', label: '提交入驻申请' },
+      { key: '/admin/tenant-approvals', label: '入驻审核管理' }
     ]
   },
   {
