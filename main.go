@@ -239,6 +239,31 @@ func main() {
 	tenantApprovalCtrl := &controllers.TenantApprovalController{DB: db}
 	tenantApprovalCtrl.RegisterRoutes(sys)
 
+	// 单位管理路由
+	companyCtrl := &controllers.CompanyController{DB: db}
+	deptCtrl := &controllers.DepartmentController{DB: db}
+	empCtrl := &controllers.EmployeeController{DB: db}
+
+	sys.GET("/companies", companyCtrl.CompanyList)
+	sys.POST("/companies", companyCtrl.CompanyCreate)
+	sys.GET("/companies/:id", companyCtrl.CompanyGet)
+	sys.PUT("/companies/:id", companyCtrl.CompanyUpdate)
+	sys.DELETE("/companies/:id", companyCtrl.CompanyDelete)
+
+	sys.GET("/departments/tree", deptCtrl.DepartmentTree)
+	sys.GET("/departments", deptCtrl.DepartmentList)
+	sys.POST("/departments", deptCtrl.DepartmentCreate)
+	sys.GET("/departments/:id", deptCtrl.DepartmentGet)
+	sys.PUT("/departments/:id", deptCtrl.DepartmentUpdate)
+	sys.DELETE("/departments/:id", deptCtrl.DepartmentDelete)
+
+	sys.GET("/employees", empCtrl.EmployeeList)
+	sys.POST("/employees/onboard", empCtrl.EmployeeOnboard)
+	sys.GET("/employees/:id", empCtrl.EmployeeGet)
+	sys.PUT("/employees/:id", empCtrl.EmployeeUpdate)
+	sys.DELETE("/employees/:id", empCtrl.EmployeeDelete)
+	sys.POST("/employees/:id/leave", empCtrl.EmployeeLeave)
+
 	{
 		// 权限系统路由（多租户版本）
 		menuCtrl := &controllers.TenantMenuController{DB: db}
