@@ -21,16 +21,16 @@
     .card-title{font-size:15px;font-weight:600}
     .stat-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
     .stat-card{background:#fff;border-radius:8px;padding:16px;text-align:center}
-    .stat-value{font-size:24px;font-weight:600;color:#165qff}
+    .stat-value{font-size:24px;font-weight:600;color:#165dff}
     .stat-label{font-size:13px;color:#888;margin-top:4px}
     .member-row{display:flex;align-items:center;padding:8px 0}
-    .member-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#165qff,#4080ff);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:12px}
+    .member-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#165dff,#4080ff);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:12px}
     .member-name{font-weight:500;margin-bottom:2px}
     .member-meta{font-size:12px;color:#888}
     .member-level{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:8px}
     .level-gold{background:#fff7e6;color:#ff7d00}
     .level-silver{background:#f2f3f5;color:#888}
-    .level-normal{background:#e6f7ff;color:#165qff}
+    .level-normal{background:#e6f7ff;color:#165dff}
     .points-balance{font-weight:600;color:#ff7d00}
   </style>
 </head>
@@ -454,7 +454,7 @@ const tagPagination = reactive({ current:1, pageSize:10, total:0 });
 const tagModalVisible = ref(false), tagEditId = ref(null);
 const tagForm = reactive({ tag_name:'' });
 const tagColumns = [{title:'&#x6807;&#x7B7E;',slotName:'color',width:200},{title:'&#x72B6;&#x6001;',slotName:'status',width:80},{title:'&#x64CD;&#x4F5C;',slotName:'operations',width:100}];
-const mockTags = [{id:1,tag_name:'&#x9AD8;&#x4EF7;&#x503C;',color:'#f53f3f',member_count:128,status:1},{id:2,tag_name:'&#x6D3B;&#x8DC3;&#x7528;&#x6237;',color:'#00b42a',member_count:356,status:1},{id:3,tag_name:'&#x65B0;&#x7528;&#x6237;',color:'#165qff',member_count:234,status:1}];
+const mockTags = [{id:1,tag_name:'&#x9AD8;&#x4EF7;&#x503C;',color:'#f53f3f',member_count:128,status:1},{id:2,tag_name:'&#x6D3B;&#x8DC3;&#x7528;&#x6237;',color:'#00b42a',member_count:356,status:1},{id:3,tag_name:'&#x65B0;&#x7528;&#x6237;',color:'#165dff',member_count:234,status:1}];
 const loadTags = () => { tagLoading.value = true; setTimeout(() => { tagList.value = mockTags; tagPagination.total = mockTags.length; tagLoading.value = false; }, 300); };
 const tagPageChange = (p) => { tagPagination.current = p; loadTags(); };
 const openTagModal = (r) => { tagEditId.value = r?.id||null; Object.assign(tagForm, r||{tag_name:''}); tagModalVisible.value = true; };
