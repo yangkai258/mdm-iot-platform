@@ -1,41 +1,6 @@
 <template>
-  <a-layout class="policy-configs">
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo">
-        <span v-if="!collapsed">MDM 控制台</span>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleMenuClick">
-        <a-menu-item key="dashboard">
-          <span>设备大盘</span>
-        </a-menu-item>
-        <a-menu-item key="policies">
-          <span>策略管理</span>
-        </a-menu-item>
-        <a-menu-item key="alert">
-          <span>告警中心</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
-
-    <a-layout>
-      <a-layout-header class="header">
-        <div class="header-left">
-          <a-button type="text" @click="collapsed = !collapsed">
-            <span v-if="collapsed">☰</span>
-            <span v-else>✕</span>
-          </a-button>
-        </div>
-        <div class="header-title">
-          <a-breadcrumb>
-            <a-breadcrumb-item>策略管理</a-breadcrumb-item>
-            <a-breadcrumb-item>配置文件</a-breadcrumb-item>
-          </a-breadcrumb>
-        </div>
-        <div class="header-right"></div>
-      </a-layout-header>
-
-      <a-layout-content class="content">
-        <!-- 统计卡片 -->
+  <div class="page-container">
+<!-- 统计卡片 -->
         <a-row :gutter="16" class="stats-row">
           <a-col :span="6">
             <a-card>
@@ -112,8 +77,6 @@
             </template>
           </a-table>
         </a-card>
-      </a-layout-content>
-    </a-layout>
 
     <!-- 创建/编辑配置抽屉 -->
     <a-drawer
@@ -182,18 +145,14 @@
         </a-descriptions>
       </template>
     </a-drawer>
-  </a-layout>
+  </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
 
-const router = useRouter()
-const collapsed = ref(false)
-const selectedKeys = ref(['policies'])
 const loading = ref(false)
 const configList = ref([])
 const showCreateDrawer = ref(false)
@@ -241,12 +200,6 @@ const columns = [
   { title: '更新时间', slotName: 'updatedAt', width: 160 },
   { title: '操作', slotName: 'actions', width: 180, fixed: 'right' }
 ]
-
-const handleMenuClick = ({ key }) => {
-  const routes = { dashboard: '/dashboard', policies: '/policies/list', alert: '/alerts/list' }
-  if (routes[key]) router.push(routes[key])
-  selectedKeys.value = [key]
-}
 
 const loadConfigs = async () => {
   loading.value = true

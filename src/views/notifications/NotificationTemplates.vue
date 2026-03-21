@@ -48,7 +48,7 @@
         <a-descriptions-item label="org_name">组织名称</a-descriptions-item>
       </a-descriptions>
       <div class="tip-text" style="margin-top: 12px; color: #1650d8; font-size: 13px;">
-        <icon-info-circle />&nbsp; 使用模板发送时，请填写各变量的实际值。支持变量占位符格式：<code>{{ '{{' }}变量名{{ '}}' }}</code>，例如：您的设备 {{ '{{' }}device_name{{ '}}' }} 有新版本可用。
+        <icon-info-circle />&nbsp; 使用模板发送时，请填写各变量的实际值。支持变量占位符格式：<code v-pre>{{变量名}}</code>，例如：您的设备 <code v-pre>{{device_name}}</code> 有新版本可用。
       </div>
     </a-card>
 
