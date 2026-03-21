@@ -68,6 +68,7 @@ const routes = [
     name: 'NotificationTemplates',
     component: () => import('../views/notifications/NotificationTemplates.vue')
   },
+  // 合规策略管理路由
   {
     path: '/policies',
     redirect: '/policies/list'
@@ -76,6 +77,26 @@ const routes = [
     path: '/policies/list',
     name: 'PolicyList',
     component: () => import('../views/policies/PolicyList.vue')
+  },
+  {
+    path: '/policies/configs',
+    name: 'PolicyConfigs',
+    component: () => import('../views/policies/PolicyConfigs.vue')
+  },
+  {
+    path: '/policies/compliance-rules',
+    name: 'ComplianceRules',
+    component: () => import('../views/policies/ComplianceRules.vue')
+  },
+  {
+    path: '/policies/device-compliance',
+    name: 'DeviceCompliance',
+    component: () => import('../views/policies/DeviceCompliance.vue')
+  },
+  {
+    path: '/test-modals',
+    name: 'TestModals',
+    component: () => import('../views/ModalTest.vue')
   }
 ]
 

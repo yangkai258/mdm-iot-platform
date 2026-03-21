@@ -139,6 +139,16 @@ const menuItems = [
       { key: '/apps/distributions', label: '应用分发' }
     ]
   },
+  {
+    key: '/policies',
+    label: '合规策略',
+    children: [
+      { key: '/policies/list', label: '策略管理' },
+      { key: '/policies/configs', label: '配置文件库' },
+      { key: '/policies/compliance-rules', label: '合规规则' },
+      { key: '/policies/device-compliance', label: '设备合规状态' }
+    ]
+  },
   { key: '/test-modals', label: '🎨 UI测试' },
 ]
 
