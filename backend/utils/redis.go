@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -62,9 +63,16 @@ func InitRedis() (*RedisClient, error) {
 	// 获取 host:port
 	if parsedURL.Host != "" {
 		addr = parsedURL.Host
+		// 如果 Host 没有端口，添加默认端口
+		if !strings.Contains(addr, ":") {
+			addr = addr + ":6379"
+		}
 	} else if parsedURL.Path != "" {
-		// 没有 Host 时，Path 包含路径
-		addr = parsedURL.Path + ":6379"
+		// 没有 Host 时，Path 包含路径（格式: /0 或 localhost:6379/0）
+		addr = parsedURL.Path
+		if !strings.Contains(addr, ":") {
+			addr = addr + ":6379"
+		}
 	}
 
 	// 获取密码
