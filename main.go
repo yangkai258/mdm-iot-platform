@@ -122,6 +122,8 @@ func main() {
 		&models.SysDictItem{},
 		&models.SysNumberRule{},
 		&models.SysScheduleJob{},
+		// 报表记录表
+		&models.ReportRecord{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -230,6 +232,11 @@ func main() {
 
 	// 注册业务路由
 	controllers.RegisterRoutes(r, db, redisClient)
+
+	// 报表统计路由
+	reportCtrl := controllers.NewReportController(db, redisClient)
+	reportGroup := r.Group("/api/v1")
+	reportCtrl.RegisterRoutes(reportGroup)
 
 	// 注册系统管理路由
 	sys := r.Group("/api/v1")
