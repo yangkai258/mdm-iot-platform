@@ -168,6 +168,13 @@ func main() {
 		&models.ProductCategory{},
 		&models.Product{},
 		&models.Order{},
+		// Sprint 24: 研究平台 - 行为研究数据 & AI 行为实验
+		&models.ResearchDataset{},
+		&models.ResearchDataRecord{},
+		&models.ResearchExportJob{},
+		&models.Experiment{},
+		&models.ExperimentRun{},
+		&models.ExperimentParticipant{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}

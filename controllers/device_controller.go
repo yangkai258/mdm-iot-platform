@@ -35,6 +35,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 	positionTemplateCtrl := &PositionTemplateController{DB: db}
+	researchCtrl := &ResearchController{DB: db}
 
 	api := r.Group("/api/v1")
 	{
@@ -302,6 +303,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 违规记录
 		api.GET("/compliance/violations", complianceCtrl.ListViolations)
 		api.PUT("/compliance/violations/:id/resolve", complianceCtrl.ResolveViolation)
+
+		// ============ Sprint 24: 研究平台 - 行为研究数据 & AI 行为实验 ============
+		researchCtrl.RegisterRoutes(api)
 	}
 }
 
