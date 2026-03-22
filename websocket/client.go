@@ -47,6 +47,8 @@ func (c *Client) ReadPump() {
 			}
 			break
 		}
+		// 对于通知推送场景，客户端通常不需要发送消息
+		// 如果需要处理客户端消息，可以在这里处理
 	}
 }
 
@@ -63,6 +65,7 @@ func (c *Client) WritePump() {
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
+				// Hub closed the channel
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
@@ -73,6 +76,7 @@ func (c *Client) WritePump() {
 			}
 			w.Write(message)
 
+			// Add queued messages to the current websocket message
 			n := len(c.send)
 			for i := 0; i < n; i++ {
 				w.Write([]byte{'\n'})

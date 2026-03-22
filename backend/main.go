@@ -132,13 +132,6 @@ func main() {
 		// Sprint 12: 数据权限表
 		&models.DataPermissionRule{},
 		&models.UserDataPermission{},
-		// Sprint 13: 多区域数据库架构
-		&models.Region{},
-		&models.RegionalNode{},
-		// Sprint 13: 时区支持
-		&models.TimezoneConfig{},
-		// Sprint 13: 数据驻留
-		&models.DataResidencyRule{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}

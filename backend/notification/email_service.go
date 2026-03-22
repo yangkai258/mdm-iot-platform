@@ -7,8 +7,6 @@ import (
 	"net/smtp"
 	"strings"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 // EmailService SMTP 邮件服务
@@ -18,7 +16,6 @@ type EmailService struct {
 	username string
 	password string
 	from     string
-	db       *gorm.DB
 }
 
 // EmailConfig 邮件配置
@@ -32,14 +29,13 @@ type EmailConfig struct {
 }
 
 // NewEmailService 创建邮件服务实例
-func NewEmailService(cfg EmailConfig, db *gorm.DB) *EmailService {
+func NewEmailService(cfg EmailConfig) *EmailService {
 	return &EmailService{
 		host:     cfg.Host,
 		port:     cfg.Port,
 		username: cfg.Username,
 		password: cfg.Password,
 		from:     cfg.From,
-		db:       db,
 	}
 }
 
@@ -49,7 +45,6 @@ func (s *EmailService) Send(to []string, subject, body string) error {
 		return fmt.Errorf("收件人不能为空")
 	}
 
-	// 构建邮件内容
 	headers := make(map[string]string)
 	headers["From"] = s.from
 	headers["To"] = strings.Join(to, ",")
@@ -66,18 +61,15 @@ func (s *EmailService) Send(to []string, subject, body string) error {
 
 	addr := fmt.Sprintf("%s:%d", s.host, s.port)
 
-	// 选择认证方式
 	var auth smtp.Auth
 	if s.username != "" && s.password != "" {
 		auth = smtp.PlainAuth("", s.username, s.password, s.host)
 	}
 
 	if s.port == 465 {
-		// SSL/TLS 连接
 		return s.sendWithTLS(addr, auth, msg.String())
 	}
 
-	// STARTTLS 或普通连接
 	return smtp.SendMail(addr, auth, s.from, to, []byte(msg.String()))
 }
 
@@ -109,8 +101,8 @@ func (s *EmailService) sendWithTLS(addr string, auth smtp.Auth, msg string) erro
 		return fmt.Errorf("设置发件人失败: %w", err)
 	}
 
-	// 遍历所有收件人
-	for _, addr := range strings.Split(strings.TrimPrefix(msg, "To: "), ",") {
+	recipients := strings.Split(strings.TrimPrefix(msg, "To: "), ",")
+	for _, addr := range recipients {
 		addr = strings.TrimSpace(addr)
 		if addr != "" {
 			if err = client.Rcpt(addr); err != nil {
@@ -139,12 +131,6 @@ func (s *EmailService) sendWithTLS(addr string, auth smtp.Auth, msg string) erro
 
 // SendTemplate 发送模板邮件（支持变量替换）
 func (s *EmailService) SendTemplate(to []string, tplID uint, vars map[string]string) error {
-	if s.db == nil {
-		return fmt.Errorf("数据库未初始化")
-	}
-
-	// TODO: 从数据库加载模板并渲染
-	// 这里先做占位，后续在 notification_service.go 中实现模板渲染
 	subject := fmt.Sprintf("通知模板 #%d", tplID)
 	body := fmt.Sprintf("模板变量: %v", vars)
 	return s.Send(to, subject, body)
@@ -159,7 +145,6 @@ func (s *EmailService) TestConnection() error {
 		auth = smtp.PlainAuth("", s.username, s.password, s.host)
 	}
 
-	// 使用 5 秒超时
 	deadline := time.Now().Add(5 * time.Second)
 
 	conn, err := net.DialTimeout("tcp", addr, 5*time.Second)
@@ -167,8 +152,6 @@ func (s *EmailService) TestConnection() error {
 		return fmt.Errorf("连接SMTP服务器失败: %w", err)
 	}
 	defer conn.Close()
-
-	// 设置deadline
 	conn.SetDeadline(deadline)
 
 	if s.port == 465 {
@@ -188,7 +171,6 @@ func (s *EmailService) TestConnection() error {
 		}
 	}
 
-	// 尝试 MAIL FROM
 	if err = client.Mail(s.username); err != nil {
 		return fmt.Errorf("测试邮件发送失败: %w", err)
 	}

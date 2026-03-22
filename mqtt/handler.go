@@ -81,20 +81,15 @@ func SetGlobalMQTTClient(client mqtt.Client) {
 	GlobalMQTTClient = client
 }
 
-// GetGlobalMQTTClient 获取全局 MQTT 客户端
-func GetGlobalMQTTClient() mqtt.Client {
-	return GlobalMQTTClient
-}
-
 // StatusPayload 心跳上报 JSON 结构
 type StatusPayload struct {
-	DeviceID         string `json:"device_id"`
-	Timestamp        string `json:"timestamp"`
-	ConnectionStatus string `json:"connection_status"` // online, offline, poor_network
-	BatteryLevel     int    `json:"battery_level"`     // 0-100
-	ChargingStatus   bool   `json:"charging_status"`
-	CurrentMode      string `json:"current_mode"` // sleeping, roaming, listening, talking, idle
-	RSSI             *int   `json:"rssi,omitempty"`
+	DeviceID         string  `json:"device_id"`
+	Timestamp        string  `json:"timestamp"`
+	ConnectionStatus string  `json:"connection_status"` // online, offline, poor_network
+	BatteryLevel     int     `json:"battery_level"`     // 0-100
+	ChargingStatus   bool    `json:"charging_status"`
+	CurrentMode      string  `json:"current_mode"` // sleeping, roaming, listening, talking, idle
+	RSSI             *int    `json:"rssi,omitempty"`
 	// 越狱/ROOT检测
 	IsJailbroken bool   `json:"is_jailbroken"`
 	RootStatus   string `json:"root_status"` // normal, rooted, jailbroken
@@ -182,10 +177,10 @@ func (h *Handler) StatusMessageHandler(client mqtt.Client, msg mqtt.Message) {
 		BatteryLevel:  payload.BatteryLevel,
 		CurrentMode:   payload.CurrentMode,
 		LastHeartbeat: &timestamp,
-		IsJailbroken:  payload.IsJailbroken,
-		RootStatus:    payload.RootStatus,
-		Latitude:      payload.Latitude,
-		Longitude:     payload.Longitude,
+		IsJailbroken: payload.IsJailbroken,
+		RootStatus:   payload.RootStatus,
+		Latitude:     payload.Latitude,
+		Longitude:    payload.Longitude,
 	}
 
 	if err := h.Redis.SetDeviceShadow(payload.DeviceID, shadow, 90*time.Second); err != nil {
@@ -341,15 +336,15 @@ func CheckGeofence(db *gorm.DB, deviceID string, lat, lng float64, alertType str
 
 		if triggered {
 			extraData, _ := json.Marshal(map[string]interface{}{
-				"rule_id":     rule.ID,
-				"rule_name":   rule.Name,
-				"distance_m":  distance,
-				"radius_m":    rule.RadiusMeters,
-				"center_lat":  rule.CenterLat,
-				"center_lng":  rule.CenterLng,
-				"current_lat": lat,
-				"current_lng": lng,
-				"event_type":  eventType,
+				"rule_id":        rule.ID,
+				"rule_name":      rule.Name,
+				"distance_m":     distance,
+				"radius_m":       rule.RadiusMeters,
+				"center_lat":    rule.CenterLat,
+				"center_lng":     rule.CenterLng,
+				"current_lat":   lat,
+				"current_lng":    lng,
+				"event_type":     eventType,
 			})
 
 			alert := models.DeviceAlert{
@@ -375,7 +370,7 @@ func CheckGeofence(db *gorm.DB, deviceID string, lat, lng float64, alertType str
 				Severity:  rule.Severity,
 				Message:   fmt.Sprintf("设备%s地理围栏[%s]", eventType, rule.Name),
 				Status:    1,
-				AlertID:   alert.ID,
+				AlertID:  alert.ID,
 			}
 			db.Create(&geoAlert)
 
@@ -448,7 +443,7 @@ func (h *Handler) syncShadowToDB(deviceID string, isOnline bool, batteryLevel in
 		// 记录存在，更新字段（但 lifecycle_status 不变）
 		updates := map[string]interface{}{
 			"is_online":      isOnline,
-			"battery_level":  batteryLevel,
+			"battery_level":   batteryLevel,
 			"current_mode":   currentMode,
 			"last_heartbeat": lastHeartbeat,
 		}
@@ -582,10 +577,10 @@ func (h *Handler) checkOfflineDevices() {
 				// 触发合规检查
 				if h.ComplianceCB != nil {
 					h.ComplianceCB(h.DB, shadow.DeviceID, map[string]interface{}{
-						"is_online": false,
-						"offline":   true,
-						"elapsed":   elapsed.Seconds(),
-						"battery":   float64(shadow.BatteryLevel),
+						"is_online":   false,
+						"offline":     true,
+						"elapsed":     elapsed.Seconds(),
+						"battery":     float64(shadow.BatteryLevel),
 					})
 				}
 			}
@@ -601,7 +596,7 @@ func (h *Handler) syncOfflineToDB(deviceID string) {
 
 	now := time.Now()
 	h.DB.Model(&models.DeviceShadow{}).Where("device_id = ?", deviceID).Updates(map[string]interface{}{
-		"is_online":      false,
+		"is_online":     false,
 		"last_heartbeat": now,
 	})
 }

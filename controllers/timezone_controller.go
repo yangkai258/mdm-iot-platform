@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"mdm-backend/models"
 	"mdm-backend/timezone"
 
 	"github.com/gin-gonic/gin"

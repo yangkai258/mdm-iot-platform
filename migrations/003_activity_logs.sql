@@ -1,48 +1,55 @@
--- Activity Logs and Login Logs Migration
--- Created: 2026-03-21
+-- ============================================================
+-- Sprint 9: Activity Logs 审计日志迁移
+-- ============================================================
 
--- Activity Logs table
+-- 创建 activity_logs 表
 CREATE TABLE IF NOT EXISTS activity_logs (
-    id SERIAL PRIMARY KEY,
-    user_id INT DEFAULT 0,
-    username VARCHAR(64) DEFAULT '',
-    action VARCHAR(64) DEFAULT '',
-    resource_type VARCHAR(64) DEFAULT '',
-    resource_id INT DEFAULT 0,
-    details JSONB DEFAULT '{}',
-    ip VARCHAR(32) DEFAULT '',
-    user_agent TEXT DEFAULT '',
-    created_at TIMESTAMP DEFAULT NOW()
+    id              SERIAL PRIMARY KEY,
+    user_id         INT,
+    username        VARCHAR(64),
+    action          VARCHAR(64) NOT NULL,  -- create/update/delete/login/logout
+    resource_type   VARCHAR(64) NOT NULL,  -- device/member/role/config/menu
+    resource_id     INT,
+    resource_name   VARCHAR(255),
+    details         JSONB DEFAULT '{}',
+    ip              VARCHAR(32),
+    user_agent      VARCHAR(255),
+    tenant_id       UUID,
+    created_at      TIMESTAMP DEFAULT NOW()
 );
 
--- Index for activity_logs
+-- 创建索引
 CREATE INDEX IF NOT EXISTS idx_activity_logs_user_id ON activity_logs(user_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_username ON activity_logs(username);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_action ON activity_logs(action);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_resource_type ON activity_logs(resource_type);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_resource_id ON activity_logs(resource_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_tenant_id ON activity_logs(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at);
 
--- Login Logs table
+-- 创建 login_logs 表（独立登录日志）
 CREATE TABLE IF NOT EXISTS login_logs (
-    id SERIAL PRIMARY KEY,
-    user_id INT DEFAULT 0,
-    username VARCHAR(64) DEFAULT '',
-    status VARCHAR(32) DEFAULT '',
-    ip VARCHAR(32) DEFAULT '',
-    location VARCHAR(128) DEFAULT '',
-    device VARCHAR(128) DEFAULT '',
-    browser VARCHAR(128) DEFAULT '',
-    login_at TIMESTAMP DEFAULT NOW(),
-    logout_at TIMESTAMP,
-    created_at TIMESTAMP DEFAULT NOW()
+    id          SERIAL PRIMARY KEY,
+    user_id     INT,
+    username    VARCHAR(64),
+    ip          VARCHAR(32),
+    location    VARCHAR(255),
+    browser     VARCHAR(50),
+    os          VARCHAR(50),
+    status      INT DEFAULT 1,  -- 1:成功 0:失败
+    msg         VARCHAR(255),
+    tenant_id   UUID,
+    login_time  TIMESTAMP NOT NULL,
+    created_at  TIMESTAMP DEFAULT NOW()
 );
 
--- Index for login_logs
+-- 创建索引
 CREATE INDEX IF NOT EXISTS idx_login_logs_user_id ON login_logs(user_id);
 CREATE INDEX IF NOT EXISTS idx_login_logs_username ON login_logs(username);
-CREATE INDEX IF NOT EXISTS idx_login_logs_status ON login_logs(status);
-CREATE INDEX IF NOT EXISTS idx_login_logs_login_at ON login_logs(login_at);
+CREATE INDEX IF NOT EXISTS idx_login_logs_tenant_id ON login_logs(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_login_logs_login_time ON login_logs(login_time);
 
--- Comments
-COMMENT ON TABLE activity_logs IS 'Activity/Audit logs for tracking user actions';
-COMMENT ON TABLE login_logs IS 'Login and logout tracking';
+-- 迁移说明：
+-- 如果表已存在但缺少 tenant_id 列，执行以下 ALTER 语句：
+-- ALTER TABLE activity_logs ADD COLUMN IF NOT EXISTS tenant_id UUID;
+-- ALTER TABLE login_logs ADD COLUMN IF NOT EXISTS tenant_id UUID;

@@ -9,7 +9,6 @@ import (
 // PolicyConfig 策略配置文件（Wi-Fi/VPN/Email/证书/限制策略配置）
 type PolicyConfig struct {
 	ID          uint           `gorm:"primaryKey" json:"id"`
-	TenantID    string         `gorm:"type:uuid;index" json:"tenant_id"` // 租户ID
 	Name        string         `gorm:"type:varchar(128);not null" json:"name"`
 	ConfigType  string         `gorm:"type:varchar(32);not null;index" json:"config_type"` // wifi / vpn / email / certificate / restrictions
 	SubType     string         `gorm:"type:varchar(64)" json:"sub_type"`                   // 子类型，如 WPA2/WPA3, OpenVPN/IPSec 等
@@ -31,7 +30,6 @@ func (PolicyConfig) TableName() string {
 // Policy 策略主表
 type Policy struct {
 	ID          uint           `gorm:"primaryKey" json:"id"`
-	TenantID    string         `gorm:"type:uuid;index" json:"tenant_id"` // 租户ID
 	Name        string         `gorm:"type:varchar(128);not null" json:"name"`
 	PolicyType  string         `gorm:"type:varchar(32);not null;index" json:"policy_type"` // compliance / security / network / app / device
 	Description string         `gorm:"type:text" json:"description"`
@@ -56,7 +54,6 @@ func (Policy) TableName() string {
 // PolicyBinding 策略绑定表
 type PolicyBinding struct {
 	ID         uint       `gorm:"primaryKey" json:"id"`
-	TenantID   string     `gorm:"type:uuid;index" json:"tenant_id"` // 租户ID
 	PolicyID   uint       `gorm:"not null;index" json:"policy_id"`
 	TargetType string     `gorm:"type:varchar(32);not null;index" json:"target_type"` // device / user / group / org_unit
 	TargetID   string     `gorm:"type:varchar(64);not null;index" json:"target_id"`   // 绑定目标 ID

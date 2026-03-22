@@ -59,7 +59,7 @@ type SleepRecord struct {
 	Events          JSON           `gorm:"type:jsonb" json:"events"`
 	Environment     JSON           `gorm:"type:jsonb" json:"environment"`
 	Notes           string         `gorm:"type:text" json:"notes"`
-	Tags            JSON           `gorm:"type:jsonb" json:"tags"`
+	Tags            StringArray    `gorm:"type:text" json:"tags"`
 	DataSource      string         `gorm:"type:varchar(32);default:'device'" json:"data_source"`
 	IsNap           bool           `gorm:"type:boolean;default:false" json:"is_nap"`
 	IsGoalAchieved  bool           `gorm:"type:boolean;default:false" json:"is_goal_achieved"`
@@ -110,8 +110,8 @@ type SleepAnalysis struct {
 	TotalRecordDays   int            `gorm:"type:int" json:"total_record_days"`
 	GoalAchievedDays  int            `gorm:"type:int" json:"goal_achieved_days"`
 	TrendAnalysis     JSON           `gorm:"type:jsonb" json:"trend_analysis"`
-	IssuesDetected    JSON           `gorm:"type:jsonb" json:"issues_detected"`
-	Recommendations   JSON           `gorm:"type:jsonb" json:"recommendations"`
+	IssuesDetected    StringArrayMap `gorm:"type:text" json:"issues_detected"`
+	Recommendations   StringArrayMap `gorm:"type:text" json:"recommendations"`
 	TenantID          string         `gorm:"type:uuid;index" json:"tenant_id"`
 	CreatedAt         time.Time      `json:"created_at"`
 	UpdatedAt         time.Time      `json:"updated_at"`

@@ -325,7 +325,7 @@ func (ctrl *AlertRuleController) Toggle(c *gin.Context) {
 		"code": 0,
 		"data": gin.H{
 			"enabled":  rule.Enabled,
-			"rule_id":  rule.RuleID,
+			"rule_id":  rule.ID,
 			"message":  "Alert rule toggled successfully",
 		},
 	})
@@ -358,7 +358,7 @@ func evaluateAlertRule(conditions models.JSON, data map[string]interface{}) (boo
 		op, _ := conditions["operator"].(string)
 		threshold, _ := toFloat64(conditions["value"])
 
-		return alertRuleEvaluateCondition(field, op, threshold, data), nil
+		return evaluateRuleCondition(field, op, threshold, data), nil
 	}
 
 	// 多条件 AND 逻辑
@@ -373,7 +373,7 @@ func evaluateAlertRule(conditions models.JSON, data map[string]interface{}) (boo
 		}
 		op, _ := itemMap["operator"].(string)
 		threshold, _ := toFloat64(itemMap["value"])
-		if !alertRuleEvaluateCondition(field, op, threshold, data) {
+		if !evaluateRuleCondition(field, op, threshold, data) {
 			return false, nil
 		}
 	}
@@ -381,8 +381,8 @@ func evaluateAlertRule(conditions models.JSON, data map[string]interface{}) (boo
 	return true, nil
 }
 
-// evaluateCondition 评估单个条件
-func alertRuleEvaluateCondition(field, operator string, threshold float64, data map[string]interface{}) bool {
+// evaluateRuleCondition 评估单个条件
+func evaluateRuleCondition(field, operator string, threshold float64, data map[string]interface{}) bool {
 	val, exists := data[field]
 	if !exists {
 		return false
@@ -438,7 +438,6 @@ func toFloat64(v interface{}) (float64, bool) {
 	case int64:
 		return float64(val), true
 	case string:
-		var f float64
 		for _, c := range val {
 			if c == '.' {
 				continue

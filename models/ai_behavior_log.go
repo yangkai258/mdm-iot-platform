@@ -13,6 +13,7 @@ type AIBehaviorLog struct {
 	LogID         string    `json:"log_id" gorm:"uniqueIndex;size:64"`
 	DeviceID      string    `json:"device_id" gorm:"index;size:64"`
 	UserID        uint      `json:"user_id" gorm:"index"`
+	ModelID       string    `json:"model_id" gorm:"size:64"`          // 模型ID
 	ModelName     string    `json:"model_name" gorm:"size:64"`
 	ModelVersion  string    `json:"model_version" gorm:"size:32"`
 	EventType     string    `json:"event_type" gorm:"size:32"` // inference/abnormal/rollback

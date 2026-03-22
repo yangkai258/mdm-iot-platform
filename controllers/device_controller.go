@@ -31,19 +31,10 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	deptCtrl := &DepartmentController{DB: db}
 	postCtrl := &PostController{DB: db}
 	empCtrl := &EmployeeController{DB: db}
-	roleCtrl := &OldRoleController{DB: db}
+	// roleCtrl 已迁移到 NewRoleController (main.go)
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 	positionTemplateCtrl := &PositionTemplateController{DB: db}
-
-	// Sprint 16: 订阅和计费控制器
-	subscriptionCtrl := &SubscriptionController{DB: db}
-	usageCtrl := &UsageController{DB: db}
-	webhookCtrl := &WebhookController{DB: db}
-	billingCtrl := &BillingController{DB: db}
-
-	// Sprint 19: 健康追踪控制器
-	healthTrackingCtrl := &HealthTrackingCtrl{DB: db}
 
 	api := r.Group("/api/v1")
 	{
@@ -166,14 +157,15 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/position-templates/:id/copy", positionTemplateCtrl.PositionTemplateCopy)
 
 		// ============ 角色管理 ============
-		api.GET("/roles", roleCtrl.List)
-		api.POST("/roles", roleCtrl.Create)
-		api.GET("/roles/:id", roleCtrl.Get)
-		api.PUT("/roles/:id", roleCtrl.Update)
-		api.DELETE("/roles/:id", roleCtrl.Delete)
-		api.GET("/roles/:id/permissions", roleCtrl.GetPermissions)
-		api.POST("/roles/:id/permissions", roleCtrl.AssignPermissions)
-		api.GET("/permissions", roleCtrl.ListPermissions)
+		// (已迁移到 main.go NewRoleController)
+		// api.GET("/roles", roleCtrl.List)
+		// api.POST("/roles", roleCtrl.Create)
+		// api.GET("/roles/:id", roleCtrl.Get)
+		// api.PUT("/roles/:id", roleCtrl.Update)
+		// api.DELETE("/roles/:id", roleCtrl.Delete)
+		// api.GET("/roles/:id/permissions", roleCtrl.GetPermissions)
+		// api.POST("/roles/:id/permissions", roleCtrl.AssignPermissions)
+		// api.GET("/permissions", roleCtrl.ListPermissions)
 
 		// ============ 会员管理 ============
 		// 会员信息
@@ -310,92 +302,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 违规记录
 		api.GET("/compliance/violations", complianceCtrl.ListViolations)
 		api.PUT("/compliance/violations/:id/resolve", complianceCtrl.ResolveViolation)
-
-		// ============ Sprint 14: AI 行为监控和模型管理 ============
-		aiMonitorCtrl := NewAIMonitorController(db)
-		modelVersionCtrl := NewModelVersionController(db)
-		modelRollbackCtrl := NewModelRollbackController(db)
-		aiSandboxCtrl := NewAISandboxController(db)
-		aiQualityCtrl := NewAIQualityController(db)
-
-		// AI 行为监控
-		api.POST("/ai/monitor/events", aiMonitorCtrl.ReportEvent)
-		api.GET("/ai/monitor/events", aiMonitorCtrl.ListEvents)
-		api.GET("/ai/monitor/events/:id", aiMonitorCtrl.GetEvent)
-		api.GET("/ai/monitor/stats", aiMonitorCtrl.GetStats)
-
-		// AI 模型版本管理
-		api.GET("/ai/models", modelVersionCtrl.ListModels)
-		api.POST("/ai/models", modelVersionCtrl.CreateModel)
-		api.GET("/ai/models/:id", modelVersionCtrl.GetModel)
-		api.PUT("/ai/models/:id", modelVersionCtrl.UpdateModel)
-		api.DELETE("/ai/models/:id", modelVersionCtrl.DeleteModel)
-		api.GET("/ai/models/:id/versions", modelVersionCtrl.ListVersions)
-		api.POST("/ai/models/:id/versions", modelVersionCtrl.CreateVersion)
-		api.POST("/ai/models/:id/deprecate", modelVersionCtrl.DeprecateVersion)
-
-		// 模型热回滚
-		api.POST("/ai/models/:id/rollback", modelRollbackCtrl.Rollback)
-		api.GET("/ai/rollback/tasks/:task_id", modelRollbackCtrl.GetRollbackTask)
-		api.GET("/ai/rollback/history", modelRollbackCtrl.GetRollbackHistory)
-
-		// AI 沙箱测试
-		api.POST("/ai/sandbox/test", aiSandboxCtrl.CreateTest)
-		api.GET("/ai/sandbox/test/:task_id", aiSandboxCtrl.GetTest)
-		api.GET("/ai/sandbox/tests", aiSandboxCtrl.ListTests)
-		api.POST("/ai/sandbox/test/:task_id/cancel", aiSandboxCtrl.CancelTest)
-		api.POST("/ai/sandbox/test/:task_id/run", aiSandboxCtrl.RunTest)
-
-		// AI 质量指标
-		api.GET("/ai/quality/metrics", aiQualityCtrl.GetMetrics)
-		api.GET("/ai/quality/metrics/trend", aiQualityCtrl.GetMetricsTrend)
-		api.GET("/ai/quality/anomaly", aiQualityCtrl.GetAnomalyEvents)
-
-		// ============ Sprint 16: 订阅和计费系统 ============
-		// 订阅计划管理
-		api.GET("/subscription/plans", subscriptionCtrl.ListPlans)
-		api.POST("/subscription/plans", subscriptionCtrl.CreatePlan)
-		api.GET("/subscription/plans/:id", subscriptionCtrl.GetPlan)
-		api.PUT("/subscription/plans/:id", subscriptionCtrl.UpdatePlan)
-		api.DELETE("/subscription/plans/:id", subscriptionCtrl.DeletePlan)
-
-		// 用户订阅管理
-		api.GET("/subscriptions", subscriptionCtrl.ListUserSubscriptions)
-		api.GET("/subscriptions/current", subscriptionCtrl.GetCurrentSubscription)
-		api.POST("/subscriptions", subscriptionCtrl.Subscribe)
-		api.GET("/subscriptions/:id", subscriptionCtrl.GetSubscription)
-		api.POST("/subscriptions/:id/cancel", subscriptionCtrl.CancelSubscription)
-		api.POST("/subscriptions/:id/renew", subscriptionCtrl.RenewSubscription)
-		api.POST("/subscriptions/:id/upgrade", subscriptionCtrl.UpgradeSubscription)
-		api.POST("/subscriptions/:id/downgrade", subscriptionCtrl.DowngradeSubscription)
-
-		// 用量计费
-		api.GET("/usage/current", usageCtrl.GetCurrentUsage)
-		api.GET("/usage/history", usageCtrl.GetUsageHistory)
-		api.GET("/usage/quotas", usageCtrl.GetQuotas)
-		api.GET("/usage/quotas/:type", usageCtrl.GetQuotaByType)
-		api.PUT("/usage/quotas/:type", usageCtrl.UpdateQuota)
-		api.GET("/usage/stats", usageCtrl.GetUsageStats)
-
-		// Webhook 管理
-		api.GET("/webhooks", webhookCtrl.List)
-		api.POST("/webhooks", webhookCtrl.Create)
-		api.GET("/webhooks/:id", webhookCtrl.Get)
-		api.PUT("/webhooks/:id", webhookCtrl.Update)
-		api.DELETE("/webhooks/:id", webhookCtrl.Delete)
-		api.POST("/webhooks/:id/test", webhookCtrl.TestWebhook)
-		api.GET("/webhooks/:id/events", webhookCtrl.GetEvents)
-
-		// 账单
-		api.GET("/billing/records", billingCtrl.ListRecords)
-		api.GET("/billing/records/:id", billingCtrl.GetRecord)
-		api.GET("/billing/invoices", billingCtrl.ListInvoices)
-		api.POST("/billing/invoices", billingCtrl.CreateInvoice)
-		api.GET("/billing/invoices/:id", billingCtrl.GetInvoice)
-		api.GET("/billing/summary", billingCtrl.GetSummary)
-
-		// ============ Sprint 19: 健康追踪路由 ============
-		healthTrackingCtrl.RegisterHealthRoutes(api)
 	}
 }
 
@@ -560,10 +466,15 @@ func (c *DeviceController) Bind(ctx *gin.Context) {
 type ListRequest struct {
 	Page            int    `form:"page"`
 	PageSize        int    `form:"page_size"`
-	Status          string `form:"status"`
-	LifecycleStatus int    `form:"lifecycle_status"`
+	Status          string `form:"status"`           // online/offline
+	LifecycleStatus int    `form:"lifecycle_status"` // 1:待激活 2:服役中 3:维修 4:报废
 	HardwareModel   string `form:"hardware_model"`
-	Search          string `form:"search"`
+	DeviceType      string `form:"device_type"`     // 设备类型筛选（M5Stack, ESP32等）
+	OnlineStatus    string `form:"online_status"`   // 在线状态筛选: online/offline
+	TenantID        string `form:"tenant_id"`       // 租户筛选
+	Search          string `form:"search"`          // 关键词搜索（device_id/sn_code/mac_address）
+	StartTime       string `form:"start_time"`     // 创建时间范围-开始
+	EndTime         string `form:"end_time"`        // 创建时间范围-结束
 }
 
 // List 获取设备列表（带分页和筛选）
@@ -590,9 +501,28 @@ func (c *DeviceController) List(ctx *gin.Context) {
 	if req.HardwareModel != "" {
 		query = query.Where("hardware_model = ?", req.HardwareModel)
 	}
+	// device_type 是 hardware_model 的别名
+	if req.DeviceType != "" {
+		query = query.Where("hardware_model = ?", req.DeviceType)
+	}
+	if req.TenantID != "" {
+		query = query.Where("tenant_id = ?", req.TenantID)
+	}
 	if req.Search != "" {
 		search := "%" + req.Search + "%"
-		query = query.Where("device_id LIKE ? OR sn_code LIKE ?", search, search)
+		query = query.Where("device_id LIKE ? OR sn_code LIKE ? OR mac_address LIKE ?", search, search, search)
+	}
+
+	// 时间范围筛选
+	if req.StartTime != "" {
+		if t, err := time.Parse("2006-01-02 15:04:05", req.StartTime); err == nil {
+			query = query.Where("created_at >= ?", t)
+		}
+	}
+	if req.EndTime != "" {
+		if t, err := time.Parse("2006-01-02 15:04:05", req.EndTime); err == nil {
+			query = query.Where("created_at <= ?", t)
+		}
 	}
 
 	// 获取总数
@@ -629,13 +559,17 @@ func (c *DeviceController) List(ctx *gin.Context) {
 		}
 	}
 
-	// 如果有 status 筛选，内存过滤
-	if req.Status != "" {
+	// 如果有 status 或 online_status 筛选，内存过滤
+	onlineStatusFilter := req.Status
+	if req.OnlineStatus != "" {
+		onlineStatusFilter = req.OnlineStatus
+	}
+	if onlineStatusFilter != "" {
 		filtered := make([]DeviceWithShadow, 0)
 		for _, d := range result {
-			if req.Status == "online" && d.IsOnline {
+			if onlineStatusFilter == "online" && d.IsOnline {
 				filtered = append(filtered, d)
-			} else if req.Status == "offline" && !d.IsOnline {
+			} else if onlineStatusFilter == "offline" && !d.IsOnline {
 				filtered = append(filtered, d)
 			}
 		}

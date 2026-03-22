@@ -3,7 +3,6 @@ package notification
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"time"
@@ -11,7 +10,7 @@ import (
 
 // HealthStatus 健康状态
 type HealthStatus struct {
-	Status      string    `json:"status"`      // "healthy" / "unhealthy" / "unknown"
+	Status     string    `json:"status"`      // healthy / unhealthy / unknown
 	Message    string    `json:"message"`
 	LatencyMs  int64     `json:"latency_ms"`
 	CheckedAt  time.Time `json:"checked_at"`
@@ -29,7 +28,6 @@ type ChannelHealth struct {
 type HealthChecker struct {
 	emailService *EmailService
 	smsService   *SMSService
-	webhookURL   string
 	client       *http.Client
 }
 
@@ -48,9 +46,9 @@ func NewHealthChecker(email *EmailService, sms *SMSService) *HealthChecker {
 func (h *HealthChecker) CheckEmailHealth() HealthStatus {
 	if h.emailService == nil {
 		return HealthStatus{
-			Status:     "unknown",
-			Message:    "邮件服务未配置",
-			CheckedAt:  time.Now(),
+			Status:    "unknown",
+			Message:   "邮件服务未配置",
+			CheckedAt: time.Now(),
 		}
 	}
 
@@ -60,36 +58,36 @@ func (h *HealthChecker) CheckEmailHealth() HealthStatus {
 
 	if err != nil {
 		return HealthStatus{
-			Status:     "unhealthy",
-			Message:    err.Error(),
-			LatencyMs:  latency,
-			CheckedAt:  time.Now(),
+			Status:    "unhealthy",
+			Message:   err.Error(),
+			LatencyMs: latency,
+			CheckedAt: time.Now(),
 		}
 	}
 
 	return HealthStatus{
-		Status:     "healthy",
-		Message:    "邮件服务正常",
-		LatencyMs:  latency,
-		CheckedAt:  time.Now(),
+		Status:    "healthy",
+		Message:   "SMTP 连接正常",
+		LatencyMs: latency,
+		CheckedAt: time.Now(),
 	}
 }
 
-// CheckSMSHealth 检查短信服务健康状态（仅检查配置，不实际发送）
+// CheckSMSHealth 检查短信服务健康状态
 func (h *HealthChecker) CheckSMSHealth() HealthStatus {
 	if h.smsService == nil {
 		return HealthStatus{
-			Status:     "unknown",
-			Message:    "短信服务未配置",
-			CheckedAt:  time.Now(),
+			Status:    "unknown",
+			Message:   "短信服务未配置",
+			CheckedAt: time.Now(),
 		}
 	}
 
 	return HealthStatus{
-		Status:     "healthy",
-		Message:    fmt.Sprintf("短信服务商: %s", h.smsService.provider),
-		LatencyMs:  0,
-		CheckedAt:  time.Now(),
+		Status:    "healthy",
+		Message:   fmt.Sprintf("短信服务商: %s", h.smsService.provider),
+		LatencyMs: 0,
+		CheckedAt: time.Now(),
 	}
 }
 
@@ -105,7 +103,6 @@ func (h *HealthChecker) CheckWebhookHealth(webhookURL string) HealthStatus {
 
 	start := time.Now()
 
-	// 使用 HEAD 请求快速检查
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -157,66 +154,35 @@ func (h *HealthChecker) CheckWebhookHealth(webhookURL string) HealthStatus {
 }
 
 // CheckChannel 检查指定渠道的健康状态
-func (h *HealthChecker) CheckChannel(channelType string, config map[string]interface{}) ChannelHealth {
-	health := HealthStatus{
-		Status:    "unknown",
-		Message:   "未配置",
-		CheckedAt: time.Now(),
-	}
-
+func (h *HealthChecker) CheckChannel(channelType string, cfg EmailConfig) HealthStatus {
 	switch channelType {
-	case "email":
-		// 构建临时邮件服务检查
-		cfg := EmailConfig{}
-		if v, ok := config["host"].(string); ok {
-			cfg.Host = v
+	case "smtp", "email":
+		emailSvc := NewEmailService(cfg)
+		start := time.Now()
+		err := emailSvc.TestConnection()
+		latency := time.Since(start).Milliseconds()
+		if err != nil {
+			return HealthStatus{
+				Status:    "unhealthy",
+				Message:   err.Error(),
+				LatencyMs: latency,
+				CheckedAt: time.Now(),
+			}
 		}
-		if v, ok := config["port"].(float64); ok {
-			cfg.Port = int(v)
-		}
-		if v, ok := config["username"].(string); ok {
-			cfg.Username = v
-		}
-		if v, ok := config["password"].(string); ok {
-			cfg.Password = v
-		}
-		if v, ok := config["from"].(string); ok {
-			cfg.From = v
-		}
-		emailSvc := NewEmailService(cfg, nil)
-		health = h.checkEmailWithService(emailSvc)
-	case "sms":
-		health = h.CheckSMSHealth()
-	case "webhook":
-		if url, ok := config["url"].(string); ok {
-			health = h.CheckWebhookHealth(url)
-		}
-	}
-
-	return ChannelHealth{
-		ChannelType: channelType,
-		Health:      health,
-	}
-}
-
-func (h *HealthChecker) checkEmailWithService(svc *EmailService) HealthStatus {
-	start := time.Now()
-	err := svc.TestConnection()
-	latency := time.Since(start).Milliseconds()
-
-	if err != nil {
 		return HealthStatus{
-			Status:    "unhealthy",
-			Message:   err.Error(),
+			Status:    "healthy",
+			Message:   "SMTP 连接正常",
 			LatencyMs: latency,
 			CheckedAt: time.Now(),
 		}
+	case "sms":
+		return h.CheckSMSHealth()
+	case "webhook":
+		return h.CheckWebhookHealth(cfg.Host) // Host 字段存储 webhook URL
 	}
-
 	return HealthStatus{
-		Status:    "healthy",
-		Message:   "SMTP 连接正常",
-		LatencyMs: latency,
+		Status:    "unknown",
+		Message:   "未知渠道类型",
 		CheckedAt: time.Now(),
 	}
 }
@@ -226,5 +192,4 @@ var GlobalHealthChecker *HealthChecker
 
 func init() {
 	GlobalHealthChecker = NewHealthChecker(nil, nil)
-	log.Printf("[HealthCheck] 全局健康检查器已初始化")
 }

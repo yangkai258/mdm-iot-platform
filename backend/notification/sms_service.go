@@ -53,7 +53,6 @@ func (s *SMSService) Send(phones []string, templateCode string, params map[strin
 	if len(phones) == 0 {
 		return fmt.Errorf("手机号不能为空")
 	}
-
 	switch s.provider {
 	case "aliyun":
 		return s.sendAliyun(phones, templateCode, params)
@@ -64,17 +63,15 @@ func (s *SMSService) Send(phones []string, templateCode string, params map[strin
 	}
 }
 
-// SendBatch 批量发送短信（相同模板，不同手机号）
+// SendBatch 批量发送短信
 func (s *SMSService) SendBatch(phones []string, templateCode string, params map[string]string) error {
 	if len(phones) == 0 {
 		return fmt.Errorf("手机号不能为空")
 	}
-
 	switch s.provider {
 	case "aliyun":
-		return s.sendBatchAliyun(phones, templateCode, params)
+		return s.sendAliyun(phones, templateCode, params)
 	case "tencent":
-		// 腾讯云批量发送也是调用单个接口
 		return s.sendTencent(phones, templateCode, params)
 	default:
 		return fmt.Errorf("不支持的短信服务商: %s", s.provider)
@@ -83,19 +80,14 @@ func (s *SMSService) SendBatch(phones []string, templateCode string, params map[
 
 // sendAliyun 阿里云短信发送
 func (s *SMSService) sendAliyun(phones []string, templateCode string, params map[string]string) error {
-	if len(phones) == 0 {
-		return fmt.Errorf("手机号不能为空")
+	region := s.region
+	if region == "" {
+		region = "cn-hangzhou"
 	}
-
-	// 阿里云短信 API
-	apiURL := fmt.Sprintf("https://dysmsapi.aliyuncs.com/?RegionId=%s", s.region)
-	if s.region == "" {
-		apiURL = "https://dysmsapi.aliyuncs.com/?RegionId=cn-hangzhou"
-	}
+	apiURL := fmt.Sprintf("https://dysmsapi.aliyuncs.com/?RegionId=%s", region)
 
 	phoneStr := strings.Join(phones, ",")
 
-	// 构造参数
 	payload := url.Values{}
 	payload.Set("AccessKeyId", s.accessKey)
 	payload.Set("Action", "SendBatchSms")
@@ -103,13 +95,11 @@ func (s *SMSService) sendAliyun(phones []string, templateCode string, params map
 	payload.Set("TemplateCode", templateCode)
 	payload.Set("PhoneNumberJson", fmt.Sprintf(`["%s"]`, phoneStr))
 
-	// 模板变量
 	if len(params) > 0 {
 		paramJSON, _ := json.Marshal(params)
 		payload.Set("TemplateParamJson", fmt.Sprintf(`[%s]`, string(paramJSON)))
 	}
 
-	// 生成签名
 	signature := s.aliyunSign(payload)
 	payload.Set("Signature", signature)
 
@@ -136,30 +126,12 @@ func (s *SMSService) sendAliyun(phones []string, templateCode string, params map
 	return nil
 }
 
-// sendBatchAliyun 阿里云批量短信
-func (s *SMSService) sendBatchAliyun(phones []string, templateCode string, params map[string]string) error {
-	return s.sendAliyun(phones, templateCode, params)
-}
-
 // sendTencent 腾讯云短信发送
 func (s *SMSService) sendTencent(phones []string, templateCode string, params map[string]string) error {
-	// 腾讯云 SecretId/SecretKey 签名方式
-	secretId := s.accessKey
-
-	// 腾讯云短信 API
 	apiURL := "https://sms.tencentcloudapi.com/"
-
-	// 构建正文参数
-	type SMSPhone struct {
-		PhoneNumber string `json:"PhoneNumber"`
-	}
-	type TemplateParam struct {
-		Value string `json:"Value"`
-	}
 
 	phoneNumbers := make([]string, 0, len(phones))
 	for _, p := range phones {
-		// 腾讯云手机号格式需要带 +86
 		if !strings.HasPrefix(p, "+") && !strings.HasPrefix(p, "86") {
 			p = "+86" + p
 		}
@@ -172,15 +144,15 @@ func (s *SMSService) sendTencent(phones []string, templateCode string, params ma
 	}
 
 	payload := map[string]interface{}{
-		"Version":  "2021-01-11",
-		"Action":   "SendSms",
-		"Region":    s.region,
-		"SecretId":  secretId,
-		"SmsType":   0,
-		"From":      s.signName,
-		"SmsSdkAppId": secretId, // 通常 AppId
+		"Version":       "2021-01-11",
+		"Action":        "SendSms",
+		"Region":        s.region,
+		"SecretId":      s.accessKey,
+		"SmsType":       0,
+		"From":          s.signName,
+	"SmsSdkAppId":    s.accessKey,
 		"PhoneNumberSet": phoneNumbers,
-		"TemplateId":     templateCode,
+		"TemplateId":    templateCode,
 	}
 	if len(params) > 0 {
 		payload["TemplateParamSet"] = templateParams
@@ -192,21 +164,12 @@ func (s *SMSService) sendTencent(phones []string, templateCode string, params ma
 		return err
 	}
 
-	// 签名
-	timestamp := fmt.Sprintf("%d", time.Now().Unix())
-	canonicalRequest := fmt.Sprintf("POST\n/\n\ncontent-type:application/json\nhost:sms.tencentcloudapi.com\n\ncontent-type;host\n%s",
-		string(payloadBytes))
-	h := sha1.New()
-	h.Write([]byte(canonicalRequest))
-	signature := base64.StdEncoding.EncodeToString(h.Sum(nil))
-
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-TC-Action", "SendSms")
 	req.Header.Set("X-TC-Version", "2021-01-11")
-	req.Header.Set("X-TC-Timestamp", timestamp)
+	req.Header.Set("X-TC-Timestamp", fmt.Sprintf("%d", time.Now().Unix()))
 	req.Header.Set("X-TC-Region", s.region)
-	req.Header.Set("X-TC-SecretId", secretId)
-	req.Header.Set("X-TC-Signature", signature)
+	req.Header.Set("X-TC-SecretId", s.accessKey)
 
 	resp, err := s.client.Do(req)
 	if err != nil {
@@ -214,11 +177,8 @@ func (s *SMSService) sendTencent(phones []string, templateCode string, params ma
 	}
 	defer resp.Body.Close()
 
-	body, _ := io.ReadAll(resp.Body)
-	var result map[string]interface{}
-	json.Unmarshal(body, &result)
-
 	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("腾讯云短信发送失败: HTTP %d - %s", resp.StatusCode, string(body))
 	}
 
@@ -227,14 +187,12 @@ func (s *SMSService) sendTencent(phones []string, templateCode string, params ma
 
 // aliyunSign 生成阿里云 API 签名
 func (s *SMSService) aliyunSign(params url.Values) string {
-	// 1. 排序
 	keys := make([]string, 0, len(params))
 	for k := range params {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 
-	// 2. 拼接
 	var canonicalized strings.Builder
 	for _, k := range keys {
 		canonicalized.WriteString(url.QueryEscape(k))
@@ -242,11 +200,9 @@ func (s *SMSService) aliyunSign(params url.Values) string {
 		canonicalized.WriteString(url.QueryEscape(params.Get(k)))
 		canonicalized.WriteString("&")
 	}
-	signedStr := canonicalized.String()
-	signedStr = strings.TrimSuffix(signedStr, "&")
+	signedStr := strings.TrimSuffix(canonicalized.String(), "&")
 
-	// 3. HMAC-SHA1
 	mac := hmac.New(sha1.New, []byte(s.secretKey+"&"))
-	mac.Write([]byte("GET&%2F&"+url.QueryEscape(signedStr)))
+	mac.Write([]byte("GET&%2F&" + url.QueryEscape(signedStr)))
 	return base64.StdEncoding.EncodeToString(mac.Sum(nil))
 }

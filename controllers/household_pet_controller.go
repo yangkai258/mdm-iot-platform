@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"net/http"
 	"strconv"
 
@@ -25,13 +23,6 @@ func (h *HouseholdPetCtrl) RegisterHouseholdRoutes(r *gin.RouterGroup) {
 	r.POST("/household/members", h.AddMember)
 	r.PUT("/household/members/:id", h.UpdateMember)
 	r.DELETE("/household/members/:id", h.RemoveMember)
-}
-
-// generateInviteCode 生成随机邀请码
-func generateInviteCode() string {
-	bytes := make([]byte, 8)
-	rand.Read(bytes)
-	return hex.EncodeToString(bytes)
 }
 
 // ListHouseholdPets 获取当前用户家庭的所有宠物
@@ -207,7 +198,8 @@ func (h *HouseholdPetCtrl) AddMember(c *gin.Context) {
 		invite.UserID = userID
 		invite.Status = "active"
 		invite.InviteCode = ""
-		invite.JoinedAt = invite.CreatedAt
+		joinedAt := invite.CreatedAt
+		invite.JoinedAt = &joinedAt
 
 		if err := h.DB.Save(&invite).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "加入失败"})

@@ -30,8 +30,7 @@ func QuotaCheck(db *gorm.DB, quotaType QuotaType) gin.HandlerFunc {
 			return
 		}
 
-		// 修复：从 package_quotas 表查询指定类型的配额记录
-		quota, err := models.GetQuota(db, tenantID, string(quotaType))
+		quota, err := models.GetQuota(db, tenantID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"code":    "DB_ERROR",
@@ -41,14 +40,19 @@ func QuotaCheck(db *gorm.DB, quotaType QuotaType) gin.HandlerFunc {
 			return
 		}
 
-		// 租户配额记录不存在，获取套餐默认配额
-		limit := getQuotaLimit(db, tenantID, quotaType)
-		usedCount := 0
-
-		// 如果配额记录存在，获取已使用量
-		if quota != nil && quota.ID != 0 {
-			usedCount = quota.QuotaUsed
+		// 租户配额记录不存在，初始化默认值
+		if quota.ID == 0 {
+			quota = &models.TenantQuota{
+				TenantID:   tenantID,
+				UserCount:  5,
+				DeviceCount: 10,
+				DeptCount:  1,
+				StoreCount: 1,
+			}
 		}
+
+		usedCount := getUsedCount(quota, quotaType)
+		limit := getQuotaLimit(db, tenantID, quotaType)
 
 		if limit == -1 {
 			// -1 表示不限
@@ -56,7 +60,7 @@ func QuotaCheck(db *gorm.DB, quotaType QuotaType) gin.HandlerFunc {
 			return
 		}
 
-		if usedCount >= limit {
+		if int(usedCount) >= limit {
 			c.JSON(http.StatusForbidden, gin.H{
 				"code":    "QUOTA_EXCEEDED",
 				"message": getQuotaExceededMessage(quotaType, usedCount, limit),
@@ -83,35 +87,54 @@ func QuotaCheck(db *gorm.DB, quotaType QuotaType) gin.HandlerFunc {
 	}
 }
 
-// getQuotaLimit 从 packages 表查询套餐配额上限
-// 修复：查询 packages 表（不是 plans 表），从 quota_config JSONB 提取配额
-func getQuotaLimit(db *gorm.DB, tenantID string, quotaType QuotaType) int {
-	// Directly query package_quotas table for this tenant's quota limit
-	var quota models.TenantQuota
-	if err := db.Where("tenant_id = ? AND quota_type = ?", tenantID, string(quotaType)).First(&quota).Error; err != nil {
-		return getDefaultQuotaLimit("free", quotaType)
+func getUsedCount(quota *models.TenantQuota, quotaType QuotaType) int {
+	switch quotaType {
+	case QuotaUser:
+		return quota.UserCount
+	case QuotaDevice:
+		return quota.DeviceCount
+	case QuotaDept:
+		return quota.DeptCount
+	case QuotaStore:
+		return quota.StoreCount
+	default:
+		return 0
 	}
-	return quota.QuotaLimit
 }
 
+// getQuotaLimit 从 plans 表查询套餐配额上限
+func getQuotaLimit(db *gorm.DB, tenantID string, quotaType QuotaType) int {
+	var tenant models.Tenant
+	if err := db.Where("id = ?", tenantID).First(&tenant).Error; err != nil {
+		return 5 // 默认免费配额
+	}
 
-// getQuotaKey 将 QuotaType 转换为 quota_config JSONB 的 key
-func getQuotaKey(quotaType QuotaType) string {
-	keyMap := map[QuotaType]string{
-		QuotaUser:   "users",
-		QuotaDevice: "devices",
-		QuotaDept:   "departments",
-		QuotaStore:  "stores",
+	planCode := tenant.Plan
+	if planCode == "" {
+		planCode = "free"
 	}
-	if key, ok := keyMap[quotaType]; ok {
-		return key
+
+	var plan models.Plan
+	if err := db.Where("plan_code = ?", planCode).First(&plan).Error; err != nil {
+		return getDefaultQuotaLimit(planCode, quotaType)
 	}
-	// 回退：使用 quotaType 本身作为 key
-	return string(quotaType)
+
+	switch quotaType {
+	case QuotaUser:
+		return plan.UserQuota
+	case QuotaDevice:
+		return plan.DeviceQuota
+	case QuotaDept:
+		return plan.DeptQuota
+	case QuotaStore:
+		return plan.StoreQuota
+	default:
+		return -1
+	}
 }
 
 // getDefaultQuotaLimit 默认套餐配额
-func getDefaultQuotaLimit(packageCode string, quotaType QuotaType) int {
+func getDefaultQuotaLimit(planCode string, quotaType QuotaType) int {
 	defaults := map[string]map[QuotaType]int{
 		"free": {
 			QuotaUser:   5,
@@ -139,7 +162,7 @@ func getDefaultQuotaLimit(packageCode string, quotaType QuotaType) int {
 		},
 	}
 
-	if d, ok := defaults[packageCode]; ok {
+	if d, ok := defaults[planCode]; ok {
 		if v, ok := d[quotaType]; ok {
 			return v
 		}

@@ -8,26 +8,26 @@ import (
 
 // NotificationJob 通知任务
 type NotificationJob struct {
-	ID          uint                  `json:"id"`
-	ChannelType string                `json:"channel_type"` // email/sms/webhook
-	Recipient   string                `json:"recipient"`
-	Subject     string                `json:"subject"`
-	Content     string                `json:"content"`
-	Payload     []byte                `json:"payload,omitempty"`
-	Secret      string                `json:"secret,omitempty"`
-	RetryCount  int                   `json:"retry_count"`
-	MaxRetries  int                   `json:"max_retries"`
-	ChannelID   uint                  `json:"channel_id"`
-	AlertID     uint                  `json:"alert_id"`
-	Status      string                `json:"status"` // pending/success/failed
-	ErrorMsg    string               `json:"error_msg"`
-	CreatedAt   time.Time            `json:"created_at"`
+	ID          uint   `json:"id"`
+	ChannelType string `json:"channel_type"` // email/sms/webhook
+	Recipient   string `json:"recipient"`
+	Subject     string `json:"subject"`
+	Content     string `json:"content"`
+	Payload     []byte `json:"payload,omitempty"`
+	Secret      string `json:"secret,omitempty"`
+	RetryCount  int    `json:"retry_count"`
+	MaxRetries  int    `json:"max_retries"`
+	ChannelID   uint   `json:"channel_id"`
+	AlertID     uint   `json:"alert_id"`
+	Status      string `json:"status"` // pending/success/failed
+	ErrorMsg    string `json:"error_msg"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 // NotificationHandler 处理通知的函数类型
 type NotificationHandler func(job *NotificationJob) error
 
-// RetryWorker 重试机制 worker
+// RetryWorker 重试机制 worker（指数退避: 1s, 2s, 4s, 8s, 16s，最大重试5次）
 type RetryWorker struct {
 	queue      chan *NotificationJob
 	handler    NotificationHandler
@@ -44,7 +44,6 @@ func NewRetryWorker(handler NotificationHandler, queueSize int) *RetryWorker {
 		queue:      make(chan *NotificationJob, queueSize),
 		handler:    handler,
 		maxRetries: 5,
-		// 指数退避: 1s, 2s, 4s, 8s, 16s
 		backoffs: []time.Duration{
 			1 * time.Second,
 			2 * time.Second,
@@ -115,7 +114,6 @@ func (w *RetryWorker) processJob(job *NotificationJob) {
 		return
 	}
 
-	// 计算退避时间
 	backoffIdx := job.RetryCount - 1
 	if backoffIdx >= len(w.backoffs) {
 		backoffIdx = len(w.backoffs) - 1
@@ -126,7 +124,6 @@ func (w *RetryWorker) processJob(job *NotificationJob) {
 	log.Printf("[RetryWorker] 通知发送失败，准备重试 (#%d/%d, %.0fs后): JobID=%d, Type=%s, Error=%v",
 		job.RetryCount, job.MaxRetries, backoff.Seconds(), job.ID, job.ChannelType, err)
 
-	// 延迟后重新入队
 	go func(j *NotificationJob, delay time.Duration) {
 		time.Sleep(delay)
 		w.Enqueue(j)
@@ -136,10 +133,10 @@ func (w *RetryWorker) processJob(job *NotificationJob) {
 // Stats 获取 worker 统计信息
 func (w *RetryWorker) Stats() map[string]interface{} {
 	return map[string]interface{}{
-		"queue_size":    len(w.queue),
-		"max_retries":   w.maxRetries,
-		"backoffs":      w.backoffs,
-		"running":       w.ctx.Err() == nil,
+		"queue_size":   len(w.queue),
+		"max_retries":  w.maxRetries,
+		"backoffs":     w.backoffs,
+		"running":      w.ctx.Err() == nil,
 	}
 }
 

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 	"os"
 	"strings"
@@ -10,24 +11,51 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte(getJWTSecret())
-
-// getJWTSecret 从环境变量获取 JWT 密钥
-func getJWTSecret() string {
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		panic("JWT_SECRET environment variable is not set")
-	}
-	return secret
+// Config 配置结构体
+type Config struct {
+	JWTSecret string `json:"jwt_secret"`
 }
 
-// GetCORSAllowedOrigins 获取 CORS 允许的源列表
-func GetCORSAllowedOrigins() string {
-	origins := os.Getenv("CORS_ALLOWED_ORIGINS")
-	if origins == "" {
-		return "*" // 开发环境默认值
+// LoadConfig 加载配置文件
+func LoadConfig(configPath string) (*Config, error) {
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return nil, err
 	}
-	return origins
+	var cfg Config
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+var jwtSecret = []byte(getJWTSecret())
+
+// getJWTSecret 从配置文件或环境变量获取 JWT 密钥
+func getJWTSecret() string {
+	// 优先从配置文件读取
+	configPaths := []string{
+		"config.json",
+		"../config.json",
+		"../../config.json",
+		os.Getenv("CONFIG_PATH"),
+	}
+
+	for _, path := range configPaths {
+		if path == "" {
+			continue
+		}
+		if cfg, err := LoadConfig(path); err == nil && cfg.JWTSecret != "" {
+			return cfg.JWTSecret
+		}
+	}
+
+	// 降级到环境变量
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		panic("JWT_SECRET environment variable is not set and no config file found")
+	}
+	return secret
 }
 
 // JWTClaims JWT 载荷

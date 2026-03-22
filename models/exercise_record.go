@@ -45,7 +45,7 @@ type ExerciseRecord struct {
 	Weather         string         `gorm:"type:varchar(32)" json:"weather"`
 	Temperature     float64        `gorm:"type:decimal(5,2)" json:"temperature"`
 	Notes           string         `gorm:"type:text" json:"notes"`
-	Tags            JSON           `gorm:"type:jsonb" json:"tags"`
+	Tags            StringArray    `gorm:"type:text" json:"tags"`
 	DataSource      string         `gorm:"type:varchar(32);default:'device'" json:"data_source"`
 	IsGoalAchieved  bool           `gorm:"type:boolean;default:false" json:"is_goal_achieved"`
 	GoalID          *uint          `gorm:"type:uint;index" json:"goal_id"`

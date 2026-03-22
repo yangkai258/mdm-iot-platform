@@ -219,30 +219,49 @@ func (c *NotificationController) SendNotificationFromTemplate(ctx *gin.Context) 
 	content := ReplaceTemplateVariables(tmpl.ContentTpl, req.Variables)
 
 	now := time.Now()
-	var notifications []models.Notification
 
-	// 根据目标类型发送
+	// 收集所有目标设备ID
+	var deviceIDs []string
 	switch req.TargetType {
 	case "all":
-		// 向所有设备发送
 		var devices []models.Device
-		c.DB.Find(&devices)
+		c.DB.Select("device_id").Find(&devices)
 		for _, device := range devices {
-			notif := c.sendToDevice(device.DeviceID, title, content, req.CreatedBy, &now)
-			notifications = append(notifications, notif)
+			deviceIDs = append(deviceIDs, device.DeviceID)
 		}
 	case "device":
-		for _, deviceID := range req.TargetIDs {
-			notif := c.sendToDevice(deviceID, title, content, req.CreatedBy, &now)
-			notifications = append(notifications, notif)
-		}
+		deviceIDs = req.TargetIDs
 	case "user":
-		// 向用户的所有设备发送
 		var devices []models.Device
-		c.DB.Where("owner_id = ?", req.TargetIDs).Find(&devices)
+		c.DB.Select("device_id").Where("owner_id IN ?", req.TargetIDs).Find(&devices)
 		for _, device := range devices {
-			notif := c.sendToDevice(device.DeviceID, title, content, req.CreatedBy, &now)
-			notifications = append(notifications, notif)
+			deviceIDs = append(deviceIDs, device.DeviceID)
+		}
+	}
+
+	// 批量创建通知记录（避免 N+1 查询）
+	var notifications []models.Notification
+	if len(deviceIDs) > 0 {
+		for _, deviceID := range deviceIDs {
+			notifications = append(notifications, models.Notification{
+				DeviceID:  deviceID,
+				Title:     title,
+				Content:   content,
+				Priority:  1,
+				Channel:   "push",
+				Status:    "sent",
+				SentAt:    &now,
+				CreatedBy: req.CreatedBy,
+			})
+		}
+		// 批量插入
+		if err := c.DB.Create(&notifications).Error; err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"code":       5001,
+				"message":    "通知发送失败",
+				"error_code": "ERR_INTERNAL",
+			})
+			return
 		}
 	}
 
@@ -720,37 +739,54 @@ func (c *NotificationController) PushNotification(ctx *gin.Context) {
 	}
 
 	now := time.Now()
-	var notifications []models.Notification
-	deviceIDs := req.TargetIDs
 
+	// 收集所有目标设备ID
+	var deviceIDs []string
 	if req.TargetType == "all" {
 		var devices []models.Device
-		c.DB.Find(&devices)
+		c.DB.Select("device_id").Find(&devices)
 		for _, d := range devices {
 			deviceIDs = append(deviceIDs, d.DeviceID)
 		}
+	} else {
+		deviceIDs = req.TargetIDs
 	}
 
-	for _, deviceID := range deviceIDs {
-		notif := models.Notification{
-			DeviceID:  deviceID,
-			Title:     req.Title,
-			Content:   req.Content,
-			Priority:  1,
-			Channel:   "push",
-			Status:    "sent",
-			SentAt:    &now,
-			CreatedBy: req.CreatedBy,
+	// 批量创建通知记录（避免 N+1 查询）
+	if len(deviceIDs) > 0 {
+		notifications := make([]models.Notification, 0, len(deviceIDs))
+		for _, deviceID := range deviceIDs {
+			notifications = append(notifications, models.Notification{
+				DeviceID:  deviceID,
+				Title:     req.Title,
+				Content:   req.Content,
+				Priority:  1,
+				Channel:   "push",
+				Status:    "sent",
+				SentAt:    &now,
+				CreatedBy: req.CreatedBy,
+			})
 		}
-		c.DB.Create(&notif)
-		notifications = append(notifications, notif)
+		// 批量插入
+		if err := c.DB.Create(&notifications).Error; err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "发送失败"})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "success",
+			"data": gin.H{
+				"sent_count": len(deviceIDs),
+			},
+		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "success",
 		"data": gin.H{
-			"sent_count": len(notifications),
+			"sent_count": 0,
 		},
 	})
 }

@@ -43,6 +43,9 @@ type HouseholdMember struct {
 	AvatarURL      string         `gorm:"type:varchar(512)" json:"avatar_url"`
 	InviteCode     string         `gorm:"type:varchar(64);index" json:"invite_code"` // 邀请码
 	InviteStatus   string         `gorm:"type:varchar(20);default:'active'" json:"invite_status"` // pending, active, removed
+	Status         string         `gorm:"type:varchar(20);default:'pending'" json:"status"` // 邀请状态
+	InvitedEmail   string         `gorm:"type:varchar(255)" json:"invited_email"` // 被邀请人邮箱
+	InvitedBy      *uint          `gorm:"index" json:"invited_by"`                // 邀请人ID
 	JoinedAt       *time.Time     `json:"joined_at"`
 	TenantID       string         `gorm:"type:uuid;index" json:"tenant_id"`
 	Permissions    string         `gorm:"type:varchar(512)" json:"permissions"` // JSON数组字符串

@@ -25,6 +25,9 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
+	// 设置全局数据库实例
+	models.SetDB(db)
+
 	// 自动迁移数据库表
 	if err := db.AutoMigrate(
 		&models.Device{},

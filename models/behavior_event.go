@@ -67,26 +67,27 @@ func (b *BehaviorEvent) BeforeCreate(tx *gorm.DB) error {
 
 // BehaviorPrediction 行为预测 (Sprint 18)
 type BehaviorPrediction struct {
-	ID               uint           `gorm:"primaryKey" json:"id"`
-	PredictionUUID   string         `gorm:"type:varchar(64);uniqueIndex;not null" json:"prediction_uuid"`
-	PetUUID          string         `gorm:"type:varchar(64);index;not null" json:"pet_uuid"`
-	DeviceID         string         `gorm:"type:varchar(64);index" json:"device_id"`
-	PredictionType   string         `gorm:"type:varchar(32);not null;index" json:"prediction_type"`
-	PredictedBehavior string        `gorm:"type:varchar(32);index" json:"predicted_behavior"`
-	Probability      float64        `gorm:"type:decimal(5,4)" json:"probability"`
-	TimeWindowStart  time.Time      `gorm:"type:timestamp;index" json:"time_window_start"`
-	TimeWindowEnd    time.Time      `gorm:"type:timestamp;index" json:"time_window_end"`
-	Confidence       float64        `gorm:"type:decimal(5,4)" json:"confidence"`
-	ModelVersion     string         `gorm:"type:varchar(32)" json:"model_version"`
-	Factors          JSON           `gorm:"type:jsonb" json:"factors"`
-	Recommendation   string         `gorm:"type:text" json:"recommendation"`
-	IsVerified       bool           `gorm:"type:boolean;default:false" json:"is_verified"`
-	VerifiedAt       *time.Time     `json:"verified_at"`
-	ActualBehavior   string         `gorm:"type:varchar(32)" json:"actual_behavior"`
-	TenantID         string         `gorm:"type:uuid;index" json:"tenant_id"`
-	CreatedAt        time.Time      `json:"created_at"`
-	UpdatedAt        time.Time      `json:"updated_at"`
-	DeletedAt        gorm.DeletedAt `gorm:"index" json:"-"`
+	ID                uint           `gorm:"primaryKey" json:"id"`
+	PredictionUUID    string         `gorm:"type:varchar(64);uniqueIndex;not null" json:"prediction_uuid"`
+	PetUUID           string         `gorm:"type:varchar(64);index;not null" json:"pet_uuid"`
+	DeviceID          string         `gorm:"type:varchar(64);index" json:"device_id"`
+	PredictionType    string         `gorm:"type:varchar(32);not null;index" json:"prediction_type"`
+	PredictedBehavior string         `gorm:"type:varchar(32);index" json:"predicted_behavior"`
+	Probability       float64        `gorm:"type:decimal(5,4)" json:"probability"`
+	TimeWindowStart   time.Time      `gorm:"type:timestamp;index" json:"time_window_start"`
+	TimeWindowEnd     time.Time      `gorm:"type:timestamp;index" json:"time_window_end"`
+	Confidence        float64        `gorm:"type:decimal(5,4)" json:"confidence"`
+	ModelVersion      string         `gorm:"type:varchar(32)" json:"model_version"`
+	Factors           JSON           `gorm:"type:jsonb" json:"factors"`
+	Recommendation    string         `gorm:"type:text" json:"recommendation"`
+	Trigger           string         `gorm:"type:varchar(100)" json:"trigger"` // 触发条件
+	IsVerified        bool           `gorm:"type:boolean;default:false" json:"is_verified"`
+	VerifiedAt        *time.Time     `json:"verified_at"`
+	ActualBehavior    string         `gorm:"type:varchar(32)" json:"actual_behavior"`
+	TenantID          string         `gorm:"type:uuid;index" json:"tenant_id"`
+	CreatedAt         time.Time      `json:"created_at"`
+	UpdatedAt         time.Time      `json:"updated_at"`
+	DeletedAt         gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 func (BehaviorPrediction) TableName() string {

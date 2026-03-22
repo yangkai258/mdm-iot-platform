@@ -68,11 +68,7 @@ func (ctrl *DataResidencyController) ListDataResidencyRules(c *gin.Context) {
 // @Router /api/v1/data-residency/rules/{id} [get]
 func (ctrl *DataResidencyController) GetDataResidencyRule(c *gin.Context) {
 	id := c.Param("id")
-	var ruleID uint
-	if _, err := parseUint(id, &ruleID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid rule id"})
-		return
-	}
+	ruleID := parseUint(id)
 
 	var rule models.DataResidencyRule
 	if err := ctrl.DB.First(&rule, ruleID).Error; err != nil {
@@ -160,10 +156,7 @@ func (ctrl *DataResidencyController) CreateDataResidencyRule(c *gin.Context) {
 func (ctrl *DataResidencyController) UpdateDataResidencyRule(c *gin.Context) {
 	id := c.Param("id")
 	var ruleID uint
-	if _, err := parseUint(id, &ruleID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid rule id"})
-		return
-	}
+	ruleID = parseUint(id)
 
 	var existingRule models.DataResidencyRule
 	if err := ctrl.DB.First(&existingRule, ruleID).Error; err != nil {
@@ -215,11 +208,7 @@ func (ctrl *DataResidencyController) UpdateDataResidencyRule(c *gin.Context) {
 // @Router /api/v1/data-residency/rules/{id} [delete]
 func (ctrl *DataResidencyController) DeleteDataResidencyRule(c *gin.Context) {
 	id := c.Param("id")
-	var ruleID uint
-	if _, err := parseUint(id, &ruleID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid rule id"})
-		return
-	}
+	ruleID := parseUint(id)
 
 	var rule models.DataResidencyRule
 	if err := ctrl.DB.First(&rule, ruleID).Error; err != nil {

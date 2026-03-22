@@ -8,9 +8,16 @@ import (
 )
 
 const (
-	writeWait      = 10 * time.Second
-	pongWait       = 60 * time.Second
-	pingPeriod     = (pongWait * 9) / 10
+	// Time allowed to write a message to the peer.
+	writeWait = 10 * time.Second
+
+	// Time allowed to read the next pong message from the peer.
+	pongWait = 60 * time.Second
+
+	// Send pings to peer with this period. Must be less than pongWait.
+	pingPeriod = (pongWait * 9) / 10
+
+	// Maximum message size allowed from peer.
 	maxMessageSize = 512
 )
 
@@ -18,18 +25,18 @@ const (
 type NotificationType string
 
 const (
-	NotificationTypeAlert   NotificationType = "alert"
-	NotificationTypeOTA     NotificationType = "ota"
-	NotificationTypeSystem  NotificationType = "system"
+	NotificationTypeAlert    NotificationType = "alert"     // 新告警
+	NotificationTypeOTA     NotificationType = "ota"       // OTA升级进度
+	NotificationTypeSystem  NotificationType = "system"   // 系统消息
 )
 
 // Notification 通知消息结构
 type Notification struct {
-	Type      NotificationType `json:"type"`
-	Title     string          `json:"title"`
-	Content   string          `json:"content"`
-	Data      interface{}     `json:"data,omitempty"`
-	Timestamp time.Time       `json:"timestamp"`
+	Type      NotificationType     `json:"type"`                // 通知类型
+	Title     string               `json:"title"`               // 通知标题
+	Content   string               `json:"content"`             // 通知内容
+	Data      interface{}          `json:"data,omitempty"`       // 附加数据
+	Timestamp time.Time            `json:"timestamp"`            // 时间戳
 }
 
 // ClientHub 所有客户端的集中管理

@@ -236,7 +236,7 @@ func (ctrl *ActionLibraryController) Update(c *gin.Context) {
 		return
 	}
 
-	updates := make(map[string]interface{}{"updated_at": time.Now()})
+	updates := map[string]interface{}{"updated_at": time.Now()}
 	if req.ActionName != "" {
 		updates["action_name"] = req.ActionName
 	}

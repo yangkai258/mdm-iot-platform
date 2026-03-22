@@ -187,7 +187,7 @@ func (c *WebhookController) Create(ctx *gin.Context) {
 		Name:      req.Name,
 		URL:       req.URL,
 		Secret:    secret,
-		EventTypes: models.StringArray(req.EventTypes),
+		EventTypes: models.WebhookStringArray(req.EventTypes),
 		Status:    "active",
 		TenantID:  tenantID,
 		Headers:   convertMapStringToInterface(req.Headers),
@@ -251,7 +251,7 @@ func (c *WebhookController) Update(ctx *gin.Context) {
 		webhook.Secret = req.Secret
 	}
 	if req.EventTypes != nil {
-		webhook.EventTypes = models.StringArray(req.EventTypes)
+		webhook.EventTypes = models.WebhookStringArray(req.EventTypes)
 	}
 	if req.Headers != nil {
 		webhook.Headers = convertMapStringToInterface(req.Headers)

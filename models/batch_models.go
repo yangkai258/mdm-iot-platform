@@ -38,3 +38,37 @@ type BatchTaskDeviceResult struct {
 	Status   string `json:"status"` // success/failed
 	Error    string `json:"error,omitempty"`
 }
+
+// BatchTaskResponse 批量任务响应
+type BatchTaskResponse struct {
+	ID        uint      `json:"id"`
+	TaskID    string    `json:"task_id"`
+	TaskType  string    `json:"task_type"`
+	Total     int       `json:"total"`
+	Success   int       `json:"success"`
+	Failed    int       `json:"failed"`
+	Pending   int       `json:"pending"`
+	Status    string    `json:"status"`
+	Results   string    `json:"results"`
+	CreatorID uint      `json:"creator_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// ToResponse 转换为响应结构
+func (t *BatchTask) ToResponse() *BatchTaskResponse {
+	return &BatchTaskResponse{
+		ID:        t.ID,
+		TaskID:    t.TaskID,
+		TaskType:  t.TaskType,
+		Total:     t.Total,
+		Success:   t.Success,
+		Failed:    t.Failed,
+		Pending:   t.Pending,
+		Status:    t.Status,
+		Results:   t.Results,
+		CreatorID: t.CreatorID,
+		CreatedAt: t.CreatedAt,
+		UpdatedAt: t.UpdatedAt,
+	}
+}

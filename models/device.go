@@ -17,9 +17,9 @@ type Device struct {
 	FirmwareVersion string         `gorm:"type:varchar(32);not null" json:"firmware_version"`
 	BindUserID      *string        `gorm:"type:varchar(36);index" json:"bind_user_id"`
 	LifecycleStatus int            `gorm:"type:smallint;default:1" json:"lifecycle_status"` // 1:待激活 2:服役中 3:维修 4:报废
-	TenantID        string         `gorm:"type:uuid;index" json:"tenant_id"`                // 租户ID
-	OrgID           uint           `gorm:"index" json:"org_id"`                             // 组织ID（用于数据权限）
-	CreateUserID    uint           `gorm:"index" json:"create_user_id"`                    // 创建人ID（用于数据权限）
+	OrgID           uint           `gorm:"index" json:"org_id"`                              // 组织ID（用于数据权限）
+	CreateUserID    uint           `gorm:"index" json:"create_user_id"`                      // 创建人ID（用于数据权限）
+	DesiredState    string         `gorm:"type:text" json:"desired_state"`                   // 期望状态 JSON
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
@@ -67,7 +67,6 @@ type DeviceShadow struct {
 type CommandHistory struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	DeviceID  string    `gorm:"type:varchar(36);index" json:"device_id"`
-	TenantID  string    `gorm:"type:uuid;index" json:"tenant_id"` // 租户ID
 	CmdID     string    `gorm:"type:varchar(36)" json:"cmd_id"`
 	CmdType   string    `gorm:"type:varchar(20)" json:"cmd_type"`
 	Action    string    `gorm:"type:varchar(50)" json:"action"`
@@ -79,7 +78,6 @@ type CommandHistory struct {
 // PetProfile 宠物配置
 type PetProfile struct {
 	DeviceID         string                 `gorm:"primaryKey;type:varchar(36)" json:"device_id"`
-	TenantID         string                 `gorm:"type:uuid;index" json:"tenant_id"` // 租户ID
 	PetName          string                 `gorm:"type:varchar(64);default:'Mimi'" json:"pet_name"`
 	Personality      string                 `gorm:"type:varchar(32);default:'lively'" json:"personality"`
 	InteractionFreq  string                 `gorm:"type:varchar(16);default:'medium'" json:"interaction_freq"`

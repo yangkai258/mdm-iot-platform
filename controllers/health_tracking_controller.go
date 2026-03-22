@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"time"
@@ -535,7 +536,8 @@ func (h *HealthTrackingCtrl) ReportSleep(c *gin.Context) {
 		record.Tags = input.Tags
 	}
 	if input.StageDetails != nil {
-		record.StageDetails = input.StageDetails
+		stageJSON, _ := json.Marshal(input.StageDetails)
+		json.Unmarshal(stageJSON, &record.StageDetails)
 	}
 	if input.Environment.Temperature != 0 || input.Environment.Humidity != 0 {
 		record.Environment = map[string]interface{}{

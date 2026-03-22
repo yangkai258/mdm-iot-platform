@@ -62,7 +62,7 @@ const routes = [
   {
     path: '/pet/console',
     name: 'PetConsole',
-    component: () => import('../views/pet/PetConsole.vue')
+    component: () => import('../views/pet/PetConsoleView.vue')
   },
   {
     path: '/pet/conversations',
@@ -129,90 +129,21 @@ const routes = [
     name: 'ComplianceRules',
     component: () => import('../views/policies/ComplianceRules.vue')
   },
-  // 会员管理 - 会员积分
+  // 会员管理
   {
     path: '/members/points',
     name: 'MemberPoints',
     component: () => import('../views/members/MemberPoints.vue')
   },
   {
-    path: '/members/points/rules',
-    name: 'PointsRules',
-    component: () => import('../views/members/PointsRules.vue')
-  },
-  {
-    path: '/members/points/inventory',
-    name: 'PointsInventory',
-    component: () => import('../views/members/PointsInventory.vue')
-  },
-  {
-    path: '/members/points/records',
-    name: 'PointsRecords',
-    component: () => import('../views/members/PointsRecords.vue')
-  },
-  {
-    path: '/members/points/settings',
-    name: 'PointsSettings',
-    component: () => import('../views/members/PointsSettings.vue')
-  },
-  {
-    path: '/members/points/exclude',
-    name: 'PointsExclude',
-    component: () => import('../views/members/PointsExclude.vue')
-  },
-  // 会员管理 - 优惠券
-  {
     path: '/members/coupons',
     name: 'MemberCoupons',
     component: () => import('../views/members/MemberCoupons.vue')
   },
-  // 会员管理 - 促销
   {
     path: '/members/promotions',
     name: 'MemberPromotions',
     component: () => import('../views/members/MemberPromotions.vue')
-  },
-  // 会员管理 - 店铺管理
-  {
-    path: '/members/stores',
-    name: 'MemberStores',
-    component: () => import('../views/members/MemberStores.vue')
-  },
-  {
-    path: '/members/store-sources',
-    name: 'StoreSources',
-    component: () => import('../views/members/StoreSources.vue')
-  },
-  {
-    path: '/members/store-locations',
-    name: 'StoreLocations',
-    component: () => import('../views/members/StoreLocations.vue')
-  },
-  {
-    path: '/members/channels',
-    name: 'MemberChannels',
-    component: () => import('../views/members/MemberChannels.vue')
-  },
-  {
-    path: '/members/miniprogram',
-    name: 'MiniProgram',
-    component: () => import('../views/members/MiniProgram.vue')
-  },
-  {
-    path: '/members/printers',
-    name: 'Printers',
-    component: () => import('../views/members/Printers.vue')
-  },
-  // 会员管理 - 临时会员
-  {
-    path: '/members/temp-members',
-    name: 'TempMembers',
-    component: () => import('../views/members/TempMembers.vue')
-  },
-  {
-    path: '/members/temp-coupons',
-    name: 'TempCoupons',
-    component: () => import('../views/members/TempCoupons.vue')
   },
   // 告警中心
   {
@@ -321,204 +252,6 @@ const routes = [
     path: '/org/employees',
     name: 'OrgEmployees',
     component: () => import('../views/org/Employees.vue')
-  },
-
-  // ============ Sprint 12: 安全功能 ============
-  {
-    path: '/security/permission',
-    name: 'PermissionAssignment',
-    component: () => import('../views/security/PermissionAssignmentView.vue'),
-    meta: { title: '权限分配' }
-  },
-  {
-    path: '/security/data-permission',
-    name: 'DataPermission',
-    component: () => import('../views/security/DataPermissionView.vue'),
-    meta: { title: '数据权限' }
-  },
-  {
-    path: '/security/certificate',
-    name: 'CertificateManage',
-    component: () => import('../views/security/CertificateManageView.vue'),
-    meta: { title: '证书管理' }
-  },
-  {
-    path: '/security/device',
-    name: 'DeviceSecurity',
-    component: () => import('../views/security/DeviceSecurityView.vue'),
-    meta: { title: '设备安全' }
-  },
-  {
-    path: '/security/ldap',
-    name: 'LDAPConfig',
-    component: () => import('../views/security/LDAPConfigView.vue'),
-    meta: { title: 'LDAP配置' }
-  },
-  {
-    path: '/security/user-sync',
-    name: 'UserSync',
-    component: () => import('../views/security/UserSyncView.vue'),
-    meta: { title: '用户同步' }
-  },
-
-  // ============ Sprint 13: 全球化设置 ============
-  {
-    path: '/globalization',
-    name: 'GlobalizationSettings',
-    component: () => import('../views/globalization/GlobalizationSettingsView.vue'),
-    meta: { title: '全球化设置' }
-  },
-  {
-    path: '/globalization/region',
-    name: 'RegionManage',
-    component: () => import('../views/globalization/RegionManageView.vue'),
-    meta: { title: '区域管理' }
-  },
-  {
-    path: '/globalization/timezone',
-    name: 'TimezoneSettings',
-    component: () => import('../views/globalization/TimezoneSettingsView.vue'),
-    meta: { title: '时区设置' }
-  },
-  {
-    path: '/globalization/data-residency',
-    name: 'DataResidency',
-    component: () => import('../views/globalization/DataResidencyView.vue'),
-    meta: { title: '数据驻留规则' }
-  },
-  {
-    path: '/globalization/ai-node',
-    name: 'RegionalAINode',
-    component: () => import('../views/globalization/RegionalAINodeView.vue'),
-    meta: { title: '区域AI节点' }
-  },
-  {
-    path: '/globalization/sync-status',
-    name: 'RegionSyncStatus',
-    component: () => import('../views/globalization/RegionSyncStatusView.vue'),
-    meta: { title: '跨区域同步状态' }
-  },
-
-  // ============ Sprint 10: 设备监控 ============
-  {
-    path: '/monitor/dashboard',
-    name: 'DeviceDashboard',
-    component: () => import('../views/monitor/DeviceDashboard.vue'),
-    meta: { title: '设备监控面板' }
-  },
-  {
-    path: '/monitor/logs',
-    name: 'DeviceLogs',
-    component: () => import('../views/monitor/DeviceLogs.vue'),
-    meta: { title: '设备日志' }
-  },
-  {
-    path: '/monitor/debug',
-    name: 'RemoteDebug',
-    component: () => import('../views/monitor/RemoteDebug.vue'),
-    meta: { title: '远程调试' }
-  },
-
-  // ============ Sprint 14: AI 行为监控 ============
-  {
-    path: '/ai/quality-dashboard',
-    name: 'AIQualityDashboard',
-    component: () => import('../views/ai/AIQualityDashboardView.vue'),
-    meta: { title: 'AI 质量监控' }
-  },
-  {
-    path: '/ai/behavior-log',
-    name: 'AIBehaviorLog',
-    component: () => import('../views/ai/AIBehaviorLogView.vue'),
-    meta: { title: 'AI 行为日志' }
-  },
-  {
-    path: '/ai/model-version',
-    name: 'ModelVersion',
-    component: () => import('../views/ai/ModelVersionView.vue'),
-    meta: { title: '模型版本管理' }
-  },
-  {
-    path: '/ai/sandbox',
-    name: 'AISandbox',
-    component: () => import('../views/ai/AISandboxView.vue'),
-    meta: { title: 'AI 沙箱测试' }
-  },
-  {
-    path: '/ai/behavior-detail/:id',
-    name: 'AIBehaviorDetail',
-    component: () => import('../views/ai/AIBehaviorDetailView.vue'),
-    meta: { title: 'AI 行为详情' }
-  },
-  {
-    path: '/ai/model-publish',
-    name: 'ModelPublishWorkflow',
-    component: () => import('../views/ai/ModelPublishWorkflow.vue'),
-    meta: { title: '模型发布工作流' }
-  },
-
-  // ============ Sprint 15: 宠物管理 ============
-  {
-    path: '/pet/register',
-    name: 'PetRegistration',
-    component: () => import('../views/pet/PetRegistrationView.vue'),
-    meta: { title: '宠物登记' }
-  },
-  {
-    path: '/pet/list',
-    name: 'PetList',
-    component: () => import('../views/pet/PetListView.vue'),
-    meta: { title: '我的宠物' }
-  },
-  {
-    path: '/pet/detail/:pet_id',
-    name: 'PetDetail',
-    component: () => import('../views/pet/PetDetailView.vue'),
-    meta: { title: '宠物详情' }
-  },
-  {
-    path: '/pet/lost-found',
-    name: 'LostFound',
-    component: () => import('../views/pet/LostFoundView.vue'),
-    meta: { title: '寻回网络' }
-  },
-  {
-    path: '/pet/household',
-    name: 'MultiPetManage',
-    component: () => import('../views/pet/MultiPetManageView.vue'),
-    meta: { title: '家庭宠物管理' }
-  },
-
-  // ============ Sprint 16: 订阅计费 ============
-  {
-    path: '/billing/plans',
-    name: 'SubscriptionPlans',
-    component: () => import('../views/billing/SubscriptionPlansView.vue'),
-    meta: { title: '订阅计划' }
-  },
-  {
-    path: '/billing/subscription',
-    name: 'SubscriptionManage',
-    component: () => import('../views/billing/SubscriptionManageView.vue'),
-    meta: { title: '我的订阅' }
-  },
-  {
-    path: '/billing/usage',
-    name: 'UsageQuery',
-    component: () => import('../views/billing/UsageQueryView.vue'),
-    meta: { title: '用量查询' }
-  },
-  {
-    path: '/billing/invoice',
-    name: 'InvoiceBilling',
-    component: () => import('../views/billing/InvoiceBillingView.vue'),
-    meta: { title: '发票管理' }
-  },
-  {
-    path: '/billing/webhook',
-    name: 'WebhookConfig',
-    component: () => import('../views/billing/WebhookConfigView.vue'),
-    meta: { title: 'Webhook配置' }
   }
 ]
 

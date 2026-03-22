@@ -22,7 +22,7 @@ const DefaultPauseThreshold = 0.80
 // OTAWorker OTA后台Worker
 // 职责：
 //   1. 轮询 ota_deployments 表（每30秒），向 pending/running 部署下发 MQTT OTA 指令
-//   2. 订阅 /mdm/device/+/up/ota_progress 主题，接收设备上报的 OTA 进度
+//   2. 订阅 /device/+/up/ota_progress 主题，接收设备上报的 OTA 进度
 //   3. 更新部署状态为 in_progress/completed/failed
 type OTAWorker struct {
 	DB             *gorm.DB
@@ -79,14 +79,14 @@ func (w *OTAWorker) pollLoop() {
 }
 
 // subscribeOTAProgress 订阅设备 OTA 进度上报主题
-// Topic: /mdm/device/{device_id}/up/ota_progress
+// Topic: /device/{device_id}/up/ota_progress
 func (w *OTAWorker) subscribeOTAProgress() {
 	if w.MQTTClient == nil {
 		log.Printf("[OTA-Worker] MQTT 客户端未初始化，跳过 OTA 进度订阅")
 		return
 	}
 
-	topic := "/mdm/device/+/up/ota_progress"
+	topic := "/device/+/up/ota_progress"
 	token := w.MQTTClient.Subscribe(topic, 0, w.otaProgressHandler)
 	if token.Wait() && token.Error() != nil {
 		log.Printf("[OTA-Worker] 订阅 OTA 进度主题失败: %v", token.Error())
@@ -265,7 +265,7 @@ func (w *OTAWorker) processDeployment(dep *models.OTADeployment) {
 			"timestamp": time.Now().Format(time.RFC3339),
 		}
 
-		// 通过 MQTT 下发到 /mdm/device/{device_id}/down/cmd
+		// 通过 MQTT 下发到 /device/{device_id}/down/cmd
 		if err := w.PublishOTACommand(device.DeviceID, otaCmd); err != nil {
 			log.Printf("[OTA-Worker] 设备 %s 下发失败: %v", device.DeviceID, err)
 			continue
@@ -372,7 +372,7 @@ func (w *OTAWorker) PublishOTACommand(deviceID string, cmd map[string]interface{
 		return fmt.Errorf("MQTT 客户端未初始化")
 	}
 
-	topic := fmt.Sprintf("/mdm/device/%s/down/cmd", deviceID)
+	topic := fmt.Sprintf("/device/%s/down/cmd", deviceID)
 	payload, err := json.Marshal(cmd)
 	if err != nil {
 		return fmt.Errorf("序列化指令失败: %w", err)

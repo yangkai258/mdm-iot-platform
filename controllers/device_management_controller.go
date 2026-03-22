@@ -70,7 +70,7 @@ func UpdateDeviceStatus(db *gorm.DB) gin.HandlerFunc {
 
 		var device models.Device
 		result := db.Where("device_id = ?", deviceID).First(&device)
-		
+
 		if result.Error == gorm.ErrRecordNotFound {
 			ctx.JSON(http.StatusNotFound, gin.H{
 				"code":      4002,
@@ -82,7 +82,10 @@ func UpdateDeviceStatus(db *gorm.DB) gin.HandlerFunc {
 
 		// 解析请求
 		var req struct {
-			Status int `json:"status"`
+			Status     int     `json:"status"`
+			Battery    float64 `json:"battery"`     // 电池电量（可选）
+			IsOnline   bool    `json:"is_online"`   // 在线状态（可选）
+			IsJailbreak bool   `json:"is_jailbreak"` // 越狱状态（可选）
 		}
 		if err := ctx.ShouldBindJSON(&req); err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
@@ -101,6 +104,19 @@ func UpdateDeviceStatus(db *gorm.DB) gin.HandlerFunc {
 				"error_code": "ERR_VALIDATION",
 			})
 			return
+		}
+
+		// 构建告警检查数据（如果有电池或在线状态数据）
+		if req.Battery > 0 || req.IsOnline || req.IsJailbreak {
+			alertData := map[string]interface{}{
+				"battery":          req.Battery,
+				"is_online":        req.IsOnline,
+				"battery_low":      req.Battery > 0 && req.Battery < 15,
+				"battery_critical": req.Battery > 0 && req.Battery < 5,
+				"is_jailbroken":    req.IsJailbreak,
+			}
+			// 调用告警检查（异步避免阻塞）
+			go CheckAlerts(db, deviceID, alertData)
 		}
 
 		device.LifecycleStatus = req.Status

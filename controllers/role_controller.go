@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"mdm-backend/middleware"
 	"mdm-backend/models"
@@ -35,6 +36,18 @@ func (c *NewRoleController) List(ctx *gin.Context) {
 
 	if status := ctx.Query("status"); status != "" {
 		query = query.Where("status = ?", status)
+	}
+
+	// 时间范围筛选
+	if startTime := ctx.Query("start_time"); startTime != "" {
+		if t, err := time.Parse("2006-01-02 15:04:05", startTime); err == nil {
+			query = query.Where("created_at >= ?", t)
+		}
+	}
+	if endTime := ctx.Query("end_time"); endTime != "" {
+		if t, err := time.Parse("2006-01-02 15:04:05", endTime); err == nil {
+			query = query.Where("created_at <= ?", t)
+		}
 	}
 
 	query.Count(&total)

@@ -1,7 +1,7 @@
 # Sprint 15 规划
 
 **时间**：2026-06-14
-**状态**：✅ 已完成
+**状态**：待开始
 **Sprint 周期**：2 周（2026-06-14 ～ 2026-06-27）
 
 ---
@@ -206,16 +206,3 @@ CREATE TABLE household_pet_invites (
 | 寻回信息虚假 | 用户体验差 | 审核机制+举报功能 |
 | 隐私泄露 | 位置信息暴露 | 数据脱敏+授权控制 |
 | 宠物数据量大 | DB 存储压力 | 分表+定期清理 |
-
----
-
-## 六、Sprint 15 完成清单
-
-### 后端 (agenthd)
-- [x] 宠物档案 CRUD API - `controllers/pet_controller.go` + `models/pet.go`
-- [x] 设备绑定 API - `PetCtrl.RegisterPetRoutes()` (pets/:pet_id/devices)
-- [x] 寻回网络 API - `controllers/lost_found_controller.go`
-- [x] 家庭宠物管理 API - `controllers/household_pet_controller.go`
-- [x] 宠物健康提醒 API - `controllers/pet_health_controller.go`
-- [x] 数据库迁移 - `main.go` AutoMigrate 已注册 Sprint 15 所有模型
-- [x] 路由注册 - `main.go` 已注册所有 Sprint 15 路由

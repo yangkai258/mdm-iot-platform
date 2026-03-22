@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
@@ -48,7 +47,7 @@ func (ctrl *BatchController) DeviceActions(c *gin.Context) {
 	}
 
 	taskID := "batch-" + uuid.New().String()
-	creatorID := batchGetUserIDFromContext(c)
+	creatorID := getUserIDFromContext(c)
 
 	task := models.BatchTask{
 		TaskID:    taskID,
@@ -247,7 +246,7 @@ func (ctrl *BatchController) BatchShadowUpdate(c *gin.Context) {
 	}
 
 	taskID := "batch-shadow-" + uuid.New().String()
-	creatorID := batchGetUserIDFromContext(c)
+	creatorID := getUserIDFromContext(c)
 
 	task := models.BatchTask{
 		TaskID:    taskID,
@@ -417,30 +416,6 @@ func (ctrl *BatchController) ListTasks(c *gin.Context) {
 }
 
 // ============ 辅助函数 ============
-
-func batchGetUserIDFromContext(c *gin.Context) uint {
-	if uid, exists := c.Get("user_id"); exists {
-		switch v := uid.(type) {
-		case uint:
-			return v
-		case int:
-			return uint(v)
-		case int64:
-			return uint(v)
-		case float64:
-			return uint(v)
-		case string:
-			var id uint
-			for _, ch := range v {
-				if ch >= '0' && ch <= '9' {
-					id = id*10 + uint(ch-'0')
-				}
-			}
-			return id
-		}
-	}
-	return 0
-}
 
 func parseUint64(s string) uint64 {
 	var n uint64

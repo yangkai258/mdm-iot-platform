@@ -39,40 +39,7 @@ func (s *WebhookService) Send(url string, payload []byte, secret string) error {
 		return fmt.Errorf("webhook URL 不能为空")
 	}
 
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return fmt.Errorf("创建请求失败: %w", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "MDM-Alert-Webhook/1.0")
-
-	// 如果提供了 secret，添加签名
-	if secret != "" {
-		signature := s.SignPayload(payload, secret)
-		req.Header.Set("X-Webhook-Signature", "sha256="+signature)
-		req.Header.Set("X-Webhook-Timestamp", fmt.Sprintf("%d", time.Now().Unix()))
-	}
-
-	// 带 payload
-	req.Body = io.NopCloser(nil)
-
-	// 重新创建带 body 的请求
-	req2, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return fmt.Errorf("创建请求失败: %w", err)
-	}
-
-	// 使用已签名的 payload
-	if secret != "" {
-		signedPayload := s.SignPayload(payload, secret)
-		req2.Header.Set("X-Webhook-Signature", "sha256="+signedPayload)
-		req2.Header.Set("X-Webhook-Timestamp", fmt.Sprintf("%d", time.Now().Unix()))
-	}
-
-	// 实际上我们需要使用 bytes.NewReader
-	reader := bytes.NewReader(payload)
-	reqFinal, err := http.NewRequest("POST", url, reader)
+	reqFinal, err := http.NewRequest("POST", url, bytes.NewReader(payload))
 	if err != nil {
 		return fmt.Errorf("创建请求失败: %w", err)
 	}
@@ -91,7 +58,6 @@ func (s *WebhookService) Send(url string, payload []byte, secret string) error {
 	}
 	defer resp.Body.Close()
 
-	// 读取响应
 	body, _ := io.ReadAll(resp.Body)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {

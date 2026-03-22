@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -62,9 +63,16 @@ func InitRedis() (*RedisClient, error) {
 	// 获取 host:port
 	if parsedURL.Host != "" {
 		addr = parsedURL.Host
+		// 如果 Host 没有端口，添加默认端口
+		if !strings.Contains(addr, ":") {
+			addr = addr + ":6379"
+		}
 	} else if parsedURL.Path != "" {
-		// 没有 Host 时，Path 包含路径
-		addr = parsedURL.Path + ":6379"
+		// 没有 Host 时，Path 包含路径（格式: /0 或 localhost:6379/0）
+		addr = parsedURL.Path
+		if !strings.Contains(addr, ":") {
+			addr = addr + ":6379"
+		}
 	}
 
 	// 获取密码
@@ -89,6 +97,11 @@ func InitRedis() (*RedisClient, error) {
 // RedisClient Redis 客户端封装
 type RedisClient struct {
 	client *redis.Client
+}
+
+// Client 返回底层的 redis.Client（用于限流等操作）
+func (r *RedisClient) Client() *redis.Client {
+	return r.client
 }
 
 // DeviceShadow 设备影子结构
@@ -192,4 +205,17 @@ func (r *RedisClient) DelDeviceShadow(deviceID string) error {
 // Close 关闭连接
 func (r *RedisClient) Close() error {
 	return r.client.Close()
+}
+
+// 全局 Redis 客户端，供其他包使用
+var globalRedisClient *RedisClient
+
+// SetGlobalRedisClient 设置全局 Redis 客户端
+func SetGlobalRedisClient(client *RedisClient) {
+	globalRedisClient = client
+}
+
+// GetGlobalRedisClient 获取全局 Redis 客户端
+func GetGlobalRedisClient() *RedisClient {
+	return globalRedisClient
 }
