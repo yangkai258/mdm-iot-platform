@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
@@ -16,7 +15,6 @@ import (
 	"mdm-backend/websocket"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
 )
 
@@ -61,6 +59,9 @@ func main() {
 		// 告警设置表
 		&models.AlertSettings{},
 		&models.NotificationChannel{},
+		// Sprint 11: 通知日志和告警历史
+		&models.NotificationLog{},
+		&models.AlertHistory{},
 		// 合规表
 		&models.CompliancePolicy{},
 		&models.ComplianceViolation{},
@@ -120,16 +121,24 @@ func main() {
 		// 活动日志表
 		&models.ActivityLog{},
 		&models.LoginLog{},
-
-		// Sprint 10: 传感器事件表
-		&models.SensorEvent{},
-		&models.SensorThreshold{},
-		// Sprint 10: 告警规则表
-		&models.AlertRule{},
-		// Sprint 10: 设备监控指标表
-		&models.DeviceMetric{},
-		// Sprint 10: 批量任务表
-		&models.BatchTask{},
+		// Sprint 12: LDAP/AD 配置表
+		&models.LDAPConfig{},
+		&models.LDAPUserMapping{},
+		&models.LDAPGroupRoleMapping{},
+		// Sprint 12: 证书管理表
+		&models.Certificate{},
+		// Sprint 12: 设备安全表
+		&models.WipeHistory{},
+		// Sprint 12: 数据权限表
+		&models.DataPermissionRule{},
+		&models.UserDataPermission{},
+		// Sprint 13: 多区域数据库架构
+		&models.Region{},
+		&models.RegionalNode{},
+		// Sprint 13: 时区支持
+		&models.TimezoneConfig{},
+		// Sprint 13: 数据驻留
+		&models.DataResidencyRule{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -151,6 +160,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize Redis: %v", err)
 	}
+	// 设置全局 Redis 客户端供其他模块使用
+	utils.SetGlobalRedisClient(redisClient)
 
 	// 初始化 MQTT（传入告警回调和合规检查回调）
 	alertCallback := func(deviceID string, data map[string]interface{}) {
@@ -341,6 +352,12 @@ func main() {
 		sys.POST("/notification-channels/:id/toggle", notifChannelCtrl.ToggleChannel)
 		sys.POST("/notification-channels/:id/test", notifChannelCtrl.TestChannel)
 
+		// Sprint 11: 告警历史管理
+		alertHistoryCtrl := &controllers.AlertHistoryController{DB: db}
+		sys.GET("/alerts/history", alertHistoryCtrl.GetAlertHistory)
+		sys.GET("/alerts/history/:id", alertHistoryCtrl.GetAlertHistoryByID)
+		sys.POST("/alerts/history/archive", alertHistoryCtrl.ArchiveAlert)
+
 		// Dashboard 统计（使用独立的 DashboardController）
 		dashboardCtrl := &controllers.DashboardController{DB: db}
 		sys.GET("/dashboard/stats", dashboardCtrl.GetStats)
@@ -377,25 +394,6 @@ func main() {
 	// MiniClaw路由
 	miniClawCtrl := &controllers.MiniClawController{}
 	miniClawCtrl.RegisterRoutes(apiV1)
-
-	// ============ Sprint 9: Pet Controller 路由 ============
-	petCtrl := &controllers.PetController{DB: db, Redis: redisClient}
-	petCtrl.RegisterRoutes(apiV1)
-
-	// ============ Sprint 9: Behavior Controller 路由 ============
-	behaviorCtrl := &controllers.BehaviorController{DB: db}
-	behaviorCtrl.RegisterRoutes(apiV1)
-
-	// ============ Sprint 9: Memory Controller 路由 ============
-	memoryCtrl := &controllers.MemoryController{DB: db}
-	memoryCtrl.RegisterRoutes(apiV1)
-
-	// ============ Sprint 9: MiniClaw 状态订阅 ============
-	statusHandler := mqtt.NewStatusHandler(db, redisClient)
-	statusHandler.SetupMiniClawSubscriber(mqttHandler)
-
-	// ============ Sprint 9: Pet WebSocket 路由 ============
-	apiV1.GET("/ws/pets/:device_id", handlePetWebSocket)
 
 	// 通知路由
 	notifCtrl := &controllers.NotificationController{DB: db}
@@ -447,31 +445,91 @@ func main() {
 	// 会员批量操作
 	apiV1.POST("/members/batch-delete", importExportCtrl.BatchDeleteMembers)
 
-	// ============ Sprint 10: 传感器事件路由 ============
-	sensorCtrl := &controllers.SensorController{DB: db}
-	sensorCtrl.RegisterSensorRoutes(apiV1)
-	// 传感器数据聚合
-	apiV1.GET("/sensors/:device_id/aggregations", sensorCtrl.GetAggregations)
-	// 传感器指标上报（供设备或MQTT调用）
-	apiV1.POST("/sensors/events", sensorCtrl.CreateEvent)
+	// ============ Sprint 12: LDAP/AD 路由 ============
+	ldapCtrl := &controllers.LDAPController{DB: db}
+	apiV1.GET("/ldap/config", ldapCtrl.GetLDAPConfig)
+	apiV1.PUT("/ldap/config", ldapCtrl.UpdateLDAPConfig)
+	apiV1.POST("/ldap/test", ldapCtrl.TestLDAPConnection)
+	apiV1.GET("/ldap/users", ldapCtrl.GetLDAPUsers)
+	apiV1.POST("/ldap/sync", ldapCtrl.SyncLDAPUsers)
+	apiV1.GET("/ldap/groups", ldapCtrl.GetLDAPGroups)
+	apiV1.POST("/ldap/groups/mapping", ldapCtrl.SetGroupRoleMapping)
+	apiV1.GET("/ldap/group-mappings", ldapCtrl.GetGroupRoleMappings)
 
-	// ============ Sprint 10: 动作库管理路由 ============
-	actionLibCtrl := &controllers.ActionLibraryController{DB: db}
-	actionLibCtrl.RegisterActionLibraryRoutes(apiV1)
+	// ============ Sprint 12: 证书管理路由 ============
+	certCtrl := &controllers.CertificateController{DB: db}
+	apiV1.GET("/certificates", certCtrl.ListCertificates)
+	apiV1.POST("/certificates", certCtrl.CreateCertificate)
+	apiV1.GET("/certificates/stats", certCtrl.GetCertificateStats)
+	apiV1.GET("/certificates/expiring", certCtrl.GetExpiringCertificates)
+	apiV1.POST("/certificates/validate", certCtrl.ValidateCertificate)
+	apiV1.GET("/certificates/:id", certCtrl.GetCertificate)
+	apiV1.PUT("/certificates/:id", certCtrl.UpdateCertificate)
+	apiV1.DELETE("/certificates/:id", certCtrl.DeleteCertificate)
+	apiV1.POST("/certificates/:id/revoke", certCtrl.RevokeCertificate)
+	apiV1.POST("/certificates/upload", certCtrl.UploadCertificateFile)
+	apiV1.GET("/certificates/:id/download", certCtrl.DownloadCertificate)
 
-	// ============ Sprint 10: 告警规则路由 ============
-	alertRuleCtrl := &controllers.AlertRuleController{DB: db}
-	alertRuleCtrl.RegisterAlertRuleRoutes(apiV1)
+	// ============ Sprint 12: 设备安全路由 (锁定/擦除) ============
+	deviceSecurityCtrl := &controllers.DeviceSecurityController{DB: db}
+	apiV1.POST("/devices/:device_id/lock", deviceSecurityCtrl.LockDevice)
+	apiV1.POST("/devices/:device_id/unlock", deviceSecurityCtrl.UnlockDevice)
+	apiV1.POST("/devices/:device_id/wipe", deviceSecurityCtrl.WipeDevice)
+	apiV1.POST("/devices/:device_id/wipe/confirm", deviceSecurityCtrl.ConfirmWipe)
+	apiV1.POST("/devices/:device_id/wipe/token", deviceSecurityCtrl.GenerateWipeConfirmToken)
+	apiV1.GET("/devices/:device_id/wipe-history", deviceSecurityCtrl.GetWipeHistory)
+	apiV1.GET("/devices/:device_id/lock-status", deviceSecurityCtrl.GetDeviceLockStatus)
 
-	// ============ Sprint 10: 设备监控路由 ============
-	deviceMonitorCtrl := &controllers.DeviceMonitorController{DB: db}
-	deviceMonitorCtrl.RegisterDeviceMonitorRoutes(apiV1)
-	// 设备指标上报
-	apiV1.POST("/monitor/metrics", deviceMonitorCtrl.ReportMetric)
+	// ============ Sprint 12: 数据权限路由 ============
+	dataPermCtrl := &controllers.DataPermissionController{DB: db}
+	apiV1.GET("/data-permissions/rules", dataPermCtrl.ListDataPermissionRules)
+	apiV1.POST("/data-permissions/rules", dataPermCtrl.CreateDataPermissionRule)
+	apiV1.PUT("/data-permissions/rules/:id", dataPermCtrl.UpdateDataPermissionRule)
+	apiV1.DELETE("/data-permissions/rules/:id", dataPermCtrl.DeleteDataPermissionRule)
+	apiV1.GET("/data-permissions/roles/:role_id", dataPermCtrl.GetRoleDataPermissions)
+	apiV1.PUT("/data-permissions/roles/:role_id", dataPermCtrl.UpdateRoleDataPermissions)
+	apiV1.GET("/data-permissions/users/:user_id", dataPermCtrl.GetUserDataPermissions)
+	apiV1.PUT("/data-permissions/users/:user_id", dataPermCtrl.UpdateUserDataPermissions)
+	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
+	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
 
-	// ============ Sprint 10: 批量操作路由 ============
-	batchCtrl := &controllers.BatchController{DB: db}
-	batchCtrl.RegisterBatchRoutes(apiV1)
+	// ============ Sprint 13: 多区域路由 ============
+	regionCtrl := controllers.NewRegionController(db)
+	apiV1.GET("/regions", regionCtrl.ListRegions)
+	apiV1.POST("/regions", regionCtrl.CreateRegion)
+	apiV1.GET("/regions/:id", regionCtrl.GetRegion)
+	apiV1.PUT("/regions/:id", regionCtrl.UpdateRegion)
+	apiV1.DELETE("/regions/:id", regionCtrl.DeleteRegion)
+	// 区域节点
+	apiV1.GET("/regions/:id/nodes", regionCtrl.ListRegionNodes)
+	apiV1.POST("/regions/:id/nodes", regionCtrl.CreateRegionNode)
+	apiV1.GET("/regions/:id/nodes/:node_id", regionCtrl.GetRegionNode)
+	apiV1.PUT("/regions/:id/nodes/:node_id", regionCtrl.UpdateRegionNode)
+	apiV1.DELETE("/regions/:id/nodes/:node_id", regionCtrl.DeleteRegionNode)
+	// 区域健康检查和故障切换
+	apiV1.GET("/regions/:id/health", regionCtrl.RegionHealthCheck)
+	apiV1.POST("/regions/:id/failover", regionCtrl.RegionFailover)
+
+	// ============ Sprint 13: 时区路由 ============
+	timezoneCtrl := controllers.NewTimezoneController(db)
+	apiV1.GET("/timezone", timezoneCtrl.GetCurrentUserTimezone)
+	apiV1.PUT("/timezone", timezoneCtrl.UpdateCurrentUserTimezone)
+	apiV1.GET("/timezone/list", timezoneCtrl.GetSupportedTimezones)
+	apiV1.GET("/timezone/tenant/:id", timezoneCtrl.GetTenantTimezone)
+	apiV1.PUT("/timezone/tenant/:id", timezoneCtrl.UpdateTenantTimezone)
+	apiV1.GET("/timezone/config", timezoneCtrl.GetTimezoneConfig)
+	apiV1.GET("/timezone/tenant-configs", timezoneCtrl.ListTenantTimezones)
+	apiV1.POST("/timezone/convert", timezoneCtrl.ConvertTime)
+
+	// ============ Sprint 13: 数据驻留路由 ============
+	dataResidencyCtrl := controllers.NewDataResidencyController(db)
+	apiV1.GET("/data-residency/rules", dataResidencyCtrl.ListDataResidencyRules)
+	apiV1.POST("/data-residency/rules", dataResidencyCtrl.CreateDataResidencyRule)
+	apiV1.GET("/data-residency/rules/:id", dataResidencyCtrl.GetDataResidencyRule)
+	apiV1.PUT("/data-residency/rules/:id", dataResidencyCtrl.UpdateDataResidencyRule)
+	apiV1.DELETE("/data-residency/rules/:id", dataResidencyCtrl.DeleteDataResidencyRule)
+	apiV1.POST("/data-residency/rules/validate", dataResidencyCtrl.ValidateDataResidency)
+	apiV1.POST("/data-residency/rules/batch", dataResidencyCtrl.BatchCreateDataResidencyRules)
 
 	// 获取端口
 	port := os.Getenv("PORT")
@@ -483,32 +541,4 @@ func main() {
 	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
-}
-
-// handlePetWebSocket 处理宠物WebSocket连接
-func handlePetWebSocket(c *gin.Context) {
-	deviceID := c.Param("device_id")
-	userID := "anonymous" // TODO: 从JWT获取真实用户ID
-	if uid, exists := c.Get("user_id"); exists {
-		userID = uid.(string)
-	}
-
-	// 获取WebSocket连接
-	upgrader := websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-	}
-
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		log.Printf("[PetWS] Failed to upgrade connection: %v", err)
-		return
-	}
-
-	// 使用Pet WebSocket服务处理连接
-	handler := services.NewPetWebSocketHandler()
-	handler.HandleWebSocket(conn, deviceID, userID)
 }
