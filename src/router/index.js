@@ -95,6 +95,20 @@ const routes = [
     component: () => import('../views/system/Logs.vue')
   },
   {
+    path: '/performance',
+    redirect: '/performance/dashboard'
+  },
+  {
+    path: '/performance/dashboard',
+    name: 'PerformanceDashboard',
+    component: () => import('../views/performance/PerformanceDashboardView.vue')
+  },
+  {
+    path: '/performance/cache',
+    name: 'CacheManagement',
+    component: () => import('../views/performance/CacheManagementView.vue')
+  },
+  {
     path: '/notifications',
     redirect: '/notifications/list'
   },
@@ -603,6 +617,34 @@ const routes = [
     name: 'DeviceOta',
     component: () => import('../views/tech/DeviceOtaView.vue'),
     meta: { title: '设备 OTA 优化' }
+  },
+
+  // ============ Sprint 27: 开发者平台前端 ============
+  {
+    path: '/developer/apps',
+    name: 'DeveloperApps',
+    component: () => import('../views/developer/DeveloperAppsView.vue'),
+    meta: { title: '开发者应用管理' }
+  },
+  {
+    path: '/developer/stats',
+    name: 'DeveloperStats',
+    component: () => import('../views/developer/DeveloperStatsView.vue'),
+    meta: { title: 'API 使用统计' }
+  },
+
+  // ============ Sprint 31: 国际化扩展前端 ============
+  {
+    path: '/i18n/translations',
+    name: 'TranslationManage',
+    component: () => import('../views/i18n/TranslationView.vue'),
+    meta: { title: '翻译管理' }
+  },
+  {
+    path: '/i18n/region-settings',
+    name: 'RegionSettings',
+    component: () => import('../views/i18n/RegionSettingsView.vue'),
+    meta: { title: '区域设置' }
   }
 ]
 
