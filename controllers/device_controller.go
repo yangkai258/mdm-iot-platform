@@ -21,8 +21,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	}
 
 	otaCtrl := &OTAController{DB: db}
-	edgeCtrl := &EdgeController{DB: db}
-	meshCtrl := &MeshController{DB: db}
 	profileCtrl := &PetProfileController{DB: db}
 	cmdCtrl := &CommandController{
 		DB:    db,
@@ -37,7 +35,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 	positionTemplateCtrl := &PositionTemplateController{DB: db}
-	researchCtrl := &ResearchController{DB: db}
 
 	api := r.Group("/api/v1")
 	{
@@ -76,27 +73,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 设备 OTA 回调（设备主动上报进度）
 		api.POST("/ota/devices/:device_id/report", otaCtrl.DeviceOTAReport)
 		api.GET("/ota/devices/:device_id/check", otaCtrl.CheckOTA)
-		// Sprint 26: 分片升级
-		api.POST("/device/:id/ota/partial", otaCtrl.StartPartialUpgrade)
-		api.GET("/device/:id/ota/status", otaCtrl.GetPartialUpgradeStatus)
-		api.POST("/device/:id/ota/partial/progress", otaCtrl.UpdatePartialUpgradeProgress)
-
-		// ============ 端侧推理 API (Sprint 26) ============
-		api.GET("/edge/models", edgeCtrl.ListModels)
-		api.POST("/edge/models", edgeCtrl.CreateModel)
-		api.GET("/edge/models/:id", edgeCtrl.GetModel)
-		api.POST("/edge/models/:id/deploy", edgeCtrl.DeployModel)
-		api.GET("/edge/inference/:device_id", edgeCtrl.GetInference)
-		api.GET("/edge/deployments", edgeCtrl.ListDeployments)
-
-		// ============ BLE Mesh API (Sprint 26) ============
-		api.GET("/mesh/devices", meshCtrl.ListMeshDevices)
-		api.GET("/mesh/devices/:id", meshCtrl.GetMeshDevice)
-		api.POST("/mesh/devices/:id/connect", meshCtrl.ConnectMeshDevice)
-		api.GET("/mesh/networks", meshCtrl.ListMeshNetworks)
-		api.POST("/mesh/networks", meshCtrl.SetupMeshNetwork)
-		api.GET("/mesh/networks/:id", meshCtrl.GetMeshNetwork)
-		api.POST("/mesh/networks/:id/activate", meshCtrl.ActivateMeshNetwork)
 
 		// ============ 组织管理 ============
 		// 公司管理
@@ -276,27 +252,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.DELETE("/promotions/:id", memberEnhancedCtrl.PromotionDeleteNew)
 		api.GET("/promotions/:id", memberEnhancedCtrl.PromotionDetailNew)
 
-		// ============ 应用管理 ============
-		appCtrl := &AppController{DB: db}
-		// 应用 CRUD
-		api.GET("/apps", appCtrl.List)
-		api.POST("/apps", appCtrl.Create)
-		api.GET("/apps/:id", appCtrl.Get)
-		api.PUT("/apps/:id", appCtrl.Update)
-		api.DELETE("/apps/:id", appCtrl.Delete)
-		// 版本管理
-		api.GET("/apps/:id/versions", appCtrl.ListVersions)
-		api.POST("/apps/:id/versions", appCtrl.CreateVersion)
-		api.DELETE("/apps/:id/versions/:version_id", appCtrl.DeleteVersion)
-		// 分发任务
-		api.GET("/app/distributions", appCtrl.ListDistributions)
-		api.POST("/app/distributions", appCtrl.CreateDistribution)
-		api.GET("/app/distributions/:id", appCtrl.GetDistribution)
-		api.POST("/app/distributions/:id/cancel", appCtrl.CancelDistribution)
-		// 分发任务（/apps/distributions 路径别名，供前端使用）
-		api.GET("/apps/distributions", appCtrl.ListDistributions)
-		// 统计
-		api.GET("/apps/:id/stats", appCtrl.GetStats)
+		// ============ 应用管理 (已移至 Sprint 27 developer_controller) ============
 
 		// ============ 策略管理 ============
 		policyCtrl := &PolicyController{DB: db}
@@ -326,9 +282,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 违规记录
 		api.GET("/compliance/violations", complianceCtrl.ListViolations)
 		api.PUT("/compliance/violations/:id/resolve", complianceCtrl.ResolveViolation)
-
-		// ============ Sprint 24: 研究平台 - 行为研究数据 & AI 行为实验 ============
-		researchCtrl.RegisterRoutes(api)
 	}
 }
 

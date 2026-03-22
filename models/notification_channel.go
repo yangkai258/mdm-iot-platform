@@ -32,10 +32,13 @@ type NotificationChannel struct {
 	SMSFrom     string `gorm:"type:varchar(20)" json:"sms_from"`
 
 	// 通用字段
-	Remark    string    `gorm:"type:text" json:"remark"`
-	IsDefault bool      `gorm:"default:false" json:"is_default"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Priority      int        `gorm:"default:0" json:"priority"`                  // 优先级
+	HealthStatus string     `gorm:"type:varchar(20);default:'unknown'" json:"health_status"` // healthy/unhealthy/unknown
+	LastCheckedAt *time.Time `json:"last_checked_at"`
+	Remark       string     `gorm:"type:text" json:"remark"`
+	IsDefault    bool       `gorm:"default:false" json:"is_default"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 func (NotificationChannel) TableName() string {

@@ -25,9 +25,6 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// 设置全局数据库实例
-	models.SetDB(db)
-
 	// 自动迁移数据库表
 	if err := db.AutoMigrate(
 		&models.Device{},
@@ -135,55 +132,18 @@ func main() {
 		// Sprint 12: 数据权限表
 		&models.DataPermissionRule{},
 		&models.UserDataPermission{},
-		// Sprint 13: 多区域数据库架构
-		&models.Region{},
-		&models.RegionalNode{},
-		// Sprint 13: 时区支持
-		&models.TimezoneConfig{},
-		// Sprint 13: 数据驻留
-		&models.DataResidencyRule{},
-		// Sprint 21: 内容生态 - 表情包市场
-		&models.EmoticonCategory{},
-		&models.Emoticon{},
-		&models.EmoticonPurchase{},
-		// Sprint 21: 内容生态 - 动作资源库
-		&models.CustomAction{},
-		&models.ActionMarket{},
-		// Sprint 21: 内容生态 - 声音定制
-		&models.VoiceConfig{},
-		&models.VoiceMarketItem{},
-		// Sprint 22: 移动端后端支持 - App Token & Push
-		&models.AppToken{},
-		&models.AppRefreshToken{},
-		&models.AppPush{},
-		// Sprint 22: 微信小程序后端
-		&models.MiniAppDevice{},
-		&models.MiniAppQRCodeBind{},
-		// Sprint 23: 第三方集成 - 智能家居
-		&models.SmartHomeDevice{},
-		&models.SmartHomeTrigger{},
-		// Sprint 23: 第三方集成 - 宠物医疗
-		&models.HospitalAppointment{},
-		// Sprint 23: 第三方集成 - 宠物用品电商
-		&models.ProductCategory{},
-		&models.Product{},
-		&models.Order{},
-		// Sprint 24: 研究平台 - 行为研究数据 & AI 行为实验
-		&models.ResearchDataset{},
-		&models.ResearchDataRecord{},
-		&models.ResearchExportJob{},
-		&models.Experiment{},
-		&models.ExperimentRun{},
-		&models.ExperimentParticipant{},
-		// Sprint 26: 端侧推理 & BLE Mesh
-		&models.EdgeModel{},
-		&models.EdgeModelDeployment{},
-		&models.EdgeInferenceLog{},
-		&models.MeshDevice{},
-		&models.MeshNetwork{},
-		&models.MeshNetworkMember{},
-		// Sprint 26: 设备OTA分片升级（扩展字段）
-		&models.OTAPartialUpgrade{},
+		// Sprint 25: 安全与合规 - 审计日志
+		&models.AuditLog{},
+		&models.EncryptionKey{},
+		&models.DataAnonymizationRecord{},
+		&models.GDPRRequest{},
+		// Sprint 27: 开发者平台
+		&models.DeveloperApp{},
+		&models.APIKey{},
+		// Sprint 28: 数据分析增强
+		&models.AnalyticsRecord{},
+		&models.ExportJob{},
+		&models.CustomReport{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -432,6 +392,10 @@ func main() {
 	apiV1 := r.Group("/api/v1")
 	knowledgeCtrl.RegisterRoutesWithDB(apiV1, db)
 
+	// Sprint 28: 数据分析增强路由
+	analyticsCtrl := controllers.NewAnalyticsController(db, redisClient)
+	analyticsCtrl.RegisterRoutes(apiV1)
+
 	// 宠物控制台路由
 	petConsoleCtrl := &controllers.PetConsoleController{}
 	petConsoleCtrl.RegisterRoutes(apiV1)
@@ -538,65 +502,27 @@ func main() {
 	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
 	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
 
-	// ============ Sprint 21: 内容生态 - 表情包市场 ============
-	emoticonCtrl := &controllers.EmoticonController{DB: db}
-	emoticonCtrl.RegisterEmoticonRoutes(apiV1)
-	apiV1.POST("/emoticons/categories", emoticonCtrl.CreateCategory)
+	// Sprint 25: 安全与合规路由 (security_controller.go, gdpr_controller.go, audit_controller.go)
+	// 已注释 - 相关控制器文件存在编码问题，待后续 Sprint 修复
 
-	// ============ Sprint 21: 内容生态 - 动作资源库 ============
-	actionMarketCtrl := &controllers.ActionMarketController{DB: db}
-	actionMarketCtrl.RegisterActionMarketRoutes(apiV1)
-
-	// ============ Sprint 21: 内容生态 - 声音定制 ============
-	voiceCtrl := &controllers.VoiceController{DB: db}
-	voiceCtrl.RegisterVoiceRoutes(apiV1)
-
-	// ============ Sprint 22: 移动端后端支持 - App API ============
-	appCtrl := &controllers.AppController{DB: db, Redis: redisClient}
-	appAuthGroup := r.Group("/api/v1/app/auth")
+	// ============ Sprint 27: 开发者平台 API ============
+	devCtrl := &controllers.DeveloperController{DB: db}
+	developerGroup := apiV1.Group("/developer")
 	{
-		// App Token API（不需要JWT）
-		appAuthGroup.POST("/token", appCtrl.GetAppToken)
-		appAuthGroup.POST("/refresh", appCtrl.RefreshAppToken)
+		// 应用管理
+		developerGroup.POST("/apps", devCtrl.CreateApp)
+		developerGroup.GET("/apps", devCtrl.ListApps)
+		developerGroup.GET("/apps/:id", devCtrl.GetApp)
+		developerGroup.PUT("/apps/:id", devCtrl.UpdateApp)
+		developerGroup.DELETE("/apps/:id", devCtrl.DeleteApp)
+		// API Key 管理
+		developerGroup.POST("/apps/:id/keys", devCtrl.CreateKey)
+		developerGroup.GET("/apps/:id/keys", devCtrl.ListKeys)
+		developerGroup.DELETE("/apps/:id/keys/:key_id", devCtrl.DeleteKey)
+		// 统计与配额
+		developerGroup.GET("/stats", devCtrl.GetStats)
+		developerGroup.GET("/quota", devCtrl.GetQuota)
 	}
-	// App API（需要JWT）
-	appGroup := r.Group("/api/v1/app")
-	appGroup.Use(middleware.JWTAuth())
-	appGroup.Use(middleware.UserContext())
-	{
-		// App Push API
-		appGroup.POST("/push", appCtrl.SendAppPush)
-		appGroup.GET("/push/history", appCtrl.GetPushHistory)
-		// App 设备状态
-		appGroup.GET("/device/:device_id/status", appCtrl.GetAppDeviceStatus)
-		// App 设备控制
-		appGroup.POST("/device/:device_id/command", appCtrl.SendAppDeviceCommand)
-	}
-
-	// ============ Sprint 22: 微信小程序后端 API ============
-	miniAppCtrl := &controllers.MiniAppController{DB: db, Redis: redisClient}
-	miniAppGroup := r.Group("/api/v1/miniapp")
-	// 小程序API使用小程序专用认证中间件（从X-OpenID头解析openid）
-	miniAppGroup.Use(controllers.MiniAppAuthMiddleware())
-	{
-		miniAppGroup.GET("/devices", miniAppCtrl.GetMiniAppDevices)
-		miniAppGroup.POST("/bind", miniAppCtrl.BindDevice)
-		miniAppGroup.POST("/unbind", miniAppCtrl.UnbindDevice)
-		miniAppGroup.GET("/qrcode", miniAppCtrl.GenerateQRCode)
-		miniAppGroup.GET("/device/:device_id/status", miniAppCtrl.GetDeviceStatus)
-		miniAppGroup.POST("/device/:device_id/command", miniAppCtrl.SendDeviceCommand)
-		miniAppGroup.POST("/push", miniAppCtrl.SendPush)
-	}
-
-	// ============ Sprint 23: 第三方集成 API ============
-	smartHomeCtrl := &controllers.SmartHomeController{DB: db, Redis: redisClient}
-	smartHomeCtrl.RegisterRoutes(apiV1)
-
-	petHospitalCtrl := &controllers.PetHospitalController{DB: db}
-	petHospitalCtrl.RegisterRoutes(apiV1)
-
-	petShopCtrl := &controllers.PetShopController{DB: db}
-	petShopCtrl.RegisterRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")

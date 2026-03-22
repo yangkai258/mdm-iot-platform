@@ -58,6 +58,7 @@ type AppRefreshToken struct {
 	ExpiresAt    time.Time  `json:"expires_at"` // 刷新Token有效期（通常7天）
 	RevokedAt    *time.Time `json:"revoked_at"`
 	IsActive     bool       `gorm:"default:true" json:"is_active"`
+	RefreshCount int        `gorm:"default:0" json:"refresh_count"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
 }

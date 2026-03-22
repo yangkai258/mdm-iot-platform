@@ -132,11 +132,6 @@ func main() {
 		// Sprint 12: 数据权限表
 		&models.DataPermissionRule{},
 		&models.UserDataPermission{},
-		// Sprint 25: 安全与合规 - 审计日志
-		&models.AuditLog{},
-		&models.EncryptionKey{},
-		&models.DataAnonymizationRecord{},
-		&models.GDPRRequest{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -490,33 +485,6 @@ func main() {
 	apiV1.PUT("/data-permissions/users/:user_id", dataPermCtrl.UpdateUserDataPermissions)
 	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
 	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
-
-	// ============ Sprint 25: 安全与合规 - 加密 API ============
-	securityCtrl := &controllers.SecurityController{DB: db}
-	apiV1.POST("/security/encrypt", securityCtrl.Encrypt)
-	apiV1.POST("/security/decrypt", securityCtrl.Decrypt)
-	apiV1.POST("/security/keys/rotate", securityCtrl.RotateKey)
-	apiV1.GET("/security/keys", securityCtrl.GetKeyInfo)
-
-	// Sprint 25: 安全与合规 - 数据脱敏 API ============
-	apiV1.POST("/security/anonymize", securityCtrl.AnonymizeData)
-	apiV1.GET("/security/export", securityCtrl.ExportAnonymizedData)
-
-	// ============ Sprint 25: 安全与合规 - 合规 API ============
-	gdprCtrl := &controllers.ComplianceController{DB: db}
-	apiV1.GET("/compliance/gdpr/data", gdprCtrl.GetGDPRData)
-	apiV1.POST("/compliance/gdpr/delete", gdprCtrl.DeleteGDPRData)
-	apiV1.GET("/compliance/export", gdprCtrl.GetGDPRDataExport)
-	apiV1.GET("/compliance/gdpr/requests", gdprCtrl.GetGDPRRequests)
-	apiV1.GET("/compliance/gdpr/requests/:id", gdprCtrl.GetGDPRRequest)
-	apiV1.POST("/compliance/gdpr/requests/:id/process", gdprCtrl.ProcessGDPRRequest)
-
-	// ============ Sprint 25: 安全与合规 - 审计日志 API ============
-	auditCtrl := &controllers.AuditController{DB: db}
-	apiV1.GET("/audit/logs", auditCtrl.GetAuditLogs)
-	apiV1.GET("/audit/logs/:id", auditCtrl.GetAuditLog)
-	apiV1.GET("/audit/statistics", auditCtrl.GetAuditStatistics)
-	apiV1.GET("/audit/logs/export", auditCtrl.ExportAuditLogs)
 
 	// 获取端口
 	port := os.Getenv("PORT")
