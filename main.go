@@ -144,6 +144,8 @@ func main() {
 		&models.AnalyticsRecord{},
 		&models.ExportJob{},
 		&models.CustomReport{},
+		// Sprint 30: 性能优化
+		&models.PerformanceMetric{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -395,6 +397,11 @@ func main() {
 	// Sprint 28: 数据分析增强路由
 	analyticsCtrl := controllers.NewAnalyticsController(db, redisClient)
 	analyticsCtrl.RegisterRoutes(apiV1)
+
+	// ============ Sprint 30: 性能优化路由 ============
+	perfCtrl := &controllers.PerformanceController{DB: db, Redis: redisClient}
+	perfGroup := apiV1.Group("/performance")
+	perfCtrl.RegisterPerformanceRoutes(perfGroup)
 
 	// 宠物控制台路由
 	petConsoleCtrl := &controllers.PetConsoleController{}
