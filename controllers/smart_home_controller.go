@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -72,7 +73,7 @@ func (s *SmartHomeController) RegisterDevice(c *gin.Context) {
 		IsEnabled:      true,
 		HouseholdID:    req.HouseholdID,
 		OwnerID:        userID,
-		TenantID:       tenantID,
+		TenantID:       fmt.Sprintf("%d", tenantID),
 	}
 
 	if device.Brand == "" {
@@ -309,7 +310,7 @@ func (s *SmartHomeController) TriggerDevice(c *gin.Context) {
 			ActionExpr:   string(newStatusJSON),
 			TriggerCount: 1,
 			OwnerID:      userID,
-			TenantID:     tenantID,
+			TenantID:     fmt.Sprintf("%d", tenantID),
 		}
 		now := time.Now()
 		trigger.LastTriggered = &now
@@ -442,7 +443,7 @@ func (s *SmartHomeController) CreateTrigger(c *gin.Context) {
 		IsEnabled:     true,
 		HouseholdID:   req.HouseholdID,
 		OwnerID:      userID,
-		TenantID:     tenantID,
+		TenantID:     fmt.Sprintf("%d", tenantID),
 	}
 
 	if err := s.DB.Create(&trigger).Error; err != nil {

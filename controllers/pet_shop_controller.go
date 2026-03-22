@@ -305,7 +305,7 @@ func (p *PetShopController) CreateOrder(c *gin.Context) {
 		Items:          string(itemsJSON),
 		HouseholdID:    req.HouseholdID,
 		OwnerID:        userID,
-		TenantID:       tenantID,
+		TenantID:       fmt.Sprintf("%d", tenantID),
 	}
 
 	if order.PayMethod == "" {

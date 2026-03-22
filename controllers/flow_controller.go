@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -51,16 +52,6 @@ type RejectTaskRequest struct {
 	Remark string `json:"remark" binding:"required"`
 }
 
-// getTenantIDFromContext 从上下文获取租户ID
-func getTenantIDFromContext(c *gin.Context) string {
-	if tid, ok := c.Get("tenant_id"); ok {
-		if tids, ok := tid.(string); ok {
-			return tids
-		}
-	}
-	return ""
-}
-
 // CreateDefinition 创建流程定义
 // POST /api/v1/flow/definitions
 func (fc *FlowController) CreateDefinition(c *gin.Context) {
@@ -71,7 +62,7 @@ func (fc *FlowController) CreateDefinition(c *gin.Context) {
 	}
 
 	tenantID := getTenantIDFromContext(c)
-	def, err := fc.Engine.CreateFlowDefinition(req.Name, req.Description, req.Nodes, tenantID)
+	def, err := fc.Engine.CreateFlowDefinition(req.Name, req.Description, req.Nodes, fmt.Sprintf("%d", tenantID))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "创建失败: " + err.Error()})
 		return
@@ -84,7 +75,7 @@ func (fc *FlowController) CreateDefinition(c *gin.Context) {
 // GET /api/v1/flow/definitions
 func (fc *FlowController) ListDefinitions(c *gin.Context) {
 	tenantID := getTenantIDFromContext(c)
-	defs, err := fc.Engine.GetFlowDefinitions(tenantID)
+	defs, err := fc.Engine.GetFlowDefinitions(fmt.Sprintf("%d", tenantID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
 		return
@@ -111,7 +102,7 @@ func (fc *FlowController) StartInstance(c *gin.Context) {
 		formData = b
 	}
 
-	instance, err := fc.Engine.StartInstance(req.FlowDefinitionID, userID, tenantID, req.BusinessKey, req.BusinessType, formData)
+	instance, err := fc.Engine.StartInstance(req.FlowDefinitionID, userID, fmt.Sprintf("%d", tenantID), req.BusinessKey, req.BusinessType, formData)
 	if err != nil {
 		if err == services.ErrFlowNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "流程定义不存在"})
@@ -181,7 +172,7 @@ func (fc *FlowController) ListPendingTasks(c *gin.Context) {
 	userID := getUserIDFromContext(c)
 	tenantID := getTenantIDFromContext(c)
 
-	tasks, err := fc.Engine.GetPendingTasks(userID, tenantID)
+	tasks, err := fc.Engine.GetPendingTasks(userID, fmt.Sprintf("%d", tenantID))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
 		return

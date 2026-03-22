@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -73,7 +74,7 @@ func (p *PetHospitalController) CreateAppointment(c *gin.Context) {
 		Status:         "pending",
 		HouseholdID:    req.HouseholdID,
 		OwnerID:        userID,
-		TenantID:       tenantID,
+		TenantID:       fmt.Sprintf("%d", tenantID),
 	}
 
 	if err := p.DB.Create(&appointment).Error; err != nil {
