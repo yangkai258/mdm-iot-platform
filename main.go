@@ -91,6 +91,11 @@ func main() {
 		&models.MemberOperationRecord{},
 		&models.TempMember{},
 
+		// 具身智能表
+		&models.EmbodiedAIState{},
+		&models.ExplorationSession{},
+		&models.EnvironmentMap{},
+
 		// 应用管理表
 		&models.App{},
 		&models.AppVersion{},
@@ -192,6 +197,17 @@ func main() {
 		&models.RTOSTask{},
 		&models.DevicePerformanceHistory{},
 		&models.FirmwareOptimizationConfig{},
+		// 宠物寻回网络
+		&models.PetLostReport{},
+		&models.SightingReport{},
+		&models.FinderAlert{},
+		// 家庭模式：儿童模式和老人陪伴模式
+		&models.ChildrenProfile{},
+		&models.ContentFilterRule{},
+		&models.UsageLimit{},
+		&models.ElderlyProfile{},
+		&models.HealthMonitorSetting{},
+		&models.ElderlyReminder{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -457,9 +473,17 @@ func main() {
 	petConsoleCtrl := &controllers.PetConsoleController{}
 	petConsoleCtrl.RegisterRoutes(apiV1)
 
+	// 宠物寻回网络路由
+	petFinderCtrl := &controllers.PetFinderCtrl{DB: db}
+	petFinderCtrl.RegisterPetFinderRoutes(apiV1)
+
 	// ============ Sprint 34: 保险理赔对接 ============
 	insuranceCtrl := &controllers.InsuranceController{DB: db}
 	insuranceCtrl.RegisterInsuranceRoutes(apiV1)
+
+	// ============ 家庭模式：儿童模式 + 老人陪伴模式 ============
+	familyModeCtrl := &controllers.FamilyModeController{DB: db}
+	familyModeCtrl.RegisterFamilyModeRoutes(apiV1)
 
 	// MiniClaw路由
 	miniClawCtrl := &controllers.MiniClawController{}
@@ -477,6 +501,23 @@ func main() {
 	// AI训练任务路由
 	aiTrainingCtrl := controllers.NewAITrainingController(db)
 	aiTrainingCtrl.RegisterRoutes(apiV1)
+
+	// ============ Sprint 36: 具身智能 ============
+	// 具身智能路由
+	embodiedAIController := controllers.NewEmbodiedAIController(db)
+	embodiedAIGroup := apiV1.Group("/ai/embodied")
+	{
+		embodiedAIGroup.POST("/perceive", embodiedAIController.Perceive)
+		embodiedAIGroup.POST("/spatial", embodiedAIController.Spatial)
+		embodiedAIGroup.POST("/explore", embodiedAIController.Explore)
+		embodiedAIGroup.POST("/interact", embodiedAIController.Interact)
+		embodiedAIGroup.GET("/state", embodiedAIController.GetState)
+		embodiedAIGroup.GET("/capabilities", embodiedAIController.GetCapabilities)
+		// 探索会话管理
+		embodiedAIGroup.GET("/explore/sessions", embodiedAIController.ListExplorationSessions)
+		embodiedAIGroup.GET("/explore/sessions/:id", embodiedAIController.GetExplorationSession)
+		embodiedAIGroup.POST("/explore/sessions/:id/stop", embodiedAIController.StopExplorationSession)
+	}
 
 	// ============ Sprint 33: 模型分片加载 ============
 	// 模型分片管理路由
