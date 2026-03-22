@@ -460,14 +460,14 @@ CREATE TABLE long_term_memory (
 
 ### 后端任务分配
 
-| 任务 | 负责人 |
-|------|--------|
-| 宠物状态 + 消息API | agenthd |
-| MQTT动作下发 + 状态处理 | agenthd |
-| 行为引擎API | agenthd |
-| 记忆库API | agenthd |
-| WebSocket实现 | agenthd |
-| 数据库表创建 | agenthd |
+| 任务 | 负责人 | 完成 |
+|------|--------|------|
+| 宠物状态 + 消息API | agenthd | 2026-03-23 |
+| MQTT动作下发 + 状态处理 | agenthd | 2026-03-23 |
+| 行为引擎API | agenthd | 2026-03-23 |
+| 记忆库API | agenthd | 2026-03-23 |
+| WebSocket实现 | agenthd | 2026-03-23 |
+| 数据库表创建 | agenthd | 2026-03-23 |
 
 ### 前端任务分配
 
@@ -491,16 +491,16 @@ CREATE TABLE long_term_memory (
 
 ## 十一、Sprint 9 完成清单
 
-- [ ] pet_status 表创建
-- [ ] conversations + messages 表创建
-- [ ] action_library + decision_rules 表创建
-- [ ] short_term_memory + long_term_memory 表创建
-- [ ] GET /api/v1/pets/{device_id}/status API
-- [ ] POST /api/v1/pets/{device_id}/messages API
-- [ ] POST /api/v1/pets/{device_id}/actions API
-- [ ] MQTT /down/action 下发实现
-- [ ] MQTT /up/status 处理实现
-- [ ] WebSocket 实时推送
+- [x] pet_status 表创建
+- [x] conversations + messages 表创建
+- [x] action_library + decision_rules 表创建
+- [x] short_term_memory + long_term_memory 表创建
+- [x] GET /api/v1/pets/{device_id}/status API
+- [x] POST /api/v1/pets/{device_id}/messages API
+- [x] POST /api/v1/pets/{device_id}/actions API
+- [x] MQTT /down/action 下发实现
+- [x] MQTT /up/status 处理实现
+- [x] WebSocket 实时推送
 - [x] PetConsoleView.vue 主页面
 - [x] ChatArea.vue + ChatMessage.vue
 - [x] PetStatusCard.vue + QuickActions.vue
