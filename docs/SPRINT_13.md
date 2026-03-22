@@ -34,12 +34,12 @@
 
 | # | 任务 | 说明 | 交付物 | 优先级 |
 |---|------|------|--------|--------|
-| PF0-1 | **数据驻留配置页面** | 完成 DataResidencyView.vue 数据驻留规则配置 | DataResidencyView.vue | P0 |
-| PF0-2 | **时区设置页面** | 完成 TimezoneSettingsView.vue 用户/组织时区设置 | TimezoneSettingsView.vue | P0 |
-| PF0-3 | **区域管理页面** | 完成 RegionManageView.vue 区域配置和管理 | RegionManageView.vue | P0 |
-| PF1-1 | **区域 AI 节点监控** | 完成 RegionalAINodeView.vue 区域 AI 节点状态 | RegionalAINodeView.vue | P1 |
-| PF1-2 | **跨区域数据同步状态** | 完成 RegionSyncStatusView.vue 同步状态展示 | RegionSyncStatusView.vue | P1 |
-| PF2-1 | **全球化设置概览** | 完成 GlobalizationSettingsView.vue 一站式配置 | GlobalizationSettingsView.vue | P2 |
+| PF0-1 | **数据驻留配置页面** | 完成 DataResidencyView.vue 数据驻留规则配置 | DataResidencyView.vue | P0 | ✅ 完成 |
+| PF0-2 | **时区设置页面** | 完成 TimezoneSettingsView.vue 用户/组织时区设置 | TimezoneSettingsView.vue | P0 | ✅ 完成 |
+| PF0-3 | **区域管理页面** | 完成 RegionManageView.vue 区域配置和管理 | RegionManageView.vue | P0 | ✅ 完成 |
+| PF1-1 | **区域 AI 节点监控** | 完成 RegionalAINodeView.vue 区域 AI 节点状态 | RegionalAINodeView.vue | P1 | ✅ 完成 |
+| PF1-2 | **跨区域数据同步状态** | 完成 RegionSyncStatusView.vue 同步状态展示 | RegionSyncStatusView.vue | P1 | ✅ 完成 |
+| PF2-1 | **全球化设置概览** | 完成 GlobalizationSettingsView.vue 一站式配置 | GlobalizationSettingsView.vue | P2 | ✅ 完成 |
 
 ---
 

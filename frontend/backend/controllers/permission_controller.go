@@ -1,0 +1,124 @@
+package controllers
+
+import (
+	"net/http"
+
+	"mdm-backend/models"
+
+	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+)
+
+// PermissionController 权限管理控制器
+type PermissionController struct {
+	DB *gorm.DB
+}
+
+// List 权限列表
+func (c *PermissionController) List(ctx *gin.Context) {
+	var permissions []models.SysPermission
+	
+	query := c.DB.Model(&models.SysPermission{})
+	
+	if parentID := ctx.Query("parent_id"); parentID != "" {
+		query = query.Where("parent_id = ?", parentID)
+	}
+	
+	if keyword := ctx.Query("keyword"); keyword != "" {
+		query = query.Where("name LIKE ? OR code LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+	}
+	
+	if err := query.Order("sort ASC, id ASC").Find(&permissions).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+	
+	// 构建树形结构
+	tree := buildPermTree(permissions, 0)
+	
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": tree})
+}
+
+func buildPermTree(perms []models.SysPermission, parentID uint) []map[string]interface{} {
+	var tree []map[string]interface{}
+	for _, p := range perms {
+		if p.ParentID == parentID {
+			node := map[string]interface{}{
+				"id":         p.ID,
+				"name":       p.Name,
+				"code":       p.Code,
+				"type":       p.Type,
+				"path":       p.Path,
+				"icon":       p.Icon,
+				"sort":       p.Sort,
+				"visible":    p.Visible,
+				"permission": p.Permission,
+				"status":     p.Status,
+			}
+			children := buildPermTree(perms, p.ID)
+			if len(children) > 0 {
+				node["children"] = children
+			}
+			tree = append(tree, node)
+		}
+	}
+	return tree
+}
+
+// Create 创建权限
+func (c *PermissionController) Create(ctx *gin.Context) {
+	var perm models.SysPermission
+	if err := ctx.ShouldBindJSON(&perm); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+	
+	if err := c.DB.Create(&perm).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
+		return
+	}
+	
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": perm})
+}
+
+// Update 更新权限
+func (c *PermissionController) Update(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var perm models.SysPermission
+	if err := c.DB.First(&perm, id).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "权限不存在"})
+		return
+	}
+	
+	if err := ctx.ShouldBindJSON(&perm); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+	
+	if err := c.DB.Save(&perm).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败"})
+		return
+	}
+	
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": perm})
+}
+
+// Delete 删除权限
+func (c *PermissionController) Delete(ctx *gin.Context) {
+	id := ctx.Param("id")
+	
+	// 检查是否有子权限
+	var count int64
+	c.DB.Model(&models.SysPermission{}).Where("parent_id = ?", id).Count(&count)
+	if count > 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "请先删除子权限"})
+		return
+	}
+	
+	if err := c.DB.Delete(&models.SysPermission{}, id).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "删除失败"})
+		return
+	}
+	
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
+}

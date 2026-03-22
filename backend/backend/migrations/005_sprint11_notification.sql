@@ -1,0 +1,61 @@
+-- Sprint 11: 通知服务相关表
+-- 执行方式: psql -U postgres -d mdm_db -f 005_sprint11_notification.sql
+
+-- 通知日志表（已通过 GORM AutoMigrate 创建，此处记录建表语句供参考）
+-- CREATE TABLE IF NOT EXISTS notification_logs (
+--     id              BIGSERIAL PRIMARY KEY,
+--     channel_id      BIGINT,
+--     channel_type    VARCHAR(20) NOT NULL,
+--     alert_id        BIGINT,
+--     recipient       VARCHAR(256),
+--     subject         VARCHAR(256),
+--     content         TEXT,
+--     status          VARCHAR(20) NOT NULL DEFAULT 'pending',
+--     retry_count     INT DEFAULT 0,
+--     error_code      VARCHAR(50),
+--     error_msg       VARCHAR(512),
+--     sent_at         TIMESTAMP,
+--     tenant_id       UUID,
+--     created_at      TIMESTAMP DEFAULT NOW(),
+--     INDEX idx_channel_type_status (channel_type, status),
+--     INDEX idx_alert_id (alert_id),
+--     INDEX idx_created_at (created_at DESC)
+-- );
+
+-- 告警历史表（已通过 GORM AutoMigrate 创建，此处记录建表语句供参考）
+-- CREATE TABLE IF NOT EXISTS alert_history (
+--     id                  BIGSERIAL PRIMARY KEY,
+--     original_id         BIGINT NOT NULL,
+--     rule_id             BIGINT,
+--     device_id           VARCHAR(64) NOT NULL,
+--     alert_type          VARCHAR(50) NOT NULL,
+--     severity            INT NOT NULL,
+--     message             TEXT,
+--     trigger_value       VARCHAR(100),
+--     threshold           VARCHAR(100),
+--     status              INT NOT NULL,
+--     notified_channels   JSONB,
+--     confirmed_at        TIMESTAMP,
+--     confirmed_by        BIGINT,
+--     resolved_at         TIMESTAMP,
+--     resolved_by         BIGINT,
+--     resolve_remark      TEXT,
+--     created_at          TIMESTAMP NOT NULL,
+--     resolved_at_h       TIMESTAMP,
+--     archived_at         TIMESTAMP DEFAULT NOW(),
+--     tenant_id           UUID,
+--     INDEX idx_device_id (device_id),
+--     INDEX idx_alert_type (alert_type),
+--     INDEX idx_created_at (created_at DESC)
+-- );
+
+-- 向 notification_channels 表添加新字段（Sprint 11 扩展）
+-- ALTER TABLE notification_channels ADD COLUMN IF NOT EXISTS priority INT DEFAULT 0;
+-- ALTER TABLE notification_channels ADD COLUMN IF NOT EXISTS health_status VARCHAR(20) DEFAULT 'unknown';
+-- ALTER TABLE notification_channels ADD COLUMN IF NOT EXISTS last_checked_at TIMESTAMP;
+-- ALTER TABLE notification_channels ADD COLUMN IF NOT EXISTS tenant_id UUID;
+-- ALTER TABLE notification_channels ADD COLUMN IF NOT EXISTS created_by BIGINT;
+-- CREATE INDEX IF NOT EXISTS idx_notification_channels_tenant_id ON notification_channels(tenant_id);
+
+-- 通知模板扩展（使用现有的 notification_templates 表）
+-- 如需新增字段可通过 ALTER TABLE 添加

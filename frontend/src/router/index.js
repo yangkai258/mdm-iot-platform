@@ -359,6 +359,44 @@ const routes = [
     name: 'UserSync',
     component: () => import('../views/security/UserSyncView.vue'),
     meta: { title: '用户同步' }
+  },
+
+  // ============ Sprint 13: 全球化设置 ============
+  {
+    path: '/globalization',
+    name: 'GlobalizationSettings',
+    component: () => import('../views/globalization/GlobalizationSettingsView.vue'),
+    meta: { title: '全球化设置' }
+  },
+  {
+    path: '/globalization/region',
+    name: 'RegionManage',
+    component: () => import('../views/globalization/RegionManageView.vue'),
+    meta: { title: '区域管理' }
+  },
+  {
+    path: '/globalization/timezone',
+    name: 'TimezoneSettings',
+    component: () => import('../views/globalization/TimezoneSettingsView.vue'),
+    meta: { title: '时区设置' }
+  },
+  {
+    path: '/globalization/data-residency',
+    name: 'DataResidency',
+    component: () => import('../views/globalization/DataResidencyView.vue'),
+    meta: { title: '数据驻留规则' }
+  },
+  {
+    path: '/globalization/ai-node',
+    name: 'RegionalAINode',
+    component: () => import('../views/globalization/RegionalAINodeView.vue'),
+    meta: { title: '区域AI节点' }
+  },
+  {
+    path: '/globalization/sync-status',
+    name: 'RegionSyncStatus',
+    component: () => import('../views/globalization/RegionSyncStatusView.vue'),
+    meta: { title: '跨区域同步状态' }
   }
 ]
 

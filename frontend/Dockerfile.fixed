@@ -1,0 +1,27 @@
+# Single-stage build using cached golang:1.21-alpine with GOTOOLCHAIN=auto
+FROM golang:1.21-alpine
+
+WORKDIR /app
+
+# Install git for go mod, and ca-certificates/curl for healthcheck
+RUN apk add --no-cache git ca-certificates curl
+
+# Set GOTOOLCHAIN=auto to automatically download required Go version
+ENV GOTOOLCHAIN=auto
+
+# Copy go mod files first for caching
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY . .
+
+# Build for Linux
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o mdm-server .
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+CMD ["./mdm-server"]
