@@ -399,26 +399,6 @@ const routes = [
     meta: { title: '跨区域同步状态' }
   },
 
-  // ============ Sprint 10: 设备监控 ============
-  {
-    path: '/monitor/dashboard',
-    name: 'DeviceDashboard',
-    component: () => import('../views/monitor/DeviceDashboard.vue'),
-    meta: { title: '设备监控面板' }
-  },
-  {
-    path: '/monitor/logs',
-    name: 'DeviceLogs',
-    component: () => import('../views/monitor/DeviceLogs.vue'),
-    meta: { title: '设备日志' }
-  },
-  {
-    path: '/monitor/debug',
-    name: 'RemoteDebug',
-    component: () => import('../views/monitor/RemoteDebug.vue'),
-    meta: { title: '远程调试' }
-  },
-
   // ============ Sprint 14: AI 行为监控 ============
   {
     path: '/ai/quality-dashboard',
@@ -457,68 +437,30 @@ const routes = [
     meta: { title: '模型发布工作流' }
   },
 
-  // ============ Sprint 15: 宠物管理 ============
+  // ============ Sprint 17: 宠物情绪识别和响应 ============
   {
-    path: '/pet/register',
-    name: 'PetRegistration',
-    component: () => import('../views/pet/PetRegistrationView.vue'),
-    meta: { title: '宠物登记' }
+    path: '/emotion/recognize',
+    name: 'EmotionRecognize',
+    component: () => import('../views/emotion/EmotionRecognizeView.vue'),
+    meta: { title: '情绪识别配置' }
   },
   {
-    path: '/pet/list',
-    name: 'PetList',
-    component: () => import('../views/pet/PetListView.vue'),
-    meta: { title: '我的宠物' }
+    path: '/emotion/logs',
+    name: 'EmotionLog',
+    component: () => import('../views/emotion/EmotionLogView.vue'),
+    meta: { title: '情绪日志' }
   },
   {
-    path: '/pet/detail/:pet_id',
-    name: 'PetDetail',
-    component: () => import('../views/pet/PetDetailView.vue'),
-    meta: { title: '宠物详情' }
+    path: '/emotion/response-config',
+    name: 'EmotionResponseConfig',
+    component: () => import('../views/emotion/EmotionResponseConfigView.vue'),
+    meta: { title: '响应配置' }
   },
   {
-    path: '/pet/lost-found',
-    name: 'LostFound',
-    component: () => import('../views/pet/LostFoundView.vue'),
-    meta: { title: '寻回网络' }
-  },
-  {
-    path: '/pet/household',
-    name: 'MultiPetManage',
-    component: () => import('../views/pet/MultiPetManageView.vue'),
-    meta: { title: '家庭宠物管理' }
-  },
-
-  // ============ Sprint 16: 订阅计费 ============
-  {
-    path: '/billing/plans',
-    name: 'SubscriptionPlans',
-    component: () => import('../views/billing/SubscriptionPlansView.vue'),
-    meta: { title: '订阅计划' }
-  },
-  {
-    path: '/billing/subscription',
-    name: 'SubscriptionManage',
-    component: () => import('../views/billing/SubscriptionManageView.vue'),
-    meta: { title: '我的订阅' }
-  },
-  {
-    path: '/billing/usage',
-    name: 'UsageQuery',
-    component: () => import('../views/billing/UsageQueryView.vue'),
-    meta: { title: '用量查询' }
-  },
-  {
-    path: '/billing/invoice',
-    name: 'InvoiceBilling',
-    component: () => import('../views/billing/InvoiceBillingView.vue'),
-    meta: { title: '发票管理' }
-  },
-  {
-    path: '/billing/webhook',
-    name: 'WebhookConfig',
-    component: () => import('../views/billing/WebhookConfigView.vue'),
-    meta: { title: 'Webhook配置' }
+    path: '/emotion/reports',
+    name: 'EmotionReport',
+    component: () => import('../views/emotion/EmotionReportView.vue'),
+    meta: { title: '情绪报告' }
   }
 ]
 
