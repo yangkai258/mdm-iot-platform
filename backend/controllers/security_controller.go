@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -63,7 +62,7 @@ func (c *SecurityController) AnonymizeData(ctx *gin.Context) {
 		return
 	}
 
-	startTime := time.Now()
+	_ = time.Now() // start time for potential logging
 	userID, _ := ctx.Get("user_id")
 	uid, _ := userID.(uint)
 
@@ -353,7 +352,7 @@ func (c *SecurityController) RotateKey(ctx *gin.Context) {
 	newKeyHex := hex.EncodeToString(newKeyBytes)
 
 	// 加密新密钥（使用主密钥加密后存储）
-	primaryKey := getPrimaryKey()
+	_ = getPrimaryKey() // primaryKey for potential future use
 	encryptedKey, _ := utils.EncryptAES(newKeyHex)
 
 	// 将旧密钥标记为已轮换

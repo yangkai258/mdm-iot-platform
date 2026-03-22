@@ -275,7 +275,7 @@ type GenerateQRCodeRequest struct {
 // GenerateQRCode 生成设备绑定二维码
 // GET /api/v1/miniapp/qrcode?device_id=xxx
 func (c *MiniAppController) GenerateQRCode(ctx *gin.Context) {
-	deviceID := ctx.GetQuery("device_id")
+	deviceID, _ := ctx.GetQuery("device_id")
 	if deviceID == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "device_id不能为空"})
 		return
@@ -323,6 +323,7 @@ func (c *MiniAppController) GenerateQRCode(ctx *gin.Context) {
 		"expires_at":     expiresAt,
 		"expire_seconds": expiresMinutes * 60,
 	}
+	_ = qrContent // suppress unused warning
 
 	// TODO: 实际应调用微信API生成小程序码
 	// 微信通过 /cgi-bin/wxaapp/createwxaqrcode 生成小程序码

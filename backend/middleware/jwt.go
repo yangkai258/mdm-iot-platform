@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,33 +31,43 @@ func LoadConfig(configPath string) (*Config, error) {
 	return &cfg, nil
 }
 
-var jwtSecret = []byte(getJWTSecret())
+var jwtSecret []byte
+var jwtSecretOnce sync.Once
+var jwtSecretErr error
 
-// getJWTSecret 从配置文件或环境变量获取 JWT 密钥
+// getJWTSecret 从配置文件或环境变量获取 JWT 密钥（延迟初始化）
 func getJWTSecret() string {
-	// 优先从配置文件读取
-	configPaths := []string{
-		"config.json",
-		"../config.json",
-		"../../config.json",
-		os.Getenv("CONFIG_PATH"),
-	}
-
-	for _, path := range configPaths {
-		if path == "" {
-			continue
+	jwtSecretOnce.Do(func() {
+		// 优先从配置文件读取
+		configPaths := []string{
+			"config.json",
+			"../config.json",
+			"../../config.json",
+			os.Getenv("CONFIG_PATH"),
 		}
-		if cfg, err := LoadConfig(path); err == nil && cfg.JWTSecret != "" {
-			return cfg.JWTSecret
-		}
-	}
 
-	// 降级到环境变量
-	secret := os.Getenv("JWT_SECRET")
-	if secret == "" {
-		panic("JWT_SECRET environment variable is not set and no config file found")
+		for _, path := range configPaths {
+			if path == "" {
+				continue
+			}
+			if cfg, err := LoadConfig(path); err == nil && cfg.JWTSecret != "" {
+				jwtSecret = []byte(cfg.JWTSecret)
+				return
+			}
+		}
+
+		// 降级到环境变量
+		secret := os.Getenv("JWT_SECRET")
+		if secret == "" {
+			jwtSecretErr = errors.New("JWT_SECRET environment variable is not set and no config file found")
+			return
+		}
+		jwtSecret = []byte(secret)
+	})
+	if jwtSecretErr != nil {
+		panic(jwtSecretErr.Error())
 	}
-	return secret
+	return string(jwtSecret)
 }
 
 // JWTClaims JWT 载荷

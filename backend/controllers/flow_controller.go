@@ -51,16 +51,6 @@ type RejectTaskRequest struct {
 	Remark string `json:"remark" binding:"required"`
 }
 
-// getTenantIDFromContext 从上下文获取租户ID
-func getTenantIDFromContext(c *gin.Context) string {
-	if tid, ok := c.Get("tenant_id"); ok {
-		if tids, ok := tid.(string); ok {
-			return tids
-		}
-	}
-	return ""
-}
-
 // CreateDefinition 创建流程定义
 // POST /api/v1/flow/definitions
 func (fc *FlowController) CreateDefinition(c *gin.Context) {
