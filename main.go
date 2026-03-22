@@ -156,16 +156,36 @@ func main() {
 		&models.AIModelDeployHistory{},
 		&models.AIInference{},
 		&models.AITraining{},
+		// Sprint 35: AI 伦理与公平性
+		&models.FairnessTest{},
+		&models.BiasDetection{},
+		&models.FairnessMetrics{},
+		&models.AIAuditLog{},
+		&models.AIAuditReport{},
 		// Sprint 33: 模型分片加载
 		&models.ModelShard{},
 		&models.ModelVersion{},
 		&models.DeployShardedModel{},
+		// Sprint 34+: 企业应用商店
+		&models.StoreApp{},
+		&models.StoreAppVersion{},
+		&models.StoreInstallation{},
+		&models.StoreReview{},
+		// Sprint 34: 保险理赔对接
+		&models.InsuranceProduct{},
+		&models.InsuranceClaim{},
+		&models.InsuranceClaimDocument{},
+		&models.PetHealthRecord{},
 		// Sprint 32: 高级安全功能 (暂未实现)
 		// &models.SecuritySession{},
 		// &models.TwoFactorAuth{},
 		// &models.LoginAttempt{},
 		// &models.SecurityAudit{},
 		// &models.SecurityReport{},
+		// DaaS 设备即服务
+		&models.DaaSContract{},
+		&models.DaaSDeviceRental{},
+		&models.DaaSBilling{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -427,6 +447,10 @@ func main() {
 	petConsoleCtrl := &controllers.PetConsoleController{}
 	petConsoleCtrl.RegisterRoutes(apiV1)
 
+	// ============ Sprint 34: 保险理赔对接 ============
+	insuranceCtrl := &controllers.InsuranceController{DB: db}
+	insuranceCtrl.RegisterInsuranceRoutes(apiV1)
+
 	// MiniClaw路由
 	miniClawCtrl := &controllers.MiniClawController{}
 	miniClawCtrl.RegisterRoutes(apiV1)
@@ -476,6 +500,11 @@ func main() {
 
 	// 模型回滚 /api/v1/ai/models/:id/rollback
 	apiV1.POST("/ai/models/:id/rollback", modelVersionCtrl.Rollback)
+
+	// ============ Sprint 35: AI 伦理与公平性 ============
+	// AI公平性测试路由
+	aiFairnessCtrl := controllers.NewAIFairnessController(db)
+	aiFairnessCtrl.RegisterRoutes(apiV1)
 
 	// 通知路由
 	notifCtrl := &controllers.NotificationController{DB: db}
@@ -601,6 +630,43 @@ func main() {
 		developerGroup.GET("/quota", devCtrl.GetQuota)
 	}
 
+	// ============ 企业应用商店 API ============
+	appStoreCtrl := &controllers.AppStoreController{DB: db, Redis: redisClient}
+	storeGroup := apiV1.Group("/store")
+	{
+		// 应用商店 - 应用管理
+		storeGroup.GET("/apps", appStoreCtrl.ListStoreApps)
+		storeGroup.POST("/apps", appStoreCtrl.CreateStoreApp)
+		storeGroup.GET("/apps/:id", appStoreCtrl.GetStoreApp)
+		storeGroup.PUT("/apps/:id", appStoreCtrl.UpdateStoreApp)
+		storeGroup.DELETE("/apps/:id", appStoreCtrl.DeleteStoreApp)
+		storeGroup.POST("/apps/:id/publish", appStoreCtrl.PublishStoreApp)
+		// 应用版本管理
+		storeGroup.POST("/apps/:id/versions", appStoreCtrl.CreateAppVersion)
+		storeGroup.GET("/apps/:id/versions", appStoreCtrl.ListAppVersions)
+		storeGroup.POST("/apps/:id/versions/:version_id/set-latest", appStoreCtrl.SetLatestVersion)
+		// 应用审核历史
+		storeGroup.GET("/apps/:id/reviews", appStoreCtrl.GetAppReviews)
+	}
+
+	// ============ 企业应用商店 - 安装管理 API ============
+	storeInstallGroup := apiV1.Group("/store/installations")
+	{
+		storeInstallGroup.GET("", appStoreCtrl.ListInstallations)
+		storeInstallGroup.POST("", appStoreCtrl.InstallApp)
+		storeInstallGroup.DELETE("/:id", appStoreCtrl.UninstallApp)
+		storeInstallGroup.GET("/:id/status", appStoreCtrl.GetInstallationStatus)
+		storeInstallGroup.PUT("/:id/status", appStoreCtrl.UpdateInstallationStatus)
+	}
+
+	// ============ 企业应用商店 - 审核管理 API ============
+	storeReviewGroup := apiV1.Group("/store/reviews")
+	{
+		storeReviewGroup.GET("", appStoreCtrl.ListReviews)
+		storeReviewGroup.POST("/:id/approve", appStoreCtrl.ApproveReview)
+		storeReviewGroup.POST("/:id/reject", appStoreCtrl.RejectReview)
+	}
+
 	// ============ Sprint 31: 国际化扩展 API ============
 	// 多语言翻译管理
 	i18nCtrl := &controllers.I18nController{DB: db}
@@ -693,6 +759,27 @@ func main() {
 		}
 		c.JSON(200, gin.H{"code": 0, "data": config})
 	})
+
+	// ============ DaaS 设备即服务 API ============
+	daasCtrl := &controllers.DaaSController{DB: db, Redis: redisClient}
+	daasGroup := apiV1.Group("/daas")
+	{
+		// 租赁合同管理
+		daasGroup.GET("/contracts", daasCtrl.ListContracts)
+		daasGroup.POST("/contracts", daasCtrl.CreateContract)
+		daasGroup.GET("/contracts/:id", daasCtrl.GetContract)
+		daasGroup.PUT("/contracts/:id", daasCtrl.UpdateContract)
+		daasGroup.POST("/contracts/:id/terminate", daasCtrl.TerminateContract)
+
+		// 设备租赁管理
+		daasGroup.GET("/devices", daasCtrl.ListDaasDevices)
+		daasGroup.POST("/devices/:device_id/rent", daasCtrl.RentDevice)
+		daasGroup.POST("/devices/:device_id/return", daasCtrl.ReturnDevice)
+
+		// 租赁账单
+		daasGroup.GET("/billing", daasCtrl.ListBillings)
+		daasGroup.POST("/billing/calculate", daasCtrl.CalculateBilling)
+	}
 
 	// 获取端口
 	port := os.Getenv("PORT")
