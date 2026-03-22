@@ -62,7 +62,7 @@ const routes = [
   {
     path: '/pet/console',
     name: 'PetConsole',
-    component: () => import('../views/pet/PetConsole.vue')
+    component: () => import('../views/pet/PetConsoleView.vue')
   },
   {
     path: '/pet/conversations',
@@ -129,90 +129,21 @@ const routes = [
     name: 'ComplianceRules',
     component: () => import('../views/policies/ComplianceRules.vue')
   },
-  // 会员管理 - 会员积分
+  // 会员管理
   {
     path: '/members/points',
     name: 'MemberPoints',
     component: () => import('../views/members/MemberPoints.vue')
   },
   {
-    path: '/members/points/rules',
-    name: 'PointsRules',
-    component: () => import('../views/members/PointsRules.vue')
-  },
-  {
-    path: '/members/points/inventory',
-    name: 'PointsInventory',
-    component: () => import('../views/members/PointsInventory.vue')
-  },
-  {
-    path: '/members/points/records',
-    name: 'PointsRecords',
-    component: () => import('../views/members/PointsRecords.vue')
-  },
-  {
-    path: '/members/points/settings',
-    name: 'PointsSettings',
-    component: () => import('../views/members/PointsSettings.vue')
-  },
-  {
-    path: '/members/points/exclude',
-    name: 'PointsExclude',
-    component: () => import('../views/members/PointsExclude.vue')
-  },
-  // 会员管理 - 优惠券
-  {
     path: '/members/coupons',
     name: 'MemberCoupons',
     component: () => import('../views/members/MemberCoupons.vue')
   },
-  // 会员管理 - 促销
   {
     path: '/members/promotions',
     name: 'MemberPromotions',
     component: () => import('../views/members/MemberPromotions.vue')
-  },
-  // 会员管理 - 店铺管理
-  {
-    path: '/members/stores',
-    name: 'MemberStores',
-    component: () => import('../views/members/MemberStores.vue')
-  },
-  {
-    path: '/members/store-sources',
-    name: 'StoreSources',
-    component: () => import('../views/members/StoreSources.vue')
-  },
-  {
-    path: '/members/store-locations',
-    name: 'StoreLocations',
-    component: () => import('../views/members/StoreLocations.vue')
-  },
-  {
-    path: '/members/channels',
-    name: 'MemberChannels',
-    component: () => import('../views/members/MemberChannels.vue')
-  },
-  {
-    path: '/members/miniprogram',
-    name: 'MiniProgram',
-    component: () => import('../views/members/MiniProgram.vue')
-  },
-  {
-    path: '/members/printers',
-    name: 'Printers',
-    component: () => import('../views/members/Printers.vue')
-  },
-  // 会员管理 - 临时会员
-  {
-    path: '/members/temp-members',
-    name: 'TempMembers',
-    component: () => import('../views/members/TempMembers.vue')
-  },
-  {
-    path: '/members/temp-coupons',
-    name: 'TempCoupons',
-    component: () => import('../views/members/TempCoupons.vue')
   },
   // 告警中心
   {
@@ -359,6 +290,26 @@ const routes = [
     name: 'UserSync',
     component: () => import('../views/security/UserSyncView.vue'),
     meta: { title: '用户同步' }
+  },
+
+  // ============ Sprint 25: 安全与合规前端 ============
+  {
+    path: '/security/settings',
+    name: 'SecuritySettings',
+    component: () => import('../views/security/SecuritySettingsView.vue'),
+    meta: { title: '安全设置' }
+  },
+  {
+    path: '/security/privacy',
+    name: 'DataPrivacy',
+    component: () => import('../views/security/DataPrivacyView.vue'),
+    meta: { title: '数据隐私' }
+  },
+  {
+    path: '/security/audit-log',
+    name: 'AuditLog',
+    component: () => import('../views/security/AuditLogView.vue'),
+    meta: { title: '审计日志' }
   },
 
   // ============ Sprint 13: 全球化设置 ============
@@ -599,6 +550,41 @@ const routes = [
     name: 'MiniAppDevice',
     component: () => import('../views/app/MiniAppDeviceView.vue'),
     meta: { title: '小程序设备控制', mobile: true }
+  },
+
+  // ============ Sprint 23: 第三方集成前端 ============
+  {
+    path: '/integration/smarthome',
+    name: 'SmartHome',
+    component: () => import('../views/integration/SmartHomeView.vue'),
+    meta: { title: '智能家居' }
+  },
+  {
+    path: '/integration/pet-hospital',
+    name: 'PetHospital',
+    component: () => import('../views/integration/PetHospitalView.vue'),
+    meta: { title: '宠物医疗' }
+  },
+  {
+    path: '/integration/pet-shop',
+    name: 'PetShop',
+    component: () => import('../views/integration/PetShopView.vue'),
+    meta: { title: '宠物用品商城' }
+  },
+
+  // ============ Sprint 24: 研究平台前端 ============
+  {
+    path: '/research/data',
+    name: 'ResearchData',
+    component: () => import('../views/research/ResearchDataView.vue'),
+    meta: { title: '数据集管理' }
+  },
+  {
+    path: '/research/experiment',
+    name: 'ResearchExperiment',
+    component: () => import('../views/research/ExperimentView.vue'),
+    meta: { title: 'AI 行为实验' }
+  }
   }
 ]
 
