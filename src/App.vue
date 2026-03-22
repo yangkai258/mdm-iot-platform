@@ -149,6 +149,14 @@ const menuItems = [
     ]
   },
   { key: '/test-modals', label: '🎨 UI测试' },
+  {
+    key: '/research',
+    label: '🔬 研究平台',
+    children: [
+      { key: '/research/data', label: '数据集管理' },
+      { key: '/research/experiment', label: 'AI 行为实验' }
+    ]
+  }
 ]
 
 onMounted(() => {

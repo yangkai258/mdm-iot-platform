@@ -550,6 +550,20 @@ const routes = [
     name: 'PetShop',
     component: () => import('../views/integration/PetShopView.vue'),
     meta: { title: '宠物用品商城' }
+  },
+
+  // ============ Sprint 24: 研究平台前端 ============
+  {
+    path: '/research/data',
+    name: 'ResearchData',
+    component: () => import('../views/research/ResearchDataView.vue'),
+    meta: { title: '数据集管理' }
+  },
+  {
+    path: '/research/experiment',
+    name: 'ResearchExperiment',
+    component: () => import('../views/research/ExperimentView.vue'),
+    meta: { title: 'AI 行为实验' }
   }
   }
 ]
