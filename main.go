@@ -186,6 +186,12 @@ func main() {
 		&models.DaaSContract{},
 		&models.DaaSDeviceRental{},
 		&models.DaaSBilling{},
+		// Sprint 35: RTOS 优化和设备端性能监控
+		&models.RTOSStats{},
+		&models.RTOSMemory{},
+		&models.RTOSTask{},
+		&models.DevicePerformanceHistory{},
+		&models.FirmwareOptimizationConfig{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -442,6 +448,10 @@ func main() {
 	perfCtrl := &controllers.PerformanceController{DB: db, Redis: redisClient}
 	perfGroup := apiV1.Group("/performance")
 	perfCtrl.RegisterPerformanceRoutes(perfGroup)
+
+	// ============ Sprint 35: RTOS 优化和设备端性能监控 ============
+	rtosCtrl := &controllers.RTOSPerformanceController{DB: db, Redis: redisClient}
+	rtosCtrl.RegisterRTOSPerformanceRoutes(apiV1)
 
 	// 宠物控制台路由
 	petConsoleCtrl := &controllers.PetConsoleController{}
