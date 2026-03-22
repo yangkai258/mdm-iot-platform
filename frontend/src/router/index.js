@@ -435,6 +435,58 @@ const routes = [
     name: 'ModelPublishWorkflow',
     component: () => import('../views/ai/ModelPublishWorkflow.vue'),
     meta: { title: '模型发布工作流' }
+  },
+
+  // ============ Sprint 17: 宠物情绪识别和响应 ============
+  {
+    path: '/emotion/recognize',
+    name: 'EmotionRecognize',
+    component: () => import('../views/emotion/EmotionRecognizeView.vue'),
+    meta: { title: '情绪识别配置' }
+  },
+  {
+    path: '/emotion/logs',
+    name: 'EmotionLog',
+    component: () => import('../views/emotion/EmotionLogView.vue'),
+    meta: { title: '情绪日志' }
+  },
+  {
+    path: '/emotion/response-config',
+    name: 'EmotionResponseConfig',
+    component: () => import('../views/emotion/EmotionResponseConfigView.vue'),
+    meta: { title: '响应配置' }
+  },
+  {
+    path: '/emotion/reports',
+    name: 'EmotionReport',
+    component: () => import('../views/emotion/EmotionReportView.vue'),
+    meta: { title: '情绪报告' }
+  },
+
+  // ============ Sprint 18: 宠物数字孪生 ============
+  {
+    path: '/digital-twin/vitals',
+    name: 'DigitalTwinVitals',
+    component: () => import('../views/digital-twin/VitalsDashboardView.vue'),
+    meta: { title: '生命体征仪表盘' }
+  },
+  {
+    path: '/digital-twin/vitals-chart',
+    name: 'DigitalTwinVitalsChart',
+    component: () => import('../views/digital-twin/RealTimeVitalsChart.vue'),
+    meta: { title: '实时体征曲线' }
+  },
+  {
+    path: '/digital-twin/history',
+    name: 'DigitalTwinHistory',
+    component: () => import('../views/digital-twin/HistoricalReplayView.vue'),
+    meta: { title: '历史回放' }
+  },
+  {
+    path: '/digital-twin/behavior',
+    name: 'DigitalTwinBehavior',
+    component: () => import('../views/digital-twin/BehaviorPredictionView.vue'),
+    meta: { title: '行为预测' }
   }
 ]
 

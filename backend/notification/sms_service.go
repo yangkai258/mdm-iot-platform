@@ -145,14 +145,13 @@ func (s *SMSService) sendBatchAliyun(phones []string, templateCode string, param
 func (s *SMSService) sendTencent(phones []string, templateCode string, params map[string]string) error {
 	// 腾讯云 SecretId/SecretKey 签名方式
 	secretId := s.accessKey
-	secretKey := s.secretKey
 
 	// 腾讯云短信 API
 	apiURL := "https://sms.tencentcloudapi.com/"
 
 	// 构建正文参数
 	type SMSPhone struct {
-		PhoneNumber: string `json:"PhoneNumber"`
+		PhoneNumber string `json:"PhoneNumber"`
 	}
 	type TemplateParam struct {
 		Value string `json:"Value"`

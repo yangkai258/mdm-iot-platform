@@ -70,11 +70,6 @@ func (s *WebhookService) Send(url string, payload []byte, secret string) error {
 		req2.Header.Set("X-Webhook-Timestamp", fmt.Sprintf("%d", time.Now().Unix()))
 	}
 
-	req3, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return fmt.Errorf("创建请求失败: %w", err)
-	}
-
 	// 实际上我们需要使用 bytes.NewReader
 	reader := bytes.NewReader(payload)
 	reqFinal, err := http.NewRequest("POST", url, reader)
