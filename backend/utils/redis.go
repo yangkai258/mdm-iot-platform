@@ -206,3 +206,16 @@ func (r *RedisClient) DelDeviceShadow(deviceID string) error {
 func (r *RedisClient) Close() error {
 	return r.client.Close()
 }
+
+// 全局 Redis 客户端，供其他包使用
+var globalRedisClient *RedisClient
+
+// SetGlobalRedisClient 设置全局 Redis 客户端
+func SetGlobalRedisClient(client *RedisClient) {
+	globalRedisClient = client
+}
+
+// GetGlobalRedisClient 获取全局 Redis 客户端
+func GetGlobalRedisClient() *RedisClient {
+	return globalRedisClient
+}
