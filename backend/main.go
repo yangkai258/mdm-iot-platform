@@ -59,6 +59,9 @@ func main() {
 		// 告警设置表
 		&models.AlertSettings{},
 		&models.NotificationChannel{},
+		// Sprint 11: 通知日志和告警历史
+		&models.NotificationLog{},
+		&models.AlertHistory{},
 		// 合规表
 		&models.CompliancePolicy{},
 		&models.ComplianceViolation{},
@@ -118,6 +121,17 @@ func main() {
 		// 活动日志表
 		&models.ActivityLog{},
 		&models.LoginLog{},
+		// Sprint 12: LDAP/AD 配置表
+		&models.LDAPConfig{},
+		&models.LDAPUserMapping{},
+		&models.LDAPGroupRoleMapping{},
+		// Sprint 12: 证书管理表
+		&models.Certificate{},
+		// Sprint 12: 设备安全表
+		&models.WipeHistory{},
+		// Sprint 12: 数据权限表
+		&models.DataPermissionRule{},
+		&models.UserDataPermission{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -139,6 +153,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to initialize Redis: %v", err)
 	}
+	// 设置全局 Redis 客户端供其他模块使用
+	utils.SetGlobalRedisClient(redisClient)
 
 	// 初始化 MQTT（传入告警回调和合规检查回调）
 	alertCallback := func(deviceID string, data map[string]interface{}) {
@@ -329,6 +345,12 @@ func main() {
 		sys.POST("/notification-channels/:id/toggle", notifChannelCtrl.ToggleChannel)
 		sys.POST("/notification-channels/:id/test", notifChannelCtrl.TestChannel)
 
+		// Sprint 11: 告警历史管理
+		alertHistoryCtrl := &controllers.AlertHistoryController{DB: db}
+		sys.GET("/alerts/history", alertHistoryCtrl.GetAlertHistory)
+		sys.GET("/alerts/history/:id", alertHistoryCtrl.GetAlertHistoryByID)
+		sys.POST("/alerts/history/archive", alertHistoryCtrl.ArchiveAlert)
+
 		// Dashboard 统计（使用独立的 DashboardController）
 		dashboardCtrl := &controllers.DashboardController{DB: db}
 		sys.GET("/dashboard/stats", dashboardCtrl.GetStats)
@@ -415,6 +437,54 @@ func main() {
 	apiV1.POST("/devices/batch-status", importExportCtrl.BatchUpdateDeviceStatus)
 	// 会员批量操作
 	apiV1.POST("/members/batch-delete", importExportCtrl.BatchDeleteMembers)
+
+	// ============ Sprint 12: LDAP/AD 路由 ============
+	ldapCtrl := &controllers.LDAPController{DB: db}
+	apiV1.GET("/ldap/config", ldapCtrl.GetLDAPConfig)
+	apiV1.PUT("/ldap/config", ldapCtrl.UpdateLDAPConfig)
+	apiV1.POST("/ldap/test", ldapCtrl.TestLDAPConnection)
+	apiV1.GET("/ldap/users", ldapCtrl.GetLDAPUsers)
+	apiV1.POST("/ldap/sync", ldapCtrl.SyncLDAPUsers)
+	apiV1.GET("/ldap/groups", ldapCtrl.GetLDAPGroups)
+	apiV1.POST("/ldap/groups/mapping", ldapCtrl.SetGroupRoleMapping)
+	apiV1.GET("/ldap/group-mappings", ldapCtrl.GetGroupRoleMappings)
+
+	// ============ Sprint 12: 证书管理路由 ============
+	certCtrl := &controllers.CertificateController{DB: db}
+	apiV1.GET("/certificates", certCtrl.ListCertificates)
+	apiV1.POST("/certificates", certCtrl.CreateCertificate)
+	apiV1.GET("/certificates/stats", certCtrl.GetCertificateStats)
+	apiV1.GET("/certificates/expiring", certCtrl.GetExpiringCertificates)
+	apiV1.POST("/certificates/validate", certCtrl.ValidateCertificate)
+	apiV1.GET("/certificates/:id", certCtrl.GetCertificate)
+	apiV1.PUT("/certificates/:id", certCtrl.UpdateCertificate)
+	apiV1.DELETE("/certificates/:id", certCtrl.DeleteCertificate)
+	apiV1.POST("/certificates/:id/revoke", certCtrl.RevokeCertificate)
+	apiV1.POST("/certificates/upload", certCtrl.UploadCertificateFile)
+	apiV1.GET("/certificates/:id/download", certCtrl.DownloadCertificate)
+
+	// ============ Sprint 12: 设备安全路由 (锁定/擦除) ============
+	deviceSecurityCtrl := &controllers.DeviceSecurityController{DB: db}
+	apiV1.POST("/devices/:device_id/lock", deviceSecurityCtrl.LockDevice)
+	apiV1.POST("/devices/:device_id/unlock", deviceSecurityCtrl.UnlockDevice)
+	apiV1.POST("/devices/:device_id/wipe", deviceSecurityCtrl.WipeDevice)
+	apiV1.POST("/devices/:device_id/wipe/confirm", deviceSecurityCtrl.ConfirmWipe)
+	apiV1.POST("/devices/:device_id/wipe/token", deviceSecurityCtrl.GenerateWipeConfirmToken)
+	apiV1.GET("/devices/:device_id/wipe-history", deviceSecurityCtrl.GetWipeHistory)
+	apiV1.GET("/devices/:device_id/lock-status", deviceSecurityCtrl.GetDeviceLockStatus)
+
+	// ============ Sprint 12: 数据权限路由 ============
+	dataPermCtrl := &controllers.DataPermissionController{DB: db}
+	apiV1.GET("/data-permissions/rules", dataPermCtrl.ListDataPermissionRules)
+	apiV1.POST("/data-permissions/rules", dataPermCtrl.CreateDataPermissionRule)
+	apiV1.PUT("/data-permissions/rules/:id", dataPermCtrl.UpdateDataPermissionRule)
+	apiV1.DELETE("/data-permissions/rules/:id", dataPermCtrl.DeleteDataPermissionRule)
+	apiV1.GET("/data-permissions/roles/:role_id", dataPermCtrl.GetRoleDataPermissions)
+	apiV1.PUT("/data-permissions/roles/:role_id", dataPermCtrl.UpdateRoleDataPermissions)
+	apiV1.GET("/data-permissions/users/:user_id", dataPermCtrl.GetUserDataPermissions)
+	apiV1.PUT("/data-permissions/users/:user_id", dataPermCtrl.UpdateUserDataPermissions)
+	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
+	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
 
 	// 获取端口
 	port := os.Getenv("PORT")
