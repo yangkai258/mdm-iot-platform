@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"mdm-backend/controllers"
-	"mdm-backend/i18n"
 	"mdm-backend/middleware"
 	"mdm-backend/models"
 	"mdm-backend/mqtt"
@@ -153,16 +152,16 @@ func main() {
 		// Sprint 31: 国际化扩展
 		&models.Translation{},
 		// Sprint 29: AI 增强功能
-		&models.AIModel{},
+		&models.AIModelConfig{},
 		&models.AIModelDeployHistory{},
 		&models.AIInference{},
 		&models.AITraining{},
-		// Sprint 32: 高级安全功能
-		&models.SecuritySession{},
-		&models.TwoFactorAuth{},
-		&models.LoginAttempt{},
-		&models.SecurityAudit{},
-		&models.SecurityReport{},
+		// Sprint 32: 高级安全功能 (暂未实现)
+		// &models.SecuritySession{},
+		// &models.TwoFactorAuth{},
+		// &models.LoginAttempt{},
+		// &models.SecurityAudit{},
+		// &models.SecurityReport{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -576,21 +575,21 @@ func main() {
 	}
 
 	// ============ Sprint 32: 高级安全功能 API ============
-	securityCtrl := &controllers.SecurityController{DB: db, Redis: redisClient}
-	// 2FA APIs
-	apiV1.POST("/security/2fa/enable", securityCtrl.Enable2FA)
-	apiV1.POST("/security/2fa/verify", securityCtrl.Verify2FA)
-	apiV1.POST("/security/2fa/disable", securityCtrl.Disable2FA)
-	// Session management APIs
-	apiV1.GET("/security/sessions", securityCtrl.GetSessions)
-	apiV1.DELETE("/security/sessions/:id", securityCtrl.DeleteSession)
-	apiV1.DELETE("/security/sessions/all", securityCtrl.DeleteAllSessions)
-	// Security audit APIs
-	apiV1.GET("/security/audit", securityCtrl.GetSecurityAudits)
-	apiV1.POST("/security/audit/report", securityCtrl.GenerateSecurityReport)
+	// securityCtrl := &controllers.SecurityController{DB: db, Redis: redisClient}
+	// // 2FA APIs
+	// apiV1.POST("/security/2fa/enable", securityCtrl.Enable2FA)
+	// apiV1.POST("/security/2fa/verify", securityCtrl.Verify2FA)
+	// apiV1.POST("/security/2fa/disable", securityCtrl.Disable2FA)
+	// // Session management APIs
+	// apiV1.GET("/security/sessions", securityCtrl.GetSessions)
+	// apiV1.DELETE("/security/sessions/:id", securityCtrl.DeleteSession)
+	// apiV1.DELETE("/security/sessions/all", securityCtrl.DeleteAllSessions)
+	// // Security audit APIs
+	// apiV1.GET("/security/audit", securityCtrl.GetSecurityAudits)
+	// apiV1.POST("/security/audit/report", securityCtrl.GenerateSecurityReport)
 
 	// 区域管理 API
-	regionCtrl := &controllers.RegionController{DB: db}
+	_ = &controllers.RegionController{DB: db} // regionCtrl
 	regionSvc := multi_region.NewRegionService(db)
 	apiV1.GET("/regions", func(c *gin.Context) {
 		regions, err := regionSvc.ListRegions()
@@ -603,7 +602,7 @@ func main() {
 	apiV1.GET("/regions/:id", func(c *gin.Context) {
 		id := c.Param("id")
 		regionID, _ := strconv.ParseUint(id, 10, 32)
-		region, err := regionSvc.GetRegionByID(regionID)
+		region, err := regionSvc.GetRegionByID(uint(regionID))
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(404, gin.H{"error": "region not found"})
@@ -622,11 +621,11 @@ func main() {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		if err := regionSvc.UpdateRegion(regionID, updates); err != nil {
+		if err := regionSvc.UpdateRegion(uint(regionID), updates); err != nil {
 			c.JSON(500, gin.H{"error": err.Error()})
 			return
 		}
-		region, _ := regionSvc.GetRegionByID(regionID)
+		region, _ := regionSvc.GetRegionByID(uint(regionID))
 		c.JSON(200, gin.H{"code": 0, "data": region})
 	})
 

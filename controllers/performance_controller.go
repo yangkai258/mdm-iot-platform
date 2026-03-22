@@ -128,7 +128,7 @@ func (c *PerformanceController) GetCacheStats(ctx *gin.Context) {
 	}
 
 	// 解析 keyspace 信息
-	keyspace, _ := c.Redis.Client().Info(ctx2, "keyspace").Result()
+	_, _ = c.Redis.Client().Info(ctx2, "keyspace").Result()
 
 	// 获取 db size
 	dbSize := int64(0)
@@ -195,7 +195,7 @@ func (c *PerformanceController) GetMetrics(ctx *gin.Context) {
 
 	db, _ := c.DB.DB()
 	if db != nil {
-		sqlStats.MaxOpenConnections, _ = db.Stats().MaxOpenConnections, nil
+		sqlStats.MaxOpenConnections = db.Stats().MaxOpenConnections
 		sqlStats.OpenConnections = db.Stats().OpenConnections
 		sqlStats.InUse = db.Stats().InUse
 		sqlStats.Idle = db.Stats().Idle
@@ -383,8 +383,8 @@ func (c *PerformanceController) Reindex(ctx *gin.Context) {
 				"sql":    reindexSQL,
 			})
 			if result.Error != nil {
-				results[len(results)-1].(map[string]interface{})["status"] = "failed"
-				results[len(results)-1].(map[string]interface{})["error"] = result.Error.Error()
+				results[len(results)-1]["status"] = "failed"
+				results[len(results)-1]["error"] = result.Error.Error()
 			}
 		}
 
@@ -413,10 +413,10 @@ func (c *PerformanceController) Reindex(ctx *gin.Context) {
 					"sql":   reindexSQL,
 				})
 				if result.Error != nil {
-					results[len(results)-1].(map[string]interface{})["status"] = "failed"
-					results[len(results)-1].(map[string]interface{})["error"] = result.Error.Error()
+					results[len(results)-1]["status"] = "failed"
+					results[len(results)-1]["error"] = result.Error.Error()
 				} else {
-					results[len(results)-1].(map[string]interface{})["status"] = "success"
+					results[len(results)-1]["status"] = "success"
 				}
 			}
 		}
@@ -453,7 +453,7 @@ func (c *PerformanceController) GetDBStats(ctx *gin.Context) {
 	c.DB.Raw("SELECT COUNT(*) FROM pg_indexes WHERE schemaname = 'public'").Scan(&stats.TotalIndexes)
 
 	// 获取数据库大小
-	var totalSize, indexSize, tableSize string
+	var totalSize string
 	c.DB.Raw("SELECT pg_size_pretty(pg_database_size(current_database()))").Scan(&totalSize)
 	stats.TotalSize = totalSize
 

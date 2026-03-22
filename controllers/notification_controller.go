@@ -1195,7 +1195,7 @@ func (c *NotificationController) TestNotificationChannel(ctx *gin.Context) {
 			Password: channel.SMTPPassword,
 			From:     channel.SMTPFrom,
 		}
-		emailSvc := notification.NewEmailService(emailCfg)
+		emailSvc := notification.NewEmailService(emailCfg, c.DB)
 		err := emailSvc.TestConnection()
 		if err != nil {
 			healthStatus = "unhealthy"

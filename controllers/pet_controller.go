@@ -350,19 +350,19 @@ func (p *PetController) MoodBoost(c *gin.Context) {
 
 	switch req.BoostType {
 	case "food":
-		petStatus.Hunger = max(0, petStatus.Hunger-boostAmount)
-		petStatus.Mood = min(100, petStatus.Mood+boostAmount/2)
-		petStatus.Energy = min(100, petStatus.Energy+boostAmount)
+		petStatus.Hunger = maxInt(0, petStatus.Hunger-boostAmount)
+		petStatus.Mood = minInt(100, petStatus.Mood+boostAmount/2)
+		petStatus.Energy = minInt(100, petStatus.Energy+boostAmount)
 	case "play":
-		petStatus.Mood = min(100, petStatus.Mood+boostAmount)
-		petStatus.Energy = max(0, petStatus.Energy-boostAmount/2)
+		petStatus.Mood = minInt(100, petStatus.Mood+boostAmount)
+		petStatus.Energy = maxInt(0, petStatus.Energy-boostAmount/2)
 	case "praise":
-		petStatus.Mood = min(100, petStatus.Mood+boostAmount)
+		petStatus.Mood = minInt(100, petStatus.Mood+boostAmount)
 	case "music":
-		petStatus.Mood = min(100, petStatus.Mood+boostAmount/2)
-		petStatus.Energy = min(100, petStatus.Energy+boostAmount/2)
+		petStatus.Mood = minInt(100, petStatus.Mood+boostAmount/2)
+		petStatus.Energy = minInt(100, petStatus.Energy+boostAmount/2)
 	default:
-		petStatus.Mood = min(100, petStatus.Mood+boostAmount)
+		petStatus.Mood = minInt(100, petStatus.Mood+boostAmount)
 	}
 
 	// 更新表情
@@ -505,14 +505,14 @@ func (p *PetController) ListMessages(c *gin.Context) {
 }
 
 // 辅助函数
-func min(a, b int) int {
+func minInt(a, b int) int {
 	if a < b {
 		return a
 	}
 	return b
 }
 
-func max(a, b int) int {
+func maxInt(a, b int) int {
 	if a > b {
 		return a
 	}
