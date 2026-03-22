@@ -518,6 +518,44 @@ const routes = [
     meta: { title: '声音定制' }
   },
 
+  // ============ Sprint 21: 具身智能前端 ============
+  {
+    path: '/embodied/:device_id/perception',
+    name: 'EmbodiedPerception',
+    component: () => import('../views/embodied/PerceptionView.vue'),
+    meta: { title: '环境感知' }
+  },
+  {
+    path: '/embodied/:device_id/map',
+    name: 'EmbodiedMap',
+    component: () => import('../views/embodied/MapView.vue'),
+    meta: { title: '地图管理' }
+  },
+  {
+    path: '/embodied/:device_id/navigate',
+    name: 'EmbodiedNavigation',
+    component: () => import('../views/embodied/NavigationView.vue'),
+    meta: { title: '导航控制' }
+  },
+  {
+    path: '/embodied/action-library',
+    name: 'EmbodiedActionLibrary',
+    component: () => import('../views/embodied/ActionLibraryView.vue'),
+    meta: { title: '动作库' }
+  },
+  {
+    path: '/embodied/:device_id/safety',
+    name: 'EmbodiedSafety',
+    component: () => import('../views/embodied/SafetyZonesView.vue'),
+    meta: { title: '安全禁区' }
+  },
+  {
+    path: '/embodied/:device_id/decision',
+    name: 'EmbodiedDecision',
+    component: () => import('../views/embodied/DecisionLogsView.vue'),
+    meta: { title: '决策日志' }
+  },
+
   // ============ Sprint 22: App 端页面 ============
   {
     path: '/app/devices',
