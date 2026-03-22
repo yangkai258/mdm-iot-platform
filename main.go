@@ -208,6 +208,11 @@ func main() {
 		&models.ElderlyProfile{},
 		&models.HealthMonitorSetting{},
 		&models.ElderlyReminder{},
+		// 仿真测试平台
+		&models.VirtualPet{},
+		&models.SimulationEnvironment{},
+		&models.SimulationRun{},
+		&models.SimulationMetrics{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -488,6 +493,10 @@ func main() {
 	// MiniClaw路由
 	miniClawCtrl := &controllers.MiniClawController{}
 	miniClawCtrl.RegisterRoutes(apiV1)
+
+	// ============ 仿真测试平台 ============
+	simulationCtrl := controllers.NewSimulationController(db)
+	simulationCtrl.RegisterRoutes(apiV1)
 
 	// ============ Sprint 29: AI 增强功能 ============
 	// AI模型管理路由
