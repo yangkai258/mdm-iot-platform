@@ -399,10 +399,6 @@ func main() {
 	notifCtrl := &controllers.NotificationController{DB: db}
 	notifCtrl.RegisterRoutes(apiV1)
 
-	// 情绪计算路由 (Sprint 17)
-	emotionCtrl := &controllers.EmotionController{DB: db}
-	emotionCtrl.RegisterEmotionRoutes(apiV1)
-
 	// 补充通知路由（push 和 batch-delete）
 	apiV1.POST("/notifications/push", notifCtrl.PushNotification)
 	apiV1.POST("/notifications/batch-delete", notifCtrl.BatchDeleteNotifications)
