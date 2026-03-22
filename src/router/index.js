@@ -326,6 +326,26 @@ const routes = [
     meta: { title: '审计日志' }
   },
 
+  // ============ Sprint 32: 高级安全功能前端 ============
+  {
+    path: '/security/two-factor',
+    name: 'TwoFactorAuth',
+    component: () => import('../views/security/TwoFactorAuthView.vue'),
+    meta: { title: '双因素认证' }
+  },
+  {
+    path: '/security/sessions',
+    name: 'SessionManagement',
+    component: () => import('../views/security/SessionManagementView.vue'),
+    meta: { title: '会话管理' }
+  },
+  {
+    path: '/security/audit',
+    name: 'SecurityAudit',
+    component: () => import('../views/security/SecurityAuditView.vue'),
+    meta: { title: '安全审计' }
+  },
+
   // ============ Sprint 13: 全球化设置 ============
   {
     path: '/globalization',
