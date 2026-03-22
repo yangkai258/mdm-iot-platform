@@ -565,6 +565,40 @@ const routes = [
     name: 'VoiceConfig',
     component: () => import('../views/market/VoiceConfigView.vue'),
     meta: { title: '声音定制' }
+  },
+
+  // ============ Sprint 22: App 端页面 ============
+  {
+    path: '/app/devices',
+    name: 'AppDeviceList',
+    component: () => import('../views/app/AppDeviceListView.vue'),
+    meta: { title: 'App设备列表', mobile: true }
+  },
+  {
+    path: '/app/device/:id',
+    name: 'AppDeviceControl',
+    component: () => import('../views/app/AppDeviceControlView.vue'),
+    meta: { title: 'App设备控制', mobile: true }
+  },
+
+  // ============ Sprint 22: 微信小程序 H5 页面 ============
+  {
+    path: '/miniapp/home',
+    name: 'MiniAppHome',
+    component: () => import('../views/app/MiniAppHomeView.vue'),
+    meta: { title: '小程序首页', mobile: true }
+  },
+  {
+    path: '/miniapp/devices',
+    name: 'MiniAppDevices',
+    component: () => import('../views/app/AppDeviceListView.vue'),
+    meta: { title: '小程序设备列表', mobile: true }
+  },
+  {
+    path: '/miniapp/device/:id',
+    name: 'MiniAppDevice',
+    component: () => import('../views/app/MiniAppDeviceView.vue'),
+    meta: { title: '小程序设备控制', mobile: true }
   }
 ]
 
