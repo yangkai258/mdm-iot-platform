@@ -241,3 +241,135 @@ export async function getAiQualityMetricsTrend(params = {}) {
   })
   return res.json()
 }
+
+// ============ 模型部署管理 ============
+
+/**
+ * 部署模型
+ * @param {string|number} id
+ * @param {Object} data - { environment, instances, gpu_type, memory_limit }
+ */
+export async function postAiModelDeploy(id, data) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/models/${id}/deploy`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  return res.json()
+}
+
+/**
+ * 取消部署模型
+ * @param {string|number} id
+ */
+export async function postAiModelUndeploy(id) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/models/${id}/undeploy`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({})
+  })
+  return res.json()
+}
+
+/**
+ * 删除模型
+ * @param {string|number} id
+ */
+export async function deleteAiModel(id) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/models/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  return res.json()
+}
+
+// ============ AI 训练任务 ============
+
+/**
+ * 获取训练任务列表
+ * @param {Object} params - { keyword, task_type, status, start_time, end_time, page, page_size }
+ */
+export async function getAiTrainingTasks(params = {}) {
+  const token = localStorage.getItem('token')
+  const qs = new URLSearchParams(params).toString()
+  const res = await fetch(`${BASE_URL}/training/tasks?${qs}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  return res.json()
+}
+
+/**
+ * 创建训练任务
+ * @param {Object} data - { task_name, task_type, base_model_id, train_data_path, valid_data_path, learning_rate, batch_size, epochs, max_length, description }
+ */
+export async function postAiTrainingTask(data) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/training/tasks`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  })
+  return res.json()
+}
+
+/**
+ * 获取训练任务详情
+ * @param {string|number} id
+ */
+export async function getAiTrainingTaskById(id) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/training/tasks/${id}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  return res.json()
+}
+
+/**
+ * 获取训练任务日志
+ * @param {string|number} id
+ */
+export async function getAiTrainingTaskLogs(id) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/training/tasks/${id}/logs`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  return res.json()
+}
+
+/**
+ * 取消训练任务
+ * @param {string|number} id
+ */
+export async function cancelAiTrainingTask(id) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/training/tasks/${id}/cancel`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  return res.json()
+}
+
+/**
+ * 删除训练任务
+ * @param {string|number} id
+ */
+export async function deleteAiTrainingTask(id) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${BASE_URL}/training/tasks/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  })
+  return res.json()
+}
