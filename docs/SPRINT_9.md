@@ -1,7 +1,7 @@
 # Sprint 9 规划
 
 **时间**：2026-03-22  
-**状态**：待开始  
+**状态**：进行中（前端已完成）  
 **Sprint 周期**：2 周（2026-03-22 ～ 2026-04-04）  
 
 ---
@@ -471,13 +471,13 @@ CREATE TABLE long_term_memory (
 
 ### 前端任务分配
 
-| 任务 | 负责人 |
-|------|--------|
-| 宠物控制台主页面 | agentqd |
-| 对话区域组件 | agentqd |
-| 状态卡片 + 快捷指令 | agentqd |
-| WebSocket集成 | agentqd |
-| 历史会话 + 设置 | agentqd |
+| 任务 | 负责人 | 完成 |
+|------|--------|------|
+| 宠物控制台主页面 | agentqd | 2026-03-22 |
+| 对话区域组件 | agentqd | 2026-03-22 |
+| 状态卡片 + 快捷指令 | agentqd | 2026-03-22 |
+| WebSocket集成 | agentqd | 2026-03-22 |
+| 历史会话 + 设置 | agentqd | 2026-03-22 |
 
 ### 测试任务
 
@@ -501,8 +501,8 @@ CREATE TABLE long_term_memory (
 - [ ] MQTT /down/action 下发实现
 - [ ] MQTT /up/status 处理实现
 - [ ] WebSocket 实时推送
-- [ ] PetConsoleView.vue 主页面
-- [ ] ChatArea.vue + ChatMessage.vue
-- [ ] PetStatusCard.vue + QuickActions.vue
-- [ ] ConversationList.vue + PetSettingsModal.vue
+- [x] PetConsoleView.vue 主页面
+- [x] ChatArea.vue + ChatMessage.vue
+- [x] PetStatusCard.vue + QuickActions.vue
+- [x] ConversationList.vue + PetSettingsModal.vue
 - [ ] API 单元测试通过
