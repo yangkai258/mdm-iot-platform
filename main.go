@@ -3,14 +3,18 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"mdm-backend/controllers"
+	"mdm-backend/i18n"
 	"mdm-backend/middleware"
 	"mdm-backend/models"
 	"mdm-backend/mqtt"
+	"mdm-backend/multi_region"
 	plugins "mdm-backend/plugins"
 	"mdm-backend/services"
+	"mdm-backend/timezone"
 	"mdm-backend/utils"
 	"mdm-backend/websocket"
 
@@ -146,6 +150,19 @@ func main() {
 		&models.CustomReport{},
 		// Sprint 30: 性能优化
 		&models.PerformanceMetric{},
+		// Sprint 31: 国际化扩展
+		&models.Translation{},
+		// Sprint 29: AI 增强功能
+		&models.AIModel{},
+		&models.AIModelDeployHistory{},
+		&models.AIInference{},
+		&models.AITraining{},
+		// Sprint 32: 高级安全功能
+		&models.SecuritySession{},
+		&models.TwoFactorAuth{},
+		&models.LoginAttempt{},
+		&models.SecurityAudit{},
+		&models.SecurityReport{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -411,6 +428,19 @@ func main() {
 	miniClawCtrl := &controllers.MiniClawController{}
 	miniClawCtrl.RegisterRoutes(apiV1)
 
+	// ============ Sprint 29: AI 增强功能 ============
+	// AI模型管理路由
+	aiModelCtrl := controllers.NewAIModelController(db)
+	aiModelCtrl.RegisterRoutes(apiV1)
+
+	// AI推理路由
+	aiInferenceCtrl := controllers.NewAIInferenceController(db)
+	aiInferenceCtrl.RegisterRoutes(apiV1)
+
+	// AI训练任务路由
+	aiTrainingCtrl := controllers.NewAITrainingController(db)
+	aiTrainingCtrl.RegisterRoutes(apiV1)
+
 	// 通知路由
 	notifCtrl := &controllers.NotificationController{DB: db}
 	notifCtrl.RegisterRoutes(apiV1)
@@ -530,6 +560,99 @@ func main() {
 		developerGroup.GET("/stats", devCtrl.GetStats)
 		developerGroup.GET("/quota", devCtrl.GetQuota)
 	}
+
+	// ============ Sprint 31: 国际化扩展 API ============
+	// 多语言翻译管理
+	i18nCtrl := &controllers.I18nController{DB: db}
+	i18nGroup := apiV1.Group("/i18n")
+	{
+		i18nGroup.GET("/translations", i18nCtrl.ListTranslations)
+		i18nGroup.POST("/translations", i18nCtrl.CreateTranslation)
+		i18nGroup.GET("/translations/:id", i18nCtrl.GetTranslation)
+		i18nGroup.PUT("/translations/:id", i18nCtrl.UpdateTranslation)
+		i18nGroup.DELETE("/translations/:id", i18nCtrl.DeleteTranslation)
+		i18nGroup.GET("/locales", i18nCtrl.GetSupportedLocales)
+		i18nGroup.GET("/namespaces", i18nCtrl.GetNamespaces)
+	}
+
+	// ============ Sprint 32: 高级安全功能 API ============
+	securityCtrl := &controllers.SecurityController{DB: db, Redis: redisClient}
+	// 2FA APIs
+	apiV1.POST("/security/2fa/enable", securityCtrl.Enable2FA)
+	apiV1.POST("/security/2fa/verify", securityCtrl.Verify2FA)
+	apiV1.POST("/security/2fa/disable", securityCtrl.Disable2FA)
+	// Session management APIs
+	apiV1.GET("/security/sessions", securityCtrl.GetSessions)
+	apiV1.DELETE("/security/sessions/:id", securityCtrl.DeleteSession)
+	apiV1.DELETE("/security/sessions/all", securityCtrl.DeleteAllSessions)
+	// Security audit APIs
+	apiV1.GET("/security/audit", securityCtrl.GetSecurityAudits)
+	apiV1.POST("/security/audit/report", securityCtrl.GenerateSecurityReport)
+
+	// 区域管理 API
+	regionCtrl := &controllers.RegionController{DB: db}
+	regionSvc := multi_region.NewRegionService(db)
+	apiV1.GET("/regions", func(c *gin.Context) {
+		regions, err := regionSvc.ListRegions()
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"code": 0, "data": regions})
+	})
+	apiV1.GET("/regions/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		regionID, _ := strconv.ParseUint(id, 10, 32)
+		region, err := regionSvc.GetRegionByID(regionID)
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(404, gin.H{"error": "region not found"})
+				return
+			}
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"code": 0, "data": region})
+	})
+	apiV1.PUT("/regions/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		regionID, _ := strconv.ParseUint(id, 10, 32)
+		var updates map[string]interface{}
+		if err := c.ShouldBindJSON(&updates); err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+		if err := regionSvc.UpdateRegion(regionID, updates); err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		region, _ := regionSvc.GetRegionByID(regionID)
+		c.JSON(200, gin.H{"code": 0, "data": region})
+	})
+
+	// 时区管理 API
+	timezoneCtrl := &controllers.TimezoneController{DB: db}
+	apiV1.GET("/timezones", timezoneCtrl.GetSupportedTimezones)
+	apiV1.GET("/timezones/:id", func(c *gin.Context) {
+		// 获取时区详情 - 根据ID返回时区配置
+		idStr := c.Param("id")
+		id, err := strconv.ParseUint(idStr, 10, 32)
+		if err != nil {
+			c.JSON(400, gin.H{"error": "invalid id"})
+			return
+		}
+		tzSvc := timezone.NewTimezoneService(db)
+		config, err := tzSvc.GetTimezoneConfigByID(uint(id))
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(404, gin.H{"error": "timezone not found"})
+				return
+			}
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{"code": 0, "data": config})
+	})
 
 	// 获取端口
 	port := os.Getenv("PORT")

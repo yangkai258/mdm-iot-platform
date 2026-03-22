@@ -132,6 +132,16 @@ func (s *TimezoneService) GetTimezoneConfig(entityType string, entityID uint) (*
 	return &config, nil
 }
 
+// GetTimezoneConfigByID 根据ID获取时区配置
+func (s *TimezoneService) GetTimezoneConfigByID(id uint) (*models.TimezoneConfig, error) {
+	var config models.TimezoneConfig
+	err := s.db.First(&config, id).Error
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
+}
+
 // ListTimezoneConfigs 列出所有时区配置
 func (s *TimezoneService) ListTimezoneConfigs(entityType string) ([]models.TimezoneConfig, error) {
 	var configs []models.TimezoneConfig
@@ -196,9 +206,9 @@ func FormatTimeWithTimezone(t time.Time, tz string) map[string]interface{} {
 	offset, _ := GetTimezoneOffset(tz)
 
 	return map[string]interface{}{
-		"utc":     t.UTC().Format("2006-01-02T15:04:05Z"),
-		"local":   converted.Format("2006-01-02T15:04:05"),
+		"utc":      t.UTC().Format("2006-01-02T15:04:05Z"),
+		"local":    converted.Format("2006-01-02T15:04:05"),
 		"timezone": tz,
-		"offset":  fmt.Sprintf("UTC%+d", int(offset)),
+		"offset":   fmt.Sprintf("UTC%+d", int(offset)),
 	}
 }
