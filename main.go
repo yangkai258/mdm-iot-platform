@@ -152,6 +152,16 @@ func main() {
 		&models.HouseholdMember{},
 		&models.PetHealthReminder{},
 		&models.PetCheckup{},
+		// Sprint 16: 订阅和计费系统
+		&models.SubscriptionPlan{},
+		&models.UserSubscription{},
+		&models.SubscriptionChange{},
+		&models.UsageRecord{},
+		&models.UserQuota{},
+		&models.Webhook{},
+		&models.WebhookEvent{},
+		&models.BillingRecord{},
+		&models.Invoice{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}

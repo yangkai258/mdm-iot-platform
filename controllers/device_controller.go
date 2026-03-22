@@ -36,6 +36,12 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 	positionTemplateCtrl := &PositionTemplateController{DB: db}
 
+	// Sprint 16: 订阅和计费控制器
+	subscriptionCtrl := &SubscriptionController{DB: db}
+	usageCtrl := &UsageController{DB: db}
+	webhookCtrl := &WebhookController{DB: db}
+	billingCtrl := &BillingController{DB: db}
+
 	api := r.Group("/api/v1")
 	{
 		// ============ 设备管理 ============
@@ -341,6 +347,49 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.GET("/ai/quality/metrics", aiQualityCtrl.GetMetrics)
 		api.GET("/ai/quality/metrics/trend", aiQualityCtrl.GetMetricsTrend)
 		api.GET("/ai/quality/anomaly", aiQualityCtrl.GetAnomalyEvents)
+
+		// ============ Sprint 16: 订阅和计费系统 ============
+		// 订阅计划管理
+		api.GET("/subscription/plans", subscriptionCtrl.ListPlans)
+		api.POST("/subscription/plans", subscriptionCtrl.CreatePlan)
+		api.GET("/subscription/plans/:id", subscriptionCtrl.GetPlan)
+		api.PUT("/subscription/plans/:id", subscriptionCtrl.UpdatePlan)
+		api.DELETE("/subscription/plans/:id", subscriptionCtrl.DeletePlan)
+
+		// 用户订阅管理
+		api.GET("/subscriptions", subscriptionCtrl.ListUserSubscriptions)
+		api.GET("/subscriptions/current", subscriptionCtrl.GetCurrentSubscription)
+		api.POST("/subscriptions", subscriptionCtrl.Subscribe)
+		api.GET("/subscriptions/:id", subscriptionCtrl.GetSubscription)
+		api.POST("/subscriptions/:id/cancel", subscriptionCtrl.CancelSubscription)
+		api.POST("/subscriptions/:id/renew", subscriptionCtrl.RenewSubscription)
+		api.POST("/subscriptions/:id/upgrade", subscriptionCtrl.UpgradeSubscription)
+		api.POST("/subscriptions/:id/downgrade", subscriptionCtrl.DowngradeSubscription)
+
+		// 用量计费
+		api.GET("/usage/current", usageCtrl.GetCurrentUsage)
+		api.GET("/usage/history", usageCtrl.GetUsageHistory)
+		api.GET("/usage/quotas", usageCtrl.GetQuotas)
+		api.GET("/usage/quotas/:type", usageCtrl.GetQuotaByType)
+		api.PUT("/usage/quotas/:type", usageCtrl.UpdateQuota)
+		api.GET("/usage/stats", usageCtrl.GetUsageStats)
+
+		// Webhook 管理
+		api.GET("/webhooks", webhookCtrl.List)
+		api.POST("/webhooks", webhookCtrl.Create)
+		api.GET("/webhooks/:id", webhookCtrl.Get)
+		api.PUT("/webhooks/:id", webhookCtrl.Update)
+		api.DELETE("/webhooks/:id", webhookCtrl.Delete)
+		api.POST("/webhooks/:id/test", webhookCtrl.TestWebhook)
+		api.GET("/webhooks/:id/events", webhookCtrl.GetEvents)
+
+		// 账单
+		api.GET("/billing/records", billingCtrl.ListRecords)
+		api.GET("/billing/records/:id", billingCtrl.GetRecord)
+		api.GET("/billing/invoices", billingCtrl.ListInvoices)
+		api.POST("/billing/invoices", billingCtrl.CreateInvoice)
+		api.GET("/billing/invoices/:id", billingCtrl.GetInvoice)
+		api.GET("/billing/summary", billingCtrl.GetSummary)
 	}
 }
 
