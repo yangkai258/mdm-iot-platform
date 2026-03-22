@@ -358,7 +358,7 @@ func evaluateAlertRule(conditions models.JSON, data map[string]interface{}) (boo
 		op, _ := conditions["operator"].(string)
 		threshold, _ := toFloat64(conditions["value"])
 
-		return evaluateCondition(field, op, threshold, data), nil
+		return alertRuleEvaluateCondition(field, op, threshold, data), nil
 	}
 
 	// 多条件 AND 逻辑
@@ -373,7 +373,7 @@ func evaluateAlertRule(conditions models.JSON, data map[string]interface{}) (boo
 		}
 		op, _ := itemMap["operator"].(string)
 		threshold, _ := toFloat64(itemMap["value"])
-		if !evaluateCondition(field, op, threshold, data) {
+		if !alertRuleEvaluateCondition(field, op, threshold, data) {
 			return false, nil
 		}
 	}
@@ -382,7 +382,7 @@ func evaluateAlertRule(conditions models.JSON, data map[string]interface{}) (boo
 }
 
 // evaluateCondition 评估单个条件
-func evaluateCondition(field, operator string, threshold float64, data map[string]interface{}) bool {
+func alertRuleEvaluateCondition(field, operator string, threshold float64, data map[string]interface{}) bool {
 	val, exists := data[field]
 	if !exists {
 		return false

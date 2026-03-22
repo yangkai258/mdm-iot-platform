@@ -48,7 +48,7 @@ func (ctrl *BatchController) DeviceActions(c *gin.Context) {
 	}
 
 	taskID := "batch-" + uuid.New().String()
-	creatorID := getUserIDFromContext(c)
+	creatorID := batchGetUserIDFromContext(c)
 
 	task := models.BatchTask{
 		TaskID:    taskID,
@@ -247,7 +247,7 @@ func (ctrl *BatchController) BatchShadowUpdate(c *gin.Context) {
 	}
 
 	taskID := "batch-shadow-" + uuid.New().String()
-	creatorID := getUserIDFromContext(c)
+	creatorID := batchGetUserIDFromContext(c)
 
 	task := models.BatchTask{
 		TaskID:    taskID,
@@ -418,7 +418,7 @@ func (ctrl *BatchController) ListTasks(c *gin.Context) {
 
 // ============ 辅助函数 ============
 
-func getUserIDFromContext(c *gin.Context) uint {
+func batchGetUserIDFromContext(c *gin.Context) uint {
 	if uid, exists := c.Get("user_id"); exists {
 		switch v := uid.(type) {
 		case uint:
