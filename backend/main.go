@@ -132,6 +132,18 @@ func main() {
 		// Sprint 12: 数据权限表
 		&models.DataPermissionRule{},
 		&models.UserDataPermission{},
+		// Sprint 21: 具身智能表
+		&models.EmbodiedMap{},
+		&models.SpatialPosition{},
+		&models.ActionExecution{},
+		&models.SafetyZone{},
+		&models.EmbodiedDecisionLog{},
+		&models.SafetyLog{},
+		&models.PerceptionData{},
+		&models.NavigationTask{},
+		&models.ExploreTask{},
+		&models.FollowTask{},
+		&models.DecisionStrategy{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -473,9 +485,19 @@ func main() {
 	apiV1.GET("/devices/:device_id/wipe-history", deviceSecurityCtrl.GetWipeHistory)
 	apiV1.GET("/devices/:device_id/lock-status", deviceSecurityCtrl.GetDeviceLockStatus)
 
+	// ============ Sprint 21: 具身智能路由 ============
+	embodiedCtrl := &controllers.EmbodiedController{DB: db}
+	embodiedCtrl.RegisterEmbodiedRoutes(apiV1)
+
 	// ============ Sprint 12: 数据权限路由 ============
 	dataPermCtrl := &controllers.DataPermissionController{DB: db}
 	apiV1.GET("/data-permissions/rules", dataPermCtrl.ListDataPermissionRules)
+
+	// ============ 批量操作路由 ============
+	controllers.RegisterBatchRoutes(apiV1, db, redisClient)
+
+	// ============ 设备监控路由 ============
+	controllers.RegisterDeviceMonitorRoutes(apiV1, db, redisClient)
 	apiV1.POST("/data-permissions/rules", dataPermCtrl.CreateDataPermissionRule)
 	apiV1.PUT("/data-permissions/rules/:id", dataPermCtrl.UpdateDataPermissionRule)
 	apiV1.DELETE("/data-permissions/rules/:id", dataPermCtrl.DeleteDataPermissionRule)
