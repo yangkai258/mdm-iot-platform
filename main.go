@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -12,8 +13,10 @@ import (
 	plugins "mdm-backend/plugins"
 	"mdm-backend/services"
 	"mdm-backend/utils"
+	"mdm-backend/websocket"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 	"gorm.io/gorm"
 )
 
@@ -55,6 +58,9 @@ func main() {
 		&models.GeofenceAlert{},
 		// 告警通知表
 		&models.AlertNotification{},
+		// 告警设置表
+		&models.AlertSettings{},
+		&models.NotificationChannel{},
 		// 合规表
 		&models.CompliancePolicy{},
 		&models.ComplianceViolation{},
@@ -95,8 +101,6 @@ func main() {
 		&models.Tenant{},
 		&models.TenantQuota{},
 		&models.Plan{},
-		&models.Package{},
-		&models.PackageQuota{},
 		// 租户申请表
 		&models.TenantApplication{},
 		&models.ApprovalHistory{},
@@ -113,19 +117,19 @@ func main() {
 		&models.RolePermissionGroup{},
 		// 数据权限表
 		&models.DataScope{},
-		// 流程管理表
-		&models.FlowDefinition{},
-		&models.FlowInstance{},
-		&models.FlowTask{},
-		// 基础管理表（档案/调度/字典）
-		&models.SysDictType{},
-		&models.SysDictItem{},
-		&models.SysNumberRule{},
-		&models.SysScheduleJob{},
-		// 报表记录表
-		&models.ReportRecord{},
-		// 邮件模板表
-		&models.EmailTemplate{},
+		// 活动日志表
+		&models.ActivityLog{},
+		&models.LoginLog{},
+
+		// Sprint 10: 传感器事件表
+		&models.SensorEvent{},
+		&models.SensorThreshold{},
+		// Sprint 10: 告警规则表
+		&models.AlertRule{},
+		// Sprint 10: 设备监控指标表
+		&models.DeviceMetric{},
+		// Sprint 10: 批量任务表
+		&models.BatchTask{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -178,17 +182,24 @@ func main() {
 	r := gin.Default()
 
 	// CORS 白名单中间件
-	allowedOrigins := []string{
-		"http://localhost:3000",
-		"http://127.0.0.1:3000",
-	}
-	// 支持从环境变量扩展白名单，逗号分隔
+	// 优先从环境变量 CORS_ALLOWED_ORIGINS 读取（逗号分隔），为空时使用默认值
+	var allowedOrigins []string
 	if extra := os.Getenv("CORS_ALLOWED_ORIGINS"); extra != "" {
 		for _, o := range strings.Split(extra, ",") {
 			o = strings.TrimSpace(o)
 			if o != "" {
 				allowedOrigins = append(allowedOrigins, o)
 			}
+		}
+	} else {
+		// 开发环境默认值
+		allowedOrigins = []string{
+			"http://localhost:3000",
+			"http://127.0.0.1:3000",
+			"http://localhost:5173",
+			"http://localhost:5174",
+			"http://127.0.0.1:5173",
+			"http://127.0.0.1:5174",
 		}
 	}
 	r.Use(func(c *gin.Context) {
@@ -214,7 +225,7 @@ func main() {
 	})
 
 	// 注册认证路由 (不需要 JWT)
-	authCtrl := &controllers.AuthController{DB: db}
+	authCtrl := &controllers.AuthController{DB: db, Redis: redisClient}
 	r.POST("/api/v1/auth/login", authCtrl.Login)
 
 	// JWT 中间件
@@ -235,11 +246,6 @@ func main() {
 	// 注册业务路由
 	controllers.RegisterRoutes(r, db, redisClient)
 
-	// 报表统计路由
-	reportCtrl := controllers.NewReportController(db, redisClient)
-	reportGroup := r.Group("/api/v1")
-	reportCtrl.RegisterRoutes(reportGroup)
-
 	// 注册系统管理路由
 	sys := r.Group("/api/v1")
 	dictCtrl := &controllers.DictController{DB: db}
@@ -250,37 +256,9 @@ func main() {
 	adminGroup := sys.Group("/admin")
 	tenantCtrl.RegisterTenantRoutes(adminGroup)
 
-	// 租户 CRUD API（/api/v1/tenants 路径，超管可用）
-	tenantCtrl.RegisterTenantAPIRoutes(sys)
-
 	// 租户申请审批路由（/api/v1/tenant-approvals）
 	tenantApprovalCtrl := &controllers.TenantApprovalController{DB: db}
 	tenantApprovalCtrl.RegisterRoutes(sys)
-
-	// 单位管理路由
-	companyCtrl := &controllers.CompanyController{DB: db}
-	deptCtrl := &controllers.DepartmentController{DB: db}
-	empCtrl := &controllers.EmployeeController{DB: db}
-
-	sys.GET("/companies", companyCtrl.CompanyList)
-	sys.POST("/companies", companyCtrl.CompanyCreate)
-	sys.GET("/companies/:id", companyCtrl.CompanyGet)
-	sys.PUT("/companies/:id", companyCtrl.CompanyUpdate)
-	sys.DELETE("/companies/:id", companyCtrl.CompanyDelete)
-
-	sys.GET("/departments/tree", deptCtrl.DepartmentTree)
-	sys.GET("/departments", deptCtrl.DepartmentList)
-	sys.POST("/departments", deptCtrl.DepartmentCreate)
-	sys.GET("/departments/:id", deptCtrl.DepartmentGet)
-	sys.PUT("/departments/:id", deptCtrl.DepartmentUpdate)
-	sys.DELETE("/departments/:id", deptCtrl.DepartmentDelete)
-
-	sys.GET("/employees", empCtrl.EmployeeList)
-	sys.POST("/employees/onboard", empCtrl.EmployeeOnboard)
-	sys.GET("/employees/:id", empCtrl.EmployeeGet)
-	sys.PUT("/employees/:id", empCtrl.EmployeeUpdate)
-	sys.DELETE("/employees/:id", empCtrl.EmployeeDelete)
-	sys.POST("/employees/:id/leave", empCtrl.EmployeeLeave)
 
 	{
 		// 权限系统路由（多租户版本）
@@ -320,65 +298,6 @@ func main() {
 		sys.GET("/logs/operations", logCtrl.GetOperationLogs)
 		sys.GET("/logs/login", logCtrl.GetLoginLogs)
 
-		// ========== 系统参数配置 ==========
-		sysConfigCtrl := &controllers.SystemConfigController{DB: db}
-		if err := sysConfigCtrl.InitDefaultConfigs(); err != nil {
-			log.Printf("WARN: Init default configs failed: %v", err)
-		}
-		sys.GET("/system-configs", sysConfigCtrl.GetConfigs)
-		sys.GET("/system-configs/:key", sysConfigCtrl.GetConfigByKey)
-		sys.PUT("/system-configs", sysConfigCtrl.UpdateConfigs)
-		sys.DELETE("/system-configs/:key", sysConfigCtrl.DeleteConfig)
-
-		// ========== 邮件模板管理 ==========
-		emailTemplateService := services.NewEmailTemplateService(db)
-		if err := emailTemplateService.InitDefaultTemplates(); err != nil {
-			log.Printf("WARN: Init default email templates failed: %v", err)
-		}
-		emailTemplateCtrl := controllers.NewEmailTemplateController(emailTemplateService)
-		sys.GET("/email-templates", emailTemplateCtrl.List)
-		sys.GET("/email-templates/:id", emailTemplateCtrl.Get)
-		sys.POST("/email-templates", emailTemplateCtrl.Create)
-		sys.PUT("/email-templates/:id", emailTemplateCtrl.Update)
-		sys.DELETE("/email-templates/:id", emailTemplateCtrl.Delete)
-		sys.POST("/email-templates/preview", emailTemplateCtrl.RenderPreview)
-
-		// ========== 基础管理路由（档案/调度/字典）==========
-		// 字典类型
-		dictTypeCtrl := &controllers.DictTypeController{DB: db}
-		sys.GET("/dict-types", dictTypeCtrl.List)
-		sys.GET("/dict-types/:id", dictTypeCtrl.Get)
-		sys.POST("/dict-types", dictTypeCtrl.Create)
-		sys.PUT("/dict-types/:id", dictTypeCtrl.Update)
-		sys.DELETE("/dict-types/:id", dictTypeCtrl.Delete)
-
-		// 字典项
-		dictItemCtrl := &controllers.DictItemController{DB: db}
-		sys.GET("/dict-items", dictItemCtrl.List)
-		sys.GET("/dict-items/:id", dictItemCtrl.Get)
-		sys.POST("/dict-items", dictItemCtrl.Create)
-		sys.PUT("/dict-items/:id", dictItemCtrl.Update)
-		sys.DELETE("/dict-items/:id", dictItemCtrl.Delete)
-		sys.GET("/dict-items-by-type/:type", dictItemCtrl.GetByType)
-
-		// 编号规则
-		numberRuleCtrl := &controllers.NumberRuleController{DB: db}
-		sys.GET("/number-rules", numberRuleCtrl.List)
-		sys.GET("/number-rules/:id", numberRuleCtrl.Get)
-		sys.POST("/number-rules", numberRuleCtrl.Create)
-		sys.PUT("/number-rules/:id", numberRuleCtrl.Update)
-		sys.DELETE("/number-rules/:id", numberRuleCtrl.Delete)
-		sys.POST("/number-rules/generate", numberRuleCtrl.Generate)
-
-		// 调度任务
-		scheduleJobCtrl := &controllers.ScheduleJobController{DB: db}
-		sys.GET("/schedule-jobs", scheduleJobCtrl.List)
-		sys.GET("/schedule-jobs/:id", scheduleJobCtrl.Get)
-		sys.POST("/schedule-jobs", scheduleJobCtrl.Create)
-		sys.PUT("/schedule-jobs/:id", scheduleJobCtrl.Update)
-		sys.DELETE("/schedule-jobs/:id", scheduleJobCtrl.Delete)
-		sys.POST("/schedule-jobs/:id/execute", scheduleJobCtrl.Execute)
-
 		// 告警管理
 		alertCtrl := &controllers.AlertController{DB: db}
 		sys.GET("/alerts/rules", alertCtrl.GetRules)
@@ -407,13 +326,44 @@ func main() {
 		sys.DELETE("/geofence/rules/:id", alertCtrl.DeleteGeofenceRule)
 		sys.GET("/geofence/alerts", alertCtrl.GetGeofenceAlerts)
 
-		sys.GET("/dashboard/stats", alertCtrl.GetDashboardStats)
+		// 告警设置
+		alertSettingsCtrl := &controllers.AlertSettingsController{DB: db}
+		sys.GET("/alerts/settings", alertSettingsCtrl.GetAlertSettings)
+		sys.PUT("/alerts/settings", alertSettingsCtrl.UpdateAlertSettings)
+
+		// 通知渠道配置
+		notifChannelCtrl := &controllers.NotificationChannelController{DB: db}
+		sys.GET("/notification-channels", notifChannelCtrl.ListChannels)
+		sys.POST("/notification-channels", notifChannelCtrl.CreateChannel)
+		sys.GET("/notification-channels/:id", notifChannelCtrl.GetChannel)
+		sys.PUT("/notification-channels/:id", notifChannelCtrl.UpdateChannel)
+		sys.DELETE("/notification-channels/:id", notifChannelCtrl.DeleteChannel)
+		sys.POST("/notification-channels/:id/toggle", notifChannelCtrl.ToggleChannel)
+		sys.POST("/notification-channels/:id/test", notifChannelCtrl.TestChannel)
+
+		// Dashboard 统计（使用独立的 DashboardController）
+		dashboardCtrl := &controllers.DashboardController{DB: db}
+		sys.GET("/dashboard/stats", dashboardCtrl.GetStats)
+		sys.GET("/dashboard/stats/simple", dashboardCtrl.GetStatsSimple)
+		sys.GET("/dashboard/activity-summary", dashboardCtrl.GetActivitySummary)
+
+		// 活动日志（审计日志）
+		activityLogCtrl := &controllers.ActivityLogController{DB: db}
+		loginLogCtrl := &controllers.LoginLogController{DB: db}
+		sys.GET("/activity-logs", activityLogCtrl.List)
+		sys.GET("/activity-logs/statistics", activityLogCtrl.GetStatistics)
+		sys.GET("/activity-logs/:id", activityLogCtrl.Get)
+		sys.GET("/login-logs", loginLogCtrl.List)
 	}
 
 	// 健康检查
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+
+	// WebSocket 实时通知路由
+	websocket.GetHub() // 初始化Hub
+	r.GET("/ws/notifications", controllers.HandleWebSocket)
 
 	// 知识库路由
 	knowledgeCtrl := &controllers.KnowledgeController{}
@@ -427,6 +377,25 @@ func main() {
 	// MiniClaw路由
 	miniClawCtrl := &controllers.MiniClawController{}
 	miniClawCtrl.RegisterRoutes(apiV1)
+
+	// ============ Sprint 9: Pet Controller 路由 ============
+	petCtrl := &controllers.PetController{DB: db, Redis: redisClient}
+	petCtrl.RegisterRoutes(apiV1)
+
+	// ============ Sprint 9: Behavior Controller 路由 ============
+	behaviorCtrl := &controllers.BehaviorController{DB: db}
+	behaviorCtrl.RegisterRoutes(apiV1)
+
+	// ============ Sprint 9: Memory Controller 路由 ============
+	memoryCtrl := &controllers.MemoryController{DB: db}
+	memoryCtrl.RegisterRoutes(apiV1)
+
+	// ============ Sprint 9: MiniClaw 状态订阅 ============
+	statusHandler := mqtt.NewStatusHandler(db, redisClient)
+	statusHandler.SetupMiniClawSubscriber(mqttHandler)
+
+	// ============ Sprint 9: Pet WebSocket 路由 ============
+	apiV1.GET("/ws/pets/:device_id", handlePetWebSocket)
 
 	// 通知路由
 	notifCtrl := &controllers.NotificationController{DB: db}
@@ -454,9 +423,55 @@ func main() {
 	apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
 	apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
 
-	// 流程管理路由（BPMN）
-	flowCtrl := controllers.NewFlowController(db)
-	flowCtrl.RegisterRoutes(apiV1)
+	// 合规策略 API（/api/v1/compliance/policies，标准 REST 端点）
+	apiV1.GET("/compliance/policies", complianceCtrlExtra.ListRules)
+	apiV1.POST("/compliance/policies", complianceCtrlExtra.CreateRule)
+	apiV1.PUT("/compliance/policies/:id", complianceCtrlExtra.UpdateRule)
+	apiV1.DELETE("/compliance/policies/:id", complianceCtrlExtra.DeleteRule)
+
+	// ============ 数据导入导出路由 ============
+	importExportCtrl := &controllers.ImportExportController{DB: db}
+	// 设备导入导出
+	apiV1.GET("/devices/export", importExportCtrl.ExportDevices)
+	apiV1.POST("/devices/import", importExportCtrl.ImportDevices)
+	// 会员导入导出
+	apiV1.GET("/members/export", importExportCtrl.ExportMembers)
+	apiV1.POST("/members/import", importExportCtrl.ImportMembers)
+	// 活动日志导出
+	apiV1.GET("/activity-logs/export", importExportCtrl.ExportActivityLogs)
+
+	// ============ 批量操作路由 ============
+	// 设备批量操作
+	apiV1.POST("/devices/batch-delete", importExportCtrl.BatchDeleteDevices)
+	apiV1.POST("/devices/batch-status", importExportCtrl.BatchUpdateDeviceStatus)
+	// 会员批量操作
+	apiV1.POST("/members/batch-delete", importExportCtrl.BatchDeleteMembers)
+
+	// ============ Sprint 10: 传感器事件路由 ============
+	sensorCtrl := &controllers.SensorController{DB: db}
+	sensorCtrl.RegisterSensorRoutes(apiV1)
+	// 传感器数据聚合
+	apiV1.GET("/sensors/:device_id/aggregations", sensorCtrl.GetAggregations)
+	// 传感器指标上报（供设备或MQTT调用）
+	apiV1.POST("/sensors/events", sensorCtrl.CreateEvent)
+
+	// ============ Sprint 10: 动作库管理路由 ============
+	actionLibCtrl := &controllers.ActionLibraryController{DB: db}
+	actionLibCtrl.RegisterActionLibraryRoutes(apiV1)
+
+	// ============ Sprint 10: 告警规则路由 ============
+	alertRuleCtrl := &controllers.AlertRuleController{DB: db}
+	alertRuleCtrl.RegisterAlertRuleRoutes(apiV1)
+
+	// ============ Sprint 10: 设备监控路由 ============
+	deviceMonitorCtrl := &controllers.DeviceMonitorController{DB: db}
+	deviceMonitorCtrl.RegisterDeviceMonitorRoutes(apiV1)
+	// 设备指标上报
+	apiV1.POST("/monitor/metrics", deviceMonitorCtrl.ReportMetric)
+
+	// ============ Sprint 10: 批量操作路由 ============
+	batchCtrl := &controllers.BatchController{DB: db}
+	batchCtrl.RegisterBatchRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")
@@ -468,4 +483,32 @@ func main() {
 	if err := r.Run(":" + port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// handlePetWebSocket 处理宠物WebSocket连接
+func handlePetWebSocket(c *gin.Context) {
+	deviceID := c.Param("device_id")
+	userID := "anonymous" // TODO: 从JWT获取真实用户ID
+	if uid, exists := c.Get("user_id"); exists {
+		userID = uid.(string)
+	}
+
+	// 获取WebSocket连接
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Printf("[PetWS] Failed to upgrade connection: %v", err)
+		return
+	}
+
+	// 使用Pet WebSocket服务处理连接
+	handler := services.NewPetWebSocketHandler()
+	handler.HandleWebSocket(conn, deviceID, userID)
 }
