@@ -1,0 +1,192 @@
+import axios from 'axios'
+
+const BASE_URL = '/api/v1'
+
+function getToken() {
+  return localStorage.getItem('token') || ''
+}
+
+function headers() {
+  return { Authorization: `Bearer ${getToken()}` }
+}
+
+// ============================================================
+// LDAP 配置
+// ============================================================
+export async function getLdapConfig() {
+  const res = await axios.get(`${BASE_URL}/ldap/config`, { headers: headers() })
+  return res.data
+}
+
+export async function updateLdapConfig(data: any) {
+  const res = await axios.put(`${BASE_URL}/ldap/config`, data, { headers: headers() })
+  return res.data
+}
+
+export async function testLdapConnection(data: any) {
+  const res = await axios.post(`${BASE_URL}/ldap/test`, data, { headers: headers() })
+  return res.data
+}
+
+export async function getLdapUsers(params: any) {
+  const res = await axios.get(`${BASE_URL}/ldap/users`, { params, headers: headers() })
+  return res.data
+}
+
+export async function getLdapGroups() {
+  const res = await axios.get(`${BASE_URL}/ldap/groups`, { headers: headers() })
+  return res.data
+}
+
+export async function syncLdapUsers() {
+  const res = await axios.post(`${BASE_URL}/ldap/sync`, {}, { headers: headers() })
+  return res.data
+}
+
+export async function setLdapGroupMapping(data: any) {
+  const res = await axios.post(`${BASE_URL}/ldap/group-mapping`, data, { headers: headers() })
+  return res.data
+}
+
+// ============================================================
+// 证书管理
+// ============================================================
+export async function getCertificates(params: any) {
+  const res = await axios.get(`${BASE_URL}/certificates`, { params, headers: headers() })
+  return res.data
+}
+
+export async function getCertificate(id: string) {
+  const res = await axios.get(`${BASE_URL}/certificates/${id}`, { headers: headers() })
+  return res.data
+}
+
+export async function uploadCertificate(data: any) {
+  const res = await axios.post(`${BASE_URL}/certificates`, data, {
+    headers: { ...headers(), 'Content-Type': 'multipart/form-data' }
+  })
+  return res.data
+}
+
+export async function deleteCertificate(id: string) {
+  const res = await axios.delete(`${BASE_URL}/certificates/${id}`, { headers: headers() })
+  return res.data
+}
+
+export async function revokeCertificate(id: string, reason?: string) {
+  const res = await axios.post(`${BASE_URL}/certificates/${id}/revoke`, { reason }, { headers: headers() })
+  return res.data
+}
+
+export async function renewCertificate(id: string) {
+  const res = await axios.post(`${BASE_URL}/certificates/${id}/renew`, {}, { headers: headers() })
+  return res.data
+}
+
+export async function issueCertificate(data: any) {
+  const res = await axios.post(`${BASE_URL}/certificates/issue`, data, { headers: headers() })
+  return res.data
+}
+
+export async function downloadCertificate(id: string) {
+  const res = await axios.get(`${BASE_URL}/certificates/${id}/download`, {
+    headers: headers(),
+    responseType: 'blob'
+  })
+  return res.data
+}
+
+// ============================================================
+// 设备安全操作
+// ============================================================
+export async function lockDevice(deviceId: string) {
+  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/lock`, {}, { headers: headers() })
+  return res.data
+}
+
+export async function unlockDevice(deviceId: string) {
+  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/unlock`, {}, { headers: headers() })
+  return res.data
+}
+
+export async function wipeDevice(deviceId: string) {
+  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/wipe`, {}, { headers: headers() })
+  return res.data
+}
+
+export async function confirmWipeDevice(deviceId: string, data: any) {
+  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/wipe/confirm`, data, { headers: headers() })
+  return res.data
+}
+
+export async function getWipeHistory(deviceId: string, params?: any) {
+  const res = await axios.get(`${BASE_URL}/devices/${deviceId}/wipe-history`, { params, headers: headers() })
+  return res.data
+}
+
+// ============================================================
+// 数据权限
+// ============================================================
+export async function getDataPermissionRoles(roleId: string) {
+  const res = await axios.get(`${BASE_URL}/data-permissions/roles/${roleId}`, { headers: headers() })
+  return res.data
+}
+
+export async function updateDataPermissionRoles(roleId: string, data: any) {
+  const res = await axios.put(`${BASE_URL}/data-permissions/roles/${roleId}`, data, { headers: headers() })
+  return res.data
+}
+
+export async function getDataPermissionUsers(userId: string) {
+  const res = await axios.get(`${BASE_URL}/data-permissions/users/${userId}`, { headers: headers() })
+  return res.data
+}
+
+export async function updateDataPermissionUsers(userId: string, data: any) {
+  const res = await axios.put(`${BASE_URL}/data-permissions/users/${userId}`, data, { headers: headers() })
+  return res.data
+}
+
+export async function getDataPermissions(params?: any) {
+  const res = await axios.get(`${BASE_URL}/data-permissions`, { params, headers: headers() })
+  return res.data
+}
+
+export async function createDataPermission(data: any) {
+  const res = await axios.post(`${BASE_URL}/data-permissions`, data, { headers: headers() })
+  return res.data
+}
+
+export async function updateDataPermission(id: string, data: any) {
+  const res = await axios.put(`${BASE_URL}/data-permissions/${id}`, data, { headers: headers() })
+  return res.data
+}
+
+export async function deleteDataPermission(id: string) {
+  const res = await axios.delete(`${BASE_URL}/data-permissions/${id}`, { headers: headers() })
+  return res.data
+}
+
+// ============================================================
+// 辅助：获取设备列表
+// ============================================================
+export async function getDevices(params?: any) {
+  const res = await axios.get(`${BASE_URL}/devices`, { params, headers: headers() })
+  return res.data
+}
+
+// ============================================================
+// 辅助：获取角色列表
+// ============================================================
+export async function getRoles(params?: any) {
+  const res = await axios.get(`${BASE_URL}/roles`, { params, headers: headers() })
+  return res.data
+}
+
+// ============================================================
+// 辅助：获取用户列表
+// ============================================================
+export async function getUsers(params?: any) {
+  const res = await axios.get(`${BASE_URL}/users`, { params, headers: headers() })
+  return res.data
+}

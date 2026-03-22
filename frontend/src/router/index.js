@@ -230,6 +230,25 @@ const routes = [
     name: 'AlertSettings',
     component: () => import('../views/alerts/AlertSettings.vue')
   },
+  // ============ Sprint 11: 告警通知 ============
+  {
+    path: '/alert/notification',
+    name: 'AlertNotification',
+    component: () => import('../views/alert/AlertNotificationView.vue'),
+    meta: { title: '告警通知' }
+  },
+  {
+    path: '/alert/history',
+    name: 'AlertHistory',
+    component: () => import('../views/alert/AlertHistoryView.vue'),
+    meta: { title: '告警历史' }
+  },
+  {
+    path: '/alert/notification-logs',
+    name: 'NotificationLogs',
+    component: () => import('../views/alert/NotificationLogsView.vue'),
+    meta: { title: '通知日志' }
+  },
   // 租户管理
   {
     path: '/tenants/approval',
@@ -302,6 +321,44 @@ const routes = [
     path: '/org/employees',
     name: 'OrgEmployees',
     component: () => import('../views/org/Employees.vue')
+  },
+
+  // ============ Sprint 12: 安全功能 ============
+  {
+    path: '/security/permission',
+    name: 'PermissionAssignment',
+    component: () => import('../views/security/PermissionAssignmentView.vue'),
+    meta: { title: '权限分配' }
+  },
+  {
+    path: '/security/data-permission',
+    name: 'DataPermission',
+    component: () => import('../views/security/DataPermissionView.vue'),
+    meta: { title: '数据权限' }
+  },
+  {
+    path: '/security/certificate',
+    name: 'CertificateManage',
+    component: () => import('../views/security/CertificateManageView.vue'),
+    meta: { title: '证书管理' }
+  },
+  {
+    path: '/security/device',
+    name: 'DeviceSecurity',
+    component: () => import('../views/security/DeviceSecurityView.vue'),
+    meta: { title: '设备安全' }
+  },
+  {
+    path: '/security/ldap',
+    name: 'LDAPConfig',
+    component: () => import('../views/security/LDAPConfigView.vue'),
+    meta: { title: 'LDAP配置' }
+  },
+  {
+    path: '/security/user-sync',
+    name: 'UserSync',
+    component: () => import('../views/security/UserSyncView.vue'),
+    meta: { title: '用户同步' }
   }
 ]
 

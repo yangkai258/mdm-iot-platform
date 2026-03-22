@@ -161,6 +161,25 @@ const routes = [
     name: 'AlertSettings',
     component: () => import('../views/alerts/AlertSettings.vue')
   },
+  // ============ Sprint 11: 告警通知 ============
+  {
+    path: '/alert/notification',
+    name: 'AlertNotification',
+    component: () => import('../views/alert/AlertNotificationView.vue'),
+    meta: { title: '告警通知' }
+  },
+  {
+    path: '/alert/history',
+    name: 'AlertHistory',
+    component: () => import('../views/alert/AlertHistoryView.vue'),
+    meta: { title: '告警历史' }
+  },
+  {
+    path: '/alert/notification-logs',
+    name: 'NotificationLogs',
+    component: () => import('../views/alert/NotificationLogsView.vue'),
+    meta: { title: '通知日志' }
+  },
   // 租户管理
   {
     path: '/tenants/approval',

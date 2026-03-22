@@ -220,3 +220,27 @@ CREATE TABLE data_permission_rules (
 | LDAP 服务不稳定 | 用户无法登录 | 保留本地账号作为备用 |
 | 设备不在线 | 锁定/擦除失败 | 增加重试+状态查询 |
 | 证书过期未处理 | 设备离线 | 提前 30 天预警 |
+
+---
+
+## 六、前端完成清单（agentqd）
+
+**完成时间**：2026-03-22
+
+| # | 任务 | 交付物 | 状态 |
+|---|------|--------|------|
+| PF0-1 | 权限分配页面 | `views/security/PermissionAssignmentView.vue` | ✅ 完成 |
+| PF0-2 | 数据权限配置页面 | `views/security/DataPermissionView.vue` | ✅ 完成 |
+| PF0-3 | 证书管理页面 | `views/security/CertificateManageView.vue` | ✅ 完成 |
+| PF0-4 | 设备安全操作 | `views/security/DeviceSecurityView.vue` | ✅ 完成 |
+| PF1-1 | LDAP 配置页面 | `views/security/LDAPConfigView.vue` | ✅ 完成 |
+| PF1-2 | 用户同步管理 | `views/security/UserSyncView.vue` | ✅ 完成 |
+| PF1-3 | 擦除操作确认弹窗 | `components/security/DeviceWipeConfirmModal.vue` | ✅ 完成 |
+| PF2-1 | 擦除历史页面 | （由后端 agent 提供） | 待完成 |
+| API层 | security.ts | `api/security.ts` | ✅ 完成 |
+| 路由 | 安全模块路由 | `router/index.js` | ✅ 完成 |
+
+**附带修复**：
+- 修复 `AlertHistoryView.vue`、 `NotificationLogsView.vue` 等 Sprint 11 文件中的 TypeScript 语法错误和错误 icon 导入
+- 修复 `WebhookChannelConfig.vue` 等文件的 TypeScript 类型注解问题
+- 构建验证通过 ✅
