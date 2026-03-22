@@ -144,6 +144,14 @@ func main() {
 		&models.AIModelVersion{},
 		&models.SandboxTest{},
 		&models.AIRollbackTask{},
+		// Sprint 15: 宠物档案扩展
+		&models.Pet{},
+		&models.PetDeviceBinding{},
+		&models.LostPet{},
+		&models.PetSighting{},
+		&models.HouseholdMember{},
+		&models.PetHealthReminder{},
+		&models.PetCheckup{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -535,6 +543,19 @@ func main() {
 	apiV1.DELETE("/data-residency/rules/:id", dataResidencyCtrl.DeleteDataResidencyRule)
 	apiV1.POST("/data-residency/rules/validate", dataResidencyCtrl.ValidateDataResidency)
 	apiV1.POST("/data-residency/rules/batch", dataResidencyCtrl.BatchCreateDataResidencyRules)
+
+	// ============ Sprint 15: 宠物档案扩展路由 ============
+	petCtrl := &controllers.PetCtrl{DB: db}
+	petCtrl.RegisterPetRoutes(apiV1)
+
+	lostFoundCtrl := &controllers.LostFoundCtrl{DB: db}
+	lostFoundCtrl.RegisterLostFoundRoutes(apiV1)
+
+	householdPetCtrl := &controllers.HouseholdPetCtrl{DB: db}
+	householdPetCtrl.RegisterHouseholdRoutes(apiV1)
+
+	petHealthCtrl := &controllers.PetHealthCtrl{DB: db}
+	petHealthCtrl.RegisterPetHealthRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")
