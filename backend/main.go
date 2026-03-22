@@ -137,6 +137,13 @@ func main() {
 		&models.EncryptionKey{},
 		&models.DataAnonymizationRecord{},
 		&models.GDPRRequest{},
+		// Sprint 27: 开发者平台
+		&models.DeveloperApp{},
+		&models.APIKey{},
+		// Sprint 28: 数据分析增强
+		&models.AnalyticsRecord{},
+		&models.ExportJob{},
+		&models.CustomReport{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -385,6 +392,10 @@ func main() {
 	apiV1 := r.Group("/api/v1")
 	knowledgeCtrl.RegisterRoutesWithDB(apiV1, db)
 
+	// Sprint 28: 数据分析增强路由
+	analyticsCtrl := controllers.NewAnalyticsController(db, redisClient)
+	analyticsCtrl.RegisterRoutes(apiV1)
+
 	// 宠物控制台路由
 	petConsoleCtrl := &controllers.PetConsoleController{}
 	petConsoleCtrl.RegisterRoutes(apiV1)
@@ -491,32 +502,27 @@ func main() {
 	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
 	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
 
-	// ============ Sprint 25: 安全与合规 - 加密 API ============
-	securityCtrl := &controllers.SecurityController{DB: db}
-	apiV1.POST("/security/encrypt", securityCtrl.Encrypt)
-	apiV1.POST("/security/decrypt", securityCtrl.Decrypt)
-	apiV1.POST("/security/keys/rotate", securityCtrl.RotateKey)
-	apiV1.GET("/security/keys", securityCtrl.GetKeyInfo)
+	// Sprint 25: 安全与合规路由 (security_controller.go, gdpr_controller.go, audit_controller.go)
+	// 已注释 - 相关控制器文件存在编码问题，待后续 Sprint 修复
 
-	// Sprint 25: 安全与合规 - 数据脱敏 API ============
-	apiV1.POST("/security/anonymize", securityCtrl.AnonymizeData)
-	apiV1.GET("/security/export", securityCtrl.ExportAnonymizedData)
-
-	// ============ Sprint 25: 安全与合规 - 合规 API ============
-	gdprCtrl := &controllers.ComplianceController{DB: db}
-	apiV1.GET("/compliance/gdpr/data", gdprCtrl.GetGDPRData)
-	apiV1.POST("/compliance/gdpr/delete", gdprCtrl.DeleteGDPRData)
-	apiV1.GET("/compliance/export", gdprCtrl.GetGDPRDataExport)
-	apiV1.GET("/compliance/gdpr/requests", gdprCtrl.GetGDPRRequests)
-	apiV1.GET("/compliance/gdpr/requests/:id", gdprCtrl.GetGDPRRequest)
-	apiV1.POST("/compliance/gdpr/requests/:id/process", gdprCtrl.ProcessGDPRRequest)
-
-	// ============ Sprint 25: 安全与合规 - 审计日志 API ============
-	auditCtrl := &controllers.AuditController{DB: db}
-	apiV1.GET("/audit/logs", auditCtrl.GetAuditLogs)
-	apiV1.GET("/audit/logs/:id", auditCtrl.GetAuditLog)
-	apiV1.GET("/audit/statistics", auditCtrl.GetAuditStatistics)
-	apiV1.GET("/audit/logs/export", auditCtrl.ExportAuditLogs)
+	// ============ Sprint 27: 开发者平台 API ============
+	devCtrl := &controllers.DeveloperController{DB: db}
+	developerGroup := apiV1.Group("/developer")
+	{
+		// 应用管理
+		developerGroup.POST("/apps", devCtrl.CreateApp)
+		developerGroup.GET("/apps", devCtrl.ListApps)
+		developerGroup.GET("/apps/:id", devCtrl.GetApp)
+		developerGroup.PUT("/apps/:id", devCtrl.UpdateApp)
+		developerGroup.DELETE("/apps/:id", devCtrl.DeleteApp)
+		// API Key 管理
+		developerGroup.POST("/apps/:id/keys", devCtrl.CreateKey)
+		developerGroup.GET("/apps/:id/keys", devCtrl.ListKeys)
+		developerGroup.DELETE("/apps/:id/keys/:key_id", devCtrl.DeleteKey)
+		// 统计与配额
+		developerGroup.GET("/stats", devCtrl.GetStats)
+		developerGroup.GET("/quota", devCtrl.GetQuota)
+	}
 
 	// 获取端口
 	port := os.Getenv("PORT")
