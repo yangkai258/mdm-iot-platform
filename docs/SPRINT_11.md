@@ -1,7 +1,7 @@
 # Sprint 11 规划
 
 **时间**：2026-04-19
-**状态**：待开始
+**状态**：✅ 前端已完成（2026-03-22）
 **Sprint 周期**：2 周（2026-04-19 ～ 2026-05-02）
 
 ---
@@ -34,16 +34,55 @@
 
 ### 前端 P0/P1/P2 任务表
 
-| # | 任务 | 说明 | 交付物 | 优先级 |
-|---|------|------|--------|--------|
-| PF0-1 | **告警通知配置页面** | 完成 AlertNotificationView.vue 通知渠道配置 | AlertNotificationView.vue | P0 |
-| PF0-2 | **邮件渠道配置** | 完成 EmailChannelConfig.vue SMTP 配置表单 | EmailChannelConfig.vue | P0 |
-| PF0-3 | **短信渠道配置** | 完成 SMSChannelConfig.vue 短信服务商配置 | SMSChannelConfig.vue | P0 |
-| PF0-4 | **Webhook渠道配置** | 完成 WebhookChannelConfig.vue Webhook 配置 | WebhookChannelConfig.vue | P0 |
-| PF1-1 | **告警历史管理页面** | 完成 AlertHistoryView.vue 告警历史查询/导出 | AlertHistoryView.vue | P1 |
-| PF1-2 | **通知日志页面** | 完成 NotificationLogsView.vue 通知发送日志 | NotificationLogsView.vue | P1 |
-| PF1-3 | **通知模板编辑** | 完成 NotificationTemplateEditor.vue 模板编辑 | NotificationTemplateEditor.vue | P1 |
-| PF2-1 | **通知统计仪表盘** | 完成 NotificationStatsView.vue 发送统计看板 | NotificationStatsView.vue | P2 |
+| # | 任务 | 说明 | 交付物 | 优先级 | 状态 |
+|---|------|------|--------|--------|------|
+| PF0-1 | **告警通知配置页面** | 完成 AlertNotificationView.vue 通知渠道配置 | AlertNotificationView.vue | P0 | ✅ 完成 |
+| PF0-2 | **邮件渠道配置** | 完成 EmailChannelConfig.vue SMTP 配置表单 | EmailChannelConfig.vue | P0 | ✅ 完成 |
+| PF0-3 | **短信渠道配置** | 完成 SMSChannelConfig.vue 短信服务商配置 | SMSChannelConfig.vue | P0 | ✅ 完成 |
+| PF0-4 | **Webhook渠道配置** | 完成 WebhookChannelConfig.vue Webhook 配置 | WebhookChannelConfig.vue | P0 | ✅ 完成 |
+| PF1-1 | **告警历史管理页面** | 完成 AlertHistoryView.vue 告警历史查询/导出 | AlertHistoryView.vue | P1 | ✅ 完成 |
+| PF1-2 | **通知日志页面** | 完成 NotificationLogsView.vue 通知发送日志 | NotificationLogsView.vue | P1 | ✅ 完成 |
+| PF1-3 | **通知模板编辑** | 完成 NotificationTemplateEditor.vue 模板编辑 | NotificationTemplateEditor.vue | P1 | ⏳ 待后端 |
+| PF2-1 | **通知统计仪表盘** | 完成 NotificationStatsView.vue 发送统计看板 | NotificationStatsView.vue | P2 | ✅ 完成 |
+
+---
+
+## 六、前端交付清单
+
+### ✅ 已完成文件
+
+| 文件路径 | 说明 |
+|----------|------|
+| `src/api/notification.ts` | 通知相关 API 定义 |
+| `src/composables/useNotification.ts` | 通知相关 Composable |
+| `src/views/alert/AlertNotificationView.vue` | 告警通知主页面 |
+| `src/views/alert/EmailChannelConfig.vue` | 邮件渠道配置 |
+| `src/views/alert/SMSChannelConfig.vue` | 短信渠道配置 |
+| `src/views/alert/WebhookChannelConfig.vue` | Webhook 配置 |
+| `src/views/alert/AlertHistoryView.vue` | 告警历史页面 |
+| `src/views/alert/NotificationLogsView.vue` | 通知日志页面 |
+| `src/views/alert/NotificationStatsView.vue` | 统计报表页面 |
+| `src/router/index.js` | 已添加新路由 |
+
+### 路由配置
+
+```typescript
+{
+  path: '/alert/notification',
+  name: 'AlertNotification',
+  component: () => import('@/views/alert/AlertNotificationView.vue')
+},
+{
+  path: '/alert/history',
+  name: 'AlertHistory',
+  component: () => import('@/views/alert/AlertHistoryView.vue')
+},
+{
+  path: '/alert/notification-logs',
+  name: 'NotificationLogs',
+  component: () => import('@/views/alert/NotificationLogsView.vue')
+}
+```
 
 ---
 
