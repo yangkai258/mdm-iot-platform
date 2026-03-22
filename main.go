@@ -139,29 +139,6 @@ func main() {
 		&models.TimezoneConfig{},
 		// Sprint 13: 数据驻留
 		&models.DataResidencyRule{},
-		// Sprint 14: AI 行为监控和模型管理
-		&models.AIBehaviorLog{},
-		&models.AIModelVersion{},
-		&models.SandboxTest{},
-		&models.AIRollbackTask{},
-		// Sprint 15: 宠物档案扩展
-		&models.Pet{},
-		&models.PetDeviceBinding{},
-		&models.LostPet{},
-		&models.PetSighting{},
-		&models.HouseholdMember{},
-		&models.PetHealthReminder{},
-		&models.PetCheckup{},
-		// Sprint 16: 订阅和计费系统
-		&models.SubscriptionPlan{},
-		&models.UserSubscription{},
-		&models.SubscriptionChange{},
-		&models.UsageRecord{},
-		&models.UserQuota{},
-		&models.Webhook{},
-		&models.WebhookEvent{},
-		&models.BillingRecord{},
-		&models.Invoice{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -422,6 +399,10 @@ func main() {
 	notifCtrl := &controllers.NotificationController{DB: db}
 	notifCtrl.RegisterRoutes(apiV1)
 
+	// 情绪计算路由 (Sprint 17)
+	emotionCtrl := &controllers.EmotionController{DB: db}
+	emotionCtrl.RegisterEmotionRoutes(apiV1)
+
 	// 补充通知路由（push 和 batch-delete）
 	apiV1.POST("/notifications/push", notifCtrl.PushNotification)
 	apiV1.POST("/notifications/batch-delete", notifCtrl.BatchDeleteNotifications)
@@ -515,57 +496,6 @@ func main() {
 	apiV1.PUT("/data-permissions/users/:user_id", dataPermCtrl.UpdateUserDataPermissions)
 	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
 	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
-
-	// ============ Sprint 13: 多区域路由 ============
-	regionCtrl := controllers.NewRegionController(db)
-	apiV1.GET("/regions", regionCtrl.ListRegions)
-	apiV1.POST("/regions", regionCtrl.CreateRegion)
-	apiV1.GET("/regions/:id", regionCtrl.GetRegion)
-	apiV1.PUT("/regions/:id", regionCtrl.UpdateRegion)
-	apiV1.DELETE("/regions/:id", regionCtrl.DeleteRegion)
-	// 区域节点
-	apiV1.GET("/regions/:id/nodes", regionCtrl.ListRegionNodes)
-	apiV1.POST("/regions/:id/nodes", regionCtrl.CreateRegionNode)
-	apiV1.GET("/regions/:id/nodes/:node_id", regionCtrl.GetRegionNode)
-	apiV1.PUT("/regions/:id/nodes/:node_id", regionCtrl.UpdateRegionNode)
-	apiV1.DELETE("/regions/:id/nodes/:node_id", regionCtrl.DeleteRegionNode)
-	// 区域健康检查和故障切换
-	apiV1.GET("/regions/:id/health", regionCtrl.RegionHealthCheck)
-	apiV1.POST("/regions/:id/failover", regionCtrl.RegionFailover)
-
-	// ============ Sprint 13: 时区路由 ============
-	timezoneCtrl := controllers.NewTimezoneController(db)
-	apiV1.GET("/timezone", timezoneCtrl.GetCurrentUserTimezone)
-	apiV1.PUT("/timezone", timezoneCtrl.UpdateCurrentUserTimezone)
-	apiV1.GET("/timezone/list", timezoneCtrl.GetSupportedTimezones)
-	apiV1.GET("/timezone/tenant/:id", timezoneCtrl.GetTenantTimezone)
-	apiV1.PUT("/timezone/tenant/:id", timezoneCtrl.UpdateTenantTimezone)
-	apiV1.GET("/timezone/config", timezoneCtrl.GetTimezoneConfig)
-	apiV1.GET("/timezone/tenant-configs", timezoneCtrl.ListTenantTimezones)
-	apiV1.POST("/timezone/convert", timezoneCtrl.ConvertTime)
-
-	// ============ Sprint 13: 数据驻留路由 ============
-	dataResidencyCtrl := controllers.NewDataResidencyController(db)
-	apiV1.GET("/data-residency/rules", dataResidencyCtrl.ListDataResidencyRules)
-	apiV1.POST("/data-residency/rules", dataResidencyCtrl.CreateDataResidencyRule)
-	apiV1.GET("/data-residency/rules/:id", dataResidencyCtrl.GetDataResidencyRule)
-	apiV1.PUT("/data-residency/rules/:id", dataResidencyCtrl.UpdateDataResidencyRule)
-	apiV1.DELETE("/data-residency/rules/:id", dataResidencyCtrl.DeleteDataResidencyRule)
-	apiV1.POST("/data-residency/rules/validate", dataResidencyCtrl.ValidateDataResidency)
-	apiV1.POST("/data-residency/rules/batch", dataResidencyCtrl.BatchCreateDataResidencyRules)
-
-	// ============ Sprint 15: 宠物档案扩展路由 ============
-	petCtrl := &controllers.PetCtrl{DB: db}
-	petCtrl.RegisterPetRoutes(apiV1)
-
-	lostFoundCtrl := &controllers.LostFoundCtrl{DB: db}
-	lostFoundCtrl.RegisterLostFoundRoutes(apiV1)
-
-	householdPetCtrl := &controllers.HouseholdPetCtrl{DB: db}
-	householdPetCtrl.RegisterHouseholdRoutes(apiV1)
-
-	petHealthCtrl := &controllers.PetHealthCtrl{DB: db}
-	petHealthCtrl.RegisterPetHealthRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")
