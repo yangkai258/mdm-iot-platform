@@ -1,7 +1,7 @@
 # Sprint 14 规划
 
 **时间**：2026-05-31
-**状态**：待开始
+**状态**：进行中
 **Sprint 周期**：2 周（2026-05-31 ～ 2026-06-13）
 
 ---
@@ -187,3 +187,32 @@ CREATE TABLE model_rollback_records (
 | AI 服务不可用 | AI 功能不可用 | 降级到本地模型 |
 | 回滚过程中请求失败 | 用户体验差 | 灰度回滚+备用节点 |
 | 行为日志数据量大 | DB 压力 | 分表+定期归档 |
+
+---
+
+## 六、完成清单
+
+### 前端完成情况
+
+| # | 任务 | 交付物 | 状态 |
+|---|------|--------|------|
+| PF0-1 | AI 质量仪表盘 | `views/ai/AIQualityDashboardView.vue` | ✅ 完成 |
+| PF0-2 | AI 行为日志页面 | `views/ai/AIBehaviorLogView.vue` | ✅ 完成 |
+| PF0-3 | 模型版本管理页面 | `views/ai/ModelVersionView.vue` | ✅ 完成 |
+| PF0-4 | AI 沙箱测试页面 | `views/ai/AISandboxView.vue` | ✅ 完成 |
+| PF1-1 | AI 行为详情页 | `views/ai/AIBehaviorDetailView.vue` | ✅ 完成 |
+| PF1-2 | 模型发布工作流 | `views/ai/ModelPublishWorkflow.vue` | ✅ 完成 |
+| — | API 层 | `api/ai.ts` | ✅ 完成 |
+| — | Composable | `composables/useAIQuality.ts` | ✅ 完成 |
+| — | 路由配置 | `router/index.js` | ✅ 完成 |
+| — | 图表依赖 | `echarts` | ✅ 已安装 |
+
+### 后端完成情况
+
+| # | 任务 | 状态 |
+|---|------|------|
+| P0-1 | AI 行为监控 API | ⏳ 待开发 |
+| P0-2 | AI 行为日志存储 | ⏳ 待开发 |
+| P0-3 | 模型热回滚 API | ⏳ 待开发 |
+| P0-4 | AI 沙箱测试 API | ⏳ 待开发 |
+| P0-5 | AI 质量指标 API | ⏳ 待开发 |

@@ -397,6 +397,44 @@ const routes = [
     name: 'RegionSyncStatus',
     component: () => import('../views/globalization/RegionSyncStatusView.vue'),
     meta: { title: '跨区域同步状态' }
+  },
+
+  // ============ Sprint 14: AI 行为监控 ============
+  {
+    path: '/ai/quality-dashboard',
+    name: 'AIQualityDashboard',
+    component: () => import('../views/ai/AIQualityDashboardView.vue'),
+    meta: { title: 'AI 质量监控' }
+  },
+  {
+    path: '/ai/behavior-log',
+    name: 'AIBehaviorLog',
+    component: () => import('../views/ai/AIBehaviorLogView.vue'),
+    meta: { title: 'AI 行为日志' }
+  },
+  {
+    path: '/ai/model-version',
+    name: 'ModelVersion',
+    component: () => import('../views/ai/ModelVersionView.vue'),
+    meta: { title: '模型版本管理' }
+  },
+  {
+    path: '/ai/sandbox',
+    name: 'AISandbox',
+    component: () => import('../views/ai/AISandboxView.vue'),
+    meta: { title: 'AI 沙箱测试' }
+  },
+  {
+    path: '/ai/behavior-detail/:id',
+    name: 'AIBehaviorDetail',
+    component: () => import('../views/ai/AIBehaviorDetailView.vue'),
+    meta: { title: 'AI 行为详情' }
+  },
+  {
+    path: '/ai/model-publish',
+    name: 'ModelPublishWorkflow',
+    component: () => import('../views/ai/ModelPublishWorkflow.vue'),
+    meta: { title: '模型发布工作流' }
   }
 ]
 
