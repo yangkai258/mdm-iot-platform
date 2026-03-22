@@ -139,6 +139,11 @@ func main() {
 		&models.TimezoneConfig{},
 		// Sprint 13: 数据驻留
 		&models.DataResidencyRule{},
+		// Sprint 14: AI 行为监控和模型管理
+		&models.AIBehaviorLog{},
+		&models.AIModelVersion{},
+		&models.SandboxTest{},
+		&models.AIRollbackTask{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
