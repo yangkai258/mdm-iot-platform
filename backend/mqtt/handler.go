@@ -81,6 +81,11 @@ func SetGlobalMQTTClient(client mqtt.Client) {
 	GlobalMQTTClient = client
 }
 
+// GetGlobalMQTTClient 获取全局 MQTT 客户端
+func GetGlobalMQTTClient() mqtt.Client {
+	return GlobalMQTTClient
+}
+
 // StatusPayload 心跳上报 JSON 结构
 type StatusPayload struct {
 	DeviceID         string  `json:"device_id"`

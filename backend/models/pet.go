@@ -89,28 +89,6 @@ func (PetDeviceBinding) TableName() string {
 	return "pet_device_bindings"
 }
 
-// HouseholdMember 家庭成员
-type HouseholdMember struct {
-	ID           uint           `gorm:"primaryKey" json:"id"`
-	HouseholdID  uint           `gorm:"index;not null" json:"household_id"`
-	UserID       uint           `gorm:"index;not null" json:"user_id"`
-	Role         string         `gorm:"type:varchar(20);default:'member'" json:"role"` // owner/member/viewer
-	Status       string         `gorm:"type:varchar(20);default:'active'" json:"status"` // active/inactive
-	TenantID     string         `gorm:"type:uuid;index" json:"tenant_id"`
-	InviteCode   string         `gorm:"type:varchar(20);uniqueIndex" json:"invite_code"` // 邀请码
-	InvitedEmail string         `gorm:"type:varchar(255)" json:"invited_email"`
-	InvitedBy    *uint          `json:"invited_by"` // 邀请人
-	JoinedAt     time.Time      `gorm:"type:timestamp;default:now()" json:"joined_at"`
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
-}
-
-// TableName 指定表名
-func (HouseholdMember) TableName() string {
-	return "household_members"
-}
-
 // LostPet 失宠报告
 type LostPet struct {
 	ID           uint           `gorm:"primaryKey" json:"id"`

@@ -53,11 +53,7 @@ func (ctrl *RegionController) ListRegions(c *gin.Context) {
 // @Router /api/v1/regions/{id} [get]
 func (ctrl *RegionController) GetRegion(c *gin.Context) {
 	id := c.Param("id")
-	var regionID uint
-	if _, err := parseUint(id, &regionID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid region id"})
-		return
-	}
+	regionID := parseUint(id)
 
 	region, err := ctrl.regionSvc.GetRegionByID(regionID)
 	if err != nil {
@@ -116,11 +112,7 @@ func (ctrl *RegionController) CreateRegion(c *gin.Context) {
 // @Router /api/v1/regions/{id} [put]
 func (ctrl *RegionController) UpdateRegion(c *gin.Context) {
 	id := c.Param("id")
-	var regionID uint
-	if _, err := parseUint(id, &regionID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid region id"})
-		return
-	}
+	regionID := parseUint(id)
 
 	var updates map[string]interface{}
 	if err := c.ShouldBindJSON(&updates); err != nil {
@@ -149,11 +141,7 @@ func (ctrl *RegionController) UpdateRegion(c *gin.Context) {
 // @Router /api/v1/regions/{id} [delete]
 func (ctrl *RegionController) DeleteRegion(c *gin.Context) {
 	id := c.Param("id")
-	var regionID uint
-	if _, err := parseUint(id, &regionID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid region id"})
-		return
-	}
+	regionID := parseUint(id)
 
 	if err := ctrl.regionSvc.DeleteRegion(regionID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -174,11 +162,7 @@ func (ctrl *RegionController) DeleteRegion(c *gin.Context) {
 // @Router /api/v1/regions/{id}/nodes [get]
 func (ctrl *RegionController) ListRegionNodes(c *gin.Context) {
 	id := c.Param("id")
-	var regionID uint
-	if _, err := parseUint(id, &regionID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid region id"})
-		return
-	}
+	regionID := parseUint(id)
 
 	region, err := ctrl.regionSvc.GetRegionByID(regionID)
 	if err != nil {
@@ -208,11 +192,7 @@ func (ctrl *RegionController) ListRegionNodes(c *gin.Context) {
 // @Router /api/v1/regions/{id}/nodes [post]
 func (ctrl *RegionController) CreateRegionNode(c *gin.Context) {
 	id := c.Param("id")
-	var regionID uint
-	if _, err := parseUint(id, &regionID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid region id"})
-		return
-	}
+	regionID := parseUint(id)
 
 	region, err := ctrl.regionSvc.GetRegionByID(regionID)
 	if err != nil {
@@ -323,11 +303,7 @@ func (ctrl *RegionController) DeleteRegionNode(c *gin.Context) {
 // @Router /api/v1/regions/{id}/health [get]
 func (ctrl *RegionController) RegionHealthCheck(c *gin.Context) {
 	id := c.Param("id")
-	var regionID uint
-	if _, err := parseUint(id, &regionID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid region id"})
-		return
-	}
+	regionID := parseUint(id)
 
 	health, err := ctrl.regionSvc.HealthCheck(regionID)
 	if err != nil {
@@ -349,11 +325,7 @@ func (ctrl *RegionController) RegionHealthCheck(c *gin.Context) {
 // @Router /api/v1/regions/{id}/failover [post]
 func (ctrl *RegionController) RegionFailover(c *gin.Context) {
 	id := c.Param("id")
-	var regionID uint
-	if _, err := parseUint(id, &regionID); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid region id"})
-		return
-	}
+	regionID := parseUint(id)
 
 	if err := ctrl.regionSvc.Failover(regionID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

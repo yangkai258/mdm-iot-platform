@@ -209,12 +209,12 @@ func (b *BehaviorController) ListBehaviors(c *gin.Context) {
 	limit := 20
 	offset := 0
 	if l := c.Query("limit"); l != "" {
-		if v, err := parseInt(l); err == nil && v > 0 {
+		if v := parseInt(l); v > 0 {
 			limit = min(v, 100)
 		}
 	}
 	if o := c.Query("offset"); o != "" {
-		if v, err := parseInt(o); err == nil && v >= 0 {
+		if v := parseInt(o); v >= 0 {
 			offset = v
 		}
 	}
@@ -319,7 +319,7 @@ func (b *BehaviorController) TriggerBehavior(c *gin.Context) {
 	})
 }
 
-func parseInt(s string) (int, error) {
+func parseIntWithError(s string) (int, error) {
 	var v int
 	_, err := parseStrToInt(s, &v)
 	return v, err

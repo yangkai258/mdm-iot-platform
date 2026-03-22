@@ -80,9 +80,9 @@ func (c *DataPermissionController) UpdateRoleDataPermissions(ctx *gin.Context) {
 	// 创建新权限
 	for _, permReq := range req.Permissions {
 		columnFields := models.StringArray(permReq.ColumnFields)
-		dataScope := models.JSONMap(permReq.DataScope)
-		if permReq.DataScope == nil {
-			dataScope = models.JSONMap{}
+		var dataScope models.JSON
+		if permReq.DataScope != nil {
+			dataScope = permReq.DataScope
 		}
 
 		perm := models.UserDataPermission{
@@ -162,9 +162,9 @@ func (c *DataPermissionController) UpdateUserDataPermissions(ctx *gin.Context) {
 	// 创建新权限
 	for _, permReq := range req.Permissions {
 		columnFields := models.StringArray(permReq.ColumnFields)
-		dataScope := models.JSONMap(permReq.DataScope)
-		if permReq.DataScope == nil {
-			dataScope = models.JSONMap{}
+		var dataScope models.JSON
+		if permReq.DataScope != nil {
+			dataScope = permReq.DataScope
 		}
 
 		perm := models.UserDataPermission{
@@ -372,9 +372,9 @@ func (c *DataPermissionController) CreateDataPermissionRule(ctx *gin.Context) {
 		return
 	}
 
-	permExpr := models.JSONMap(req.PermissionExpr)
-	if req.PermissionExpr == nil {
-		permExpr = models.JSONMap{}
+	var permExpr models.JSON
+	if req.PermissionExpr != nil {
+		permExpr = req.PermissionExpr
 	}
 
 	rule := models.DataPermissionRule{
@@ -440,7 +440,7 @@ func (c *DataPermissionController) UpdateDataPermissionRule(ctx *gin.Context) {
 	rule.RuleType = req.RuleType
 	rule.ResourceIDs = req.ResourceIDs
 	if req.PermissionExpr != nil {
-		rule.PermissionExpr = models.JSONMap(req.PermissionExpr)
+		rule.PermissionExpr = req.PermissionExpr
 	}
 	rule.Priority = req.Priority
 	rule.IsActive = req.IsActive

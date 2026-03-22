@@ -19,6 +19,7 @@ type Device struct {
 	LifecycleStatus int            `gorm:"type:smallint;default:1" json:"lifecycle_status"` // 1:待激活 2:服役中 3:维修 4:报废
 	OrgID           uint           `gorm:"index" json:"org_id"`                              // 组织ID（用于数据权限）
 	CreateUserID    uint           `gorm:"index" json:"create_user_id"`                      // 创建人ID（用于数据权限）
+	DesiredState    string         `gorm:"type:text" json:"desired_state"`                   // 期望状态 JSON
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`

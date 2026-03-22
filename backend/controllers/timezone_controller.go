@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"mdm-backend/models"
 	"mdm-backend/timezone"
 
 	"github.com/gin-gonic/gin"
@@ -293,7 +292,7 @@ func (ctrl *TimezoneController) ConvertTime(c *gin.Context) {
 
 // parseTime 解析时间字符串
 func parseTime(timeStr, tz string) (time.Time, error) {
-	loc, err := timezone.LoadLocation(tz)
+	loc, err := time.LoadLocation(tz)
 	if err != nil {
 		return time.Time{}, err
 	}

@@ -8,13 +8,18 @@ import (
 type DeviceAlertRule struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
 	Name        string    `gorm:"type:varchar(100);not null" json:"name"`
+	RuleName    string    `gorm:"type:varchar(100)" json:"rule_name"`
+	RuleType    string    `gorm:"type:varchar(50)" json:"rule_type"`
 	DeviceID    string    `gorm:"type:varchar(36)" json:"device_id"` // 空表示所有设备
 	AlertType   string    `gorm:"type:varchar(50);not null" json:"alert_type"` // battery_low, offline, temperature_high
 	Condition   string    `gorm:"type:varchar(100);not null" json:"condition"` // <, >, =, >=
-	Threshold   float64   `not null" json:"threshold"`
+	Threshold   float64   `gorm:"not null" json:"threshold"`
 	Severity    int       `gorm:"default:1" json:"severity"` // 1:低 2:中 3:高 4:严重
 	Enabled     bool      `gorm:"default:true" json:"enabled"`
 	NotifyWays  string    `gorm:"type:varchar(100)" json:"notify_ways"` // email,sms,webhook
+	Conditions  JSON      `gorm:"type:jsonb" json:"conditions"`
+	Actions     JSON      `gorm:"type:jsonb" json:"actions"`
+	Priority    int       `gorm:"default:50" json:"priority"`
 	Remark      string    `gorm:"type:varchar(255)" json:"remark"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`

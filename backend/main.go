@@ -25,6 +25,9 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
+	// 设置全局数据库实例
+	models.SetDB(db)
+
 	// 自动迁移数据库表
 	if err := db.AutoMigrate(
 		&models.Device{},
@@ -132,6 +135,23 @@ func main() {
 		// Sprint 12: 数据权限表
 		&models.DataPermissionRule{},
 		&models.UserDataPermission{},
+		// Sprint 13: 多区域数据库架构
+		&models.Region{},
+		&models.RegionalNode{},
+		// Sprint 13: 时区支持
+		&models.TimezoneConfig{},
+		// Sprint 13: 数据驻留
+		&models.DataResidencyRule{},
+		// Sprint 21: 内容生态 - 表情包市场
+		&models.EmoticonCategory{},
+		&models.Emoticon{},
+		&models.EmoticonPurchase{},
+		// Sprint 21: 内容生态 - 动作资源库
+		&models.CustomAction{},
+		&models.ActionMarket{},
+		// Sprint 21: 内容生态 - 声音定制
+		&models.VoiceConfig{},
+		&models.VoiceMarketItem{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -485,6 +505,19 @@ func main() {
 	apiV1.PUT("/data-permissions/users/:user_id", dataPermCtrl.UpdateUserDataPermissions)
 	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
 	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
+
+	// ============ Sprint 21: 内容生态 - 表情包市场 ============
+	emoticonCtrl := &controllers.EmoticonController{DB: db}
+	emoticonCtrl.RegisterEmoticonRoutes(apiV1)
+	apiV1.POST("/emoticons/categories", emoticonCtrl.CreateCategory)
+
+	// ============ Sprint 21: 内容生态 - 动作资源库 ============
+	actionMarketCtrl := &controllers.ActionMarketController{DB: db}
+	actionMarketCtrl.RegisterActionMarketRoutes(apiV1)
+
+	// ============ Sprint 21: 内容生态 - 声音定制 ============
+	voiceCtrl := &controllers.VoiceController{DB: db}
+	voiceCtrl.RegisterVoiceRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")

@@ -51,16 +51,6 @@ type RejectTaskRequest struct {
 	Remark string `json:"remark" binding:"required"`
 }
 
-// getUserIDFromContext 从上下文获取用户ID
-func getUserIDFromContext(c *gin.Context) uint {
-	if id, ok := c.Get("user_id"); ok {
-		if uid, ok := id.(uint); ok {
-			return uid
-		}
-	}
-	return 0
-}
-
 // getTenantIDFromContext 从上下文获取租户ID
 func getTenantIDFromContext(c *gin.Context) string {
 	if tid, ok := c.Get("tenant_id"); ok {
