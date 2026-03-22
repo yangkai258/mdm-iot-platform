@@ -85,22 +85,11 @@ const menuItems = [
       { key: '/ota/deployments', label: '部署任务' }
     ]
   },
-  {
-    key: '/alert',
-    label: '告警管理',
-    children: [
-      { key: '/alert/rules', label: '告警规则' },
-      { key: '/alert/list', label: '告警列表' },
-      { key: '/alert/settings', label: '告警设置' },
-      { key: '/alert/channels', label: '通知渠道' }
-    ]
-  },
+  { key: '/alert', label: '告警管理' },
   {
     key: '/members',
     label: '会员管理',
     children: [
-      { key: '/members/list', label: '会员列表' },
-      { key: '/members/levels', label: '会员等级' },
       { key: '/members/points', label: '积分管理' },
       { key: '/members/coupons', label: '优惠券' },
       { key: '/members/promotions', label: '促销活动' }
@@ -116,21 +105,21 @@ const menuItems = [
     ]
   },
   {
-    key: '/tenant',
-    label: '租户入驻',
+    key: '/tenants',
+    label: '系统管理',
     children: [
-      { key: '/tenant/apply', label: '提交入驻申请' },
-      { key: '/admin/tenant-approvals', label: '入驻审核管理' }
+      { key: '/tenants/approval', label: '租户入驻审核' },
+      { key: '/tenants/management', label: '租户系统管理' },
+      { key: '/tenants/public-archives', label: '公共档案' },
+      { key: '/tenants/system-info', label: '系统信息' }
     ]
   },
   {
     key: '/permissions',
-    label: '权限管理',
+    label: '多维权限',
     children: [
-      { key: '/permissions/roles', label: '角色管理' },
-      { key: '/permissions/menus', label: '菜单管理' },
-      { key: '/permissions/api-permissions', label: 'API权限配置' },
-      { key: '/permissions/groups', label: '权限组管理' }
+      { key: '/permissions/groups', label: '权限组管理' },
+      { key: '/permissions/data-config', label: '数据权限配置' }
     ]
   },
   {
@@ -151,13 +140,12 @@ const menuItems = [
     ]
   },
   {
-    key: '/policies',
-    label: '合规策略',
+    key: '/pet',
+    label: '🐾 宠物管理',
     children: [
-      { key: '/policies/list', label: '策略管理' },
-      { key: '/policies/configs', label: '配置文件库' },
-      { key: '/policies/compliance-rules', label: '合规规则' },
-      { key: '/policies/device-compliance', label: '设备合规状态' }
+      { key: '/pet', label: '宠物配置' },
+      { key: '/pet/console', label: '宠物控制台' },
+      { key: '/pet/conversations', label: '会话记录' }
     ]
   },
   { key: '/test-modals', label: '🎨 UI测试' },
