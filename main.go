@@ -139,14 +139,6 @@ func main() {
 		&models.TimezoneConfig{},
 		// Sprint 13: 数据驻留
 		&models.DataResidencyRule{},
-		// Sprint 19: 健康追踪
-		&models.HealthWarning{},
-		&models.ExerciseRecord{},
-		&models.ExerciseSummary{},
-		&models.SleepRecord{},
-		&models.SleepAnalysis{},
-		&models.DiseasePattern{},
-		&models.ExerciseGoal{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
