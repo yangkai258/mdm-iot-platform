@@ -1,7 +1,7 @@
 # Sprint 11 规划
 
 **时间**：2026-04-19
-**状态**：待开始
+**状态**：✅ 后端已完成（2026-03-22）| 前端已完成
 **Sprint 周期**：2 周（2026-04-19 ～ 2026-05-02）
 
 ---
@@ -18,32 +18,110 @@
 
 ### 后端 P0/P1/P2 任务表
 
-| # | 任务 | 说明 | 交付物 | 优先级 |
-|---|------|------|--------|--------|
-| P0-1 | **SMTP 邮件通知服务** | 实现邮件发送服务，支持模板渲染 | notification/email_service.go | P0 |
-| P0-2 | **短信通知服务** | 实现 SMS 发送服务（阿里云/腾讯云 SDK 集成） | notification/sms_service.go | P0 |
-| P0-3 | **Webhook 通知服务** | 实现 HTTP Webhook 推送，支持签名验证 | notification/webhook_service.go | P0 |
-| P0-4 | **通知渠道配置 API** | 完成 `/api/v1/notification/channels/*` CRUD | notification_controller.go | P0 |
-| P0-5 | **通知日志 API** | 完成 `/api/v1/notification/logs` 查询接口 | notification_controller.go | P0 |
-| P1-1 | **告警历史管理 API** | 完成 `/api/v1/alerts/history` 告警历史查询 | alert_history_controller.go | P1 |
-| P1-2 | **通知模板管理** | 完成 `/api/v1/notification/templates/*` CRUD | notification_template_controller.go | P1 |
-| P1-3 | **通知重试机制** | 实现失败通知自动重试（指数退避） | notification/retry_worker.go | P1 |
-| P1-4 | **告警升级策略** | 告警未处理时自动升级通知级别 | alert_escalation_service.go | P1 |
-| P2-1 | **通知渠道健康检查** | 实现通知渠道可用性检测 | notification/health_check.go | P2 |
-| P2-2 | **通知统计 API** | 完成 `/api/v1/notification/stats` 发送统计 | notification_controller.go | P2 |
+| # | 任务 | 说明 | 交付物 | 优先级 | 状态 |
+|---|------|------|--------|--------|------|
+| P0-1 | **SMTP 邮件通知服务** | 实现邮件发送服务，支持模板渲染 | notification/email_service.go | P0 | ✅ 完成 |
+| P0-2 | **短信通知服务** | 实现 SMS 发送服务（阿里云/腾讯云 SDK 集成） | notification/sms_service.go | P0 | ✅ 完成 |
+| P0-3 | **Webhook 通知服务** | 实现 HTTP Webhook 推送，支持签名验证 | notification/webhook_service.go | P0 | ✅ 完成 |
+| P0-4 | **通知渠道配置 API** | 完成 `/api/v1/notification/channels/*` CRUD | notification_controller.go | P0 | ✅ 完成 |
+| P0-5 | **通知日志 API** | 完成 `/api/v1/notification/logs` 查询接口 | notification_controller.go | P0 | ✅ 完成 |
+| P1-1 | **告警历史管理 API** | 完成 `/api/v1/alerts/history` 告警历史查询 | alert_history_controller.go | P1 | ✅ 完成 |
+| P1-2 | **通知模板管理** | 完成 `/api/v1/notification/templates/*` CRUD | notification_controller.go | P1 | ✅ 完成 |
+| P1-3 | **通知重试机制** | 实现失败通知自动重试（指数退避） | notification/retry_worker.go | P1 | ✅ 完成 |
+| P1-4 | **告警升级策略** | 告警未处理时自动升级通知级别 | alert_escalation_service.go | P1 | ⏳ 待实现 |
+| P2-1 | **通知渠道健康检查** | 实现通知渠道可用性检测 | notification/health_check.go | P2 | ✅ 完成 |
+| P2-2 | **通知统计 API** | 完成 `/api/v1/notification/stats` 发送统计 | notification_controller.go | P2 | ✅ 完成 |
 
 ### 前端 P0/P1/P2 任务表
 
-| # | 任务 | 说明 | 交付物 | 优先级 |
-|---|------|------|--------|--------|
-| PF0-1 | **告警通知配置页面** | 完成 AlertNotificationView.vue 通知渠道配置 | AlertNotificationView.vue | P0 |
-| PF0-2 | **邮件渠道配置** | 完成 EmailChannelConfig.vue SMTP 配置表单 | EmailChannelConfig.vue | P0 |
-| PF0-3 | **短信渠道配置** | 完成 SMSChannelConfig.vue 短信服务商配置 | SMSChannelConfig.vue | P0 |
-| PF0-4 | **Webhook渠道配置** | 完成 WebhookChannelConfig.vue Webhook 配置 | WebhookChannelConfig.vue | P0 |
-| PF1-1 | **告警历史管理页面** | 完成 AlertHistoryView.vue 告警历史查询/导出 | AlertHistoryView.vue | P1 |
-| PF1-2 | **通知日志页面** | 完成 NotificationLogsView.vue 通知发送日志 | NotificationLogsView.vue | P1 |
-| PF1-3 | **通知模板编辑** | 完成 NotificationTemplateEditor.vue 模板编辑 | NotificationTemplateEditor.vue | P1 |
-| PF2-1 | **通知统计仪表盘** | 完成 NotificationStatsView.vue 发送统计看板 | NotificationStatsView.vue | P2 |
+| # | 任务 | 说明 | 交付物 | 优先级 | 状态 |
+|---|------|------|--------|--------|------|
+| PF0-1 | **告警通知配置页面** | 完成 AlertNotificationView.vue 通知渠道配置 | AlertNotificationView.vue | P0 | ✅ 完成 |
+| PF0-2 | **邮件渠道配置** | 完成 EmailChannelConfig.vue SMTP 配置表单 | EmailChannelConfig.vue | P0 | ✅ 完成 |
+| PF0-3 | **短信渠道配置** | 完成 SMSChannelConfig.vue 短信服务商配置 | SMSChannelConfig.vue | P0 | ✅ 完成 |
+| PF0-4 | **Webhook渠道配置** | 完成 WebhookChannelConfig.vue Webhook 配置 | WebhookChannelConfig.vue | P0 | ✅ 完成 |
+| PF1-1 | **告警历史管理页面** | 完成 AlertHistoryView.vue 告警历史查询/导出 | AlertHistoryView.vue | P1 | ✅ 完成 |
+| PF1-2 | **通知日志页面** | 完成 NotificationLogsView.vue 通知发送日志 | NotificationLogsView.vue | P1 | ✅ 完成 |
+| PF1-3 | **通知模板编辑** | 完成 NotificationTemplateEditor.vue 模板编辑 | NotificationTemplateEditor.vue | P1 | ⏳ 待后端 |
+| PF2-1 | **通知统计仪表盘** | 完成 NotificationStatsView.vue 发送统计看板 | NotificationStatsView.vue | P2 | ✅ 完成 |
+
+---
+
+## 六、前端交付清单
+
+### ✅ 已完成文件
+
+| 文件路径 | 说明 |
+|----------|------|
+| `src/api/notification.ts` | 通知相关 API 定义 |
+| `src/composables/useNotification.ts` | 通知相关 Composable |
+| `src/views/alert/AlertNotificationView.vue` | 告警通知主页面 |
+| `src/views/alert/EmailChannelConfig.vue` | 邮件渠道配置 |
+| `src/views/alert/SMSChannelConfig.vue` | 短信渠道配置 |
+| `src/views/alert/WebhookChannelConfig.vue` | Webhook 配置 |
+| `src/views/alert/AlertHistoryView.vue` | 告警历史页面 |
+| `src/views/alert/NotificationLogsView.vue` | 通知日志页面 |
+| `src/views/alert/NotificationStatsView.vue` | 统计报表页面 |
+| `src/router/index.js` | 已添加新路由 |
+
+### 路由配置
+
+```typescript
+{
+  path: '/alert/notification',
+  name: 'AlertNotification',
+  component: () => import('@/views/alert/AlertNotificationView.vue')
+},
+{
+  path: '/alert/history',
+  name: 'AlertHistory',
+  component: () => import('@/views/alert/AlertHistoryView.vue')
+},
+{
+  path: '/alert/notification-logs',
+  name: 'NotificationLogs',
+  component: () => import('@/views/alert/NotificationLogsView.vue')
+}
+```
+
+---
+
+## 七、后端交付清单
+
+### ✅ 已完成文件
+
+| 文件路径 | 说明 |
+|----------|------|
+| `backend/notification/email_service.go` | SMTP 邮件服务（支持 TLS/STARTTLS） |
+| `backend/notification/sms_service.go` | SMS 短信服务（支持阿里云/腾讯云） |
+| `backend/notification/webhook_service.go` | Webhook 服务（支持 HMAC-SHA256 签名） |
+| `backend/notification/retry_worker.go` | 重试机制（指数退避：1s,2s,4s,8s,16s，最大5次） |
+| `backend/notification/health_check.go` | 渠道健康检查（支持 SMTP/Webhook/SMS） |
+| `backend/models/notification_channel.go` | 通知渠道扩展模型 |
+| `backend/models/notification_log.go` | 通知日志模型 + 统计结构体 |
+| `backend/models/alert_history.go` | 告警历史模型 |
+| `backend/controllers/notification_controller.go` | 新增 `/api/v1/notification/*` 路由 |
+| `backend/controllers/alert_history_controller.go` | 告警历史 API |
+| `backend/migrations/005_sprint11_notification.sql` | 数据库迁移 SQL |
+| `backend/main.go` | 已添加 AlertHistory AutoMigrate + 路由注册 |
+
+### API 路由清单
+
+| 路由 | 方法 | 说明 |
+|------|------|------|
+| `/api/v1/notification/channels` | GET | 通知渠道列表 |
+| `/api/v1/notification/channels` | POST | 创建通知渠道 |
+| `/api/v1/notification/channels/:id` | GET | 渠道详情 |
+| `/api/v1/notification/channels/:id` | PUT | 更新渠道配置 |
+| `/api/v1/notification/channels/:id` | DELETE | 删除渠道 |
+| `/api/v1/notification/channels/:id/test` | POST | 测试渠道连通性 |
+| `/api/v1/notification/logs` | GET | 通知日志（支持多条件筛选） |
+| `/api/v1/notification/stats` | GET | 通知发送统计 |
+| `/api/v1/notification/templates` | GET/POST | 通知模板 CRUD |
+| `/api/v1/notification/templates/:id` | PUT/DELETE | 通知模板更新/删除 |
+| `/api/v1/alerts/history` | GET | 告警历史列表 |
+| `/api/v1/alerts/history/:id` | GET | 告警历史详情 |
+| `/api/v1/alerts/history/archive` | POST | 归档告警到历史表 |
 
 ---
 

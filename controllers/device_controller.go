@@ -301,6 +301,46 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 违规记录
 		api.GET("/compliance/violations", complianceCtrl.ListViolations)
 		api.PUT("/compliance/violations/:id/resolve", complianceCtrl.ResolveViolation)
+
+		// ============ Sprint 14: AI 行为监控和模型管理 ============
+		aiMonitorCtrl := NewAIMonitorController(db)
+		modelVersionCtrl := NewModelVersionController(db)
+		modelRollbackCtrl := NewModelRollbackController(db)
+		aiSandboxCtrl := NewAISandboxController(db)
+		aiQualityCtrl := NewAIQualityController(db)
+
+		// AI 行为监控
+		api.POST("/ai/monitor/events", aiMonitorCtrl.ReportEvent)
+		api.GET("/ai/monitor/events", aiMonitorCtrl.ListEvents)
+		api.GET("/ai/monitor/events/:id", aiMonitorCtrl.GetEvent)
+		api.GET("/ai/monitor/stats", aiMonitorCtrl.GetStats)
+
+		// AI 模型版本管理
+		api.GET("/ai/models", modelVersionCtrl.ListModels)
+		api.POST("/ai/models", modelVersionCtrl.CreateModel)
+		api.GET("/ai/models/:id", modelVersionCtrl.GetModel)
+		api.PUT("/ai/models/:id", modelVersionCtrl.UpdateModel)
+		api.DELETE("/ai/models/:id", modelVersionCtrl.DeleteModel)
+		api.GET("/ai/models/:id/versions", modelVersionCtrl.ListVersions)
+		api.POST("/ai/models/:id/versions", modelVersionCtrl.CreateVersion)
+		api.POST("/ai/models/:id/deprecate", modelVersionCtrl.DeprecateVersion)
+
+		// 模型热回滚
+		api.POST("/ai/models/:id/rollback", modelRollbackCtrl.Rollback)
+		api.GET("/ai/rollback/tasks/:task_id", modelRollbackCtrl.GetRollbackTask)
+		api.GET("/ai/rollback/history", modelRollbackCtrl.GetRollbackHistory)
+
+		// AI 沙箱测试
+		api.POST("/ai/sandbox/test", aiSandboxCtrl.CreateTest)
+		api.GET("/ai/sandbox/test/:task_id", aiSandboxCtrl.GetTest)
+		api.GET("/ai/sandbox/tests", aiSandboxCtrl.ListTests)
+		api.POST("/ai/sandbox/test/:task_id/cancel", aiSandboxCtrl.CancelTest)
+		api.POST("/ai/sandbox/test/:task_id/run", aiSandboxCtrl.RunTest)
+
+		// AI 质量指标
+		api.GET("/ai/quality/metrics", aiQualityCtrl.GetMetrics)
+		api.GET("/ai/quality/metrics/trend", aiQualityCtrl.GetMetricsTrend)
+		api.GET("/ai/quality/anomaly", aiQualityCtrl.GetAnomalyEvents)
 	}
 }
 

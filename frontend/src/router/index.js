@@ -230,6 +230,25 @@ const routes = [
     name: 'AlertSettings',
     component: () => import('../views/alerts/AlertSettings.vue')
   },
+  // ============ Sprint 11: 告警通知 ============
+  {
+    path: '/alert/notification',
+    name: 'AlertNotification',
+    component: () => import('../views/alert/AlertNotificationView.vue'),
+    meta: { title: '告警通知' }
+  },
+  {
+    path: '/alert/history',
+    name: 'AlertHistory',
+    component: () => import('../views/alert/AlertHistoryView.vue'),
+    meta: { title: '告警历史' }
+  },
+  {
+    path: '/alert/notification-logs',
+    name: 'NotificationLogs',
+    component: () => import('../views/alert/NotificationLogsView.vue'),
+    meta: { title: '通知日志' }
+  },
   // 租户管理
   {
     path: '/tenants/approval',
@@ -302,6 +321,120 @@ const routes = [
     path: '/org/employees',
     name: 'OrgEmployees',
     component: () => import('../views/org/Employees.vue')
+  },
+
+  // ============ Sprint 12: 安全功能 ============
+  {
+    path: '/security/permission',
+    name: 'PermissionAssignment',
+    component: () => import('../views/security/PermissionAssignmentView.vue'),
+    meta: { title: '权限分配' }
+  },
+  {
+    path: '/security/data-permission',
+    name: 'DataPermission',
+    component: () => import('../views/security/DataPermissionView.vue'),
+    meta: { title: '数据权限' }
+  },
+  {
+    path: '/security/certificate',
+    name: 'CertificateManage',
+    component: () => import('../views/security/CertificateManageView.vue'),
+    meta: { title: '证书管理' }
+  },
+  {
+    path: '/security/device',
+    name: 'DeviceSecurity',
+    component: () => import('../views/security/DeviceSecurityView.vue'),
+    meta: { title: '设备安全' }
+  },
+  {
+    path: '/security/ldap',
+    name: 'LDAPConfig',
+    component: () => import('../views/security/LDAPConfigView.vue'),
+    meta: { title: 'LDAP配置' }
+  },
+  {
+    path: '/security/user-sync',
+    name: 'UserSync',
+    component: () => import('../views/security/UserSyncView.vue'),
+    meta: { title: '用户同步' }
+  },
+
+  // ============ Sprint 13: 全球化设置 ============
+  {
+    path: '/globalization',
+    name: 'GlobalizationSettings',
+    component: () => import('../views/globalization/GlobalizationSettingsView.vue'),
+    meta: { title: '全球化设置' }
+  },
+  {
+    path: '/globalization/region',
+    name: 'RegionManage',
+    component: () => import('../views/globalization/RegionManageView.vue'),
+    meta: { title: '区域管理' }
+  },
+  {
+    path: '/globalization/timezone',
+    name: 'TimezoneSettings',
+    component: () => import('../views/globalization/TimezoneSettingsView.vue'),
+    meta: { title: '时区设置' }
+  },
+  {
+    path: '/globalization/data-residency',
+    name: 'DataResidency',
+    component: () => import('../views/globalization/DataResidencyView.vue'),
+    meta: { title: '数据驻留规则' }
+  },
+  {
+    path: '/globalization/ai-node',
+    name: 'RegionalAINode',
+    component: () => import('../views/globalization/RegionalAINodeView.vue'),
+    meta: { title: '区域AI节点' }
+  },
+  {
+    path: '/globalization/sync-status',
+    name: 'RegionSyncStatus',
+    component: () => import('../views/globalization/RegionSyncStatusView.vue'),
+    meta: { title: '跨区域同步状态' }
+  },
+
+  // ============ Sprint 14: AI 行为监控 ============
+  {
+    path: '/ai/quality-dashboard',
+    name: 'AIQualityDashboard',
+    component: () => import('../views/ai/AIQualityDashboardView.vue'),
+    meta: { title: 'AI 质量监控' }
+  },
+  {
+    path: '/ai/behavior-log',
+    name: 'AIBehaviorLog',
+    component: () => import('../views/ai/AIBehaviorLogView.vue'),
+    meta: { title: 'AI 行为日志' }
+  },
+  {
+    path: '/ai/model-version',
+    name: 'ModelVersion',
+    component: () => import('../views/ai/ModelVersionView.vue'),
+    meta: { title: '模型版本管理' }
+  },
+  {
+    path: '/ai/sandbox',
+    name: 'AISandbox',
+    component: () => import('../views/ai/AISandboxView.vue'),
+    meta: { title: 'AI 沙箱测试' }
+  },
+  {
+    path: '/ai/behavior-detail/:id',
+    name: 'AIBehaviorDetail',
+    component: () => import('../views/ai/AIBehaviorDetailView.vue'),
+    meta: { title: 'AI 行为详情' }
+  },
+  {
+    path: '/ai/model-publish',
+    name: 'ModelPublishWorkflow',
+    component: () => import('../views/ai/ModelPublishWorkflow.vue'),
+    meta: { title: '模型发布工作流' }
   }
 ]
 
