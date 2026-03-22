@@ -101,7 +101,11 @@ const menuItems = [
     children: [
       { key: '/system/monitor', label: '服务监控' },
       { key: '/system/logs', label: '操作日志' },
-      { key: '/policies', label: '策略管理' }
+      { key: '/policies', label: '策略管理' },
+      { key: '/performance', label: '性能管理', children: [
+        { key: '/performance/dashboard', label: '性能仪表盘' },
+        { key: '/performance/cache', label: '缓存管理' }
+      ]}
     ]
   },
   {

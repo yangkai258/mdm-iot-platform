@@ -401,6 +401,18 @@ const routes = [
     component: () => import('../views/ai/ModelPublishWorkflow.vue'),
     meta: { title: '模型发布工作流' }
   },
+  {
+    path: '/ai/models',
+    name: 'AIModels',
+    component: () => import('../views/ai/AIModelsView.vue'),
+    meta: { title: 'AI 模型管理' }
+  },
+  {
+    path: '/ai/training',
+    name: 'AITraining',
+    component: () => import('../views/ai/AITrainingView.vue'),
+    meta: { title: 'AI 训练任务' }
+  },
 
   // ============ Sprint 17: 宠物情绪识别和响应 ============
   {
