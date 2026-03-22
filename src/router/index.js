@@ -399,6 +399,26 @@ const routes = [
     meta: { title: '跨区域同步状态' }
   },
 
+  // ============ Sprint 10: 设备监控 ============
+  {
+    path: '/monitor/dashboard',
+    name: 'DeviceDashboard',
+    component: () => import('../views/monitor/DeviceDashboard.vue'),
+    meta: { title: '设备监控面板' }
+  },
+  {
+    path: '/monitor/logs',
+    name: 'DeviceLogs',
+    component: () => import('../views/monitor/DeviceLogs.vue'),
+    meta: { title: '设备日志' }
+  },
+  {
+    path: '/monitor/debug',
+    name: 'RemoteDebug',
+    component: () => import('../views/monitor/RemoteDebug.vue'),
+    meta: { title: '远程调试' }
+  },
+
   // ============ Sprint 14: AI 行为监控 ============
   {
     path: '/ai/quality-dashboard',
