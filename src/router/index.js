@@ -292,6 +292,26 @@ const routes = [
     meta: { title: '用户同步' }
   },
 
+  // ============ Sprint 25: 安全与合规前端 ============
+  {
+    path: '/security/settings',
+    name: 'SecuritySettings',
+    component: () => import('../views/security/SecuritySettingsView.vue'),
+    meta: { title: '安全设置' }
+  },
+  {
+    path: '/security/privacy',
+    name: 'DataPrivacy',
+    component: () => import('../views/security/DataPrivacyView.vue'),
+    meta: { title: '数据隐私' }
+  },
+  {
+    path: '/security/audit-log',
+    name: 'AuditLog',
+    component: () => import('../views/security/AuditLogView.vue'),
+    meta: { title: '审计日志' }
+  },
+
   // ============ Sprint 13: 全球化设置 ============
   {
     path: '/globalization',
@@ -564,7 +584,25 @@ const routes = [
     name: 'ResearchExperiment',
     component: () => import('../views/research/ExperimentView.vue'),
     meta: { title: 'AI 行为实验' }
-  }
+  },
+  // ============ Sprint 26: 技术架构前端 ============
+  {
+    path: '/tech/edge-models',
+    name: 'EdgeModels',
+    component: () => import('../views/tech/EdgeModelView.vue'),
+    meta: { title: '端侧推理模型' }
+  },
+  {
+    path: '/tech/mesh-network',
+    name: 'MeshNetwork',
+    component: () => import('../views/tech/MeshNetworkView.vue'),
+    meta: { title: 'BLE Mesh 网络' }
+  },
+  {
+    path: '/tech/device-ota',
+    name: 'DeviceOta',
+    component: () => import('../views/tech/DeviceOtaView.vue'),
+    meta: { title: '设备 OTA 优化' }
   }
 ]
 
