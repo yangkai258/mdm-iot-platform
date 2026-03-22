@@ -392,6 +392,164 @@ const routes = [
     name: 'EmotionReport',
     component: () => import('../views/emotion/EmotionReportView.vue'),
     meta: { title: '情绪报告' }
+  },
+
+  // ============ Sprint 18: 宠物数字孪生 ============
+  {
+    path: '/digital-twin/vitals',
+    name: 'DigitalTwinVitals',
+    component: () => import('../views/digital-twin/VitalsDashboardView.vue'),
+    meta: { title: '生命体征仪表盘' }
+  },
+  {
+    path: '/digital-twin/vitals-chart',
+    name: 'DigitalTwinVitalsChart',
+    component: () => import('../views/digital-twin/RealTimeVitalsChart.vue'),
+    meta: { title: '实时体征曲线' }
+  },
+  {
+    path: '/digital-twin/history',
+    name: 'DigitalTwinHistory',
+    component: () => import('../views/digital-twin/HistoricalReplayView.vue'),
+    meta: { title: '历史回放' }
+  },
+  {
+    path: '/digital-twin/behavior',
+    name: 'DigitalTwinBehavior',
+    component: () => import('../views/digital-twin/BehaviorPredictionView.vue'),
+    meta: { title: '行为预测' }
+  },
+
+  // ============ Sprint 19: 健康追踪和预警 ============
+  {
+    path: '/health/warnings',
+    name: 'HealthWarnings',
+    component: () => import('../views/health/HealthWarningView.vue'),
+    meta: { title: '健康预警' }
+  },
+  {
+    path: '/health/exercise',
+    name: 'ExerciseStats',
+    component: () => import('../views/health/ExerciseStatsView.vue'),
+    meta: { title: '运动统计' }
+  },
+  {
+    path: '/health/sleep',
+    name: 'SleepAnalysis',
+    component: () => import('../views/health/SleepAnalysisView.vue'),
+    meta: { title: '睡眠分析' }
+  },
+  {
+    path: '/health/report',
+    name: 'HealthReport',
+    component: () => import('../views/health/HealthReportView.vue'),
+    meta: { title: '健康报告' }
+  },
+
+  // ============ Sprint 20: 家庭和多用户场景 ============
+  {
+    path: '/family/members',
+    name: 'FamilyMembers',
+    component: () => import('../views/family/FamilyMembersView.vue'),
+    meta: { title: '家庭成员' }
+  },
+  {
+    path: '/family/child-mode',
+    name: 'ChildMode',
+    component: () => import('../views/family/ChildModeView.vue'),
+    meta: { title: '儿童模式' }
+  },
+  {
+    path: '/family/elder-mode',
+    name: 'ElderMode',
+    component: () => import('../views/family/ElderModeView.vue'),
+    meta: { title: '老人陪伴模式' }
+  },
+  {
+    path: '/family/album',
+    name: 'FamilyAlbum',
+    component: () => import('../views/family/FamilyAlbumView.vue'),
+    meta: { title: '家庭相册' }
+  },
+  {
+    path: '/family/settings',
+    name: 'FamilySettings',
+    component: () => import('../views/family/FamilySettingsView.vue'),
+    meta: { title: '家庭设置' }
+  },
+
+  // ============ Sprint 21: 内容生态前端 ============
+  {
+    path: '/market/emoticons',
+    name: 'EmoticonMarket',
+    component: () => import('../views/market/EmoticonMarketView.vue'),
+    meta: { title: '表情包市场' }
+  },
+  {
+    path: '/market/actions',
+    name: 'ActionMarket',
+    component: () => import('../views/market/ActionMarketView.vue'),
+    meta: { title: '动作资源库' }
+  },
+  {
+    path: '/market/voices',
+    name: 'VoiceConfig',
+    component: () => import('../views/market/VoiceConfigView.vue'),
+    meta: { title: '声音定制' }
+  },
+
+  // ============ Sprint 22: App 端页面 ============
+  {
+    path: '/app/devices',
+    name: 'AppDeviceList',
+    component: () => import('../views/app/AppDeviceListView.vue'),
+    meta: { title: 'App设备列表', mobile: true }
+  },
+  {
+    path: '/app/device/:id',
+    name: 'AppDeviceControl',
+    component: () => import('../views/app/AppDeviceControlView.vue'),
+    meta: { title: 'App设备控制', mobile: true }
+  },
+
+  // ============ Sprint 22: 微信小程序 H5 页面 ============
+  {
+    path: '/miniapp/home',
+    name: 'MiniAppHome',
+    component: () => import('../views/app/MiniAppHomeView.vue'),
+    meta: { title: '小程序首页', mobile: true }
+  },
+  {
+    path: '/miniapp/devices',
+    name: 'MiniAppDevices',
+    component: () => import('../views/app/AppDeviceListView.vue'),
+    meta: { title: '小程序设备列表', mobile: true }
+  },
+  {
+    path: '/miniapp/device/:id',
+    name: 'MiniAppDevice',
+    component: () => import('../views/app/MiniAppDeviceView.vue'),
+    meta: { title: '小程序设备控制', mobile: true }
+  },
+
+  // ============ Sprint 23: 第三方集成前端 ============
+  {
+    path: '/integration/smarthome',
+    name: 'SmartHome',
+    component: () => import('../views/integration/SmartHomeView.vue'),
+    meta: { title: '智能家居' }
+  },
+  {
+    path: '/integration/pet-hospital',
+    name: 'PetHospital',
+    component: () => import('../views/integration/PetHospitalView.vue'),
+    meta: { title: '宠物医疗' }
+  },
+  {
+    path: '/integration/pet-shop',
+    name: 'PetShop',
+    component: () => import('../views/integration/PetShopView.vue'),
+    meta: { title: '宠物用品商城' }
   }
   }
 ]
