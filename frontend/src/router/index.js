@@ -487,6 +487,32 @@ const routes = [
     name: 'DigitalTwinBehavior',
     component: () => import('../views/digital-twin/BehaviorPredictionView.vue'),
     meta: { title: '行为预测' }
+  },
+
+  // ============ Sprint 19: 健康追踪和预警 ============
+  {
+    path: '/health/warnings',
+    name: 'HealthWarnings',
+    component: () => import('../views/health/HealthWarningView.vue'),
+    meta: { title: '健康预警' }
+  },
+  {
+    path: '/health/exercise',
+    name: 'ExerciseStats',
+    component: () => import('../views/health/ExerciseStatsView.vue'),
+    meta: { title: '运动统计' }
+  },
+  {
+    path: '/health/sleep',
+    name: 'SleepAnalysis',
+    component: () => import('../views/health/SleepAnalysisView.vue'),
+    meta: { title: '睡眠分析' }
+  },
+  {
+    path: '/health/report',
+    name: 'HealthReport',
+    component: () => import('../views/health/HealthReportView.vue'),
+    meta: { title: '健康报告' }
   }
 ]
 
