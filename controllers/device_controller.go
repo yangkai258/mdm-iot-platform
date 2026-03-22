@@ -42,6 +42,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	webhookCtrl := &WebhookController{DB: db}
 	billingCtrl := &BillingController{DB: db}
 
+	// Sprint 19: 健康追踪控制器
+	healthTrackingCtrl := &HealthTrackingCtrl{DB: db}
+
 	api := r.Group("/api/v1")
 	{
 		// ============ 设备管理 ============
@@ -390,6 +393,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/billing/invoices", billingCtrl.CreateInvoice)
 		api.GET("/billing/invoices/:id", billingCtrl.GetInvoice)
 		api.GET("/billing/summary", billingCtrl.GetSummary)
+
+		// ============ Sprint 19: 健康追踪路由 ============
+		healthTrackingCtrl.RegisterHealthRoutes(api)
 	}
 }
 
