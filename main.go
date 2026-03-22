@@ -452,6 +452,10 @@ func main() {
 	apiV1.POST("/announcements/:id/withdraw", notifCtrl.WithdrawAnnouncement)
 	apiV1.GET("/announcements/:id", notifCtrl.GetAnnouncement)
 
+	// ============ BLE Mesh 网络路由 ============
+	meshCtrl := &controllers.MeshController{DB: db}
+	meshCtrl.RegisterMeshRoutes(apiV1)
+
 	// 策略配置别名路由（/api/v1/policy-configs，供前端使用）
 	policyCtrlExtra := &controllers.PolicyController{DB: db}
 	complianceCtrlExtra := &controllers.ComplianceController{DB: db}
