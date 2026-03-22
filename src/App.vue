@@ -92,15 +92,7 @@ const menuItems = [
     children: [
       { key: '/members/points', label: '积分管理' },
       { key: '/members/coupons', label: '优惠券' },
-      { key: '/members/promotions', label: '促销活动' },
-      { key: '/member/card-types', label: '会员卡类型' },
-      { key: '/member/card-groups', label: '会员卡分组' },
-      { key: '/member/level-rules', label: '升级规则' },
-      { key: '/member/settings', label: '参数设置' },
-      { key: '/member/orders', label: '会员订单' },
-      { key: '/member/occupation-types', label: '从业类型' },
-      { key: '/member/coupon-inventory', label: '优惠券库存' },
-      { key: '/member/coupon-messages', label: '优惠消息流水' }
+      { key: '/members/promotions', label: '促销活动' }
     ]
   },
   {
@@ -145,6 +137,15 @@ const menuItems = [
     children: [
       { key: '/apps/list', label: '应用列表' },
       { key: '/apps/distributions', label: '应用分发' }
+    ]
+  },
+  {
+    key: '/pet',
+    label: '🐾 宠物管理',
+    children: [
+      { key: '/pet', label: '宠物配置' },
+      { key: '/pet/console', label: '宠物控制台' },
+      { key: '/pet/conversations', label: '会话记录' }
     ]
   },
   { key: '/test-modals', label: '🎨 UI测试' },
