@@ -513,6 +513,38 @@ const routes = [
     name: 'HealthReport',
     component: () => import('../views/health/HealthReportView.vue'),
     meta: { title: '健康报告' }
+  },
+
+  // ============ Sprint 20: 家庭和多用户场景 ============
+  {
+    path: '/family/members',
+    name: 'FamilyMembers',
+    component: () => import('../views/family/FamilyMembersView.vue'),
+    meta: { title: '家庭成员' }
+  },
+  {
+    path: '/family/child-mode',
+    name: 'ChildMode',
+    component: () => import('../views/family/ChildModeView.vue'),
+    meta: { title: '儿童模式' }
+  },
+  {
+    path: '/family/elder-mode',
+    name: 'ElderMode',
+    component: () => import('../views/family/ElderModeView.vue'),
+    meta: { title: '老人陪伴模式' }
+  },
+  {
+    path: '/family/album',
+    name: 'FamilyAlbum',
+    component: () => import('../views/family/FamilyAlbumView.vue'),
+    meta: { title: '家庭相册' }
+  },
+  {
+    path: '/family/settings',
+    name: 'FamilySettings',
+    component: () => import('../views/family/FamilySettingsView.vue'),
+    meta: { title: '家庭设置' }
   }
 ]
 
