@@ -152,6 +152,13 @@ func main() {
 		// Sprint 21: 内容生态 - 声音定制
 		&models.VoiceConfig{},
 		&models.VoiceMarketItem{},
+		// Sprint 22: 移动端后端支持 - App Token & Push
+		&models.AppToken{},
+		&models.AppRefreshToken{},
+		&models.AppPush{},
+		// Sprint 22: 微信小程序后端
+		&models.MiniAppDevice{},
+		&models.MiniAppQRCodeBind{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -518,6 +525,43 @@ func main() {
 	// ============ Sprint 21: 内容生态 - 声音定制 ============
 	voiceCtrl := &controllers.VoiceController{DB: db}
 	voiceCtrl.RegisterVoiceRoutes(apiV1)
+
+	// ============ Sprint 22: 移动端后端支持 - App API ============
+	appCtrl := &controllers.AppController{DB: db, Redis: redisClient}
+	appAuthGroup := r.Group("/api/v1/app/auth")
+	{
+		// App Token API（不需要JWT）
+		appAuthGroup.POST("/token", appCtrl.GetAppToken)
+		appAuthGroup.POST("/refresh", appCtrl.RefreshAppToken)
+	}
+	// App API（需要JWT）
+	appGroup := r.Group("/api/v1/app")
+	appGroup.Use(middleware.JWTAuth())
+	appGroup.Use(middleware.UserContext())
+	{
+		// App Push API
+		appGroup.POST("/push", appCtrl.SendAppPush)
+		appGroup.GET("/push/history", appCtrl.GetPushHistory)
+		// App 设备状态
+		appGroup.GET("/device/:device_id/status", appCtrl.GetAppDeviceStatus)
+		// App 设备控制
+		appGroup.POST("/device/:device_id/command", appCtrl.SendAppDeviceCommand)
+	}
+
+	// ============ Sprint 22: 微信小程序后端 API ============
+	miniAppCtrl := &controllers.MiniAppController{DB: db, Redis: redisClient}
+	miniAppGroup := r.Group("/api/v1/miniapp")
+	// 小程序API使用小程序专用认证中间件（从X-OpenID头解析openid）
+	miniAppGroup.Use(controllers.MiniAppAuthMiddleware())
+	{
+		miniAppGroup.GET("/devices", miniAppCtrl.GetMiniAppDevices)
+		miniAppGroup.POST("/bind", miniAppCtrl.BindDevice)
+		miniAppGroup.POST("/unbind", miniAppCtrl.UnbindDevice)
+		miniAppGroup.GET("/qrcode", miniAppCtrl.GenerateQRCode)
+		miniAppGroup.GET("/device/:device_id/status", miniAppCtrl.GetDeviceStatus)
+		miniAppGroup.POST("/device/:device_id/command", miniAppCtrl.SendDeviceCommand)
+		miniAppGroup.POST("/push", miniAppCtrl.SendPush)
+	}
 
 	// 获取端口
 	port := os.Getenv("PORT")

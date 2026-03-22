@@ -1,626 +1,617 @@
 package controllers
 
 import (
+	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
+	"mdm-backend/middleware"
 	"mdm-backend/models"
+	"mdm-backend/mqtt"
+	"mdm-backend/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-// AppController 应用管理控制器
+// AppController App移动端API控制器
 type AppController struct {
-	DB *gorm.DB
+	DB    *gorm.DB
+	Redis *utils.RedisClient
 }
 
-// ===== 请求结构 =====
+// ==================== App Token API ====================
 
-// CreateAppRequest 创建应用请求
-type CreateAppRequest struct {
-	Name        string `json:"name" binding:"required"`
-	BundleID    string `json:"bundle_id" binding:"required"`
-	Description string `json:"description"`
-	IconURL     string `json:"icon_url"`
-	Category    string `json:"category"`
-	Developer   string `json:"developer"`
-	Platform    string `json:"platform"`
+// AppTokenRequest App Token请求
+type AppTokenRequest struct {
+	AppID     string `json:"app_id" binding:"required"`
+	Platform  string `json:"platform" binding:"required"` // ios, android
+	ClientID  string `json:"client_id" binding:"required"`
+	AuthCode  string `json:"auth_code"`                     // 授权码（App扫码场景）
+	Username  string `json:"username"`                      // 用户名（密码模式）
+	Password  string `json:"password"`                      // 密码（密码模式）
+	GrantType string `json:"grant_type" binding:"required"` // authorization_code, password, client_credentials
 }
 
-// UpdateAppRequest 更新应用请求
-type UpdateAppRequest struct {
-	Name        string `json:"name"`
-	BundleID    string `json:"bundle_id"`
-	Description string `json:"description"`
-	IconURL     string `json:"icon_url"`
-	Category    string `json:"category"`
-	Developer   string `json:"developer"`
-	Platform    string `json:"platform"`
-	Status      *int   `json:"status"`
+// AppTokenResponse App Token响应
+type AppTokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int64  `json:"expires_in"`
+	RefreshToken string `json:"refresh_token"`
+	Scope        string `json:"scope"`
 }
 
-// CreateAppVersionRequest 创建版本请求
-type CreateAppVersionRequest struct {
-	Version      string `json:"version" binding:"required"`
-	BuildNumber  string `json:"build_number"`
-	FileSize     int64  `json:"file_size"`
-	FileURL      string `json:"file_url" binding:"required"`
-	FileMD5      string `json:"file_md5"`
-	MinOSVersion string `json:"min_os_version"`
-	ReleaseNotes string `json:"release_notes"`
-	IsMandatory  bool   `json:"is_mandatory"`
-}
-
-// CreateDistributionRequest 创建分发任务请求
-type CreateDistributionRequest struct {
-	Name             string   `json:"name" binding:"required"`
-	AppID            uint     `json:"app_id" binding:"required"`
-	VersionID        uint     `json:"version_id" binding:"required"`
-	DistributionType string   `json:"distribution_type" binding:"required"` // device / user / group
-	TargetIDs        []string `json:"target_ids" binding:"required"`
-}
-
-// ===== 应用 CRUD =====
-
-// List 获取应用列表
-func (c *AppController) List(ctx *gin.Context) {
-	var apps []models.App
-	query := c.DB.Model(&models.App{})
-
-	// 关键词过滤
-	if keyword := ctx.Query("keyword"); keyword != "" {
-		query = query.Where("name ILIKE ? OR bundle_id ILIKE ?", "%"+keyword+"%", "%"+keyword+"%")
-	}
-	// 平台过滤
-	if platform := ctx.Query("platform"); platform != "" {
-		query = query.Where("platform = ?", platform)
-	}
-	// 状态过滤
-	if status := ctx.Query("status"); status != "" {
-		query = query.Where("status = ?", status)
-	}
-
-	// 分页
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 20
-	}
-
-	var total int64
-	query.Count(&total)
-
-	offset := (page - 1) * pageSize
-	if err := query.Order("id DESC").Offset(offset).Limit(pageSize).Find(&apps).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"message": "success",
-		"data": gin.H{
-			"list": apps,
-			"pagination": gin.H{
-				"page":      page,
-				"page_size": pageSize,
-				"total":     total,
-			},
-		},
-	})
-}
-
-// Get 获取应用详情
-func (c *AppController) Get(ctx *gin.Context) {
-	id := ctx.Param("id")
-	var app models.App
-	if err := c.DB.First(&app, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "应用不存在", "error_code": "ERR_NOT_FOUND"})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	// 获取最新版本
-	var latestVersion models.AppVersion
-	c.DB.Where("app_id = ? AND is_active = ?", id, true).Order("created_at DESC").First(&latestVersion)
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-		"data": gin.H{
-			"app":            app,
-			"latest_version": latestVersion,
-		},
-	})
-}
-
-// Create 创建应用
-func (c *AppController) Create(ctx *gin.Context) {
-	var req CreateAppRequest
+// GetAppToken 获取App Token
+// POST /api/v1/app/auth/token
+func (c *AppController) GetAppToken(ctx *gin.Context) {
+	var req AppTokenRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 4001, "message": "参数校验失败: " + err.Error(), "error_code": "ERR_VALIDATION"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误", "error": err.Error()})
 		return
 	}
 
-	app := models.App{
-		Name:        req.Name,
-		BundleID:    req.BundleID,
-		Description: req.Description,
-		IconURL:     req.IconURL,
-		Category:    req.Category,
-		Developer:   req.Developer,
-		Platform:    req.Platform,
-		Status:      1,
+	// 验证 AppID（简单白名单，实际应查数据库）
+	allowedApps := map[string]bool{
+		"miniclaw-ios":     true,
+		"miniclaw-android": true,
 	}
-
-	if err := c.DB.Create(&app).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "创建应用失败", "error_code": "ERR_INTERNAL"})
+	if !allowedApps[req.AppID] {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "无效的AppID"})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    app,
-	})
-}
+	var userID uint
+	var username string
+	var roleID uint
+	var tenantID string
+	var isSuperAdmin bool
 
-// Update 更新应用
-func (c *AppController) Update(ctx *gin.Context) {
-	id := ctx.Param("id")
-	var app models.App
-	if err := c.DB.First(&app, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "应用不存在", "error_code": "ERR_NOT_FOUND"})
+	// 根据 grant_type 处理不同授权模式
+	switch req.GrantType {
+	case "password":
+		// 密码模式：验证用户名密码
+		var user models.SysUser
+		if err := c.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "用户名或密码错误"})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
+		userID = user.ID
+		username = user.Username
+		roleID = user.RoleID
+		tenantID = user.TenantID
 
-	var req UpdateAppRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 4001, "message": "参数校验失败: " + err.Error(), "error_code": "ERR_VALIDATION"})
-		return
-	}
-
-	// 选择性更新
-	updates := map[string]interface{}{}
-	if req.Name != "" {
-		updates["name"] = req.Name
-	}
-	if req.BundleID != "" {
-		updates["bundle_id"] = req.BundleID
-	}
-	if req.Description != "" {
-		updates["description"] = req.Description
-	}
-	if req.IconURL != "" {
-		updates["icon_url"] = req.IconURL
-	}
-	if req.Category != "" {
-		updates["category"] = req.Category
-	}
-	if req.Developer != "" {
-		updates["developer"] = req.Developer
-	}
-	if req.Platform != "" {
-		updates["platform"] = req.Platform
-	}
-	if req.Status != nil {
-		updates["status"] = *req.Status
-	}
-
-	if err := c.DB.Model(&app).Updates(updates).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "更新应用失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	c.DB.First(&app, id)
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    app,
-	})
-}
-
-// Delete 删除应用（软删除）
-func (c *AppController) Delete(ctx *gin.Context) {
-	id := ctx.Param("id")
-	var app models.App
-	if err := c.DB.First(&app, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "应用不存在", "error_code": "ERR_NOT_FOUND"})
+	case "authorization_code":
+		// 授权码模式（App扫码登录场景）
+		// auth_code 应当由扫码流程获取，此处简化处理
+		if req.AuthCode == "" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "授权码不能为空"})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	if err := c.DB.Delete(&app).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "删除应用失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-	})
-}
-
-// ===== 版本管理 =====
-
-// ListVersions 获取版本列表
-func (c *AppController) ListVersions(ctx *gin.Context) {
-	appID := ctx.Param("id")
-	var versions []models.AppVersion
-	query := c.DB.Model(&models.AppVersion{}).Where("app_id = ?", appID)
-
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 20
-	}
-
-	var total int64
-	query.Count(&total)
-
-	offset := (page - 1) * pageSize
-	if err := query.Order("id DESC").Offset(offset).Limit(pageSize).Find(&versions).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"message": "success",
-		"data": gin.H{
-			"list": versions,
-			"pagination": gin.H{
-				"page":      page,
-				"page_size": pageSize,
-				"total":     total,
-			},
-		},
-	})
-}
-
-// CreateVersion 添加版本
-func (c *AppController) CreateVersion(ctx *gin.Context) {
-	appID := ctx.Param("id")
-
-	// 检查应用是否存在
-	var app models.App
-	if err := c.DB.First(&app, appID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "应用不存在", "error_code": "ERR_NOT_FOUND"})
+		// 从Redis取出预存的code->user映射（扫码时写入）
+		if c.Redis != nil {
+			codeKey := fmt.Sprintf("app:authcode:%s", req.AuthCode)
+			ctx2 := context.Background()
+			codeData, err := c.Redis.Client().Get(ctx2, codeKey).Result()
+			if err != nil {
+				ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "授权码已过期或无效"})
+				return
+			}
+			var userInfo map[string]interface{}
+			if err := json.Unmarshal([]byte(codeData), &userInfo); err != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "授权码解析失败"})
+				return
+			}
+			userID = uint(userInfo["user_id"].(float64))
+			username = userInfo["username"].(string)
+			roleID = uint(userInfo["role_id"].(float64))
+			tenantID = userInfo["tenant_id"].(string)
+			// 删除已使用的code
+			c.Redis.Client().Del(ctx2, codeKey)
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "Redis不可用"})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
+
+	case "client_credentials":
+		// 客户端模式（设备级别的token）
+		userID = 0
+		username = "app_client"
+		roleID = 0
+		tenantID = ""
+
+	default:
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "不支持的授权模式"})
 		return
 	}
 
-	var req CreateAppVersionRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 4001, "message": "参数校验失败: " + err.Error(), "error_code": "ERR_VALIDATION"})
+	// 生成 JWT AccessToken
+	token, err := middleware.GenerateToken(userID, username, roleID, tenantID, isSuperAdmin)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "生成Token失败"})
 		return
 	}
 
-	version := models.AppVersion{
-		AppID:        app.ID,
-		Version:      req.Version,
-		BuildNumber:  req.BuildNumber,
-		FileSize:     req.FileSize,
-		FileURL:      req.FileURL,
-		FileMD5:      req.FileMD5,
-		MinOSVersion: req.MinOSVersion,
-		ReleaseNotes: req.ReleaseNotes,
-		IsMandatory:  req.IsMandatory,
+	expiresIn := int64(86400) // 24小时
+	expiresAt := time.Now().Add(time.Duration(expiresIn) * time.Second)
+
+	// 保存 AppToken 记录
+	appToken := models.AppToken{
+		Token:     uuid.New().String(),
+		AppID:     req.AppID,
+		UserID:    userID,
+		Platform:  req.Platform,
+		ClientID:  req.ClientID,
+		Scope:     "read,write",
+		ExpiresAt: expiresAt,
+		IsActive:  true,
+	}
+	if err := c.DB.Create(&appToken).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "保存Token记录失败"})
+		return
+	}
+
+	// 生成 RefreshToken
+	refreshTokenStr := generateSecureToken(64)
+	refreshExpiresAt := time.Now().Add(7 * 24 * time.Hour) // 7天
+	refreshToken := models.AppRefreshToken{
+		RefreshToken: refreshTokenStr,
+		AppTokenID:   appToken.ID,
+		UserID:       userID,
+		ClientID:     req.ClientID,
+		Platform:     req.Platform,
+		ExpiresAt:    refreshExpiresAt,
 		IsActive:     true,
 	}
-
-	if err := c.DB.Create(&version).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "创建版本失败", "error_code": "ERR_INTERNAL"})
+	if err := c.DB.Create(&refreshToken).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "生成RefreshToken失败"})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "success",
-		"data":    version,
+		"data": AppTokenResponse{
+			AccessToken:  token,
+			TokenType:    "Bearer",
+			ExpiresIn:    expiresIn,
+			RefreshToken: refreshTokenStr,
+			Scope:        "read,write",
+		},
 	})
 }
 
-// DeleteVersion 删除版本
-func (c *AppController) DeleteVersion(ctx *gin.Context) {
-	versionID := ctx.Param("version_id")
-	var version models.AppVersion
-	if err := c.DB.First(&version, versionID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "版本不存在", "error_code": "ERR_NOT_FOUND"})
-			return
+// RefreshAppToken 刷新App Token
+// POST /api/v1/app/auth/refresh
+func (c *AppController) RefreshAppToken(ctx *gin.Context) {
+	var req struct {
+		RefreshToken string `json:"refresh_token" binding:"required"`
+		ClientID     string `json:"client_id" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	// 查询刷新Token
+	var refreshToken models.AppRefreshToken
+	if err := c.DB.Where("refresh_token = ? AND client_id = ? AND is_active = ?", req.RefreshToken, req.ClientID, true).First(&refreshToken).Error; err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "RefreshToken无效"})
+		return
+	}
+
+	if refreshToken.IsExpired() || !refreshToken.IsValid() {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "RefreshToken已过期"})
+		return
+	}
+
+	// 获取原AppToken信息
+	var appToken models.AppToken
+	if err := c.DB.First(&appToken, refreshToken.AppTokenID).Error; err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "关联的Token不存在"})
+		return
+	}
+
+	// 撤销旧Token
+	now := time.Now()
+	appToken.IsActive = false
+	appToken.RevokedAt = &now
+	c.DB.Save(&appToken)
+
+	// 撤销旧刷新Token
+	refreshToken.IsActive = false
+	refreshToken.RevokedAt = &now
+	refreshToken.RefreshCount++
+	c.DB.Save(&refreshToken)
+
+	// 获取用户信息
+	var username string
+	var roleID uint
+	var tenantID string
+	var isSuperAdmin bool
+	if refreshToken.UserID > 0 {
+		var user models.SysUser
+		if err := c.DB.First(&user, refreshToken.UserID).Error; err == nil {
+			username = user.Username
+			roleID = user.RoleID
+			tenantID = user.TenantID
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
+	} else {
+		username = "app_client"
+	}
+
+	// 生成新的 AccessToken
+	token, err := middleware.GenerateToken(refreshToken.UserID, username, roleID, tenantID, isSuperAdmin)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "生成Token失败"})
 		return
 	}
 
-	if err := c.DB.Delete(&version).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "删除版本失败", "error_code": "ERR_INTERNAL"})
+	expiresIn := int64(86400)
+	expiresAt := time.Now().Add(time.Duration(expiresIn) * time.Second)
+
+	// 创建新的AppToken
+	newAppToken := models.AppToken{
+		Token:     uuid.New().String(),
+		AppID:     appToken.AppID,
+		UserID:    refreshToken.UserID,
+		Platform:  refreshToken.Platform,
+		ClientID:  refreshToken.ClientID,
+		Scope:     "read,write",
+		ExpiresAt: expiresAt,
+		IsActive:  true,
+	}
+	if err := c.DB.Create(&newAppToken).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "保存Token记录失败"})
+		return
+	}
+
+	// 生成新的RefreshToken
+	newRefreshTokenStr := generateSecureToken(64)
+	newRefreshExpiresAt := time.Now().Add(7 * 24 * time.Hour)
+	newRefreshToken := models.AppRefreshToken{
+		RefreshToken: newRefreshTokenStr,
+		AppTokenID:   newAppToken.ID,
+		UserID:       refreshToken.UserID,
+		ClientID:     refreshToken.ClientID,
+		Platform:     refreshToken.Platform,
+		ExpiresAt:    newRefreshExpiresAt,
+		IsActive:     true,
+	}
+	if err := c.DB.Create(&newRefreshToken).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "生成RefreshToken失败"})
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "success",
+		"data": AppTokenResponse{
+			AccessToken:  token,
+			TokenType:    "Bearer",
+			ExpiresIn:    expiresIn,
+			RefreshToken: newRefreshTokenStr,
+			Scope:        "read,write",
+		},
 	})
 }
 
-// ===== 分发任务 =====
+// ==================== App Push API ====================
 
-// ListDistributions 获取分发任务列表
-func (c *AppController) ListDistributions(ctx *gin.Context) {
-	var distributions []models.AppDistribution
-	query := c.DB.Model(&models.AppDistribution{})
+// SendPushRequest 发送推送请求
+type SendPushRequest struct {
+	UserID    uint                   `json:"user_id" binding:"required"`
+	DeviceID  string                 `json:"device_id"`                   // 可选，指定设备
+	Platform  string                 `json:"platform" binding:"required"` // ios, android
+	Title     string                 `json:"title" binding:"required"`
+	Body      string                 `json:"body" binding:"required"`
+	PushType  string                 `json:"push_type" binding:"required"` // alert, device, member, system, ota, marketing
+	Data      map[string]interface{} `json:"data"`                         // 透传数据
+	Badge     int                    `json:"badge"`
+	Sound     string                 `json:"sound"`
+	ChannelID string                 `json:"channel_id"`
+	Tag       string                 `json:"tag"`
+	ExpiresAt *time.Time             `json:"expires_at"` // 过期时间（用于撤回）
+}
 
-	if status := ctx.Query("status"); status != "" {
+// SendAppPush 发送App推送
+// POST /api/v1/app/push
+func (c *AppController) SendAppPush(ctx *gin.Context) {
+	var req SendPushRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误", "error": err.Error()})
+		return
+	}
+
+	pushID := uuid.New().String()
+	dataJSON, _ := json.Marshal(req.Data)
+
+	// 构建推送记录
+	push := models.AppPush{
+		PushID:    pushID,
+		UserID:    req.UserID,
+		DeviceID:  req.DeviceID,
+		Platform:  req.Platform,
+		Title:     req.Title,
+		Body:      req.Body,
+		PushType:  req.PushType,
+		Data:      string(dataJSON),
+		Badge:     req.Badge,
+		Sound:     req.Sound,
+		ChannelID: req.ChannelID,
+		Tag:       req.Tag,
+		Status:    models.PushStatusPending,
+		ExpiresAt: req.ExpiresAt,
+	}
+
+	if err := c.DB.Create(&push).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建推送记录失败"})
+		return
+	}
+
+	// 实际推送逻辑（这里模拟成功，实际应调用极光/FCM/华为push）
+	// TODO: 接入真实的推送服务（极光/FCM/华为Push）
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		// 标记为已发送
+		now := time.Now()
+		c.DB.Model(&models.AppPush{}).Where("id = ?", push.ID).Updates(map[string]interface{}{
+			"status":  models.PushStatusSent,
+			"sent_at": now,
+		})
+	}()
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"push_id": pushID,
+			"status":  "pending",
+		},
+	})
+}
+
+// GetPushHistory 获取推送历史
+// GET /api/v1/app/push/history
+func (c *AppController) GetPushHistory(ctx *gin.Context) {
+	userIDVal, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "未授权"})
+		return
+	}
+	userID := uint(userIDVal.(int))
+
+	page, _ := ctx.GetQuery("page")
+	pageSize, _ := ctx.GetQuery("page_size")
+	pushType, _ := ctx.GetQuery("push_type")
+	status, _ := ctx.GetQuery("status")
+
+	pageInt := 1
+	pageSizeInt := 20
+	fmt.Sscanf(page, "%d", &pageInt)
+	fmt.Sscanf(pageSize, "%d", &pageSizeInt)
+	if pageInt < 1 {
+		pageInt = 1
+	}
+	if pageSizeInt < 1 || pageSizeInt > 100 {
+		pageSizeInt = 20
+	}
+	offset := (pageInt - 1) * pageSizeInt
+
+	query := c.DB.Model(&models.AppPush{}).Where("user_id = ?", userID)
+	if pushType != "" {
+		query = query.Where("push_type = ?", pushType)
+	}
+	if status != "" {
 		query = query.Where("status = ?", status)
 	}
-
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 20
-	}
-	offset := (page - 1) * pageSize
 
 	var total int64
 	query.Count(&total)
 
-	query.Order("id DESC").Offset(offset).Limit(pageSize).Find(&distributions)
+	var pushes []models.AppPush
+	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSizeInt).Find(&pushes).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	// 解析Data字段
+	type PushItem struct {
+		models.AppPush
+		DataParsed map[string]interface{} `json:"data_parsed"`
+	}
+	items := make([]PushItem, len(pushes))
+	for i, p := range pushes {
+		var data map[string]interface{}
+		json.Unmarshal([]byte(p.Data), &data)
+		items[i] = PushItem{AppPush: p, DataParsed: data}
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "success",
 		"data": gin.H{
-			"list":      distributions,
+			"list":      items,
 			"total":     total,
-			"page":      page,
-			"page_size": pageSize,
+			"page":      pageInt,
+			"page_size": pageSizeInt,
 		},
 	})
 }
 
-// CreateDistribution 创建分发任务
-func (c *AppController) CreateDistribution(ctx *gin.Context) {
-	var req CreateDistributionRequest
+// ==================== App 设备控制 API ====================
+
+// GetAppDeviceStatus 获取App专用设备状态
+// GET /api/v1/app/device/:device_id/status
+func (c *AppController) GetAppDeviceStatus(ctx *gin.Context) {
+	deviceID := ctx.Param("device_id")
+	userIDVal, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "未授权"})
+		return
+	}
+	userID := uint(userIDVal.(int))
+
+	// 查找设备（需要用户有权限查看）
+	var device models.Device
+	if err := c.DB.Where("device_id = ?", deviceID).First(&device).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "设备不存在"})
+		return
+	}
+
+	// 简单权限检查：设备属于该用户或用户是创建者
+	if device.BindUserID != nil && *device.BindUserID != fmt.Sprintf("%d", userID) && device.CreateUserID != userID {
+		ctx.JSON(http.StatusForbidden, gin.H{"code": 403, "message": "无权限查看该设备"})
+		return
+	}
+
+	// 构建基础状态
+	status := map[string]interface{}{
+		"device_id":    device.DeviceID,
+		"sn_code":      device.SnCode,
+		"mac_address":  device.MacAddress,
+		"firmware_ver": device.FirmwareVersion,
+		"lifecycle":    device.LifecycleStatus,
+	}
+
+	// 从Redis获取设备影子状态
+	if c.Redis != nil {
+		shadow, _ := c.Redis.GetDeviceShadow(deviceID)
+		if shadow != nil {
+			status["is_online"] = shadow.IsOnline
+			status["battery"] = shadow.BatteryLevel
+			status["current_mode"] = shadow.CurrentMode
+			status["last_ip"] = shadow.LastIP
+			status["last_heartbeat"] = shadow.LastHeartbeat
+		} else {
+			status["is_online"] = false
+			status["battery"] = 0
+			status["current_mode"] = "unknown"
+		}
+	} else {
+		status["is_online"] = false
+		status["battery"] = 0
+		status["current_mode"] = "unknown"
+	}
+
+	// 获取设备profile
+	var profile models.PetProfile
+	if err := c.DB.Where("device_id = ?", deviceID).First(&profile).Error; err == nil {
+		status["pet_name"] = profile.PetName
+		status["personality"] = profile.Personality
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data":    status,
+	})
+}
+
+// SendAppDeviceCommand 发送设备指令（App专用）
+// POST /api/v1/app/device/:device_id/command
+func (c *AppController) SendAppDeviceCommand(ctx *gin.Context) {
+	deviceID := ctx.Param("device_id")
+	userIDVal, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "未授权"})
+		return
+	}
+	userID := uint(userIDVal.(int))
+
+	// 检查设备是否存在
+	var device models.Device
+	if err := c.DB.Where("device_id = ?", deviceID).First(&device).Error; err != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "设备不存在"})
+		return
+	}
+
+	// 权限检查
+	if device.BindUserID != nil && *device.BindUserID != fmt.Sprintf("%d", userID) && device.CreateUserID != userID {
+		ctx.JSON(http.StatusForbidden, gin.H{"code": 403, "message": "无权限操作该设备"})
+		return
+	}
+
+	var req struct {
+		CmdType string                 `json:"cmd_type" binding:"required"` // action, display, config, ota
+		Action  string                 `json:"action"`
+		Display map[string]interface{} `json:"display"`
+		Config  map[string]interface{} `json:"config"`
+	}
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 4001, "message": "参数校验失败: " + err.Error(), "error_code": "ERR_VALIDATION"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
 		return
 	}
 
-	// 校验应用和版本
-	var app models.App
-	if err := c.DB.First(&app, req.AppID).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "应用不存在", "error_code": "ERR_NOT_FOUND"})
-		return
-	}
-	var version models.AppVersion
-	if err := c.DB.First(&version, req.VersionID).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "版本不存在", "error_code": "ERR_NOT_FOUND"})
-		return
-	}
-	if version.AppID != req.AppID {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 4002, "message": "版本不属于该应用", "error_code": "ERR_VALIDATION"})
-		return
-	}
-
-	// 校验 distribution_type
-	if req.DistributionType != "device" && req.DistributionType != "user" && req.DistributionType != "group" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 4002, "message": "distribution_type 必须为 device/user/group 之一", "error_code": "ERR_VALIDATION"})
-		return
-	}
-
-	// 序列化 target_ids
-	targetIDsJSON, _ := json.Marshal(req.TargetIDs)
-
-	// 获取当前用户（如果有）
-	createdBy := "system"
-	if uid, exists := ctx.Get("user_id"); exists {
-		createdBy = uid.(string)
-	}
-
-	dist := models.AppDistribution{
-		Name:             req.Name,
-		AppID:            req.AppID,
-		VersionID:        req.VersionID,
-		DistributionType: req.DistributionType,
-		TargetIDs:        string(targetIDsJSON),
-		TargetCount:      len(req.TargetIDs),
-		PendingCount:     len(req.TargetIDs),
-		Status:           "pending",
-		CreatedBy:        createdBy,
-	}
-
-	if err := c.DB.Create(&dist).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "创建分发任务失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	// 模拟初始化安装记录（实际场景由设备回调更新状态）
-	for _, targetID := range req.TargetIDs {
-		record := models.AppInstallRecord{
-			DistributionID: &dist.ID,
-			DeviceID:       targetID,
-			AppID:          req.AppID,
-			VersionID:      req.VersionID,
-			Status:         "pending",
-		}
-		c.DB.Create(&record)
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    dist,
-	})
-}
-
-// GetDistribution 获取分发详情
-func (c *AppController) GetDistribution(ctx *gin.Context) {
-	id := ctx.Param("id")
-	var dist models.AppDistribution
-	if err := c.DB.First(&dist, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "分发任务不存在", "error_code": "ERR_NOT_FOUND"})
+	// 获取设备在线状态
+	if c.Redis != nil {
+		shadow, _ := c.Redis.GetDeviceShadow(deviceID)
+		if shadow == nil || !shadow.IsOnline {
+			ctx.JSON(http.StatusBadRequest, gin.H{"code": 4003, "message": "设备离线，无法下发指令"})
 			return
 		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
-		return
 	}
 
-	// 获取关联应用和版本信息
-	var app models.App
-	var version models.AppVersion
-	c.DB.First(&app, dist.AppID)
-	c.DB.First(&version, dist.VersionID)
+	cmdID := uuid.New().String()
+	cmd := map[string]interface{}{
+		"cmd_id":    cmdID,
+		"cmd_type":  req.CmdType,
+		"timestamp": time.Now().Format(time.RFC3339),
+	}
 
-	// 获取安装记录
-	var records []models.AppInstallRecord
-	c.DB.Where("distribution_id = ?", dist.ID).Find(&records)
+	switch req.CmdType {
+	case "action":
+		cmd["action"] = req.Action
+	case "display":
+		cmd["display"] = req.Display
+	case "config":
+		cmd["config"] = req.Config
+	default:
+		cmd["action"] = req.Action
+	}
+
+	// 通过MQTT下发指令
+	if mqtt.GlobalMQTTClient != nil {
+		if err := mqtt.PublishCommand(mqtt.GlobalMQTTClient, deviceID, req.CmdType, cmd); err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "指令下发失败"})
+			return
+		}
+	}
+
+	// 保存指令历史
+	cmdHistory := models.CommandHistory{
+		DeviceID: deviceID,
+		CmdID:    cmdID,
+		CmdType:  req.CmdType,
+		Action:   req.Action,
+		Status:   "sent",
+		SentAt:   time.Now(),
+	}
+	c.DB.Create(&cmdHistory)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":    0,
 		"message": "success",
 		"data": gin.H{
-			"distribution":     dist,
-			"app":              app,
-			"version":          version,
-			"install_records":  records,
+			"cmd_id":  cmdID,
+			"status":  "sent",
+			"sent_at": time.Now(),
 		},
 	})
 }
 
-// CancelDistribution 取消分发任务
-func (c *AppController) CancelDistribution(ctx *gin.Context) {
-	id := ctx.Param("id")
-	var dist models.AppDistribution
-	if err := c.DB.First(&dist, id).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "分发任务不存在", "error_code": "ERR_NOT_FOUND"})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
-		return
+// ==================== 辅助函数 ====================
+
+// generateSecureToken 生成安全的随机Token
+func generateSecureToken(length int) string {
+	bytes := make([]byte, length/2)
+	if _, err := rand.Read(bytes); err != nil {
+		return uuid.New().String() + uuid.New().String()
 	}
-
-	if dist.Status == "cancelled" || dist.Status == "completed" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 4002, "message": "该任务无法取消", "error_code": "ERR_VALIDATION"})
-		return
-	}
-
-	cancelledBy := "system"
-	if uid, exists := ctx.Get("user_id"); exists {
-		cancelledBy = uid.(string)
-	}
-	now := time.Now()
-
-	if err := c.DB.Model(&dist).Updates(map[string]interface{}{
-		"status":       "cancelled",
-		"cancelled_by": cancelledBy,
-		"cancelled_at": now,
-	}).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "取消分发失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	// 更新相关安装记录状态
-	c.DB.Model(&models.AppInstallRecord{}).Where("distribution_id = ? AND status = ?", dist.ID, "pending").
-		Update("status", "cancelled")
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-	})
-}
-
-// ===== 统计 =====
-
-// GetStats 获取应用安装统计
-func (c *AppController) GetStats(ctx *gin.Context) {
-	appID := ctx.Param("id")
-
-	var app models.App
-	if err := c.DB.First(&app, appID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JSON(http.StatusNotFound, gin.H{"code": 4041, "message": "应用不存在", "error_code": "ERR_NOT_FOUND"})
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败", "error_code": "ERR_INTERNAL"})
-		return
-	}
-
-	var totalInstalls int64
-	var activeInstalls int64
-	var failedInstalls int64
-
-	c.DB.Model(&models.AppInstallRecord{}).Where("app_id = ?", appID).Count(&totalInstalls)
-	c.DB.Model(&models.AppInstallRecord{}).Where("app_id = ? AND status = ?", appID, "installed").Count(&activeInstalls)
-	c.DB.Model(&models.AppInstallRecord{}).Where("app_id = ? AND status = ?", appID, "failed").Count(&failedInstalls)
-
-	// 按版本统计
-	type VersionStat struct {
-		VersionID   uint   `json:"version_id"`
-		Version     string `json:"version"`
-		TotalCount  int64  `json:"total_count"`
-		SuccessCount int64 `json:"success_count"`
-	}
-	var versionStats []VersionStat
-	c.DB.Table("app_install_records as r").
-		Select("r.version_id, v.version, COUNT(*) as total_count, SUM(CASE WHEN r.status = 'installed' THEN 1 ELSE 0 END) as success_count").
-		Joins("LEFT JOIN app_versions v ON v.id = r.version_id").
-		Where("r.app_id = ?", appID).
-		Group("r.version_id, v.version").
-		Scan(&versionStats)
-
-	// 按时间统计（最近30天）
-	type DailyStat struct {
-		Date         string `json:"date"`
-		InstallCount int64  `json:"install_count"`
-		FailCount    int64  `json:"fail_count"`
-	}
-	var dailyStats []DailyStat
-	c.DB.Table("app_install_records").
-		Select("DATE(created_at) as date, COUNT(*) as install_count, SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as fail_count").
-		Where("app_id = ? AND created_at >= ?", appID, time.Now().AddDate(0, 0, -30)).
-		Group("DATE(created_at)").
-		Order("date ASC").
-		Scan(&dailyStats)
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-		"data": gin.H{
-			"app_id":          appID,
-			"total_installs":  totalInstalls,
-			"active_installs": activeInstalls,
-			"failed_installs": failedInstalls,
-			"version_stats":   versionStats,
-			"daily_stats":     dailyStats,
-		},
-	})
+	return hex.EncodeToString(bytes)
 }
