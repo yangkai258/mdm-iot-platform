@@ -487,6 +487,38 @@ const routes = [
     name: 'MultiPetManage',
     component: () => import('../views/pet/MultiPetManageView.vue'),
     meta: { title: '家庭宠物管理' }
+  },
+
+  // ============ Sprint 16: 订阅计费 ============
+  {
+    path: '/billing/plans',
+    name: 'SubscriptionPlans',
+    component: () => import('../views/billing/SubscriptionPlansView.vue'),
+    meta: { title: '订阅计划' }
+  },
+  {
+    path: '/billing/subscription',
+    name: 'SubscriptionManage',
+    component: () => import('../views/billing/SubscriptionManageView.vue'),
+    meta: { title: '我的订阅' }
+  },
+  {
+    path: '/billing/usage',
+    name: 'UsageQuery',
+    component: () => import('../views/billing/UsageQueryView.vue'),
+    meta: { title: '用量查询' }
+  },
+  {
+    path: '/billing/invoice',
+    name: 'InvoiceBilling',
+    component: () => import('../views/billing/InvoiceBillingView.vue'),
+    meta: { title: '发票管理' }
+  },
+  {
+    path: '/billing/webhook',
+    name: 'WebhookConfig',
+    component: () => import('../views/billing/WebhookConfigView.vue'),
+    meta: { title: 'Webhook配置' }
   }
 ]
 
