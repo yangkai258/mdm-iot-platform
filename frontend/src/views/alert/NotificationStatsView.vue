@@ -171,14 +171,6 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import {
-  IconSearch,
-  IconRefresh,
-  IconSend,
-  IconClose,
-  IconCheckCircle,
-  IconAllApplication
-} from '@arco-design/web-icons/vue'
 import { useNotificationStats } from '@/composables/useNotification'
 import { CHANNEL_TYPE_MAP } from '@/composables/useNotification'
 

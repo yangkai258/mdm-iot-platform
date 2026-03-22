@@ -94,7 +94,6 @@
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useNotificationChannels } from '@/composables/useNotification'
-import type { NotificationChannel } from '@/api/notification'
 
 const props = defineProps({
   channel: {
@@ -166,7 +165,7 @@ async function handleSubmit() {
 
   saving.value = true
   try {
-    const data: Partial<NotificationChannel> = {
+    const data = {
       channel_type: 'email',
       channel_name: form.channel_name,
       enabled: form.enabled,
@@ -190,14 +189,14 @@ async function handleTest() {
   testResultVisible.value = true
 
   try {
-    const channelData: Partial<NotificationChannel> = {
+    const channelData = {
       channel_type: 'email',
       channel_name: form.channel_name || '测试渠道',
       enabled: true,
       config: form.config
     }
 
-    let tempId: number | null = null
+    let tempId = null
 
     if (!props.channel?.id) {
       // 临时创建渠道进行测试
@@ -208,7 +207,7 @@ async function handleTest() {
           recipient: testRecipient.value || form.config.smtp_to
         })
         // 删除临时渠道
-        await updateChannel(created.id, { enabled: false } as any)
+        await updateChannel(created.id, { enabled: false })
       }
     } else {
       testResult.value = await testChannel(props.channel.id, {

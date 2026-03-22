@@ -106,9 +106,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconDelete, IconPlus } from '@arco-design/web-icons/vue'
 import { useNotificationChannels } from '@/composables/useNotification'
-import type { NotificationChannel } from '@/api/notification'
 
 const props = defineProps({
   channel: {
@@ -136,7 +134,7 @@ const form = reactive({
     webhook_url: '',
     webhook_method: 'POST',
     webhook_secret: '',
-    webhook_headers: [] as { key: string; value: string }[],
+    webhook_headers: [],
     timeout_seconds: 30,
     retry_count: 3
   }
@@ -183,7 +181,7 @@ async function handleSubmit() {
 
   saving.value = true
   try {
-    const data: Partial<NotificationChannel> = {
+    const data = {
       channel_type: 'webhook',
       channel_name: form.channel_name,
       enabled: form.enabled,
@@ -207,7 +205,7 @@ async function handleTest() {
   testResultVisible.value = true
 
   try {
-    const channelData: Partial<NotificationChannel> = {
+    const channelData = {
       channel_type: 'webhook',
       channel_name: form.channel_name || '测试渠道',
       enabled: true,
@@ -218,7 +216,7 @@ async function handleTest() {
       const created = await createChannel(channelData)
       if (created?.id) {
         testResult.value = await testChannel(created.id)
-        await updateChannel(created.id, { enabled: false } as any)
+        await updateChannel(created.id, { enabled: false })
       }
     } else {
       testResult.value = await testChannel(props.channel.id)

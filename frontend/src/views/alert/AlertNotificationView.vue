@@ -257,16 +257,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import {
-  IconBroadcast,
-  IconRefresh,
-  IconEmail,
-  IconMessage,
-  IconLink,
-  IconClock,
-  IconDelete,
-  IconPlus
-} from '@arco-design/web-icons/vue'
 import { useNotificationChannels, useNotificationPeriods } from '@/composables/useNotification'
 import EmailChannelConfig from './EmailChannelConfig.vue'
 import SMSChannelConfig from './SMSChannelConfig.vue'
