@@ -25,9 +25,6 @@ func main() {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
 
-	// 设置全局数据库实例
-	models.SetDB(db)
-
 	// 自动迁移数据库表
 	if err := db.AutoMigrate(
 		&models.Device{},
@@ -135,30 +132,11 @@ func main() {
 		// Sprint 12: 数据权限表
 		&models.DataPermissionRule{},
 		&models.UserDataPermission{},
-		// Sprint 13: 多区域数据库架构
-		&models.Region{},
-		&models.RegionalNode{},
-		// Sprint 13: 时区支持
-		&models.TimezoneConfig{},
-		// Sprint 13: 数据驻留
-		&models.DataResidencyRule{},
-		// Sprint 21: 内容生态 - 表情包市场
-		&models.EmoticonCategory{},
-		&models.Emoticon{},
-		&models.EmoticonPurchase{},
-		// Sprint 21: 内容生态 - 动作资源库
-		&models.CustomAction{},
-		&models.ActionMarket{},
-		// Sprint 21: 内容生态 - 声音定制
-		&models.VoiceConfig{},
-		&models.VoiceMarketItem{},
-		// Sprint 22: 移动端后端支持 - App Token & Push
-		&models.AppToken{},
-		&models.AppRefreshToken{},
-		&models.AppPush{},
-		// Sprint 22: 微信小程序后端
-		&models.MiniAppDevice{},
-		&models.MiniAppQRCodeBind{},
+		// Sprint 25: 安全与合规 - 审计日志
+		&models.AuditLog{},
+		&models.EncryptionKey{},
+		&models.DataAnonymizationRecord{},
+		&models.GDPRRequest{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -513,55 +491,32 @@ func main() {
 	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
 	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
 
-	// ============ Sprint 21: 内容生态 - 表情包市场 ============
-	emoticonCtrl := &controllers.EmoticonController{DB: db}
-	emoticonCtrl.RegisterEmoticonRoutes(apiV1)
-	apiV1.POST("/emoticons/categories", emoticonCtrl.CreateCategory)
+	// ============ Sprint 25: 安全与合规 - 加密 API ============
+	securityCtrl := &controllers.SecurityController{DB: db}
+	apiV1.POST("/security/encrypt", securityCtrl.Encrypt)
+	apiV1.POST("/security/decrypt", securityCtrl.Decrypt)
+	apiV1.POST("/security/keys/rotate", securityCtrl.RotateKey)
+	apiV1.GET("/security/keys", securityCtrl.GetKeyInfo)
 
-	// ============ Sprint 21: 内容生态 - 动作资源库 ============
-	actionMarketCtrl := &controllers.ActionMarketController{DB: db}
-	actionMarketCtrl.RegisterActionMarketRoutes(apiV1)
+	// Sprint 25: 安全与合规 - 数据脱敏 API ============
+	apiV1.POST("/security/anonymize", securityCtrl.AnonymizeData)
+	apiV1.GET("/security/export", securityCtrl.ExportAnonymizedData)
 
-	// ============ Sprint 21: 内容生态 - 声音定制 ============
-	voiceCtrl := &controllers.VoiceController{DB: db}
-	voiceCtrl.RegisterVoiceRoutes(apiV1)
+	// ============ Sprint 25: 安全与合规 - 合规 API ============
+	gdprCtrl := &controllers.ComplianceController{DB: db}
+	apiV1.GET("/compliance/gdpr/data", gdprCtrl.GetGDPRData)
+	apiV1.POST("/compliance/gdpr/delete", gdprCtrl.DeleteGDPRData)
+	apiV1.GET("/compliance/export", gdprCtrl.GetGDPRDataExport)
+	apiV1.GET("/compliance/gdpr/requests", gdprCtrl.GetGDPRRequests)
+	apiV1.GET("/compliance/gdpr/requests/:id", gdprCtrl.GetGDPRRequest)
+	apiV1.POST("/compliance/gdpr/requests/:id/process", gdprCtrl.ProcessGDPRRequest)
 
-	// ============ Sprint 22: 移动端后端支持 - App API ============
-	appCtrl := &controllers.AppController{DB: db, Redis: redisClient}
-	appAuthGroup := r.Group("/api/v1/app/auth")
-	{
-		// App Token API（不需要JWT）
-		appAuthGroup.POST("/token", appCtrl.GetAppToken)
-		appAuthGroup.POST("/refresh", appCtrl.RefreshAppToken)
-	}
-	// App API（需要JWT）
-	appGroup := r.Group("/api/v1/app")
-	appGroup.Use(middleware.JWTAuth())
-	appGroup.Use(middleware.UserContext())
-	{
-		// App Push API
-		appGroup.POST("/push", appCtrl.SendAppPush)
-		appGroup.GET("/push/history", appCtrl.GetPushHistory)
-		// App 设备状态
-		appGroup.GET("/device/:device_id/status", appCtrl.GetAppDeviceStatus)
-		// App 设备控制
-		appGroup.POST("/device/:device_id/command", appCtrl.SendAppDeviceCommand)
-	}
-
-	// ============ Sprint 22: 微信小程序后端 API ============
-	miniAppCtrl := &controllers.MiniAppController{DB: db, Redis: redisClient}
-	miniAppGroup := r.Group("/api/v1/miniapp")
-	// 小程序API使用小程序专用认证中间件（从X-OpenID头解析openid）
-	miniAppGroup.Use(controllers.MiniAppAuthMiddleware())
-	{
-		miniAppGroup.GET("/devices", miniAppCtrl.GetMiniAppDevices)
-		miniAppGroup.POST("/bind", miniAppCtrl.BindDevice)
-		miniAppGroup.POST("/unbind", miniAppCtrl.UnbindDevice)
-		miniAppGroup.GET("/qrcode", miniAppCtrl.GenerateQRCode)
-		miniAppGroup.GET("/device/:device_id/status", miniAppCtrl.GetDeviceStatus)
-		miniAppGroup.POST("/device/:device_id/command", miniAppCtrl.SendDeviceCommand)
-		miniAppGroup.POST("/push", miniAppCtrl.SendPush)
-	}
+	// ============ Sprint 25: 安全与合规 - 审计日志 API ============
+	auditCtrl := &controllers.AuditController{DB: db}
+	apiV1.GET("/audit/logs", auditCtrl.GetAuditLogs)
+	apiV1.GET("/audit/logs/:id", auditCtrl.GetAuditLog)
+	apiV1.GET("/audit/statistics", auditCtrl.GetAuditStatistics)
+	apiV1.GET("/audit/logs/export", auditCtrl.ExportAuditLogs)
 
 	// 获取端口
 	port := os.Getenv("PORT")
