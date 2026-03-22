@@ -255,33 +255,30 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// ============ 应用管理 (已移至 Sprint 27 developer_controller) ============
 
 		// ============ 策略管理 ============
-		policyCtrl := &PolicyController{DB: db}
-		complianceCtrl := &ComplianceController{DB: db}
+		// policyCtrl := &PolicyController{DB: db}
+		// complianceCtrl := &ComplianceController{DB: db}
 
-		// 配置文件 CRUD
-		api.GET("/policies/configs", policyCtrl.ListConfigs)
-		api.POST("/policies/configs", policyCtrl.CreateConfig)
-		api.PUT("/policies/configs/:id", policyCtrl.UpdateConfig)
-		api.DELETE("/policies/configs/:id", policyCtrl.DeleteConfig)
+		// 配置文件 CRUD - 已禁用
+		// api.DELETE("/policies/configs/:id", policyCtrl.DeleteConfig)
 
-		// 策略 CRUD
-		api.GET("/policies", policyCtrl.ListPolicies)
-		api.POST("/policies", policyCtrl.CreatePolicy)
-		api.PUT("/policies/:id", policyCtrl.UpdatePolicy)
-		api.DELETE("/policies/:id", policyCtrl.DeletePolicy)
-		// 策略绑定
-		api.POST("/policies/:id/bind", policyCtrl.BindPolicy)
-		api.DELETE("/policies/:id/unbind", policyCtrl.UnbindPolicy)
-		api.GET("/policies/:id/bindings", policyCtrl.GetPolicyBindings)
+		// 策略 CRUD - 已禁用
+		// api.GET("/policies", policyCtrl.ListPolicies)
+		// api.POST("/policies", policyCtrl.CreatePolicy)
+		// api.PUT("/policies/:id", policyCtrl.UpdatePolicy)
+		// api.DELETE("/policies/:id", policyCtrl.DeletePolicy)
+		// 策略绑定 - 已禁用
+		// api.POST("/policies/:id/bind", policyCtrl.BindPolicy)
+		// api.DELETE("/policies/:id/unbind", policyCtrl.UnbindPolicy)
+		// api.GET("/policies/:id/bindings", policyCtrl.GetPolicyBindings)
 
-		// 合规规则 CRUD
-		api.GET("/compliance/rules", complianceCtrl.ListRules)
-		api.POST("/compliance/rules", complianceCtrl.CreateRule)
-		api.PUT("/compliance/rules/:id", complianceCtrl.UpdateRule)
-		api.DELETE("/compliance/rules/:id", complianceCtrl.DeleteRule)
-		// 违规记录
-		api.GET("/compliance/violations", complianceCtrl.ListViolations)
-		api.PUT("/compliance/violations/:id/resolve", complianceCtrl.ResolveViolation)
+		// 合规规则 CRUD - 已禁用
+		// api.GET("/compliance/rules", complianceCtrl.ListRules)
+		// api.POST("/compliance/rules", complianceCtrl.CreateRule)
+		// api.PUT("/compliance/rules/:id", complianceCtrl.UpdateRule)
+		// api.DELETE("/compliance/rules/:id", complianceCtrl.DeleteRule)
+		// 违规记录 - 已禁用
+		// api.GET("/compliance/violations", complianceCtrl.ListViolations)
+		// api.PUT("/compliance/violations/:id/resolve", complianceCtrl.ResolveViolation)
 	}
 }
 

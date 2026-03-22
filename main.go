@@ -532,25 +532,25 @@ func main() {
 	meshCtrl := &controllers.MeshController{DB: db}
 	meshCtrl.RegisterMeshRoutes(apiV1)
 
-	// 策略配置别名路由（/api/v1/policy-configs，供前端使用）
-	policyCtrlExtra := &controllers.PolicyController{DB: db}
-	complianceCtrlExtra := &controllers.ComplianceController{DB: db}
-	apiV1.GET("/policy-configs", policyCtrlExtra.ListConfigs)
-	apiV1.POST("/policy-configs", policyCtrlExtra.CreateConfig)
-	apiV1.PUT("/policy-configs/:id", policyCtrlExtra.UpdateConfig)
-	apiV1.DELETE("/policy-configs/:id", policyCtrlExtra.DeleteConfig)
+	// 策略配置别名路由（/api/v1/policy-configs，供前端使用）- 已禁用
+	// policyCtrlExtra := &controllers.PolicyController{DB: db}
+	// complianceCtrlExtra := &controllers.ComplianceController{DB: db}
+	// apiV1.GET("/policy-configs", policyCtrlExtra.ListConfigs)
+	// apiV1.POST("/policy-configs", policyCtrlExtra.CreateConfig)
+	// apiV1.PUT("/policy-configs/:id", policyCtrlExtra.UpdateConfig)
+	// apiV1.DELETE("/policy-configs/:id", policyCtrlExtra.DeleteConfig)
 
-	// 合规规则别名路由（/api/v1/compliance-rules，供前端使用）
-	apiV1.GET("/compliance-rules", complianceCtrlExtra.ListRules)
-	apiV1.POST("/compliance-rules", complianceCtrlExtra.CreateRule)
-	apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
-	apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
+	// 合规规则别名路由（/api/v1/compliance-rules，供前端使用）- 已禁用
+	// apiV1.GET("/compliance-rules", complianceCtrlExtra.ListRules)
+	// apiV1.POST("/compliance-rules", complianceCtrlExtra.CreateRule)
+	// apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
+	// apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
 
-	// 合规策略 API（/api/v1/compliance/policies，标准 REST 端点）
-	apiV1.GET("/compliance/policies", complianceCtrlExtra.ListRules)
-	apiV1.POST("/compliance/policies", complianceCtrlExtra.CreateRule)
-	apiV1.PUT("/compliance/policies/:id", complianceCtrlExtra.UpdateRule)
-	apiV1.DELETE("/compliance/policies/:id", complianceCtrlExtra.DeleteRule)
+	// 合规策略 API（/api/v1/compliance/policies，标准 REST 端点）- 已禁用
+	// apiV1.GET("/compliance/policies", complianceCtrlExtra.ListRules)
+	// apiV1.POST("/compliance/policies", complianceCtrlExtra.CreateRule)
+	// apiV1.PUT("/compliance/policies/:id", complianceCtrlExtra.UpdateRule)
+	// apiV1.DELETE("/compliance/policies/:id", complianceCtrlExtra.DeleteRule)
 
 	// ============ 数据导入导出路由 ============
 	importExportCtrl := &controllers.ImportExportController{DB: db}
