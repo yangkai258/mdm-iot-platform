@@ -38,6 +38,27 @@ func getTenantID(c *gin.Context) string {
 	return middleware.GetTenantID(c)
 }
 
+// getOrgID 获取组织ID
+func getOrgID(c *gin.Context) uint {
+	if orgID, exists := c.Get("org_id"); exists {
+		switch v := orgID.(type) {
+		case uint:
+			return v
+		case int:
+			return uint(v)
+		case int64:
+			return uint(v)
+		case float64:
+			return uint(v)
+		case string:
+			if id, err := strconv.ParseUint(v, 10, 64); err == nil {
+				return uint(id)
+			}
+		}
+	}
+	return 0
+}
+
 // parseInt 字符串转 int
 func parseInt(s string) int {
 	if n, err := strconv.Atoi(s); err == nil {

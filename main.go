@@ -156,6 +156,10 @@ func main() {
 		&models.AIModelDeployHistory{},
 		&models.AIInference{},
 		&models.AITraining{},
+		// Sprint 33: 模型分片加载
+		&models.ModelShard{},
+		&models.ModelVersion{},
+		&models.DeployShardedModel{},
 		// Sprint 32: 高级安全功能 (暂未实现)
 		// &models.SecuritySession{},
 		// &models.TwoFactorAuth{},
@@ -439,6 +443,39 @@ func main() {
 	// AI训练任务路由
 	aiTrainingCtrl := controllers.NewAITrainingController(db)
 	aiTrainingCtrl.RegisterRoutes(apiV1)
+
+	// ============ Sprint 33: 模型分片加载 ============
+	// 模型分片管理路由
+	modelShardCtrl := &controllers.ModelShardController{DB: db}
+	modelVersionCtrl := &controllers.ModelVersionController{DB: db}
+
+	// 模型分片路由 /api/v1/ai/models/:id/shards
+	aiModelShards := apiV1.Group("/ai/models/:id/shards")
+	{
+		aiModelShards.GET("", modelShardCtrl.ListShards)
+		aiModelShards.POST("", modelShardCtrl.CreateShard)
+		aiModelShards.PUT("/:shard_id", modelShardCtrl.UpdateShard)
+		aiModelShards.GET("/:shard_id", modelShardCtrl.GetShard)
+		aiModelShards.DELETE("/:shard_id", modelShardCtrl.DeleteShard)
+		aiModelShards.POST("/:shard_id/verify", modelShardCtrl.VerifyShard)
+	}
+
+	// 分片模型部署 /api/v1/ai/models/:id/deploy/sharded
+	apiV1.POST("/ai/models/:id/deploy/sharded", modelShardCtrl.DeploySharded)
+
+	// 模型版本路由 /api/v1/ai/models/:id/versions
+	aiModelVersions := apiV1.Group("/ai/models/:id/versions")
+	{
+		aiModelVersions.GET("", modelVersionCtrl.ListVersions)
+		aiModelVersions.POST("", modelVersionCtrl.CreateVersion)
+		aiModelVersions.GET("/simple", modelVersionCtrl.GetVersionsSimple)
+		aiModelVersions.GET("/:version", modelVersionCtrl.GetVersion)
+		aiModelVersions.PUT("/:version", modelVersionCtrl.UpdateVersion)
+		aiModelVersions.POST("/:version/publish", modelVersionCtrl.PublishVersion)
+	}
+
+	// 模型回滚 /api/v1/ai/models/:id/rollback
+	apiV1.POST("/ai/models/:id/rollback", modelVersionCtrl.Rollback)
 
 	// 通知路由
 	notifCtrl := &controllers.NotificationController{DB: db}
