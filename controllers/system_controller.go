@@ -347,7 +347,7 @@ func (c *LogController) GetOperationLogs(ctx *gin.Context) {
 	page := ctx.DefaultQuery("page", "1")
 	pageSize := ctx.DefaultQuery("page_size", "20")
 
-	query.Order("id DESC").Offset((parseInt(page) - 1) * parseInt(pageSize)).Limit(parseInt(pageSize)).Find(&logs)
+	query.Order("id DESC").Offset((systemParseInt(page) - 1) * systemParseInt(pageSize)).Limit(systemParseInt(pageSize)).Find(&logs)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 0,
@@ -355,8 +355,8 @@ func (c *LogController) GetOperationLogs(ctx *gin.Context) {
 			"list": logs,
 			"pagination": gin.H{
 				"total":    total,
-				"current":  parseInt(page),
-				"pageSize": parseInt(pageSize),
+				"current":  systemParseInt(page),
+				"pageSize": systemParseInt(pageSize),
 			},
 		},
 	})
@@ -375,7 +375,7 @@ func (c *LogController) GetLoginLogs(ctx *gin.Context) {
 	})
 }
 
-func parseInt(s string) int {
+func systemParseInt(s string) int {
 	var n int
 	for _, c := range s {
 		if c >= '0' && c <= '9' {
