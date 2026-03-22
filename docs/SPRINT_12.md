@@ -244,3 +244,56 @@ CREATE TABLE data_permission_rules (
 - 修复 `AlertHistoryView.vue`、 `NotificationLogsView.vue` 等 Sprint 11 文件中的 TypeScript 语法错误和错误 icon 导入
 - 修复 `WebhookChannelConfig.vue` 等文件的 TypeScript 类型注解问题
 - 构建验证通过 ✅
+
+---
+
+## 七、后端完成清单（agenthd）
+
+**完成时间**：2026-03-22
+
+| # | 任务 | 交付物 | 状态 |
+|---|------|--------|------|
+| P0-1 | LDAP/AD 集成 API | `backend/ldap/ldap_service.go`, `backend/controllers/ldap_controller.go` | ✅ 完成 |
+| P0-2 | 证书管理 API | `backend/controllers/certificate_controller.go`, `backend/models/certificate.go` | ✅ 完成 |
+| P0-3 | 远程设备锁定 API | `backend/controllers/device_security_controller.go` | ✅ 完成 |
+| P0-4 | 远程数据擦除 API | `backend/controllers/device_security_controller.go`, `backend/models/wipe_history.go` | ✅ 完成 |
+| P0-5 | 数据权限 API | `backend/controllers/data_permission_controller.go`, `backend/models/data_permission.go` | ✅ 完成 |
+| P1-1 | LDAP 用户同步服务 | 已在 `ldap_controller.go` 的 `SyncLDAPUsers` 中实现 | ✅ 完成 |
+| P1-3 | 设备擦除确认机制 | 二次确认 token + 审计日志在 `device_security_controller.go` | ✅ 完成 |
+| P1-4 | 数据权限表达式 | `data_permission_controller.go` 中的 `ValidatePermissionExpression` | ✅ 完成 |
+| P2-1 | LDAP 分组同步 | `ldap_controller.go` 的 `GetLDAPGroups` + `SetGroupRoleMapping` | ✅ 完成 |
+| P2-2 | 证书到期预警 | `certificate_controller.go` 的 `GetExpiringCertificates` | ✅ 完成 |
+| P2-3 | 擦除历史记录 | `device_security_controller.go` 的 `GetWipeHistory` | ✅ 完成 |
+| DB | 数据库迁移 | `backend/migrations/006_sprint12_ldap_cert_wipe.sql` | ✅ 完成 |
+| Utils | AES 加密工具 | `backend/utils/crypto.go` | ✅ 完成 |
+| Models | LDAP/Certificate/Wipe/DataPermission 模型 | `backend/models/` | ✅ 完成 |
+
+**API 路由清单**：
+- `GET /api/v1/ldap/config` - 获取 LDAP 配置
+- `PUT /api/v1/ldap/config` - 更新 LDAP 配置
+- `POST /api/v1/ldap/test` - 测试 LDAP 连接
+- `GET /api/v1/ldap/users` - LDAP 用户列表
+- `POST /api/v1/ldap/sync` - 触发用户同步
+- `GET /api/v1/ldap/groups` - LDAP 分组列表
+- `POST /api/v1/ldap/groups/mapping` - 角色分组映射
+- `GET /api/v1/certificates` - 证书列表
+- `POST /api/v1/certificates` - 创建证书
+- `GET /api/v1/certificates/:id` - 证书详情
+- `PUT /api/v1/certificates/:id` - 更新证书
+- `DELETE /api/v1/certificates/:id` - 删除证书
+- `POST /api/v1/certificates/:id/revoke` - 吊销证书
+- `GET /api/v1/certificates/expiring` - 即将到期证书
+- `POST /api/v1/certificates/validate` - 验证证书
+- `POST /api/v1/devices/:device_id/lock` - 锁定设备
+- `POST /api/v1/devices/:device_id/unlock` - 解锁设备
+- `POST /api/v1/devices/:device_id/wipe` - 擦除设备
+- `POST /api/v1/devices/:device_id/wipe/confirm` - 确认擦除
+- `GET /api/v1/devices/:device_id/wipe-history` - 擦除历史
+- `GET /api/v1/data-permissions/roles/:role_id` - 获取角色数据权限
+- `PUT /api/v1/data-permissions/roles/:role_id` - 更新角色数据权限
+- `GET /api/v1/data-permissions/users/:user_id` - 获取用户数据权限
+- `PUT /api/v1/data-permissions/users/:user_id` - 更新用户数据权限
+- `GET /api/v1/data-permissions/columns` - 可配置列级权限字段列表
+- `POST /api/v1/data-permissions/validate` - 验证权限表达式
+
+**构建验证**：✅ Go build 通过
