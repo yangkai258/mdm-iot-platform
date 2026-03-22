@@ -502,3 +502,267 @@ func (c *OTAController) GetDeploymentProgress(ctx *gin.Context) {
 		},
 	})
 }
+
+// PartialUpgradeRequest 分片升级请求
+type PartialUpgradeRequest struct {
+	PackageID   uint   `json:"package_id" binding:"required"`
+	TotalShards int    `json:"total_shards" binding:"required"`
+}
+
+// StartPartialUpgrade 发起分片升级
+// POST /api/v1/device/:id/ota/partial
+func (c *OTAController) StartPartialUpgrade(ctx *gin.Context) {
+	deviceID := ctx.Param("id")
+	if deviceID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":       4005,
+			"message":    "设备ID不能为空",
+			"error_code": "ERR_VALIDATION",
+		})
+		return
+	}
+
+	var req PartialUpgradeRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":       4005,
+			"message":    "参数校验失败: " + err.Error(),
+			"error_code": "ERR_VALIDATION",
+		})
+		return
+	}
+
+	// 检查固件包是否存在
+	var pkg models.OTAPackage
+	if err := c.DB.First(&pkg, req.PackageID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"code":       4002,
+				"message":    "固件包不存在",
+				"error_code": "ERR_OTA_001",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":       5001,
+			"message":    "查询固件包失败",
+			"error_code": "ERR_INTERNAL",
+		})
+		return
+	}
+
+	// 检查设备是否存在
+	var device models.Device
+	if err := c.DB.Where("device_id = ?", deviceID).First(&device).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"code":       4002,
+				"message":    "设备不存在",
+				"error_code": "ERR_DEVICE_001",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":       5001,
+			"message":    "查询设备失败",
+			"error_code": "ERR_INTERNAL",
+		})
+		return
+	}
+
+	// 检查是否已有进行中的分片升级
+	var existing models.OTAPartialUpgrade
+	if err := c.DB.Where("device_id = ? AND shard_status NOT IN ?", deviceID, []string{"done", "failed"}).First(&existing).Error; err == nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":       4005,
+			"message":    "设备存在进行中的升级任务",
+			"error_code": "ERR_OTA_007",
+		})
+		return
+	}
+
+	// 计算分片大小
+	chunkSize := pkg.FileSize / int64(req.TotalShards)
+	if chunkSize <= 0 {
+		chunkSize = 1024 * 1024 // 默认 1MB per chunk
+	}
+
+	now := time.Now()
+	upgrade := models.OTAPartialUpgrade{
+		DeviceID:        deviceID,
+		PackageID:       req.PackageID,
+		FromVersion:     device.FirmwareVersion,
+		ToVersion:       pkg.Version,
+		TotalShards:     req.TotalShards,
+		ShardIndex:      0,
+		TotalChunks:     int(pkg.FileSize / chunkSize),
+		ByteOffset:      0,
+		TotalBytes:      pkg.FileSize,
+		ShardStatus:     "pending",
+		ChunkStatus:     "idle",
+		RetryCount:      0,
+		StartedAt:       &now,
+	}
+
+	if err := c.DB.Create(&upgrade).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":       5001,
+			"message":    "创建升级记录失败: " + err.Error(),
+			"error_code": "ERR_INTERNAL",
+		})
+		return
+	}
+
+	// TODO: 通过 MQTT 下发分片升级指令到设备
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"code":    0,
+		"message": "分片升级任务已创建",
+		"data": gin.H{
+			"upgrade_id":   upgrade.ID,
+			"device_id":    deviceID,
+			"total_shards": req.TotalShards,
+			"total_bytes":  pkg.FileSize,
+			"version":      pkg.Version,
+		},
+	})
+}
+
+// GetPartialUpgradeStatus 获取分片升级状态
+// GET /api/v1/device/:id/ota/status
+func (c *OTAController) GetPartialUpgradeStatus(ctx *gin.Context) {
+	deviceID := ctx.Param("id")
+	if deviceID == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":       4005,
+			"message":    "设备ID不能为空",
+			"error_code": "ERR_VALIDATION",
+		})
+		return
+	}
+
+	var upgrade models.OTAPartialUpgrade
+	if err := c.DB.Where("device_id = ?", deviceID).Order("created_at DESC").First(&upgrade).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"code":       4002,
+				"message":    "未找到升级记录",
+				"error_code": "ERR_OTA_004",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":       5001,
+			"message":    "查询升级状态失败",
+			"error_code": "ERR_INTERNAL",
+		})
+		return
+	}
+
+	// 获取固件包信息
+	var pkg models.OTAPackage
+	c.DB.First(&pkg, upgrade.PackageID)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": gin.H{
+			"upgrade": gin.H{
+				"id":                  upgrade.ID,
+				"device_id":           upgrade.DeviceID,
+				"from_version":        upgrade.FromVersion,
+				"to_version":          upgrade.ToVersion,
+				"total_shards":        upgrade.TotalShards,
+				"shard_index":         upgrade.ShardIndex,
+				"total_chunks":        upgrade.TotalChunks,
+				"chunk_index":         upgrade.ChunkIndex,
+				"byte_offset":         upgrade.ByteOffset,
+				"transferred_bytes":   upgrade.TransferredBytes,
+				"total_bytes":         upgrade.TotalBytes,
+				"progress":            upgrade.Progress,
+				"shard_status":        upgrade.ShardStatus,
+				"chunk_status":        upgrade.ChunkStatus,
+				"retry_count":         upgrade.RetryCount,
+				"error_message":       upgrade.ErrorMessage,
+				"started_at":          upgrade.StartedAt,
+				"completed_at":        upgrade.CompletedAt,
+			},
+			"package": gin.H{
+				"id":       pkg.ID,
+				"name":     pkg.Name,
+				"version":  pkg.Version,
+				"file_url": pkg.FileURL,
+				"file_md5": pkg.FileMD5,
+			},
+		},
+	})
+}
+
+// UpdatePartialUpgradeProgress 更新分片升级进度（设备回调）
+// POST /api/v1/device/:id/ota/partial/progress
+func (c *OTAController) UpdatePartialUpgradeProgress(ctx *gin.Context) {
+	deviceID := ctx.Param("id")
+
+	type ProgressUpdate struct {
+		ShardIndex       int    `json:"shard_index"`
+		ChunkIndex       int    `json:"chunk_index"`
+		ByteOffset       int64  `json:"byte_offset"`
+		TransferredBytes int64  `json:"transferred_bytes"`
+		Progress         int    `json:"progress"`
+		ShardStatus      string `json:"shard_status"`
+		ChunkStatus      string `json:"chunk_status"`
+		ErrorMessage     string `json:"error_message"`
+	}
+
+	var req ProgressUpdate
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":       4005,
+			"message":    "参数校验失败: " + err.Error(),
+			"error_code": "ERR_VALIDATION",
+		})
+		return
+	}
+
+	var upgrade models.OTAPartialUpgrade
+	if err := c.DB.Where("device_id = ?", deviceID).Order("created_at DESC").First(&upgrade).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"code":       4002,
+				"message":    "未找到升级记录",
+				"error_code": "ERR_OTA_004",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"code":       5001,
+			"message":    "查询升级状态失败",
+			"error_code": "ERR_INTERNAL",
+		})
+		return
+	}
+
+	updates := map[string]interface{}{
+		"shard_index":        req.ShardIndex,
+		"chunk_index":        req.ChunkIndex,
+		"byte_offset":        req.ByteOffset,
+		"transferred_bytes":  req.TransferredBytes,
+		"progress":           req.Progress,
+		"shard_status":       req.ShardStatus,
+		"chunk_status":       req.ChunkStatus,
+		"updated_at":         time.Now(),
+	}
+	if req.ErrorMessage != "" {
+		updates["error_message"] = req.ErrorMessage
+	}
+	if req.ShardStatus == "done" {
+		now := time.Now()
+		updates["completed_at"] = &now
+	}
+
+	c.DB.Model(&upgrade).Updates(updates)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "进度已更新",
+	})
+}

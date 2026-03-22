@@ -95,3 +95,34 @@ type DeploymentPackageJoin struct {
 	OTADeployment
 	PackageVersion string `gorm:"type:varchar(32)" json:"package_version"`
 }
+
+// OTAPartialUpgrade OTA 分片升级记录
+type OTAPartialUpgrade struct {
+	ID            uint           `gorm:"primaryKey" json:"id"`
+	DeviceID      string         `gorm:"type:varchar(64);not null;index" json:"device_id"`
+	PackageID     uint           `gorm:"not null" json:"package_id"`
+	FromVersion   string         `gorm:"type:varchar(32)" json:"from_version"`
+	ToVersion     string         `gorm:"type:varchar(32);not null" json:"to_version"`
+	TotalShards   int            `gorm:"default:1" json:"total_shards"`    // 总分片数
+	ShardIndex    int            `gorm:"default:0" json:"shard_index"`     // 当前分片索引(0-based)
+	ChunkIndex    int            `gorm:"default:0" json:"chunk_index"`     // 当前块索引
+	TotalChunks   int            `gorm:"default:1" json:"total_chunks"`  // 当前分片内总块数
+	ByteOffset    int64          `gorm:"default:0" json:"byte_offset"`     // 当前分片内字节偏移
+	TotalBytes    int64          `gorm:"default:0" json:"total_bytes"`   // 总字节数
+	TransferredBytes int64      `gorm:"default:0" json:"transferred_bytes"` // 已传输字节数
+	Progress      int            `gorm:"default:0" json:"progress"`        // 整体进度 0-100
+	ShardStatus   string         `gorm:"type:varchar(16);default:'pending'" json:"shard_status"` // pending, transferring, verified, applying, done, failed
+	ChunkStatus   string         `gorm:"type:varchar(16);default:'idle'" json:"chunk_status"`    // idle, requesting, receiving, verifying, writing
+	RetryCount    int            `gorm:"default:0" json:"retry_count"`
+	ErrorMessage  string         `gorm:"type:text" json:"error_message"`
+	StartedAt     *time.Time     `json:"started_at"`
+	CompletedAt   *time.Time     `json:"completed_at"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// TableName 指定表名
+func (OTAPartialUpgrade) TableName() string {
+	return "ota_partial_upgrades"
+}

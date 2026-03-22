@@ -21,6 +21,8 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	}
 
 	otaCtrl := &OTAController{DB: db}
+	edgeCtrl := &EdgeController{DB: db}
+	meshCtrl := &MeshController{DB: db}
 	profileCtrl := &PetProfileController{DB: db}
 	cmdCtrl := &CommandController{
 		DB:    db,
@@ -74,6 +76,27 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 设备 OTA 回调（设备主动上报进度）
 		api.POST("/ota/devices/:device_id/report", otaCtrl.DeviceOTAReport)
 		api.GET("/ota/devices/:device_id/check", otaCtrl.CheckOTA)
+		// Sprint 26: 分片升级
+		api.POST("/device/:id/ota/partial", otaCtrl.StartPartialUpgrade)
+		api.GET("/device/:id/ota/status", otaCtrl.GetPartialUpgradeStatus)
+		api.POST("/device/:id/ota/partial/progress", otaCtrl.UpdatePartialUpgradeProgress)
+
+		// ============ 端侧推理 API (Sprint 26) ============
+		api.GET("/edge/models", edgeCtrl.ListModels)
+		api.POST("/edge/models", edgeCtrl.CreateModel)
+		api.GET("/edge/models/:id", edgeCtrl.GetModel)
+		api.POST("/edge/models/:id/deploy", edgeCtrl.DeployModel)
+		api.GET("/edge/inference/:device_id", edgeCtrl.GetInference)
+		api.GET("/edge/deployments", edgeCtrl.ListDeployments)
+
+		// ============ BLE Mesh API (Sprint 26) ============
+		api.GET("/mesh/devices", meshCtrl.ListMeshDevices)
+		api.GET("/mesh/devices/:id", meshCtrl.GetMeshDevice)
+		api.POST("/mesh/devices/:id/connect", meshCtrl.ConnectMeshDevice)
+		api.GET("/mesh/networks", meshCtrl.ListMeshNetworks)
+		api.POST("/mesh/networks", meshCtrl.SetupMeshNetwork)
+		api.GET("/mesh/networks/:id", meshCtrl.GetMeshNetwork)
+		api.POST("/mesh/networks/:id/activate", meshCtrl.ActivateMeshNetwork)
 
 		// ============ 组织管理 ============
 		// 公司管理

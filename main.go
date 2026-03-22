@@ -175,6 +175,15 @@ func main() {
 		&models.Experiment{},
 		&models.ExperimentRun{},
 		&models.ExperimentParticipant{},
+		// Sprint 26: 端侧推理 & BLE Mesh
+		&models.EdgeModel{},
+		&models.EdgeModelDeployment{},
+		&models.EdgeInferenceLog{},
+		&models.MeshDevice{},
+		&models.MeshNetwork{},
+		&models.MeshNetworkMember{},
+		// Sprint 26: 设备OTA分片升级（扩展字段）
+		&models.OTAPartialUpgrade{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
