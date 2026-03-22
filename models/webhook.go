@@ -9,11 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// StringArray 字符串数组类型
-type StringArray []string
+// WebhookStringArray 字符串数组类型（用于 Webhook JSONB 字段）
+type WebhookStringArray []string
 
 // Scan 实现 sql.Scanner 接口
-func (s *StringArray) Scan(value interface{}) error {
+func (s *WebhookStringArray) Scan(value interface{}) error {
 	if value == nil {
 		*s = []string{}
 		return nil
@@ -26,7 +26,7 @@ func (s *StringArray) Scan(value interface{}) error {
 }
 
 // Value 实现 driver.Valuer 接口
-func (s StringArray) Value() (driver.Value, error) {
+func (s WebhookStringArray) Value() (driver.Value, error) {
 	if s == nil {
 		return []byte("[]"), nil
 	}
@@ -42,7 +42,7 @@ type Webhook struct {
 	Name       string         `gorm:"type:varchar(128);not null" json:"name"`
 	URL        string         `gorm:"type:varchar(512);not null" json:"url"`
 	Secret     string         `gorm:"type:varchar(256)" json:"secret"`           // 签名密钥
-	EventTypes StringArray    `gorm:"type:jsonb" json:"event_types"`             // ["subscription.created", "payment.success"]
+	EventTypes WebhookStringArray `gorm:"type:jsonb" json:"event_types"` // ["subscription.created", "payment.success"]
 	Status     string         `gorm:"type:varchar(20);default:'active'" json:"status"` // active/inactive
 	TenantID   uint           `gorm:"index" json:"tenant_id"`
 	Headers    JSON           `gorm:"type:jsonb" json:"headers"`                // 自定义请求头
