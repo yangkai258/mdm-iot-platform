@@ -188,6 +188,12 @@ func main() {
 		&models.FunnelAnalysis{},
 		&models.CohortAnalysis{},
 		&models.RetentionReport{},
+		// Sprint 30-31: 平台演进
+		&models.EdgeModel{},
+		&models.ModelShard{},
+		&models.BLEMeshNetwork{},
+		&models.BLEMeshNode{},
+		&models.RTOSConfig{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -547,6 +553,10 @@ func main() {
 	// ============ Sprint 21: 具身智能路由 ============
 	embodiedCtrl := &controllers.EmbodiedController{DB: db}
 	embodiedCtrl.RegisterEmbodiedRoutes(apiV1)
+
+	// ============ Sprint 30-31: 平台演进路由 ============
+	platformEvoCtrl := &controllers.PlatformEvoController{DB: db}
+	platformEvoCtrl.RegisterRoutes(apiV1)
 
 	// ============ Sprint 12: 数据权限路由 ============
 	dataPermCtrl := &controllers.DataPermissionController{DB: db}
