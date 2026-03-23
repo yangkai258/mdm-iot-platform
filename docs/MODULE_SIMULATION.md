@@ -502,7 +502,36 @@
 | POST | /api/v1/simulation/datasets/:id/split | 数据集划分 |
 | GET | /api/v1/simulation/datasets/:id/samples | 数据样本列表 |
 
-### 3.8 压力测试
+### 3.8 仿真场景管理
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/simulation/scenes | 场景列表（轻量） |
+| POST | /api/v1/simulation/scenes | 创建场景 |
+| GET | /api/v1/simulation/scenes/:id | 场景详情 |
+| PUT | /api/v1/simulation/scenes/:id | 更新场景 |
+| DELETE | /api/v1/simulation/scenes/:id | 删除场景 |
+| POST | /api/v1/simulation/scenes/:id/clone | 克隆场景 |
+| GET | /api/v1/simulation/scenes/:id/preview | 场景预览 |
+| POST | /api/v1/simulation/scenes/batch-delete | 批量删除 |
+| POST | /api/v1/simulation/scenes/import | 导入场景 |
+| GET | /api/v1/simulation/scenes/export/:id | 导出场景 |
+
+### 3.9 A/B实验仿真
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/simulation/experiments | 实验列表 |
+| POST | /api/v1/simulation/experiments | 创建实验 |
+| GET | /api/v1/simulation/experiments/:id | 实验详情 |
+| PUT | /api/v1/simulation/experiments/:id | 更新实验 |
+| DELETE | /api/v1/simulation/experiments/:id | 删除实验 |
+| POST | /api/v1/simulation/experiments/:id/start | 开始实验仿真 |
+| POST | /api/v1/simulation/experiments/:id/stop | 停止实验 |
+| GET | /api/v1/simulation/experiments/:id/compare | 多方案对比 |
+| GET | /api/v1/simulation/experiments/:id/recommend | 推荐最优方案 |
+
+### 3.10 压力测试
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -2008,7 +2037,77 @@ CREATE TABLE dataset_jobs (
 
 CREATE INDEX idx_dataset_jobs_status ON dataset_jobs(status);
 CREATE INDEX idx_dataset_jobs_dataset ON dataset_jobs(dataset_id);
-``
+```
+
+### 5.14 A/B实验表 (ab_experiments)
+
+```sql
+CREATE TABLE ab_experiments (
+    id              BIGSERIAL PRIMARY KEY,
+    experiment_name VARCHAR(255) NOT NULL,
+    description     TEXT,
+    hypothesis      TEXT,
+    traffic_split   JSONB,
+    parameters      JSONB NOT NULL,
+    target_metric   VARCHAR(100),
+    status          VARCHAR(20) DEFAULT 'draft',
+    start_time      TIMESTAMP,
+    end_time        TIMESTAMP,
+    results         JSONB,
+    recommendation  TEXT,
+    risk_level     VARCHAR(20),
+    created_by      BIGINT REFERENCES users(id),
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_ab_experiments_status ON ab_experiments(status);
+```
+
+### 5.15 仿真场景管理表 (simulation_scenes)
+
+```sql
+CREATE TABLE simulation_scenes (
+    id              BIGSERIAL PRIMARY KEY,
+    scene_name      VARCHAR(255) NOT NULL,
+    scene_type      VARCHAR(50) NOT NULL,
+    description     TEXT,
+    environment     JSONB NOT NULL,
+    objects         JSONB[],
+    triggers        JSONB[],
+    initial_state   JSONB,
+    time_range      JSONB,
+    tags            VARCHAR(100)[],
+    is_public       BOOLEAN DEFAULT FALSE,
+    parent_id       BIGINT REFERENCES simulation_scenes(id),
+    clone_count     INT DEFAULT 0,
+    rating_avg      DECIMAL(3,2) DEFAULT 0,
+    rating_count    INT DEFAULT 0,
+    run_count       INT DEFAULT 0,
+    created_by      BIGINT REFERENCES users(id),
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_simulation_scenes_type ON simulation_scenes(scene_type);
+CREATE INDEX idx_simulation_scenes_public ON simulation_scenes(is_public);
+```
+
+### 5.16 数据样本表 (dataset_samples)
+
+```sql
+CREATE TABLE dataset_samples (
+    id              BIGSERIAL PRIMARY KEY,
+    dataset_id      BIGINT NOT NULL REFERENCES simulation_datasets(id) ON DELETE CASCADE,
+    sample_data     JSONB NOT NULL,
+    sample_type     VARCHAR(20),
+    metadata        JSONB,
+    created_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_dataset_samples_dataset ON dataset_samples(dataset_id);
+CREATE INDEX idx_dataset_samples_type ON dataset_samples(dataset_id, sample_type);
+```
 
 ## 六、前端页面清单
 
@@ -2150,6 +2249,26 @@ CREATE INDEX idx_dataset_jobs_dataset ON dataset_jobs(dataset_id);
 | 结果回调 | 测试结果正确回调至CI系统 |
 | 并行任务 | 支持5个以上并行CI任务 |
 | 通知准确 | 成功/失败通知100%送达 |
+
+### 7.8 A/B实验仿真
+
+| 验收点 | 标准 |
+|--------|------|
+| 实验创建 | 实验配置完整，参数正确 |
+| 仿真运行 | 仿真按预期执行，结果准确 |
+| 方案对比 | 多方案对比指标准确 |
+| 推荐建议 | 推荐结果有数据支撑 |
+
+### 7.9 仿真数据集
+
+| 验收点 | 标准 |
+|--------|------|
+| 数据集创建 | 数据集创建成功，Schema正确 |
+| 数据上传 | 支持CSV/JSON格式上传 |
+| 数据划分 | 训练/验证/测试划分比例准确 |
+| 样本查询 | 样本查询响应<500ms |
+
+
 
 ---
 
