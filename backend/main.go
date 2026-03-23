@@ -194,6 +194,12 @@ func main() {
 		&models.BLEMeshNetwork{},
 		&models.BLEMeshNode{},
 		&models.RTOSConfig{},
+		// Sprint 32: 高级安全功能
+		&models.AuditReport{},
+		&models.ComplianceReport{},
+		&models.DataExport{},
+		&models.GDPRRequestExtra{},
+		&models.ConsentRecord{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -557,6 +563,10 @@ func main() {
 	// ============ Sprint 30-31: 平台演进路由 ============
 	platformEvoCtrl := &controllers.PlatformEvoController{DB: db}
 	platformEvoCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 32: 高级安全功能路由
+	securityEvoCtrl := &controllers.SecurityEvoController{DB: db}
+	securityEvoCtrl.RegisterSecurityEvoRoutes(apiV1)
 
 	// ============ Sprint 12: 数据权限路由 ============
 	dataPermCtrl := &controllers.DataPermissionController{DB: db}
