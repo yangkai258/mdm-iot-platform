@@ -738,7 +738,32 @@ const routes = [
     name: 'RTOS',
     component: () => import('../views/platform-evo/RTOSView.vue'),
     meta: { title: 'RTOS 优化' }
-  }
+  },
+
+  // ============ Sprint 29: 高级功能前端 ============
+  {
+    path: '/advanced/child-mode',
+    name: 'AdvancedChildMode',
+    component: () => import('../views/advanced/ChildModeView.vue'),
+    meta: { title: '儿童模式' }
+  },
+  {
+    path: '/advanced/elderly-mode',
+    name: 'AdvancedElderlyMode',
+    component: () => import('../views/advanced/ElderlyModeView.vue'),
+    meta: { title: '老人陪伴模式' }
+  },
+  {
+    path: '/advanced/album',
+    name: 'AdvancedFamilyAlbum',
+    component: () => import('../views/advanced/FamilyAlbumView.vue'),
+    meta: { title: '家庭相册' }
+  },
+  {
+    path: '/advanced/pet-finder',
+    name: 'AdvancedPetFinder',
+    component: () => import('../views/advanced/PetFinderView.vue'),
+    meta: { title: '寻回网络' }
   }
 ]
 
