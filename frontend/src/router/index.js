@@ -642,6 +642,38 @@ const routes = [
     name: 'PlatformApiDocs',
     component: () => import('../views/platform/ApiDocsView.vue'),
     meta: { title: 'API 文档' }
+  },
+
+  // ============ Sprint 23: 仿真测试前端 ============
+  {
+    path: '/simulation/scenes',
+    name: 'SimulationScenes',
+    component: () => import('../views/simulation/SimulationScenesView.vue'),
+    meta: { title: '仿真场景' }
+  },
+  {
+    path: '/simulation/virtual-pet',
+    name: 'VirtualPetSimulation',
+    component: () => import('../views/simulation/VirtualPetSimulationView.vue'),
+    meta: { title: '虚拟宠物仿真' }
+  },
+  {
+    path: '/simulation/stress-test',
+    name: 'StressTest',
+    component: () => import('../views/simulation/StressTestView.vue'),
+    meta: { title: '压力测试' }
+  },
+  {
+    path: '/simulation/ab-experiments',
+    name: 'ABExperiments',
+    component: () => import('../views/simulation/ABExperimentView.vue'),
+    meta: { title: 'A/B 实验仿真' }
+  },
+  {
+    path: '/simulation/recordings',
+    name: 'SimulationRecordings',
+    component: () => import('../views/simulation/SimulationRecordingsView.vue'),
+    meta: { title: '回放系统' }
   }
   }
 ]
