@@ -149,3 +149,45 @@ export async function deleteVoice(id) {
 export async function previewVoice(id) {
   return request(`${API_BASE}/voices/${id}/preview`)
 }
+
+// ════════════════════════════════════════════════════════════
+// 内容审核
+// ════════════════════════════════════════════════════════════
+
+/** 审核内容列表 */
+export async function getReviewList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/market/reviews?${qs}`)
+}
+
+/** 待审核内容数量 */
+export async function getReviewPendingCount() {
+  return request(`${API_BASE}/market/reviews/pending-count`)
+}
+
+/** 审核内容详情 */
+export async function getReviewDetail(id) {
+  return request(`${API_BASE}/market/reviews/${id}`)
+}
+
+/** 审核内容（通过/拒绝） */
+export async function reviewContent(id, data) {
+  return request(`${API_BASE}/market/reviews/${id}/review`, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+}
+
+/** 批量审核 */
+export async function batchReviewContent(data) {
+  return request(`${API_BASE}/market/reviews/batch-review`, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+}
+
+/** 审核历史 */
+export async function getReviewHistory(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/market/reviews/history?${qs}`)
+}

@@ -517,6 +517,12 @@ const routes = [
     component: () => import('../views/market/VoiceConfigView.vue'),
     meta: { title: '声音定制' }
   },
+  {
+    path: '/market/review',
+    name: 'ContentReview',
+    component: () => import('../views/market/ContentReviewView.vue'),
+    meta: { title: '内容审核' }
+  },
 
   // ============ Sprint 21: 具身智能前端 ============
   {
