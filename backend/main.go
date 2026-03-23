@@ -94,6 +94,11 @@ func main() {
 		&models.AppDistribution{},
 		&models.AppInstallRecord{},
 		&models.AppLicense{},
+		// Sprint 15: 内容分发和应用管理
+		&models.ContentFile{},
+		&models.ContentDistribution{},
+		&models.AppPackage{},
+		&models.AppInstall{},
 		// 通知表
 		&models.Notification{},
 		&models.NotificationTemplate{},
@@ -172,6 +177,8 @@ func main() {
 		&models.PetMedicalRecord{},
 		&models.InsuranceClaim{},
 		&models.InsurancePolicy{},
+		&models.InsuranceProduct{},
+		&models.VetAppointment{},
 		&models.PetLostReport{},
 		&models.ThirdPartyMapConfig{},
 		// Sprint 26: 内容市场表
@@ -218,6 +225,18 @@ func main() {
 		&models.HealthAlert{},
 		&models.BehaviorEvent{},
 		&models.HighlightMoment{},
+		// Sprint 29: 宠物社交
+		&models.Post{},
+		&models.PostComment{},
+		&models.PostLike{},
+		&models.Follow{},
+		&models.PetPlaydate{},
+		// Sprint 31: 数据集开放平台 + AI行为研究平台
+		&models.Dataset{},
+		&models.ResearchDatasetVersion{},
+		&models.ResearchProject{},
+		&models.ExperimentRun{},
+		&models.ResearchCollaboration{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -624,6 +643,10 @@ func main() {
 	platformEvoCtrl := &controllers.PlatformEvoController{DB: db}
 	platformEvoCtrl.RegisterRoutes(apiV1)
 
+	// Sprint 31: 数据集开放平台 + AI行为研究平台路由
+	researchCtrl := &controllers.ResearchPlatformController{DB: db}
+	researchCtrl.RegisterRoutes(apiV1)
+
 	// Sprint 32: 高级安全功能路由
 	securityEvoCtrl := &controllers.SecurityEvoController{DB: db}
 	securityEvoCtrl.RegisterSecurityEvoRoutes(apiV1)
@@ -691,6 +714,31 @@ func main() {
 	// ============ Sprint 19: 健康医疗路由 ============
 	healthCtrl := controllers.NewHealthController(db, redisClient)
 	healthCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 29: 宠物社交路由
+	petSocialCtrl := controllers.NewPetSocialController(db)
+	apiV1.GET("/posts", petSocialCtrl.GetPosts)
+	apiV1.POST("/posts", petSocialCtrl.CreatePost)
+	apiV1.GET("/posts/:id", petSocialCtrl.GetPost)
+	apiV1.DELETE("/posts/:id", petSocialCtrl.DeletePost)
+	apiV1.POST("/posts/:id/like", petSocialCtrl.LikePost)
+	apiV1.GET("/posts/:id/comments", petSocialCtrl.GetComments)
+	apiV1.POST("/posts/:id/comments", petSocialCtrl.CreateComment)
+	apiV1.GET("/following", petSocialCtrl.GetFollowing)
+	apiV1.POST("/follow", petSocialCtrl.Follow)
+	apiV1.DELETE("/follow/:id", petSocialCtrl.Unfollow)
+	apiV1.GET("/playdates", petSocialCtrl.GetPlaydates)
+	apiV1.POST("/playdates", petSocialCtrl.CreatePlaydate)
+
+	// Sprint 27: 宠物保险和医疗路由
+	insuranceCtrl := &controllers.InsuranceController{DB: db}
+	insuranceCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 15: 内容分发和应用管理路由
+	contentCtrl := &controllers.ContentController{DB: db}
+	contentCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 31: 数据集开放平台路由 (research platform controller already registered above)
 
 	// 获取端口
 	port := os.Getenv("PORT")
