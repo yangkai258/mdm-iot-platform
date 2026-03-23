@@ -132,3 +132,70 @@ export async function getPetFinderReportDetail(id) {
   const res = await axios.get(`${BASE_URL}/advanced/pet-finder/reports/${id}`, { headers })
   return res.data
 }
+
+// ========== Vaccination ==========
+export async function getVaccinationRecords(params = {}) {
+  const res = await axios.get(`${BASE_URL}/advanced/vaccination`, { params, headers })
+  return res.data
+}
+
+export async function createVaccinationRecord(data) {
+  const res = await axios.post(`${BASE_URL}/advanced/vaccination`, data, { headers })
+  return res.data
+}
+
+export async function updateVaccinationRecord(id, data) {
+  const res = await axios.put(`${BASE_URL}/advanced/vaccination/${id}`, data, { headers })
+  return res.data
+}
+
+export async function deleteVaccinationRecord(id) {
+  const res = await axios.delete(`${BASE_URL}/advanced/vaccination/${id}`, { headers })
+  return res.data
+}
+
+export async function getVaccinationReminders(params = {}) {
+  const res = await axios.get(`${BASE_URL}/advanced/vaccination/reminders`, { params, headers })
+  return res.data
+}
+
+export async function setVaccinationReminder(data) {
+  const res = await axios.post(`${BASE_URL}/advanced/vaccination/reminders`, data, { headers })
+  return res.data
+}
+
+export async function updateVaccinationReminder(id, data) {
+  const res = await axios.put(`${BASE_URL}/advanced/vaccination/reminders/${id}`, data, { headers })
+  return res.data
+}
+
+export async function deleteVaccinationReminder(id) {
+  const res = await axios.delete(`${BASE_URL}/advanced/vaccination/reminders/${id}`, { headers })
+  return res.data
+}
+
+// ========== Diet Record ==========
+export async function getDietRecords(params = {}) {
+  const res = await axios.get(`${BASE_URL}/advanced/diet`, { params, headers })
+  return res.data
+}
+
+export async function createDietRecord(data) {
+  const res = await axios.post(`${BASE_URL}/advanced/diet`, data, { headers })
+  return res.data
+}
+
+export async function updateDietRecord(id, data) {
+  const res = await axios.put(`${BASE_URL}/advanced/diet/${id}`, data, { headers })
+  return res.data
+}
+
+export async function deleteDietRecord(id) {
+  const res = await axios.delete(`${BASE_URL}/advanced/diet/${id}`, { headers })
+  return res.data
+}
+
+export async function getDietSummary(params = {}) {
+  const res = await axios.get(`${BASE_URL}/advanced/diet/summary`, { params, headers })
+  return res.data
+}

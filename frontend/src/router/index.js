@@ -764,6 +764,18 @@ const routes = [
     name: 'AdvancedPetFinder',
     component: () => import('../views/advanced/PetFinderView.vue'),
     meta: { title: '寻回网络' }
+  },
+  {
+    path: '/advanced/vaccination',
+    name: 'AdvancedVaccination',
+    component: () => import('../views/advanced/VaccinationView.vue'),
+    meta: { title: '疫苗接种' }
+  },
+  {
+    path: '/advanced/diet',
+    name: 'AdvancedDietRecord',
+    component: () => import('../views/advanced/DietRecordView.vue'),
+    meta: { title: '饮食记录' }
   }
 ]
 
