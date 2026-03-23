@@ -225,6 +225,11 @@ func main() {
 		&models.PetFinderReport{},
 		&models.PetFinderSighting{},
 		&models.PetFinderAlert{},
+		// 宠物社交
+		&models.PetSocialPost{},
+		&models.PetSocialComment{},
+		&models.PetSocialFollow{},
+		&models.PetSocialLike{},
 		// Sprint 17-18: 健康医疗和情感计算
 		&models.EmotionRecord{},
 		&models.EmotionResponseConfig{},
@@ -518,6 +523,10 @@ func main() {
 	// ============ 订单路由 (PetShopController) ============
 	petShopCtrl := &controllers.PetShopController{DB: db}
 	petShopCtrl.RegisterRoutes(apiV1)
+
+	// ============ 宠物社交路由 (PetSocialController) ============
+	petSocialCtrl := &controllers.PetSocialController{DB: db}
+	petSocialCtrl.RegisterRoutes(apiV1)
 
 	// ============ 健康报告路由 (HealthTrackingCtrl) ============
 	healthCtrl := &controllers.HealthTrackingCtrl{DB: db}
