@@ -712,6 +712,32 @@ const routes = [
     name: 'EventAnalytics',
     component: () => import('../views/analytics/EventAnalyticsView.vue'),
     meta: { title: '事件分析' }
+  },
+
+  // ============ Sprint 30-31: 平台演进前端 ============
+  {
+    path: '/platform/edge-ai',
+    name: 'EdgeAI',
+    component: () => import('../views/platform-evo/EdgeAIView.vue'),
+    meta: { title: '端侧 AI 推理' }
+  },
+  {
+    path: '/platform/model-shards',
+    name: 'ModelShards',
+    component: () => import('../views/platform-evo/ModelShardView.vue'),
+    meta: { title: '模型分片' }
+  },
+  {
+    path: '/platform/ble-mesh',
+    name: 'BLEMesh',
+    component: () => import('../views/platform-evo/BLEMeshView.vue'),
+    meta: { title: 'BLE Mesh 网络' }
+  },
+  {
+    path: '/platform/rtos',
+    name: 'RTOS',
+    component: () => import('../views/platform-evo/RTOSView.vue'),
+    meta: { title: 'RTOS 优化' }
   }
   }
 ]
