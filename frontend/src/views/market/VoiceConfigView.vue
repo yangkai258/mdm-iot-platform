@@ -216,7 +216,7 @@ import {
   getVoiceList,
   createVoice,
   updateVoice,
-  deleteVoice,
+  deleteVoice as deleteVoiceApi,
   previewVoice
 } from '@/api/market'
 
@@ -400,7 +400,7 @@ const setDefault = async (record) => {
 
 const deleteVoice = async (record) => {
   try {
-    await deleteVoice(record.voice_id)
+    await deleteVoiceApi(record.voice_id)
     voices.value = voices.value.filter(v => v.voice_id !== record.voice_id)
     pagination.total--
     Message.success('声音配置已删除')

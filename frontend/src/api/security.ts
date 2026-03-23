@@ -190,3 +190,57 @@ export async function getUsers(params?: any) {
   const res = await axios.get(`${BASE_URL}/users`, { params, headers: headers() })
   return res.data
 }
+
+// ============================================================
+// 加密配置
+// ============================================================
+export async function getEncryptionConfig() {
+  const res = await axios.get(`${BASE_URL}/security/encryption`, { headers: headers() })
+  return res.data
+}
+
+export async function updateEncryptionConfig(data: any) {
+  const res = await axios.put(`${BASE_URL}/security/encryption`, data, { headers: headers() })
+  return res.data
+}
+
+// ============================================================
+// 密钥管理
+// ============================================================
+export async function getKeys(params?: any) {
+  const res = await axios.get(`${BASE_URL}/security/keys`, { params, headers: headers() })
+  return res.data
+}
+
+export async function createKey(data: any) {
+  const res = await axios.post(`${BASE_URL}/security/keys`, data, { headers: headers() })
+  return res.data
+}
+
+export async function deleteKey(id: string) {
+  const res = await axios.delete(`${BASE_URL}/security/keys/${id}`, { headers: headers() })
+  return res.data
+}
+
+export async function toggleKeyStatus(id: string, enabled: boolean) {
+  const res = await axios.put(`${BASE_URL}/security/keys/${id}/toggle`, { enabled }, { headers: headers() })
+  return res.data
+}
+
+// ============================================================
+// 密钥轮换
+// ============================================================
+export async function getRotationConfig() {
+  const res = await axios.get(`${BASE_URL}/security/keys/rotation`, { headers: headers() })
+  return res.data
+}
+
+export async function updateRotationConfig(data: any) {
+  const res = await axios.put(`${BASE_URL}/security/keys/rotation`, data, { headers: headers() })
+  return res.data
+}
+
+export async function rotateKeys() {
+  const res = await axios.post(`${BASE_URL}/security/keys/rotate`, {}, { headers: headers() })
+  return res.data
+}

@@ -20,7 +20,7 @@
             <a-option value="recording">录制中</a-option>
             <a-option value="completed">已完成</a-option>
             <a-option value="playing">播放中</a-option>
-          </a-option>
+          </a-select>
           <a-range-picker v-model="dateRange" style="width: 260px" @change="loadPlaybacks" />
         </a-space>
       </a-card>

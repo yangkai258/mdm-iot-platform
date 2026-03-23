@@ -20,7 +20,7 @@
       </a-col>
       <a-col :xs="24" :sm="8">
         <a-card class="stat-card">
-          <a-statistic title="配额使用率" :value="stats.quotaUsage" :suffix="%">
+          <a-statistic title="配额使用率" :value="stats.quotaUsage" :suffix="'%'">
             <template #icon><icon-storage /></template>
           </a-statistic>
           <a-progress :percent="stats.quotaUsage" :show-text="false" :color="quotaColor" style="margin-top: 8px" />

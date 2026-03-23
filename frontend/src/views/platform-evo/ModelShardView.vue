@@ -69,7 +69,7 @@
           <template #cell="{ record }">{{ record.size_mb }} MB</template>
         </a-table-column>
         <a-table-column title="层范围" data-index="layer_range" :width="120">
-          <template #cell="{ record }">{{ record.layer_start } - {{ record.layer_end }}</template>
+          <template #cell="{ record }">{{ record.layer_start }} - {{ record.layer_end }}</template>
         </a-table-column>
         <a-table-column title="加载设备" data-index="loaded_device" :width="140">
           <template #cell="{ record }">{{ record.loaded_device || '-' }}</template>

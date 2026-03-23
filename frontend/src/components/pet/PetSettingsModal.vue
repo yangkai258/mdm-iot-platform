@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    v-model:visible="visible"
+    v-model:visible="modelVisible"
     title="宠物设置"
     :width="480"
     @ok="handleSave"
@@ -61,7 +61,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 
 const props = defineProps({
   visible: {
@@ -85,6 +85,11 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:visible', 'save'])
+
+const modelVisible = computed({
+  get: () => props.visible,
+  set: (val) => emit('update:visible', val)
+})
 
 const form = reactive({
   name: '',

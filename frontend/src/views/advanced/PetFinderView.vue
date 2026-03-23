@@ -342,12 +342,6 @@ function onPageChange(page: number) {
   loadReports()
 }
 
-function showCreateModal() {
-  isEdit.value = false
-  resetForm()
-  createModalVisible.value = true
-}
-
 function showDetailModal(report: any) {
   detailReport.value = report
   detailModalVisible.value = true

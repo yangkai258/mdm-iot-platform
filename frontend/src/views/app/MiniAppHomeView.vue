@@ -143,7 +143,12 @@ const router = useRouter()
 const loading = ref(false)
 const overview = ref({ total: 0, online: 0, offline: 0, alert: 0 })
 const onlineDevices = ref([])
-const recentActivities = ref([])
+const recentActivities = ref([
+  { id: 1, type: 'success', message: '设备 MDM-001 唤醒成功', time: '10:30' },
+  { id: 2, type: 'alert', message: '设备 MDM-003 电量低于 15%', time: '09:45' },
+  { id: 3, type: 'info', message: '设备 MDM-002 OTA 升级完成', time: '昨天' },
+  { id: 4, type: 'success', message: '设备 MDM-005 重启成功', time: '昨天' },
+])
 
 const greeting = computed(() => {
   const hour = new Date().getHours()
@@ -190,13 +195,6 @@ const loadData = async () => {
   }
   loading.value = false
 }
-
-const recentActivities = ref([
-  { id: 1, type: 'success', message: '设备 MDM-001 唤醒成功', time: '10:30' },
-  { id: 2, type: 'alert', message: '设备 MDM-003 电量低于 15%', time: '09:45' },
-  { id: 3, type: 'info', message: '设备 MDM-002 OTA 升级完成', time: '昨天' },
-  { id: 4, type: 'success', message: '设备 MDM-005 重启成功', time: '昨天' },
-])
 
 const goToDeviceList = () => {
   router.push('/miniapp/devices')
