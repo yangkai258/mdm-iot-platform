@@ -213,6 +213,18 @@ func main() {
 		&models.SimulationEnvironment{},
 		&models.SimulationRun{},
 		&models.SimulationMetrics{},
+		// Sprint 29: 高级功能模型
+		&models.ChildModeConfig{},
+		&models.ElderlyCareConfig{},
+		&models.FamilyAlbum{},
+		&models.FamilyAlbumComment{},
+		&models.FamilyAlbumLike{},
+		&models.PetVaccination{},
+		&models.VaccinationReminder{},
+		&models.PetDietRecord{},
+		&models.PetFinderReport{},
+		&models.PetFinderSighting{},
+		&models.PetFinderAlert{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -489,6 +501,10 @@ func main() {
 	// ============ 家庭模式：儿童模式 + 老人陪伴模式 ============
 	familyModeCtrl := &controllers.FamilyModeController{DB: db}
 	familyModeCtrl.RegisterFamilyModeRoutes(apiV1)
+
+	// ============ Sprint 29: 高级功能 API ============
+	advancedCtrl := &controllers.AdvancedController{DB: db, Redis: redisClient}
+	advancedCtrl.RegisterAdvancedRoutes(apiV1)
 
 	// MiniClaw路由
 	miniClawCtrl := &controllers.MiniClawController{}
