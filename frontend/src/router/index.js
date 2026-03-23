@@ -622,6 +622,26 @@ const routes = [
     name: 'ResearchExperiment',
     component: () => import('../views/research/ExperimentView.vue'),
     meta: { title: 'AI 行为实验' }
+  },
+
+  // ============ Sprint 25: 开放平台前端 ============
+  {
+    path: '/platform/developer',
+    name: 'PlatformDeveloper',
+    component: () => import('../views/platform/DeveloperConsoleView.vue'),
+    meta: { title: '开发者控制台' }
+  },
+  {
+    path: '/platform/webhooks',
+    name: 'PlatformWebhooks',
+    component: () => import('../views/platform/WebhookMarketView.vue'),
+    meta: { title: 'Webhook 市场' }
+  },
+  {
+    path: '/platform/api-docs',
+    name: 'PlatformApiDocs',
+    component: () => import('../views/platform/ApiDocsView.vue'),
+    meta: { title: 'API 文档' }
   }
   }
 ]
