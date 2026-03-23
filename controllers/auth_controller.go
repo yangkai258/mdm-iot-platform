@@ -41,6 +41,7 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":    400,
 			"message": "参数错误",
+			"error":   err.Error(),
 		})
 		return
 	}

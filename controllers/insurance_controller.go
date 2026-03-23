@@ -43,7 +43,12 @@ func (ic *InsuranceController) ListProducts(c *gin.Context) {
 	tenantID := getTenantID(c)
 
 	var products []models.InsuranceProduct
-	query := ic.DB.Where("tenant_id = ? AND is_active = ?", tenantID, true)
+	var query *gorm.DB
+	if tenantID != "" {
+		query = ic.DB.Where("tenant_id = ?::uuid AND is_active = ?", tenantID, true)
+	} else {
+		query = ic.DB.Where("is_active = ?", true)
+	}
 
 	// 过滤：保障类型
 	if coverageType := c.Query("coverage_type"); coverageType != "" {
@@ -70,7 +75,11 @@ func (ic *InsuranceController) ListProducts(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	var total int64
-	ic.DB.Model(&models.InsuranceProduct{}).Where("tenant_id = ? AND is_active = ?", tenantID, true).Count(&total)
+	if tenantID != "" {
+		ic.DB.Model(&models.InsuranceProduct{}).Where("tenant_id = ?::uuid AND is_active = ?", tenantID, true).Count(&total)
+	} else {
+		ic.DB.Model(&models.InsuranceProduct{}).Where("is_active = ?", true).Count(&total)
+	}
 
 	if err := query.Order("sort_order ASC, created_at DESC").Offset(offset).Limit(pageSize).Find(&products).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败"})

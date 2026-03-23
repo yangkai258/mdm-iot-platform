@@ -51,7 +51,12 @@ func (d *DigitalTwinController) GetVitals(c *gin.Context) {
 	vitalType := c.Query("vital_type")
 
 	var records []models.VitalRecord
-	query := d.DB.Where("pet_uuid = ? AND tenant_id = ?", petID, tenantID).Order("recorded_at DESC")
+	var query *gorm.DB
+	if tenantID != "" {
+		query = d.DB.Where("pet_uuid = ? AND tenant_id = ?::uuid", petID, tenantID).Order("recorded_at DESC")
+	} else {
+		query = d.DB.Where("pet_uuid = ?", petID).Order("recorded_at DESC")
+	}
 	if vitalType != "" {
 		query = query.Where("vital_type = ?", vitalType)
 	}
@@ -61,11 +66,22 @@ func (d *DigitalTwinController) GetVitals(c *gin.Context) {
 	}
 
 	var trends []models.VitalTrend
-	d.DB.Where("pet_uuid = ? AND tenant_id = ?", petID, tenantID).Order("last_updated DESC").Limit(10).Find(&trends)
+	var trendsQuery *gorm.DB
+	if tenantID != "" {
+		trendsQuery = d.DB.Where("pet_uuid = ? AND tenant_id = ?::uuid", petID, tenantID)
+	} else {
+		trendsQuery = d.DB.Where("pet_uuid = ?", petID)
+	}
+	trendsQuery.Order("last_updated DESC").Limit(10).Find(&trends)
 
 	var alerts []models.HealthAlert
-	d.DB.Where("pet_uuid = ? AND tenant_id = ? AND status = ?", petID, tenantID, "active").
-		Order("occurred_at DESC").Limit(5).Find(&alerts)
+	var alertsQuery *gorm.DB
+	if tenantID != "" {
+		alertsQuery = d.DB.Where("pet_uuid = ? AND tenant_id = ?::uuid AND status = ?", petID, tenantID, "active")
+	} else {
+		alertsQuery = d.DB.Where("pet_uuid = ? AND status = ?", petID, "active")
+	}
+	alertsQuery.Order("occurred_at DESC").Limit(5).Find(&alerts)
 
 	var lastUpdatedAt time.Time
 	if len(records) > 0 {

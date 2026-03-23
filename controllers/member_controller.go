@@ -16,6 +16,11 @@ type MemberController struct {
 	DB *gorm.DB
 }
 
+// NewMemberController 创建会员控制器
+func NewMemberController(db *gorm.DB) *MemberController {
+	return &MemberController{DB: db}
+}
+
 // MemberList 会员列表
 func (c *MemberController) MemberList(ctx *gin.Context) {
 	var members []models.Member

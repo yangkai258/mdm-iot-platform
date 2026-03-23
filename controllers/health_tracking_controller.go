@@ -260,7 +260,12 @@ func (h *HealthTrackingCtrl) ListExerciseRecords(c *gin.Context) {
 	var records []models.ExerciseRecord
 	var total int64
 
-	query := h.DB.Model(&models.ExerciseRecord{}).Where("pet_uuid = ? AND tenant_id = ?", petID, tenantID)
+	var query *gorm.DB
+	if tenantID != "" {
+		query = h.DB.Model(&models.ExerciseRecord{}).Where("pet_uuid = ? AND tenant_id = ?::uuid", petID, tenantID)
+	} else {
+		query = h.DB.Model(&models.ExerciseRecord{}).Where("pet_uuid = ?", petID)
+	}
 
 	if exerciseType := c.Query("type"); exerciseType != "" {
 		query = query.Where("exercise_type = ?", exerciseType)

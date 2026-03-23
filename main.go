@@ -225,6 +225,23 @@ func main() {
 		&models.PetFinderReport{},
 		&models.PetFinderSighting{},
 		&models.PetFinderAlert{},
+		// Sprint 17-18: 健康医疗和情感计算
+		&models.EmotionRecord{},
+		&models.EmotionResponseConfig{},
+		&models.EmotionReport{},
+		&models.ExerciseRecord{},
+		&models.ExerciseSummary{},
+		&models.ExerciseTrend{},
+		&models.HealthAlert{},
+		&models.HealthAlertRule{},
+		&models.HealthWarning{},
+		&models.ExerciseGoal{},
+		&models.VitalRecord{},
+		&models.VitalTrend{},
+		// Sprint 15-16: 订阅管理
+		&models.SubscriptionPlan{},
+		&models.UserSubscription{},
+		&models.SubscriptionChange{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -498,6 +515,41 @@ func main() {
 	insuranceCtrl := &controllers.InsuranceController{DB: db}
 	insuranceCtrl.RegisterInsuranceRoutes(apiV1)
 
+	// ============ 订单路由 (PetShopController) ============
+	petShopCtrl := &controllers.PetShopController{DB: db}
+	petShopCtrl.RegisterRoutes(apiV1)
+
+	// ============ 健康报告路由 (HealthTrackingCtrl) ============
+	healthCtrl := &controllers.HealthTrackingCtrl{DB: db}
+	healthCtrl.RegisterHealthRoutes(apiV1)
+
+	// ============ 情绪记录路由 (EmotionController) ============
+	emotionCtrl := &controllers.EmotionController{DB: db}
+	emotionCtrl.RegisterEmotionRoutes(apiV1)
+
+	// ============ 数字孪生路由 (DigitalTwinController) ============
+	digitalTwinCtrl := &controllers.DigitalTwinController{DB: db}
+	digitalTwinCtrl.RegisterDigitalTwinRoutes(apiV1)
+
+	// ============ 订阅路由 (SubscriptionController) ============
+	subscriptionCtrl := &controllers.SubscriptionController{DB: db}
+	subsGroup := apiV1.Group("/subscriptions")
+	{
+		subsGroup.GET("/plans", subscriptionCtrl.ListPlans)
+		subsGroup.GET("/plans/:id", subscriptionCtrl.GetPlan)
+		subsGroup.POST("/plans", subscriptionCtrl.CreatePlan)
+		subsGroup.PUT("/plans/:id", subscriptionCtrl.UpdatePlan)
+		subsGroup.DELETE("/plans/:id", subscriptionCtrl.DeletePlan)
+		subsGroup.GET("/current", subscriptionCtrl.GetCurrentSubscription)
+		subsGroup.POST("/subscribe", subscriptionCtrl.Subscribe)
+		subsGroup.GET("/:id", subscriptionCtrl.GetSubscription)
+		subsGroup.POST("/:id/cancel", subscriptionCtrl.CancelSubscription)
+		subsGroup.POST("/:id/renew", subscriptionCtrl.RenewSubscription)
+	}
+
+	// ============ 宠物社交动态路由 ============
+	// 注意：pet-social/feed 控制器暂未实现，跳过
+
 	// ============ 家庭模式：儿童模式 + 老人陪伴模式 ============
 	familyModeCtrl := &controllers.FamilyModeController{DB: db}
 	familyModeCtrl.RegisterFamilyModeRoutes(apiV1)
@@ -582,6 +634,10 @@ func main() {
 	aiFairnessCtrl := controllers.NewAIFairnessController(db)
 	aiFairnessCtrl.RegisterRoutes(apiV1)
 
+	// ============ 研究平台路由 ============
+	researchCtrl := &controllers.ResearchController{DB: db}
+	researchCtrl.RegisterRoutes(apiV1)
+
 	// 通知路由
 	notifCtrl := &controllers.NotificationController{DB: db}
 	notifCtrl.RegisterRoutes(apiV1)
@@ -598,24 +654,13 @@ func main() {
 	meshCtrl := &controllers.MeshController{DB: db}
 	meshCtrl.RegisterMeshRoutes(apiV1)
 
-	// 策略配置别名路由（/api/v1/policy-configs，供前端使用）- 已禁用
-	// policyCtrlExtra := &controllers.PolicyController{DB: db}
-	// complianceCtrlExtra := &controllers.ComplianceController{DB: db}
-	// apiV1.GET("/policy-configs", policyCtrlExtra.ListConfigs)
-	// apiV1.POST("/policy-configs", policyCtrlExtra.CreateConfig)
-	// apiV1.PUT("/policy-configs/:id", policyCtrlExtra.UpdateConfig)
-	// apiV1.DELETE("/policy-configs/:id", policyCtrlExtra.DeleteConfig)
+	// ============ 合规策略和规则 ============
+	complianceCtrl := &controllers.ComplianceController{DB: db}
+	complianceCtrl.RegisterRoutes(apiV1)
 
-	// 合规规则别名路由（/api/v1/compliance-rules，供前端使用）- 已禁用
-	// apiV1.GET("/compliance-rules", complianceCtrlExtra.ListRules)
-	// apiV1.POST("/compliance-rules", complianceCtrlExtra.CreateRule)
-	// apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
-	// apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
-
-	// 合规策略 API（/api/v1/compliance/policies，标准 REST 端点）- 已禁用
-	// apiV1.GET("/compliance/policies", complianceCtrlExtra.ListRules)
-	// apiV1.POST("/compliance/policies", complianceCtrlExtra.CreateRule)
-	// apiV1.PUT("/compliance/policies/:id", complianceCtrlExtra.UpdateRule)
+	// ============ 设备影子 ============
+	shadowCtrl := &controllers.DeviceShadowController{DB: db}
+	shadowCtrl.RegisterRoutes(apiV1)
 	// apiV1.DELETE("/compliance/policies/:id", complianceCtrlExtra.DeleteRule)
 
 	// ============ 数据导入导出路由 ============
