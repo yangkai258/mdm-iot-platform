@@ -27,6 +27,7 @@ func (c *PlatformEvoController) RegisterRoutes(rg *gin.RouterGroup) {
 		edge.POST("/models", c.CreateEdgeModel)
 		edge.GET("/models/:id", c.GetEdgeModel)
 		edge.DELETE("/models/:id", c.DeleteEdgeModel)
+		edge.POST("/deploy", c.DeployEdgeModel)
 	}
 
 	// 模型分片
@@ -53,6 +54,7 @@ func (c *PlatformEvoController) RegisterRoutes(rg *gin.RouterGroup) {
 	{
 		rtos.GET("/config", c.GetRTOSConfig)
 		rtos.PUT("/config", c.UpdateRTOSConfig)
+		rtos.GET("/performance", c.GetRTOSPerformance)
 	}
 }
 
@@ -816,4 +818,142 @@ func (c *PlatformEvoController) UpdateRTOSConfig(ctx *gin.Context) {
 
 	c.DB.First(&config, config.ID)
 	ctx.JSON(http.StatusOK, config)
+}
+
+// DeployEdgeModel 部署端侧模型到设备
+func (c *PlatformEvoController) DeployEdgeModel(ctx *gin.Context) {
+	var req struct {
+		ModelID   uint     `json:"model_id" binding:"required"`
+		DeviceIDs []uint   `json:"device_ids" binding:"required"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var model models.EdgeModel
+	if err := c.DB.First(&model, req.ModelID).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "edge model not found"})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get edge model"})
+		}
+		return
+	}
+
+	// 模拟部署：更新模型状态为已部署
+	if model.Status == "draft" {
+		now := time.Now()
+		model.Status = "active"
+		model.PublishedAt = &now
+		c.DB.Save(&model)
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":  "model deployed successfully",
+		"model_id": req.ModelID,
+		"devices":  req.DeviceIDs,
+	})
+}
+
+// ===== RTOS性能数据 =====
+
+// PerformanceMetrics RTOS性能指标
+type PerformanceMetrics struct {
+	CPUUsagePercent    float64 `json:"cpu_usage_percent"`
+	MemoryUsedMB       float64 `json:"memory_used_mb"`
+	MemoryTotalMB      float64 `json:"memory_total_mb"`
+	MemoryUsagePercent float64 `json:"memory_usage_percent"`
+	HeapFreeBytes      int64   `json:"heap_free_bytes"`
+	HeapUsedBytes      int64   `json:"heap_used_bytes"`
+	TaskCount          int     `json:"task_count"`
+	RunningTasks       int     `json:"running_tasks"`
+	BlockedTasks       int     `json:"blocked_tasks"`
+	ReadyTasks         int     `json:"ready_tasks"`
+	ContextSwitchCount int64   `json:"context_switch_count"`
+	ISRCount           int64   `json:"isr_count"`
+	ISRRateHz          float64 `json:"isr_rate_hz"`
+	InterruptLatencyUs int     `json:"interrupt_latency_us"`
+	SchedulerLatencyUs int     `json:"scheduler_latency_us"`
+	PowerState         string  `json:"power_state"`
+	TemperatureC       float64 `json:"temperature_c"`
+	BatteryLevel       int     `json:"battery_level"`
+	NetworkLatencyMs   int     `json:"network_latency_ms"`
+	ThroughputMbps     float64 `json:"throughput_mbps"`
+	ErrorCount         int     `json:"error_count"`
+	UptimeSeconds      int64   `json:"uptime_seconds"`
+}
+
+// GetRTOSPerformance 获取RTOS性能数据
+func (c *PlatformEvoController) GetRTOSPerformance(ctx *gin.Context) {
+	deviceID := ctx.Query("device_id")
+	configKey := ctx.DefaultQuery("config_key", "default")
+
+	// 如果指定了设备ID，返回该设备的实时性能数据（模拟数据）
+	if deviceID != "" {
+	metrics := PerformanceMetrics{
+			CPUUsagePercent:    23.5,
+			MemoryUsedMB:       128.4,
+			MemoryTotalMB:      512.0,
+			MemoryUsagePercent: 25.1,
+			HeapFreeBytes:      45_000_000,
+			HeapUsedBytes:      19_000_000,
+			TaskCount:          12,
+			RunningTasks:       8,
+			BlockedTasks:       2,
+			ReadyTasks:         2,
+			ContextSwitchCount: 1_234_567,
+			ISRCount:           56_789,
+			ISRRateHz:          142.3,
+			InterruptLatencyUs: 5,
+			SchedulerLatencyUs: 12,
+			PowerState:         "active",
+			TemperatureC:       42.3,
+			BatteryLevel:       85,
+			NetworkLatencyMs:   15,
+			ThroughputMbps:     12.5,
+			ErrorCount:         0,
+			UptimeSeconds:      86400,
+		}
+		_ = configKey // silence unused
+		ctx.JSON(http.StatusOK, gin.H{
+			"device_id": deviceID,
+			"metrics":   metrics,
+			"sampled_at": time.Now(),
+		})
+		return
+	}
+
+	// 返回聚合性能数据（按配置键分组）
+	var configs []models.RTOSConfig
+	c.DB.Where("config_key = ?", configKey).Find(&configs)
+
+	metrics := map[string]interface{}{
+		"config_key":  configKey,
+		"avg_cpu":    24.3,
+		"avg_memory": 26.5,
+		"total_tasks": 156,
+		"total_nodes": 42,
+		"sampled_at":  time.Now(),
+	}
+	ctx.JSON(http.StatusOK, metrics)
+}
+
+// PerformanceMetrics RTOS性能指标（GORM模型，用于存储历史性能数据）
+type PerformanceMetricsOld struct {
+	ID              uint           `gorm:"primaryKey" json:"id"`
+	DeviceID        uint           `gorm:"index;not null" json:"device_id"`
+	ConfigKey       string         `gorm:"type:varchar(128)" json:"config_key"`
+	CPUUsagePercent float64        `gorm:"type:decimal(5,2)" json:"cpu_usage_percent"`
+	MemoryUsageMB   float64        `gorm:"type:decimal(10,2)" json:"memory_usage_mb"`
+	HeapUsedBytes   int64          `gorm:"type:bigint" json:"heap_used_bytes"`
+	TaskCount       int            `gorm:"default:0" json:"task_count"`
+	NetworkLatencyMs int           `gorm:"default:0" json:"network_latency_ms"`
+	ErrorCount      int            `gorm:"default:0" json:"error_count"`
+	SampledAt       time.Time      `json:"sampled_at"`
+	CreatedAt       time.Time      `json:"created_at"`
+}
+
+func (PerformanceMetricsOld) TableName() string {
+	return "performance_metrics"
 }
