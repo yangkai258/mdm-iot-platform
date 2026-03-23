@@ -6,20 +6,17 @@ FROM node:20-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Install pnpm for faster package management
-RUN npm install -g pnpm
-
 # Copy package files
 COPY package.json package-lock.json ./
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
 # Build the application
-RUN pnpm build
+RUN npm run build
 
 # ==============================================
 # Stage 2: Nginx Runtime

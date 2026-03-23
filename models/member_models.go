@@ -20,6 +20,7 @@ type Member struct {
 	Points      int64          `gorm:"default:0" json:"points"`                  // 积分余额
 	Balance     float64        `gorm:"default:0" json:"balance"`                 // 储值余额
 	CardID      *uint          `gorm:"index" json:"card_id"`                     // 会员卡ID
+	Card        MemberCard     `gorm:"foreignKey:CardID" json:"card"`            // 会员卡关联
 	StoreID     *uint          `gorm:"index" json:"store_id"`                   // 所属店铺
 	Status      int            `gorm:"default:1" json:"status"`                 // 状态
 	Source      string         `gorm:"size:50" json:"source"`                   // 会员来源

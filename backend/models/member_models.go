@@ -20,6 +20,7 @@ type Member struct {
 	Points      int64          `gorm:"default:0" json:"points"`                  // 积分余额
 	Balance     float64        `gorm:"default:0" json:"balance"`                 // 储值余额
 	CardID      *uint          `gorm:"index" json:"card_id"`                     // 会员卡ID
+	Card        MemberCard     `gorm:"foreignKey:CardID" json:"card"`            // 会员卡关联
 	StoreID     *uint          `gorm:"index" json:"store_id"`                   // 所属店铺
 	Status      int            `gorm:"default:1" json:"status"`                 // 状态
 	Source      string         `gorm:"size:50" json:"source"`                   // 会员来源
@@ -156,7 +157,8 @@ type Promotion struct {
 // Store 店铺信息
 type Store struct {
 	ID         uint      `gorm:"primaryKey" json:"id"`
-	StoreCode  string    `gorm:"size:50;uniqueIndex" json:"store_code"`    // 店铺编码
+	TenantID   string    `gorm:"size:50;index" json:"tenant_id"`          // 租户ID
+	StoreCode  string    `gorm:"size:50;uniqueIndex:idx_tenant_store" json:"store_code"`    // 店铺编码
 	StoreName  string    `gorm:"size:200" json:"store_name"`              // 店铺名称
 	StoreType  int       `gorm:"default:1" json:"store_type"`             // 类型: 1直营店 2加盟店
 	Province   string    `gorm:"size:50" json:"province"`                 // 省

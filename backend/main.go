@@ -347,10 +347,11 @@ func main() {
 		}
 		c.Next()
 	})
-
+	
 	// 注册认证路由 (不需要 JWT)
 	authCtrl := controllers.NewAuthController(db)
 	r.POST("/api/v1/auth/login", authCtrl.Login)
+	r.POST("/api/v1/auth/refresh", authCtrl.RefreshToken)
 
 	// JWT 中间件
 	r.Use(middleware.JWTAuth())

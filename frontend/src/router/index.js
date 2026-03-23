@@ -646,13 +646,13 @@ const routes = [
   {
     path: '/research/data',
     name: 'ResearchData',
-    component: () => import('../views/research/ResearchDataView.vue'),
+    component: () => import('../views/research/DatasetLibraryView.vue'),
     meta: { title: '数据集管理' }
   },
   {
     path: '/research/experiment',
     name: 'ResearchExperiment',
-    component: () => import('../views/research/ExperimentView.vue'),
+    component: () => import('../views/research/ResearchProjectView.vue'),
     meta: { title: 'AI 行为实验' }
   },
 
