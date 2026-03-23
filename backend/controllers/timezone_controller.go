@@ -272,7 +272,7 @@ func (ctrl *TimezoneController) ConvertTime(c *gin.Context) {
 	}
 
 	// 解析时间
-	t, err := parseTime(req.Time, req.FromTZ)
+	t, err := parseTimeInZone(req.Time, req.FromTZ)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid time format"})
 		return
@@ -291,7 +291,7 @@ func (ctrl *TimezoneController) ConvertTime(c *gin.Context) {
 }
 
 // parseTime 解析时间字符串
-func parseTime(timeStr, tz string) (time.Time, error) {
+func parseTimeInZone(timeStr, tz string) (time.Time, error) {
 	loc, err := time.LoadLocation(tz)
 	if err != nil {
 		return time.Time{}, err
