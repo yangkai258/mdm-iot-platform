@@ -174,6 +174,20 @@ func main() {
 		&models.InsurancePolicy{},
 		&models.PetLostReport{},
 		&models.ThirdPartyMapConfig{},
+		// Sprint 26: 内容市场表
+		&models.EmoticonPack{},
+		&models.Emoticon{},
+		&models.ActionResource{},
+		&models.VoiceConfig{},
+		&models.ContentReview{},
+		&models.UserPurchase{},
+		&models.Rating{},
+		// Sprint 28: 数据分析增强
+		&models.AnalyticsEvent{},
+		&models.AnalyticsReport{},
+		&models.FunnelAnalysis{},
+		&models.CohortAnalysis{},
+		&models.RetentionReport{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -296,6 +310,11 @@ func main() {
 	integrationCtrl := &controllers.IntegrationController{DB: db}
 	integrationGroup := r.Group("/api/v1")
 	integrationCtrl.RegisterIntegrationRoutes(integrationGroup)
+
+	// Sprint 28: 数据分析增强路由
+	analyticsCtrl := controllers.NewAnalyticsController(db, redisClient)
+	analyticsGroup := r.Group("/api/v1")
+	analyticsCtrl.RegisterRoutes(analyticsGroup)
 
 	// Sprint 23: 仿真测试路由
 	simCtrl := &controllers.SimulationController{DB: db, Redis: redisClient}
@@ -580,6 +599,10 @@ func main() {
 	apiV1.DELETE("/webhooks/subscriptions/:id", webhookCtrl.DeleteSubscription)
 	apiV1.GET("/webhooks/deliveries/:id", webhookCtrl.GetDelivery)
 	apiV1.POST("/webhooks/deliveries/:id/retry", webhookCtrl.RetryDelivery)
+
+	// ============ Sprint 26: 内容市场路由 ============
+	marketCtrl := &controllers.MarketController{DB: db}
+	marketCtrl.RegisterMarketRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")
