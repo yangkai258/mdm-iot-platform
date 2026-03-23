@@ -459,7 +459,50 @@
 | POST | /api/v1/simulation/scenarios/import | 导入场景 |
 | POST | /api/v1/simulation/scenarios/export/:id | 导出场景 |
 
-### 3.5 压力测试
+### 3.5 仿真场景管理
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/simulation/scenes | 场景列表（轻量） |
+| POST | /api/v1/simulation/scenes | 创建场景 |
+| GET | /api/v1/simulation/scenes/:id | 场景详情 |
+| PUT | /api/v1/simulation/scenes/:id | 更新场景 |
+| DELETE | /api/v1/simulation/scenes/:id | 删除场景 |
+| POST | /api/v1/simulation/scenes/:id/clone | 克隆场景 |
+| GET | /api/v1/simulation/scenes/:id/preview | 场景预览 |
+| POST | /api/v1/simulation/scenes/batch-delete | 批量删除 |
+| POST | /api/v1/simulation/scenes/import | 导入场景 |
+| GET | /api/v1/simulation/scenes/export/:id | 导出场景 |
+
+### 3.6 A/B实验仿真
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/simulation/experiments | 实验列表 |
+| POST | /api/v1/simulation/experiments | 创建实验 |
+| GET | /api/v1/simulation/experiments/:id | 实验详情 |
+| PUT | /api/v1/simulation/experiments/:id | 更新实验 |
+| DELETE | /api/v1/simulation/experiments/:id | 删除实验 |
+| POST | /api/v1/simulation/experiments/:id/start | 开始实验仿真 |
+| POST | /api/v1/simulation/experiments/:id/stop | 停止实验 |
+| GET | /api/v1/simulation/experiments/:id/compare | 多方案对比 |
+| GET | /api/v1/simulation/experiments/:id/recommend | 推荐最优方案 |
+
+### 3.7 仿真数据集管理
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/simulation/datasets | 数据集列表 |
+| POST | /api/v1/simulation/datasets | 创建数据集 |
+| GET | /api/v1/simulation/datasets/:id | 数据集详情 |
+| PUT | /api/v1/simulation/datasets/:id | 更新数据集 |
+| DELETE | /api/v1/simulation/datasets/:id | 删除数据集 |
+| POST | /api/v1/simulation/datasets/:id/upload | 上传数据 |
+| GET | /api/v1/simulation/datasets/:id/download | 下载数据集 |
+| POST | /api/v1/simulation/datasets/:id/split | 数据集划分 |
+| GET | /api/v1/simulation/datasets/:id/samples | 数据样本列表 |
+
+### 3.8 压力测试
 
 | 方法 | 路径 | 说明 |
 |------|------|------|
@@ -510,7 +553,7 @@
 
 #### 3.8.1 虚拟宠物仿真 API
 
-##### 3.8.. 创建虚拟宠物
+##### 3.8.1.1 创建虚拟宠物
 
 **请求**
 ```http
@@ -558,7 +601,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 获取虚拟宠物
+##### 3.8.1.2 获取虚拟宠物
 
 **请求**
 ```http
@@ -587,7 +630,7 @@ GET /api/v1/simulation/pets/:id
 }
 ```
 
-##### 3.8.. 虚拟宠物列表
+##### 3.8.1.3 虚拟宠物列表
 
 **请求**
 ```http
@@ -626,7 +669,7 @@ GET /api/v1/simulation/pets?page=1&page_size=20&pet_type=cat&status=running
 }
 ```
 
-##### 3.8.. 虚拟交互
+##### 3.8.1.4 虚拟交互
 
 **请求**
 ```http
@@ -671,7 +714,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 虚拟宠物状态流 (WebSocket)
+##### 3.8.1.5 虚拟宠物状态流 (WebSocket)
 
 **连接**
 ```http
@@ -704,9 +747,9 @@ WS /api/v1/simulation/pets/:id/stream
 }
 ```
 
-#### 3.8. 自动化测试框架 API
+#### 3.8.2 自动化测试框架 API
 
-##### 3.8.. 创建测试用例
+##### 3.8.2.1 创建测试用例
 
 **请求**
 ```http
@@ -769,7 +812,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 测试用例列表
+##### 3.8.2.2 测试用例列表
 
 **请求**
 ```http
@@ -813,7 +856,7 @@ GET /api/v1/simulation/testcases?page=1&page_size=20&case_type=functional&module
 }
 ```
 
-##### 3.8.. 执行单个测试用例
+##### 3.8.2.3 执行单个测试用例
 
 **请求**
 ```http
@@ -846,7 +889,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 批量执行测试用例
+##### 3.8.2.4 批量执行测试用例
 
 **请求**
 ```http
@@ -880,7 +923,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 获取执行详情
+##### 3.8.2.5 获取执行详情
 
 **请求**
 ```http
@@ -920,7 +963,7 @@ GET /api/v1/simulation/executions/:id
 | skipped | 跳过 |
 | cancelled | 取消 |
 
-##### 3.8.. 执行结果流 (WebSocket)
+##### 3.8.2.6 执行结果流 (WebSocket)
 
 **连接**
 ```http
@@ -961,9 +1004,9 @@ WS /api/v1/simulation/executions/:id/stream
 }
 ```
 
-#### 3.8. 回放系统 API
+#### 3.8.3 回放系统 API
 
-##### 3.8.. 创建回放（开始录制）
+##### 3.8.3.1 创建回放（开始录制）
 
 **请求**
 ```http
@@ -1003,7 +1046,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 开始回放
+##### 3.8.3.2 开始回放
 
 **请求**
 ```http
@@ -1035,7 +1078,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 差异对比
+##### 3.8.3.3 差异对比
 
 **请求**
 ```http
@@ -1073,9 +1116,9 @@ Content-Type: application/json
 }
 ```
 
-#### 3.8. 仿真场景管理 API
+#### 3.8.4 仿真场景管理 API
 
-##### 3.8.. 创建场景
+##### 3.8.4.1 创建场景
 
 **请求**
 ```http
@@ -1127,7 +1170,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 场景列表
+##### 3.8.4.2 场景列表
 
 **请求**
 ```http
@@ -1144,7 +1187,7 @@ GET /api/v1/simulation/scenarios?page=1&page_size=20&scenario_type=preset&is_pub
 | is_public | bool | 否 | 是否公开 |
 | tags | string | 否 | 标签 |
 
-##### 3.8.. 运行场景
+##### 3.8.4.3 运行场景
 
 **请求**
 ```http
@@ -1175,7 +1218,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 导入场景
+##### 3.8.4.4 导入场景
 
 **请求**
 ```http
@@ -1201,9 +1244,9 @@ Content-Type: multipart/form-data
 }
 ```
 
-#### 3.8. 压力测试 API
+#### 3.8.5 压力测试 API
 
-##### 3.8.. 创建压力测试
+##### 3.8.5.1 创建压力测试
 
 **请求**
 ```http
@@ -1269,7 +1312,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 开始压力测试
+##### 3.8.5.2 开始压力测试
 
 **请求**
 ```http
@@ -1300,7 +1343,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 获取压力测试报告
+##### 3.8.5.3 获取压力测试报告
 
 **请求**
 ```http
@@ -1340,7 +1383,7 @@ GET /api/v1/simulation/stress-tests/:id/report
 }
 ```
 
-##### 3.8.. 实时指标流 (WebSocket)
+##### 3.8.5.4 实时指标流 (WebSocket)
 
 **连接**
 ```http
@@ -1366,9 +1409,9 @@ WS /api/v1/simulation/stress-tests/:id/metrics
 }
 ```
 
-#### 3.8. 仿真数据集管理 API
+#### 3.8.6 仿真数据集管理 API
 
-##### 3.8.. 创建数据集
+##### 3.8.6.1 创建数据集
 
 **请求**
 ```http
@@ -1419,7 +1462,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 创建数据集版本
+##### 3.8.6.2 创建数据集版本
 
 **请求**
 ```http
@@ -1453,7 +1496,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 对比数据集版本
+##### 3.8.6.3 对比数据集版本
 
 **请求**
 ```http
@@ -1490,7 +1533,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 导入数据集
+##### 3.8.6.4 导入数据集
 
 **请求**
 ```http
@@ -1517,9 +1560,9 @@ Content-Type: multipart/form-data
 }
 ```
 
-#### 3.8. CI/CD 集成 API
+#### 3.8.7 CI/CD 集成 API
 
-##### 3.8.. Webhook 触发
+##### 3.8.7.1 Webhook 触发
 
 **请求**
 ```http
@@ -1571,7 +1614,7 @@ Content-Type: application/json
 }
 ```
 
-##### 3.8.. 创建集成
+##### 3.8.7.2 创建集成
 
 **请求**
 ```http
@@ -1608,7 +1651,7 @@ Content-Type: application/json
 }
 ```
 
-#### 3.8. 通用错误码
+#### 3.8.8 通用错误码
 
 | 错误码 | 说明 |
 |--------|------|
