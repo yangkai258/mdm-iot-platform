@@ -237,6 +237,17 @@ func main() {
 		&models.ResearchProject{},
 		&models.ExperimentRun{},
 		&models.ResearchCollaboration{},
+		// Sprint 15: 发票账单
+		&models.Invoice{},
+		&models.BillingRecord{},
+		// Sprint 19: 离线支持
+		&models.OfflineCache{},
+		&models.OfflineQueue{},
+		// Sprint 17: 语音情绪
+		&models.VoiceEmotionRecord{},
+		// Sprint 15: API配额
+		&models.APIQuota{},
+		&models.APIUsageLog{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -737,6 +748,26 @@ func main() {
 	// Sprint 15: 内容分发和应用管理路由
 	contentCtrl := &controllers.ContentController{DB: db}
 	contentCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 15: 发票和账单路由
+	billingCtrl := &controllers.BillingController{DB: db}
+	billingCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 19: 离线支持路由
+	offlineCtrl := &controllers.OfflineController{DB: db}
+	offlineCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 17: 语音情绪识别路由
+	voiceEmotionCtrl := &controllers.VoiceEmotionController{DB: db}
+	voiceEmotionCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 15: API配额路由
+	apiQuotaCtrl := &controllers.APIQuotaController{DB: db}
+	apiQuotaCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 13: 模型分片路由
+	modelShardCtrl := &controllers.ModelShardController{DB: db}
+	modelShardCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 31: 数据集开放平台路由 (research platform controller already registered above)
 

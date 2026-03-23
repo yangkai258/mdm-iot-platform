@@ -137,7 +137,15 @@ func JWTAuth() gin.HandlerFunc {
 }
 
 // GenerateToken 生成 Token（支持 tenant_id 和 is_super_admin）
-func GenerateToken(userID uint, username string, roleID uint, tenantID string, isSuperAdmin bool) (string, error) {
+// isRefresh: true=生成refresh token(7天)，false=生成access token(1小时)
+func GenerateToken(userID uint, username string, roleID uint, tenantID string, isSuperAdmin bool, isRefresh bool) (string, error) {
+	var exp time.Time
+	if isRefresh {
+		exp = time.Now().Add(7 * 24 * time.Hour) // Refresh token 7天
+	} else {
+		exp = time.Now().Add(1 * time.Hour) // Access token 1小时
+	}
+
 	claims := JWTClaims{
 		UserID:       userID,
 		Username:     username,
@@ -145,11 +153,24 @@ func GenerateToken(userID uint, username string, roleID uint, tenantID string, i
 		TenantID:     tenantID,
 		IsSuperAdmin: isSuperAdmin,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)), // 24小时过期
+			ExpiresAt: jwt.NewNumericDate(exp),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			Issuer:    "mdm-backend",
 		},
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
+}
+
+// ParseToken 解析 Token 返回 Claims
+func ParseToken(tokenString string) (*JWTClaims, error) {
+	claims := &JWTClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+	return claims, nil
 }

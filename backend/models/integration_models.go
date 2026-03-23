@@ -57,67 +57,6 @@ type SmartHomeTrigger struct {
 
 func (SmartHomeTrigger) TableName() string { return "smart_home_triggers" }
 
-// PetMedicalRecord 宠物医疗记录
-type PetMedicalRecord struct {
-	ID           uint      `gorm:"primaryKey" json:"id"`
-	PetID        uint      `gorm:"not null;index" json:"pet_id"`
-	RecordType   string    `gorm:"type:varchar(50);not null" json:"record_type"` // diagnosis/vaccine/surgery/checkup
-	HospitalName string    `gorm:"type:varchar(255)" json:"hospital_name"`
-	DoctorName   string    `gorm:"type:varchar(100)" json:"doctor_name"`
-	Diagnosis    string    `gorm:"type:text" json:"diagnosis"`
-	Treatment    string    `gorm:"type:text" json:"treatment"`
-	Prescription string    `gorm:"type:text" json:"prescription"`
-	RecordDate   time.Time `gorm:"not null" json:"record_date"`
-	Attachments  StringArray `gorm:"type:varchar(500)[]" json:"attachments"`
-	ExternalID   string    `gorm:"type:varchar(100)" json:"external_id"`
-	SyncStatus   string    `gorm:"type:varchar(20);default:'synced'" json:"sync_status"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-}
-
-func (PetMedicalRecord) TableName() string { return "pet_medical_records" }
-
-// InsuranceClaim 保险理赔
-type InsuranceClaim struct {
-	ID             uint      `gorm:"primaryKey" json:"id"`
-	PolicyID       uint      `gorm:"not null;index" json:"policy_id"`
-	ClaimNumber    string    `gorm:"type:varchar(100);uniqueIndex" json:"claim_number"`
-	ClaimType      string    `gorm:"type:varchar(50)" json:"claim_type"`
-	Amount         float64   `gorm:"type:decimal(10,2);not null" json:"amount"`
-	Status         string    `gorm:"type:varchar(20);default:'pending'" json:"status"` // pending/approved/rejected/paid
-	Description    string    `gorm:"type:text" json:"description"`
-	Documents      StringArray `gorm:"type:varchar(500)[]" json:"documents"`
-	ClaimDate      *time.Time `json:"claim_date"`
-	ProcessedAt    *time.Time `json:"processed_at"`
-	ApprovedAmount float64   `gorm:"type:decimal(10,2)" json:"approved_amount"`
-	ExternalID     string    `gorm:"type:varchar(100)" json:"external_id"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
-}
-
-func (InsuranceClaim) TableName() string { return "insurance_claims" }
-
-// InsurancePolicy 保险保单
-type InsurancePolicy struct {
-	ID             uint      `gorm:"primaryKey" json:"id"`
-	UserID         uint      `gorm:"not null;index" json:"user_id"`
-	PetID          uint      `json:"pet_id"`
-	PlanID         string    `gorm:"type:varchar(100);not null" json:"plan_id"`
-	PlanName       string    `gorm:"type:varchar(255)" json:"plan_name"`
-	Insurer        string    `gorm:"type:varchar(100)" json:"insurer"`
-	PolicyNumber   string    `gorm:"type:varchar(100);uniqueIndex" json:"policy_number"`
-	Premium        float64   `gorm:"type:decimal(10,2)" json:"premium"`
-	CoverageAmount float64   `gorm:"type:decimal(10,2)" json:"coverage_amount"`
-	StartDate      time.Time `json:"start_date"`
-	EndDate        time.Time `json:"end_date"`
-	Status         string    `gorm:"type:varchar(20);default:'active'" json:"status"`
-	ExternalID     string    `gorm:"type:varchar(100)" json:"external_id"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
-}
-
-func (InsurancePolicy) TableName() string { return "insurance_policies" }
-
 // PetLostReport 寻宠报告
 type PetLostReport struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
