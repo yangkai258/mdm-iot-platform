@@ -312,6 +312,32 @@ const routes = [
     meta: { title: '审计日志' }
   },
 
+  // ============ Sprint 32: 高级安全功能 ============
+  {
+    path: '/security/audit',
+    name: 'SecurityAudit',
+    component: () => import('../views/security-evo/AuditLogView.vue'),
+    meta: { title: '审计日志' }
+  },
+  {
+    path: '/security/compliance',
+    name: 'SecurityCompliance',
+    component: () => import('../views/security-evo/ComplianceView.vue'),
+    meta: { title: '合规管理' }
+  },
+  {
+    path: '/security/data-export',
+    name: 'SecurityDataExport',
+    component: () => import('../views/security-evo/DataExportView.vue'),
+    meta: { title: '数据导出' }
+  },
+  {
+    path: '/security/gdpr',
+    name: 'SecurityGDPR',
+    component: () => import('../views/security-evo/GDPRView.vue'),
+    meta: { title: 'GDPR 请求' }
+  },
+
   // ============ Sprint 13: 全球化设置 ============
   {
     path: '/globalization',
