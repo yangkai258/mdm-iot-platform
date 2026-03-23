@@ -526,3 +526,528 @@ func (c *ComplianceController) recordAudit(ctx *gin.Context, action, module, res
 	}
 	c.DB.Create(&log)
 }
+
+// ============ 合规规则 CRUD ============
+
+// ListRules 获取合规规则列表
+func (c *ComplianceController) ListRules(ctx *gin.Context) {
+	var rules []models.CompliancePolicy
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
+	policyType := ctx.Query("policy_type")
+	severity := ctx.Query("severity")
+	enabled := ctx.Query("enabled")
+
+	query := c.DB.Model(&models.CompliancePolicy{})
+
+	if policyType != "" {
+		query = query.Where("policy_type = ?", policyType)
+	}
+	if severity != "" {
+		query = query.Where("severity = ?", severity)
+	}
+	if enabled != "" {
+		query = query.Where("enabled = ?", enabled)
+	}
+
+	var total int64
+	query.Count(&total)
+
+	offset := (page - 1) * pageSize
+	query.Order("severity DESC, created_at DESC").Offset(offset).Limit(pageSize).Find(&rules)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"list":      rules,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		},
+	})
+}
+
+// GetRule 获取单个合规规则
+func (c *ComplianceController) GetRule(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var rule models.CompliancePolicy
+	if err := c.DB.First(&rule, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "合规规则不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": rule})
+}
+
+// CreateRule 创建合规规则
+func (c *ComplianceController) CreateRule(ctx *gin.Context) {
+	var req struct {
+		Name              string `json:"name" binding:"required"`
+		Description      string `json:"description"`
+		PolicyType       string `json:"policy_type" binding:"required"`
+		TargetValue      string `json:"target_value"`
+		Condition        string `json:"condition" binding:"required"`
+		Severity         int    `json:"severity"`
+		RemediationAction string `json:"remediation_action"`
+		Enabled          *bool  `json:"enabled"`
+		EnforceScope     string `json:"enforce_scope"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
+		return
+	}
+
+	enabled := true
+	if req.Enabled != nil {
+		enabled = *req.Enabled
+	}
+	severity := 2
+	if req.Severity > 0 {
+		severity = req.Severity
+	}
+	enforceScope := "all"
+	if req.EnforceScope != "" {
+		enforceScope = req.EnforceScope
+	}
+
+	rule := models.CompliancePolicy{
+		Name:               req.Name,
+		Description:       req.Description,
+		PolicyType:        req.PolicyType,
+		TargetValue:       req.TargetValue,
+		Condition:         req.Condition,
+		Severity:          severity,
+		RemediationAction: req.RemediationAction,
+		Enabled:           enabled,
+		EnforceScope:      enforceScope,
+	}
+
+	if err := c.DB.Create(&rule).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败: " + err.Error()})
+		return
+	}
+
+	userID, _ := ctx.Get("user_id")
+	uid, _ := userID.(uint)
+	c.recordAudit(ctx, "create", "compliance", "compliance_policy", strconv.FormatUint(uint64(rule.ID), 10), uid, http.StatusOK, "")
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": rule})
+}
+
+// UpdateRule 更新合规规则
+func (c *ComplianceController) UpdateRule(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var rule models.CompliancePolicy
+	if err := c.DB.First(&rule, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "合规规则不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	var req struct {
+		Name               string `json:"name"`
+		Description       string `json:"description"`
+		PolicyType        string `json:"policy_type"`
+		TargetValue       string `json:"target_value"`
+		Condition         string `json:"condition"`
+		Severity          int    `json:"severity"`
+		RemediationAction string `json:"remediation_action"`
+		Enabled           *bool  `json:"enabled"`
+		EnforceScope      string `json:"enforce_scope"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
+		return
+	}
+
+	updates := map[string]interface{}{}
+	if req.Name != "" {
+		updates["name"] = req.Name
+	}
+	if req.Description != "" {
+		updates["description"] = req.Description
+	}
+	if req.PolicyType != "" {
+		updates["policy_type"] = req.PolicyType
+	}
+	if req.TargetValue != "" {
+		updates["target_value"] = req.TargetValue
+	}
+	if req.Condition != "" {
+		updates["condition"] = req.Condition
+	}
+	if req.Severity > 0 {
+		updates["severity"] = req.Severity
+	}
+	if req.RemediationAction != "" {
+		updates["remediation_action"] = req.RemediationAction
+	}
+	if req.Enabled != nil {
+		updates["enabled"] = *req.Enabled
+	}
+	if req.EnforceScope != "" {
+		updates["enforce_scope"] = req.EnforceScope
+	}
+
+	if err := c.DB.Model(&rule).Updates(updates).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败: " + err.Error()})
+		return
+	}
+
+	c.DB.First(&rule, id)
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": rule})
+}
+
+// DeleteRule 删除合规规则
+func (c *ComplianceController) DeleteRule(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var rule models.CompliancePolicy
+	if err := c.DB.First(&rule, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "合规规则不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	c.DB.Delete(&rule)
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
+}
+
+// EnforceRule 强制执行合规规则
+func (c *ComplianceController) EnforceRule(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var rule models.CompliancePolicy
+	if err := c.DB.First(&rule, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "合规规则不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	// 扫描所有设备，检测违规
+	var violations []models.ComplianceViolation
+	c.DB.Where("policy_id = ? AND status = 1", rule.ID).Find(&violations)
+
+	violationCount := len(violations)
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"policy_id":       rule.ID,
+			"policy_type":     rule.PolicyType,
+			"violations_found": violationCount,
+			"enforced_at":     time.Now(),
+		},
+	})
+}
+
+// ============ 合规策略（CompliancePolicy）CRUD ============
+
+// ListCompliancePolicies 获取合规策略列表
+func (c *ComplianceController) ListCompliancePolicies(ctx *gin.Context) {
+	var policies []models.CompliancePolicy
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
+	policyType := ctx.Query("policy_type")
+	enabled := ctx.Query("enabled")
+
+	query := c.DB.Model(&models.CompliancePolicy{})
+
+	if policyType != "" {
+		query = query.Where("policy_type = ?", policyType)
+	}
+	if enabled != "" {
+		query = query.Where("enabled = ?", enabled)
+	}
+
+	var total int64
+	query.Count(&total)
+
+	offset := (page - 1) * pageSize
+	query.Order("severity DESC, created_at DESC").Offset(offset).Limit(pageSize).Find(&policies)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"list":      policies,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		},
+	})
+}
+
+// CreateCompliancePolicy 创建合规策略
+func (c *ComplianceController) CreateCompliancePolicy(ctx *gin.Context) {
+	var req struct {
+		Name               string `json:"name" binding:"required"`
+		Description       string `json:"description"`
+		PolicyType        string `json:"policy_type" binding:"required"`
+		TargetValue       string `json:"target_value"`
+		Condition         string `json:"condition" binding:"required"`
+		Severity          int    `json:"severity"`
+		RemediationAction string `json:"remediation_action"`
+		Enabled           *bool  `json:"enabled"`
+		EnforceScope      string `json:"enforce_scope"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
+		return
+	}
+
+	enabled := true
+	if req.Enabled != nil {
+		enabled = *req.Enabled
+	}
+	severity := 2
+	if req.Severity > 0 {
+		severity = req.Severity
+	}
+	enforceScope := "all"
+	if req.EnforceScope != "" {
+		enforceScope = req.EnforceScope
+	}
+
+	policy := models.CompliancePolicy{
+		Name:               req.Name,
+		Description:       req.Description,
+		PolicyType:        req.PolicyType,
+		TargetValue:       req.TargetValue,
+		Condition:         req.Condition,
+		Severity:          severity,
+		RemediationAction: req.RemediationAction,
+		Enabled:           enabled,
+		EnforceScope:      enforceScope,
+	}
+
+	if err := c.DB.Create(&policy).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": policy})
+}
+
+// UpdateCompliancePolicy 更新合规策略
+func (c *ComplianceController) UpdateCompliancePolicy(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var policy models.CompliancePolicy
+	if err := c.DB.First(&policy, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "合规策略不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	var req struct {
+		Name               string `json:"name"`
+		Description       string `json:"description"`
+		PolicyType        string `json:"policy_type"`
+		TargetValue       string `json:"target_value"`
+		Condition         string `json:"condition"`
+		Severity          int    `json:"severity"`
+		RemediationAction string `json:"remediation_action"`
+		Enabled           *bool  `json:"enabled"`
+		EnforceScope      string `json:"enforce_scope"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	updates := map[string]interface{}{}
+	if req.Name != "" {
+		updates["name"] = req.Name
+	}
+	if req.Description != "" {
+		updates["description"] = req.Description
+	}
+	if req.PolicyType != "" {
+		updates["policy_type"] = req.PolicyType
+	}
+	if req.TargetValue != "" {
+		updates["target_value"] = req.TargetValue
+	}
+	if req.Condition != "" {
+		updates["condition"] = req.Condition
+	}
+	if req.Severity > 0 {
+		updates["severity"] = req.Severity
+	}
+	if req.RemediationAction != "" {
+		updates["remediation_action"] = req.RemediationAction
+	}
+	if req.Enabled != nil {
+		updates["enabled"] = *req.Enabled
+	}
+	if req.EnforceScope != "" {
+		updates["enforce_scope"] = req.EnforceScope
+	}
+
+	if err := c.DB.Model(&policy).Updates(updates).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败"})
+		return
+	}
+
+	c.DB.First(&policy, id)
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": policy})
+}
+
+// DeleteCompliancePolicy 删除合规策略
+func (c *ComplianceController) DeleteCompliancePolicy(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var policy models.CompliancePolicy
+	if err := c.DB.First(&policy, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "合规策略不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	c.DB.Delete(&policy)
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
+}
+
+// GetPolicyViolations 获取策略违规记录
+func (c *ComplianceController) GetPolicyViolations(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var policy models.CompliancePolicy
+	if err := c.DB.First(&policy, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "合规策略不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	var violations []models.ComplianceViolation
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
+	status := ctx.Query("status")
+
+	query := c.DB.Model(&models.ComplianceViolation{}).Where("policy_id = ?", policy.ID)
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	var total int64
+	query.Count(&total)
+
+	offset := (page - 1) * pageSize
+	query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&violations)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"list":      violations,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		},
+	})
+}
+
+// ============ 合规违规 CRUD（通过 ComplianceController）============
+
+// ListViolations 获取所有违规记录
+func (c *ComplianceController) ListViolations(ctx *gin.Context) {
+	var violations []models.ComplianceViolation
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "20"))
+	status := ctx.Query("status")
+	deviceID := ctx.Query("device_id")
+
+	query := c.DB.Model(&models.ComplianceViolation{})
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+	if deviceID != "" {
+		query = query.Where("device_id = ?", deviceID)
+	}
+
+	var total int64
+	query.Count(&total)
+
+	offset := (page - 1) * pageSize
+	query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&violations)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"list":      violations,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		},
+	})
+}
+
+// ResolveViolation 解决违规记录
+func (c *ComplianceController) ResolveViolation(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	var violation models.ComplianceViolation
+	if err := c.DB.First(&violation, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "违规记录不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	var req struct {
+		Status int    `json:"status"` // 3=已解决 4=已忽略
+		Note   string `json:"note"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	userID, _ := ctx.Get("user_id")
+	uid, _ := userID.(uint)
+
+	now := time.Now()
+	updates := map[string]interface{}{
+		"status":      req.Status,
+		"resolved_at": now,
+		"resolved_by": uid,
+	}
+	if req.Status == 4 {
+		updates["action_taken"] = "ignored: " + req.Note
+	}
+
+	c.DB.Model(&violation).Updates(updates)
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
+}

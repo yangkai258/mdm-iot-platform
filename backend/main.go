@@ -198,8 +198,26 @@ func main() {
 		&models.AuditReport{},
 		&models.ComplianceReport{},
 		&models.DataExport{},
+		&models.GDPRRequest{},
 		&models.GDPRRequestExtra{},
 		&models.ConsentRecord{},
+		// Sprint 17: 情感计算模块
+		&models.EmotionRecord{},
+		&models.PetEmotionAction{},
+		&models.EmotionResponseConfig{},
+		&models.EmotionReport{},
+		// Sprint 19: 健康医疗模块
+		&models.ExerciseRecord{},
+		&models.SleepRecord{},
+		&models.BodyWeightRecord{},
+		&models.DietRecord{},
+		&models.HealthWarning{},
+		&models.HealthReport{},
+		// Sprint 18: 数字孪生模块
+		&models.VitalRecord{},
+		&models.HealthAlert{},
+		&models.BehaviorEvent{},
+		&models.HighlightMoment{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -467,9 +485,26 @@ func main() {
 	petConsoleCtrl := &controllers.PetConsoleController{}
 	petConsoleCtrl.RegisterRoutes(apiV1)
 
+	// Sprint 17: 情感计算路由
+	emotionCtrl := &controllers.EmotionController{DB: db}
+	emotionCtrl.RegisterRoutes(apiV1)
+
 	// MiniClaw路由
 	miniClawCtrl := &controllers.MiniClawController{}
 	miniClawCtrl.RegisterRoutes(apiV1)
+
+	// ============ Sprint 18: 数字孪生路由 ============
+	digitalTwinCtrl := &controllers.DigitalTwinController{DB: db}
+	apiV1.GET("/digital-twin/vitals/dashboard", digitalTwinCtrl.GetVitalsDashboard)
+	apiV1.GET("/digital-twin/vitals/realtime", digitalTwinCtrl.GetRealtimeVitals)
+	apiV1.GET("/digital-twin/vitals/history", digitalTwinCtrl.GetVitalsHistory)
+	apiV1.GET("/digital-twin/vitals/alerts", digitalTwinCtrl.GetHealthAlerts)
+	apiV1.POST("/digital-twin/vitals/alerts/:id/confirm", digitalTwinCtrl.ConfirmAlert)
+	apiV1.POST("/digital-twin/vitals/alerts/:id/ignore", digitalTwinCtrl.IgnoreAlert)
+	apiV1.GET("/digital-twin/behavior/prediction", digitalTwinCtrl.GetBehaviorPrediction)
+	apiV1.GET("/digital-twin/behavior/history", digitalTwinCtrl.GetBehaviorHistory)
+	apiV1.GET("/digital-twin/replay/:pet_id", digitalTwinCtrl.GetReplay)
+	apiV1.GET("/digital-twin/highlights", digitalTwinCtrl.GetHighlights)
 
 	// 通知路由
 	notifCtrl := &controllers.NotificationController{DB: db}
@@ -483,25 +518,50 @@ func main() {
 	apiV1.POST("/announcements/:id/withdraw", notifCtrl.WithdrawAnnouncement)
 	apiV1.GET("/announcements/:id", notifCtrl.GetAnnouncement)
 
-	// 策略配置别名路由（/api/v1/policy-configs，供前端使用）- 已禁用（待实现）
-	// policyCtrlExtra := &controllers.PolicyController{DB: db}
-	// complianceCtrlExtra := &controllers.ComplianceController{DB: db}
-	// apiV1.GET("/policy-configs", policyCtrlExtra.ListConfigs)
-	// apiV1.POST("/policy-configs", policyCtrlExtra.CreateConfig)
-	// apiV1.PUT("/policy-configs/:id", policyCtrlExtra.UpdateConfig)
-	// apiV1.DELETE("/policy-configs/:id", policyCtrlExtra.DeleteConfig)
+	// ============ Sprint 9-10: 策略配置路由 ============
+	policyCtrlExtra := &controllers.PolicyController{DB: db}
+	apiV1.GET("/policy-configs", policyCtrlExtra.ListConfigs)
+	apiV1.POST("/policy-configs", policyCtrlExtra.CreateConfig)
+	apiV1.GET("/policy-configs/:id", policyCtrlExtra.GetConfig)
+	apiV1.PUT("/policy-configs/:id", policyCtrlExtra.UpdateConfig)
+	apiV1.DELETE("/policy-configs/:id", policyCtrlExtra.DeleteConfig)
 
-	// 合规规则别名路由（/api/v1/compliance-rules，供前端使用）- 已禁用（待实现）
-	// apiV1.GET("/compliance-rules", complianceCtrlExtra.ListRules)
-	// apiV1.POST("/compliance-rules", complianceCtrlExtra.CreateRule)
-	// apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
-	// apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
+	// 策略主表路由
+	apiV1.GET("/policies", policyCtrlExtra.ListPolicies)
+	apiV1.POST("/policies", policyCtrlExtra.CreatePolicy)
+	apiV1.GET("/policies/:id", policyCtrlExtra.GetPolicy)
+	apiV1.PUT("/policies/:id", policyCtrlExtra.UpdatePolicy)
+	apiV1.DELETE("/policies/:id", policyCtrlExtra.DeletePolicy)
+	apiV1.POST("/policies/:id/bind", policyCtrlExtra.BindPolicy)
+	apiV1.POST("/policies/:id/unbind", policyCtrlExtra.UnbindPolicy)
+	apiV1.GET("/policies/:id/bindings", policyCtrlExtra.GetPolicyBindings)
 
-	// 合规策略 API（/api/v1/compliance/policies，标准 REST 端点）- 已禁用（待实现）
-	// apiV1.GET("/compliance/policies", complianceCtrlExtra.ListRules)
-	// apiV1.POST("/compliance/policies", complianceCtrlExtra.CreateRule)
-	// apiV1.PUT("/compliance/policies/:id", complianceCtrlExtra.UpdateRule)
-	// apiV1.DELETE("/compliance/policies/:id", complianceCtrlExtra.DeleteRule)
+	// ============ Sprint 9-10: 合规规则路由 ============
+	complianceCtrlExtra := &controllers.ComplianceController{DB: db}
+	apiV1.GET("/compliance-rules", complianceCtrlExtra.ListRules)
+	apiV1.POST("/compliance-rules", complianceCtrlExtra.CreateRule)
+	apiV1.GET("/compliance-rules/:id", complianceCtrlExtra.GetRule)
+	apiV1.PUT("/compliance-rules/:id", complianceCtrlExtra.UpdateRule)
+	apiV1.DELETE("/compliance-rules/:id", complianceCtrlExtra.DeleteRule)
+	apiV1.POST("/compliance-rules/:id/enforce", complianceCtrlExtra.EnforceRule)
+
+	// 合规策略 API（/api/v1/compliance/policies）
+	apiV1.GET("/compliance/policies", complianceCtrlExtra.ListCompliancePolicies)
+	apiV1.POST("/compliance/policies", complianceCtrlExtra.CreateCompliancePolicy)
+	apiV1.PUT("/compliance/policies/:id", complianceCtrlExtra.UpdateCompliancePolicy)
+	apiV1.DELETE("/compliance/policies/:id", complianceCtrlExtra.DeleteCompliancePolicy)
+	apiV1.GET("/compliance/policies/:id/violations", complianceCtrlExtra.GetPolicyViolations)
+
+	// 合规违规记录
+	apiV1.GET("/compliance/violations", complianceCtrlExtra.ListViolations)
+	apiV1.PUT("/compliance/violations/:id/resolve", complianceCtrlExtra.ResolveViolation)
+
+	// ============ Sprint 9-10: GDPR 路由 ============
+	apiV1.POST("/gdpr/export", complianceCtrlExtra.GetGDPRDataExport)
+	apiV1.POST("/gdpr/delete", complianceCtrlExtra.DeleteGDPRData)
+	apiV1.GET("/gdpr/requests", complianceCtrlExtra.GetGDPRRequests)
+	apiV1.GET("/gdpr/requests/:id", complianceCtrlExtra.GetGDPRRequest)
+	apiV1.PUT("/gdpr/requests/:id/process", complianceCtrlExtra.ProcessGDPRRequest)
 
 	// ============ 数据导入导出路由 ============
 	importExportCtrl := &controllers.ImportExportController{DB: db}
@@ -627,6 +687,10 @@ func main() {
 	// ============ Sprint 29: 高级功能路由 ============
 	advancedCtrl := &controllers.AdvancedController{DB: db}
 	advancedCtrl.RegisterAdvancedRoutes(apiV1)
+
+	// ============ Sprint 19: 健康医疗路由 ============
+	healthCtrl := controllers.NewHealthController(db, redisClient)
+	healthCtrl.RegisterRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")
