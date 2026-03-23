@@ -295,6 +295,10 @@ func main() {
 	controllers.SetOTAWorkerRef(otaWorker)
 	go otaWorker.Start()
 
+	// 订阅自动续费 Worker：每小时检查到期订阅并自动续费
+	subscriptionRenewalWorker := services.NewSubscriptionRenewalWorker(db)
+	go subscriptionRenewalWorker.Start()
+
 	// 注册通知服务（支持邮件/Webhook/站内通知）
 	controllers.RegisterNotificationService(services.SendAlertNotifications)
 
@@ -345,7 +349,7 @@ func main() {
 	})
 
 	// 注册认证路由 (不需要 JWT)
-	authCtrl := &controllers.AuthController{DB: db, Redis: redisClient}
+	authCtrl := controllers.NewAuthController(db)
 	r.POST("/api/v1/auth/login", authCtrl.Login)
 
 	// JWT 中间件
@@ -758,15 +762,15 @@ func main() {
 	offlineCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 17: 语音情绪识别路由
-	voiceEmotionCtrl := &controllers.VoiceEmotionController{DB: db}
+	voiceEmotionCtrl := controllers.NewVoiceEmotionController(db)
 	voiceEmotionCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 15: API配额路由
-	apiQuotaCtrl := &controllers.APIQuotaController{DB: db}
+	apiQuotaCtrl := controllers.NewAPIQuotaController()
 	apiQuotaCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 13: 模型分片路由
-	modelShardCtrl := &controllers.ModelShardController{DB: db}
+	modelShardCtrl := controllers.NewModelShardController(db)
 	modelShardCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 31: 数据集开放平台路由 (research platform controller already registered above)

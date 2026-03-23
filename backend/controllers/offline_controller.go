@@ -53,11 +53,11 @@ func (ctrl *OfflineController) CreateCache(c *gin.Context) {
 	}
 
 	cache := models.OfflineCache{
-		DeviceID:  req.DeviceID,
-		UserID:   req.UserID,
-		CacheKey: req.CacheKey,
+		DeviceID:   req.DeviceID,
+		UserID:    req.UserID,
+		CacheKey:  req.CacheKey,
 		CacheData: req.CacheData,
-		Status:   "pending",
+		SyncStatus: "pending",
 	}
 	ctrl.DB.Create(&cache)
 	c.JSON(http.StatusOK, gin.H{"code": 0, "data": cache})

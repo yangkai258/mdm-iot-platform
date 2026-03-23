@@ -45,7 +45,7 @@ func (ctrl *APIQuotaController) GetQuotaStatus(c *gin.Context) {
 
 // GetUsageLog 获取使用日志
 func (ctrl *APIQuotaController) GetUsageLog(c *gin.Context) {
-	userID := c.Query("user_id")
+	_ = c.Query("user_id") // userID for filtering if needed
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "50"))
 

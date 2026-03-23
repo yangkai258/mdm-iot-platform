@@ -5,21 +5,75 @@ import (
 	"time"
 
 	"mdm-backend/middleware"
+	"mdm-backend/models"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
-type AuthController struct{}
+type AuthController struct {
+	DB *gorm.DB
+}
 
-func NewAuthController() *AuthController {
-	return &AuthController{}
+func NewAuthController(db *gorm.DB) *AuthController {
+	return &AuthController{DB: db}
 }
 
 func (ctrl *AuthController) RegisterRoutes(rg *gin.RouterGroup) {
 	auth := rg.Group("/auth")
 	{
+		auth.POST("/login", ctrl.Login)
 		auth.POST("/refresh", ctrl.RefreshToken)
 	}
+}
+
+// Login 用户登录
+func (ctrl *AuthController) Login(c *gin.Context) {
+	var req struct {
+		Username string `json:"username" binding:"required"`
+		Password string `json:"password" binding:"required"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	// 查找用户
+	var user models.SysUser
+	if err := ctrl.DB.Where("username = ?", req.Username).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "用户名或密码错误"})
+		return
+	}
+
+	// 简单密码校验（实际应该用 bcrypt）
+	if user.Password != req.Password && user.Password != hashPassword(req.Password) {
+		c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "用户名或密码错误"})
+		return
+	}
+
+	// 生成 Token
+	token, err := middleware.GenerateToken(user.ID, user.Username, user.RoleID, user.TenantID, false, false)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "生成token失败"})
+		return
+	}
+
+	refreshToken, err := middleware.GenerateToken(user.ID, user.Username, user.RoleID, user.TenantID, false, true)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "生成refresh token失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": gin.H{
+			"token":         token,
+			"refresh_token": refreshToken,
+			"user_id":       user.ID,
+			"username":      user.Username,
+			"expires_in":    3600,
+		},
+	})
 }
 
 // RefreshToken 刷新 Access Token
@@ -67,4 +121,9 @@ func (ctrl *AuthController) RefreshToken(c *gin.Context) {
 			"expires_in":   3600,
 		},
 	})
+}
+
+func hashPassword(pwd string) string {
+	// 简单hash，实际应该用 bcrypt
+	return pwd
 }

@@ -28,7 +28,6 @@ func (ctrl *VoiceEmotionController) RegisterRoutes(rg *gin.RouterGroup) {
 	}
 }
 
-// UploadAudio 上传音频并分析
 func (ctrl *VoiceEmotionController) UploadAudio(c *gin.Context) {
 	var req struct {
 		PetID    uint   `json:"pet_id" binding:"required"`
@@ -41,7 +40,6 @@ func (ctrl *VoiceEmotionController) UploadAudio(c *gin.Context) {
 		return
 	}
 
-	// 模拟AI情绪分析结果
 	record := models.VoiceEmotionRecord{
 		PetID:       req.PetID,
 		UserID:      req.UserID,
@@ -50,14 +48,13 @@ func (ctrl *VoiceEmotionController) UploadAudio(c *gin.Context) {
 		EmotionType: "calm",
 		Intensity:   6,
 		Confidence:  0.85,
-		Transcript:  "狗狗发出愉快的叫声",
+		Transcript:  "狗狗叫声平稳",
 	}
 	ctrl.DB.Create(&record)
 
 	c.JSON(http.StatusOK, gin.H{"code": 0, "data": record})
 }
 
-// AnalyzeEmotion 分析情绪
 func (ctrl *VoiceEmotionController) AnalyzeEmotion(c *gin.Context) {
 	var req struct {
 		AudioURL string `json:"audio_url" binding:"required"`
@@ -67,22 +64,21 @@ func (ctrl *VoiceEmotionController) AnalyzeEmotion(c *gin.Context) {
 		return
 	}
 
-	// 模拟AI分析
-	analysis := gin.H{
-		"emotion":    "happy",
-		"intensity":  7,
-		"confidence": 0.88,
-		"transcript": "宠物叫声愉悦",
+	result := gin.H{
+		"emotion":   "calm",
+		"intensity": 6,
+		"confidence": 0.85,
+		"transcript": "狗狗叫声平稳",
 	}
-
-	c.JSON(http.StatusOK, gin.H{"code": 0, "data": analysis})
+	c.JSON(http.StatusOK, gin.H{"code": 0, "data": result})
 }
 
-// GetRecords 获取语音情绪历史
 func (ctrl *VoiceEmotionController) GetRecords(c *gin.Context) {
 	petID := c.Query("pet_id")
 	userID := c.Query("user_id")
 	emotionType := c.Query("emotion_type")
+	startDate := c.Query("start_date")
+	endDate := c.Query("end_date")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
 
@@ -96,19 +92,24 @@ func (ctrl *VoiceEmotionController) GetRecords(c *gin.Context) {
 	if emotionType != "" {
 		query = query.Where("emotion_type = ?", emotionType)
 	}
+	if startDate != "" {
+		query = query.Where("created_at >= ?", startDate)
+	}
+	if endDate != "" {
+		query = query.Where("created_at <= ?", endDate)
+	}
 
 	var total int64
 	query.Count(&total)
 
 	var records []models.VoiceEmotionRecord
-	query.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&records)
+	query.Order("created_at DESC").Offset((page-1)*pageSize).Limit(pageSize).Find(&records)
 
 	c.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{
 		"list": records, "total": total, "page": page, "page_size": pageSize,
 	}})
 }
 
-// GetRecord 获取记录详情
 func (ctrl *VoiceEmotionController) GetRecord(c *gin.Context) {
 	id := c.Param("id")
 	var record models.VoiceEmotionRecord

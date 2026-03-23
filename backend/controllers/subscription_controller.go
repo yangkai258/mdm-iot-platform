@@ -3,20 +3,26 @@ package controllers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"mdm-backend/models"
+	"mdm-backend/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type SubscriptionController struct {
-	DB *gorm.DB
+	DB                *gorm.DB
+	RenewalService    *services.SubscriptionRenewalService
 }
 
 func NewSubscriptionController(db *gorm.DB) *SubscriptionController {
-	return &SubscriptionController{DB: db}
+	return &SubscriptionController{
+		DB:             db,
+		RenewalService: services.NewSubscriptionRenewalService(db),
+	}
 }
 
 func (ctrl *SubscriptionController) RegisterRoutes(rg *gin.RouterGroup) {
@@ -30,6 +36,8 @@ func (ctrl *SubscriptionController) RegisterRoutes(rg *gin.RouterGroup) {
 		sub.POST("/:id/renew", ctrl.AutoRenew)
 		sub.GET("/:id/renewal-status", ctrl.GetRenewalStatus)
 		sub.POST("/:id/cancel-renewal", ctrl.CancelAutoRenewal)
+		sub.GET("/:id/renewal-logs", ctrl.GetRenewalLogs)
+		sub.POST("/:id/resume", ctrl.ResumeSubscription)
 		sub.POST("/webhook/payment", ctrl.PaymentWebhook)
 	}
 }
@@ -191,6 +199,46 @@ func (ctrl *SubscriptionController) PaymentWebhook(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "支付失败"})
 	}
+}
+
+// GetRenewalLogs 获取续费日志
+func (ctrl *SubscriptionController) GetRenewalLogs(c *gin.Context) {
+	id := c.Param("id")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+
+	var logs []models.SubscriptionRenewalLog
+	var total int64
+
+	ctrl.DB.Model(&models.SubscriptionRenewalLog{}).Where("subscription_id = ?", id).Count(&total)
+	ctrl.DB.Where("subscription_id = ?", id).Order("created_at DESC").Offset((page-1)*pageSize).Limit(pageSize).Find(&logs)
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{
+		"list": logs, "total": total, "page": page, "page_size": pageSize,
+	}})
+}
+
+// ResumeSubscription 恢复已暂停的订阅
+func (ctrl *SubscriptionController) ResumeSubscription(c *gin.Context) {
+	id := c.Param("id")
+
+	var sub models.Subscription
+	if err := ctrl.DB.First(&sub, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "订阅不存在"})
+		return
+	}
+
+	if sub.Status != "suspended" {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "只有暂停状态的订阅才能恢复"})
+		return
+	}
+
+	sub.Status = "active"
+	sub.RetryCount = 0
+	sub.RenewFailReason = ""
+	ctrl.DB.Save(&sub)
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "订阅已恢复", "data": sub})
 }
 
 func uintVal(s string) uint {
