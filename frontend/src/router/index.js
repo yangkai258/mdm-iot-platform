@@ -680,6 +680,38 @@ const routes = [
     name: 'SimulationRecordings',
     component: () => import('../views/simulation/SimulationRecordingsView.vue'),
     meta: { title: '回放系统' }
+  },
+
+  // ============ Sprint 28: 数据分析前端 ============
+  {
+    path: '/analytics/dashboard',
+    name: 'AnalyticsDashboard',
+    component: () => import('../views/analytics/DashboardView.vue'),
+    meta: { title: '分析仪表板' }
+  },
+  {
+    path: '/analytics/funnels',
+    name: 'FunnelAnalysis',
+    component: () => import('../views/analytics/FunnelAnalysisView.vue'),
+    meta: { title: '漏斗分析' }
+  },
+  {
+    path: '/analytics/cohorts',
+    name: 'CohortAnalysis',
+    component: () => import('../views/analytics/CohortAnalysisView.vue'),
+    meta: { title: '群组分析' }
+  },
+  {
+    path: '/analytics/retention',
+    name: 'RetentionAnalysis',
+    component: () => import('../views/analytics/RetentionAnalysisView.vue'),
+    meta: { title: '留存分析' }
+  },
+  {
+    path: '/analytics/events',
+    name: 'EventAnalytics',
+    component: () => import('../views/analytics/EventAnalyticsView.vue'),
+    meta: { title: '事件分析' }
   }
   }
 ]
