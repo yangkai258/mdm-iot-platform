@@ -624,6 +624,10 @@ func main() {
 	marketCtrl := &controllers.MarketController{DB: db}
 	marketCtrl.RegisterMarketRoutes(apiV1)
 
+	// ============ Sprint 29: 高级功能路由 ============
+	advancedCtrl := &controllers.AdvancedController{DB: db}
+	advancedCtrl.RegisterAdvancedRoutes(apiV1)
+
 	// 获取端口
 	port := os.Getenv("PORT")
 	if port == "" {
