@@ -73,7 +73,7 @@ type SimulationRun struct {
 	PetID         string         `gorm:"type:varchar(36);index" json:"pet_id"`
 	ScenarioConfig string       `gorm:"type:text" json:"scenario_config"` // JSON 测试场景配置
 	ResultData    string         `gorm:"type:text" json:"result_data"`    // JSON 测试结果
-	Logs          string         `gorm:"type:longtext" json:"logs"`       // 测试日志
+	Logs          string         `gorm:"type:text" json:"logs"`       // 测试日志
 	Status        string         `gorm:"type:varchar(20);default:'pending'" json:"status"` // pending, running, success, failed, cancelled
 	Duration      int            `gorm:"type:int;default:0" json:"duration"` // 运行时长（秒）
 	ErrorMsg      string         `gorm:"type:text" json:"error_msg"`
@@ -107,7 +107,7 @@ type SimulationMetrics struct {
 	MetricValue    float64        `gorm:"type:decimal(12,4)" json:"metric_value"`
 	Unit           string         `gorm:"type:varchar(16)" json:"unit"`
 	Tags           string         `gorm:"type:varchar(256)" json:"tags"` // JSON 标签
-	Snapshots      string         `gorm:"type:longtext" json:"snapshots"` // JSON 时序快照
+	Snapshots      string         `gorm:"type:text" json:"snapshots"` // JSON 时序快照
 	OrgID          uint           `gorm:"index" json:"org_id"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`

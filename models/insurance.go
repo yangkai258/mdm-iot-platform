@@ -27,7 +27,7 @@ type InsuranceProduct struct {
 	CoverAgeMin    int            `gorm:"type:int;default:0" json:"cover_age_min"`            // 最小承保年龄（月）
 	CoverAgeMax    int            `gorm:"type:int;default:240" json:"cover_age_max"`          // 最大承保年龄（月）
 	BreedCodes     pq.StringArray `gorm:"type:text[]" json:"breed_codes"`                   // 承保品种代码
-	SpeciesAllowed pq.StringArray `gorm:"type:text[];default:{'dog','cat'}" json:"species_allowed"` // 允许的物种
+	SpeciesAllowed pq.StringArray `gorm:"type:text[]" json:"species_allowed"` // 允许的物种
 	Description    string         `gorm:"type:text" json:"description"`
 	Terms          string         `gorm:"type:text" json:"terms"`                           // 条款
 	Exclusions     string         `gorm:"type:text" json:"exclusions"`                      // 免责条款

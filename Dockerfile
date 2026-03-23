@@ -2,7 +2,10 @@
 # MDM Backend - Multi-stage Docker Build
 # ===================================================================
 # Stage 1: Builder - compile Go binary
-FROM golang:1.21-alpine AS builder
+FROM golang:1.23-alpine AS builder
+
+# Enable automatic Go toolchain download for newer Go version
+ENV GOTOOLCHAIN=auto
 
 WORKDIR /build
 
@@ -18,7 +21,8 @@ COPY . .
 
 # Build the binary with optimizations
 # CGO_ENABLED=0 for static binary, suitable for alpine
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+# GOTOOLCHAIN=auto downloads correct Go version as required by go.mod
+RUN GOTOOLCHAIN=auto CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
     go build -ldflags="-w -s" \
     -o mdm-server \
     main.go

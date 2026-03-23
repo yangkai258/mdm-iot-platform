@@ -254,7 +254,7 @@ type AIAuditReport struct {
 	Findings       string    `gorm:"type:json" json:"findings"`                      // 主要发现 JSON数组
 	Metrics        string    `gorm:"type:json" json:"metrics"`                      // 详细指标 JSON
 	Recommendations string   `gorm:"type:text" json:"recommendations"`              // 建议
-	RiskLevel      string    `gorm:"type:varchar:20" json:"risk_level"`             // low, medium, high, critical
+	RiskLevel      string    `gorm:"type:varchar(20)" json:"risk_level"`             // low, medium, high, critical
 	GeneratedBy    uint      `gorm:"index" json:"generated_by"`                     // 生成人
 	GeneratedAt    time.Time `json:"generated_at"`
 	TenantID       uint      `gorm:"index" json:"tenant_id"`

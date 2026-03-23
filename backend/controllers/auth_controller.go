@@ -8,6 +8,7 @@ import (
 	"mdm-backend/models"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -45,8 +46,8 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	// 简单密码校验（实际应该用 bcrypt）
-	if user.Password != req.Password && user.Password != hashPassword(req.Password) {
+	// 密码校验（bcrypt）
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "用户名或密码错误"})
 		return
 	}
@@ -123,7 +124,4 @@ func (ctrl *AuthController) RefreshToken(c *gin.Context) {
 	})
 }
 
-func hashPassword(pwd string) string {
-	// 简单hash，实际应该用 bcrypt
-	return pwd
-}
+
