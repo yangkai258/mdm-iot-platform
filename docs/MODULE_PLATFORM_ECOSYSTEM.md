@@ -222,35 +222,61 @@
 
 #### 2.7.1 智能家居对接
 
-| 平台 | 功能 | 优先级 |
+| 功能 | 说明 | 优先级 |
 |------|------|--------|
-| 米家 | 米家设备控制 | P2 |
-| 天猫精灵 | 语音控制宠物 | P2 |
-| HomeKit | 苹果HomeKit | P3 |
-| Google Home | Google Home | P3 |
+| 米家授权 | OAuth2.0授权米家账号 | P2 |
+| 米家设备同步 | 同步米家设备列表和状态 | P2 |
+| 设备控制 | 通过宠物行为触发米家设备 | P2 |
+| 天猫精灵授权 | 授权天猫精灵控制宠物 | P2 |
+| 语音指令 | 天猫精灵语音指令响应 | P2 |
+| HomeKit配对 | MFi设备配对和控制 | P3 |
+| Google Home | Google Assistant语音控制 | P3 |
+| 智能联动 | 配置宠物行为触发智能家居规则 | P2 |
 
 #### 2.7.2 宠物医疗对接
 
 | 功能 | 说明 | 优先级 |
 |------|------|--------|
-| 兽医预约 | 对接宠物医院预约 | P2 |
-| 病历同步 | 宠物病历同步 | P3 |
-| 疫苗提醒 | 疫苗接种提醒 | P2 |
+| 医院查询 | 合作宠物医院查询和展示 | P2 |
+| 预约挂号 | 在线预约宠物医生 | P2 |
+| 预约管理 | 查看/修改/取消预约 | P2 |
+| 病历同步 | 医院病历同步到宠物档案 | P3 |
+| 疫苗管理 | 疫苗接种记录和提醒 | P2 |
+| 健康报告 | 宠物健康数据报告 | P3 |
+| 紧急联系 | 一键联系最近的宠物医院 | P3 |
 
 #### 2.7.3 宠物保险对接
 
 | 功能 | 说明 | 优先级 |
 |------|------|--------|
-| 保险方案 | 合作保险方案展示 | P3 |
-| 理赔对接 | 保险理赔流程 | P3 |
+| 保险方案展示 | 合作保险公司方案对比 | P3 |
+| 在线投保 | 保险产品在线购买 | P3 |
+| 保单管理 | 保单查询和状态管理 | P3 |
+| 理赔申请 | 在线发起理赔并提交材料 | P3 |
+| 理赔进度 | 理赔进度查询 | P3 |
+| 宠物档案 | 宠物健康档案授权给保险公司 | P3 |
 
-#### 2.7.4 宠物用品电商
+#### 2.7.4 地图服务对接
 
 | 功能 | 说明 | 优先级 |
 |------|------|--------|
-| 食品推荐 | 基于体重/年龄推荐 | P2 |
-| 玩具推荐 | 基于性格推荐 | P3 |
-| 一键购买 | 饿了么/京东到家 | P3 |
+| 室内地图 | 室内地图瓦片服务 | P2 |
+| 室内导航 | 室内定位和导航 | P2 |
+| 地址编码 | 经纬度与地址互转 | P3 |
+| 路线规划 | 户外路线规划 | P3 |
+| 周边搜索 | 宠物医院/公园等周边搜索 | P3 |
+| 位置上报 | 宠物位置上报和历史轨迹 | P2 |
+
+#### 2.7.5 宠物用品电商对接
+
+| 功能 | 说明 | 优先级 |
+|------|------|--------|
+| 商品推荐 | 基于宠物特征推荐用品 | P2 |
+| 购物车同步 | 购物车数据同步 | P3 |
+| 一键购买 | 对接京东到家/饿了么 | P3 |
+| 订单管理 | 订单查询和物流跟踪 | P3 |
+| 食品推荐 | 基于体重/年龄/品种推荐 | P2 |
+| 玩具推荐 | 基于宠物性格推荐 | P3 |
 
 ---
 
@@ -323,12 +349,86 @@
 
 ### 3.6 第三方集成
 
+#### 3.6.1 智能家居对接
+
 | 方法 | 路径 | 说明 |
 |------|------|------|
-| GET | /api/v1/integrations | 集成列表 |
-| POST | /api/v1/integrations/:type/connect | 连接集成 |
-| POST | /api/v1/integrations/:type/disconnect | 断开集成 |
-| GET | /api/v1/integrations/:type/status | 集成状态 |
+| GET | /api/v1/integrations/smarthome/devices | 同步设备列表 |
+| GET | /api/v1/integrations/smarthome/devices/:id | 设备详情 |
+| POST | /api/v1/integrations/smarthome/devices/:id/control | 控制设备 |
+| POST | /api/v1/integrations/smarthome/triggers | 智能联动配置 |
+| GET | /api/v1/integrations/smarthome/triggers/:id | 联动规则详情 |
+| PUT | /api/v1/integrations/smarthome/triggers/:id | 更新联动规则 |
+| DELETE | /api/v1/integrations/smarthome/triggers/:id | 删除联动规则 |
+| POST | /api/v1/integrations/mi-home/auth | 米家授权 |
+| DELETE | /api/v1/integrations/mi-home/auth | 米家取消授权 |
+| GET | /api/v1/integrations/mi-home/devices | 米家设备列表 |
+| POST | /api/v1/integrations/tmall-genie/auth | 天猫精灵授权 |
+| GET | /api/v1/integrations/tmall-genie/devices | 天猫设备列表 |
+| POST | /api/v1/integrations/homekit/pair | HomeKit配对 |
+| GET | /api/v1/integrations/homekit/devices | HomeKit设备列表 |
+| POST | /api/v1/integrations/google-home/auth | Google Home授权 |
+| GET | /api/v1/integrations/google-home/devices | Google Home设备 |
+
+#### 3.6.2 宠物医疗对接
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/integrations/vet/hospitals | 合作医院列表 |
+| GET | /api/v1/integrations/vet/hospitals/:id | 医院详情 |
+| POST | /api/v1/integrations/vet/appointments | 创建预约 |
+| GET | /api/v1/integrations/vet/appointments/:id | 预约详情 |
+| PUT | /api/v1/integrations/vet/appointments/:id | 更新预约 |
+| DELETE | /api/v1/integrations/vet/appointments/:id | 取消预约 |
+| GET | /api/v1/integrations/vet/appointments | 预约列表 |
+| POST | /api/v1/integrations/vet/records/sync | 病历同步 |
+| GET | /api/v1/integrations/vet/records/:pet_id | 宠物病历 |
+| POST | /api/v1/integrations/vet/vaccines/reminder | 设置疫苗提醒 |
+| GET | /api/v1/integrations/vet/vaccines/:pet_id | 疫苗记录 |
+| POST | /api/v1/integrations/vet/health/check | 健康检查预约 |
+
+#### 3.6.3 宠物保险对接
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/integrations/insurance/plans | 保险方案列表 |
+| GET | /api/v1/integrations/insurance/plans/:id | 方案详情 |
+| POST | /api/v1/integrations/insurance/policies | 投保申请 |
+| GET | /api/v1/integrations/insurance/policies/:id | 保单详情 |
+| GET | /api/v1/integrations/insurance/policies | 保单列表 |
+| POST | /api/v1/integrations/insurance/claims | 发起理赔 |
+| GET | /api/v1/integrations/insurance/claims/:id | 理赔详情 |
+| GET | /api/v1/integrations/insurance/claims | 理赔列表 |
+| PUT | /api/v1/integrations/insurance/claims/:id/upload | 上传理赔材料 |
+| GET | /api/v1/integrations/insurance/claims/:id/status | 理赔状态 |
+
+#### 3.6.4 地图服务对接
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/integrations/maps/tiles/:z/:x/:y | 地图瓦片 |
+| POST | /api/v1/integrations/maps/geocode | 地址编码 |
+| POST | /api/v1/integrations/maps/reverse-geocode | 逆地址编码 |
+| POST | /api/v1/integrations/maps/route | 路线规划 |
+| GET | /api/v1/integrations/maps/poi/search | 周边搜索 |
+| GET | /api/v1/integrations/maps/poi/:id | POI详情 |
+| POST | /api/v1/integrations/maps/indoor/map | 室内地图数据 |
+| GET | /api/v1/integrations/maps/indoor/:floor_id | 室内地图查询 |
+| POST | /api/v1/integrations/maps/location/report | 位置上报 |
+| GET | /api/v1/integrations/maps/location/history | 位置历史 |
+
+#### 3.6.5 宠物用品电商对接
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/integrations/ecommerce/products | 商品推荐 |
+| GET | /api/v1/integrations/ecommerce/products/:id | 商品详情 |
+| POST | /api/v1/integrations/ecommerce/cart | 加入购物车 |
+| GET | /api/v1/integrations/ecommerce/cart | 购物车列表 |
+| POST | /api/v1/integrations/ecommerce/orders | 创建订单 |
+| GET | /api/v1/integrations/ecommerce/orders/:id | 订单详情 |
+| GET | /api/v1/integrations/ecommerce/food/recommend | 食品推荐 |
+| GET | /api/v1/integrations/ecommerce/toy/recommend | 玩具推荐 |
 
 ---
 
@@ -519,6 +619,159 @@ CREATE TABLE integrations (
     updated_at      TIMESTAMP DEFAULT NOW(),
     UNIQUE(user_id, integration_type)
 );
+
+### 4.10 智能家居设备表 (smart_home_devices)
+
+```sql
+CREATE TABLE smart_home_devices (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         BIGINT NOT NULL REFERENCES users(id),
+    integration_id  BIGINT REFERENCES integrations(id),
+    platform        VARCHAR(50) NOT NULL,          -- 'mi_home'/'tmall_genie'/'homekit'/'google_home'
+    platform_device_id VARCHAR(100) NOT NULL,
+    device_name     VARCHAR(255),
+    device_type     VARCHAR(50),                   -- 'light'/'switch'/'sensor'/'camera'
+    status          JSONB,                          -- 设备状态
+    is_online       BOOLEAN DEFAULT TRUE,
+    last_control_at TIMESTAMP,
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW(),
+    UNIQUE(integration_id, platform_device_id)
+);
+
+CREATE INDEX idx_smart_home_devices_user ON smart_home_devices(user_id);
+```
+
+### 4.11 智能联动规则表 (smart_home_triggers)
+
+```sql
+CREATE TABLE smart_home_triggers (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         BIGINT NOT NULL REFERENCES users(id),
+    trigger_name    VARCHAR(255) NOT NULL,
+    trigger_type    VARCHAR(50) NOT NULL,          -- 'pet_action'/'schedule'/'sensor'/'voice'
+    condition       JSONB NOT NULL,                 -- 触发条件
+    action          JSONB NOT NULL,                 -- 执行动作
+    device_id       BIGINT REFERENCES smart_home_devices(id),
+    is_enabled      BOOLEAN DEFAULT TRUE,
+    run_count       INT DEFAULT 0,
+    last_run_at     TIMESTAMP,
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_smart_home_triggers_user ON smart_home_triggers(user_id);
+```
+
+### 4.12 宠物医疗预约表 (vet_appointments)
+
+```sql
+CREATE TABLE vet_appointments (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         BIGINT NOT NULL REFERENCES users(id),
+    pet_id          BIGINT REFERENCES pets(id),
+    hospital_id     VARCHAR(100) NOT NULL,
+    hospital_name   VARCHAR(255),
+    doctor_name     VARCHAR(100),
+    appointment_time TIMESTAMP NOT NULL,
+    appointment_type VARCHAR(50),                  -- 'checkup'/'vaccine'/'emergency'/'followup'
+    reason          TEXT,
+    status          VARCHAR(20) DEFAULT 'pending',  -- 'pending'/'confirmed'/'completed'/'cancelled'
+    notes           TEXT,
+    external_id     VARCHAR(100),
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_vet_appointments_user ON vet_appointments(user_id, appointment_time DESC);
+```
+
+### 4.13 宠物病历表 (pet_medical_records)
+
+```sql
+CREATE TABLE pet_medical_records (
+    id              BIGSERIAL PRIMARY KEY,
+    pet_id          BIGINT NOT NULL REFERENCES pets(id),
+    record_type     VARCHAR(50) NOT NULL,           -- 'diagnosis'/'vaccine'/'surgery'/'checkup'
+    hospital_name   VARCHAR(255),
+    doctor_name     VARCHAR(100),
+    diagnosis       TEXT,
+    treatment       TEXT,
+    prescription    TEXT,
+    record_date     TIMESTAMP NOT NULL,
+    attachments     VARCHAR(500)[],
+    external_id     VARCHAR(100),
+    sync_status     VARCHAR(20) DEFAULT 'synced',
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_pet_medical_records_pet ON pet_medical_records(pet_id, record_date DESC);
+```
+
+### 4.14 宠物保险保单表 (insurance_policies)
+
+```sql
+CREATE TABLE insurance_policies (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         BIGINT NOT NULL REFERENCES users(id),
+    pet_id          BIGINT REFERENCES pets(id),
+    plan_id         VARCHAR(100) NOT NULL,
+    plan_name       VARCHAR(255),
+    insurer         VARCHAR(100),
+    policy_number   VARCHAR(100) UNIQUE,
+    premium         DECIMAL(10,2),
+    coverage_amount DECIMAL(10,2),
+    start_date      DATE,
+    end_date        DATE,
+    status          VARCHAR(20) DEFAULT 'active',
+    external_id     VARCHAR(100),
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_insurance_policies_user ON insurance_policies(user_id);
+```
+
+### 4.15 保险理赔表 (insurance_claims)
+
+```sql
+CREATE TABLE insurance_claims (
+    id              BIGSERIAL PRIMARY KEY,
+    policy_id       BIGINT NOT NULL REFERENCES insurance_policies(id),
+    claim_number    VARCHAR(100) UNIQUE,
+    claim_type      VARCHAR(50),
+    amount          DECIMAL(10,2) NOT NULL,
+    status          VARCHAR(20) DEFAULT 'pending',
+    description     TEXT,
+    documents       VARCHAR(500)[],
+    claim_date      TIMESTAMP,
+    processed_at    TIMESTAMP,
+    approved_amount DECIMAL(10,2),
+    external_id     VARCHAR(100),
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_insurance_claims_policy ON insurance_claims(policy_id);
+```
+
+### 4.16 地图服务配置表 (map_configs)
+
+```sql
+CREATE TABLE map_configs (
+    id              BIGSERIAL PRIMARY KEY,
+    user_id         BIGINT NOT NULL REFERENCES users(id),
+    provider        VARCHAR(50) NOT NULL,
+    api_key         VARCHAR(500),
+    is_active       BOOLEAN DEFAULT TRUE,
+    quota_used      INT DEFAULT 0,
+    quota_limit     INT DEFAULT 10000,
+    created_at      TIMESTAMP DEFAULT NOW(),
+    updated_at      TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_map_configs_user ON map_configs(user_id);
 ```
 
 ---
@@ -579,8 +832,20 @@ CREATE TABLE integrations (
 | 页面 | 路由 | 说明 |
 |------|------|------|
 | 集成中心 | /integrations | 集成列表 |
-| 集成详情 | /integrations/:type | 集成详情 |
-| 连接设置 | /integrations/:type/connect | 连接配置 |
+| 智能家居 | /integrations/smarthome | 智能家居管理 |
+| 设备列表 | /integrations/smarthome/devices | 设备列表 |
+| 联动规则 | /integrations/smarthome/triggers | 联动规则管理 |
+| 宠物医疗 | /integrations/vet | 宠物医疗 |
+| 医院查询 | /integrations/vet/hospitals | 合作医院列表 |
+| 预约管理 | /integrations/vet/appointments | 预约列表 |
+| 病历同步 | /integrations/vet/records/:pet_id | 病历查看 |
+| 宠物保险 | /integrations/insurance | 保险管理 |
+| 保险方案 | /integrations/insurance/plans | 方案对比 |
+| 保单管理 | /integrations/insurance/policies | 我的保单 |
+| 理赔申请 | /integrations/insurance/claims | 理赔申请 |
+| 地图服务 | /integrations/maps | 地图配置 |
+| 地图配置 | /integrations/maps/config | API Key配置 |
+| 宠物电商 | /integrations/ecommerce | 宠物用品 |
 
 ### 5.7 管理后台
 
@@ -645,20 +910,41 @@ CREATE TABLE integrations (
 | 米家对接 | 米家设备可被宠物触发 |
 | 天猫精灵 | 语音指令正常响应 |
 | 预约功能 | 预约流程完整 |
-|
+| 地图服务 | 室内地图加载正常 |
+| 保险理赔 | 理赔流程可完整提交 |
+
 
 ---
 
-## 六、页面布局规范
+### 6.7 地图服务
 
-### 6.1 开发者首页（/developer）
+| 验收点 | 标准 |
+|--------|------|
+| 地图加载 | 室内地图瓦片加载<500ms |
+| 位置精度 | 室内定位精度<1m |
+| 地址编码 | 地址编码准确率>95% |
+
+### 6.8 宠物保险
+
+| 验收点 | 标准 |
+|--------|------|
+| 方案展示 | 保险方案信息准确 |
+| 投保流程 | 投保流程完整顺畅 |
+| 理赔进度 | 理赔状态实时更新 |
+
+
+---
+
+## 七、页面布局规范
+
+### 7.1 开发者首页（/developer）
 
 **布局结构：**
 1. 面包屑 → 页面标题
 2. 开发者统计卡片（应用数/API调用量/配额使用率）—— 白色
 3. 快捷入口卡片网格（应用管理/API Key/文档中心/SDK下载）
 
-### 6.2 应用管理页面（/developer/apps）
+### 7.2 应用管理页面（/developer/apps）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -682,7 +968,7 @@ CREATE TABLE integrations (
 
 **分页：** 右下角，10/20/50/100 条
 
-### 6.3 插件市场页面（/marketplace/plugins）
+### 7.3 插件市场页面（/marketplace/plugins）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -694,7 +980,7 @@ CREATE TABLE integrations (
 - [我的插件] — 右对齐（开发者视图）
 - [安装] [详情] — 卡片内
 
-### 6.4 表情包市场页面（/marketplace/emotions）
+### 7.4 表情包市场页面（/marketplace/emotions）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -706,7 +992,7 @@ CREATE TABLE integrations (
 - [我的表情包] — 右对齐（创作者视图）
 - [购买] [详情] — 卡片内
 
-### 6.5 动作市场页面（/marketplace/actions）
+### 7.5 动作市场页面（/marketplace/actions）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -718,7 +1004,7 @@ CREATE TABLE integrations (
 - [我的动作] — 右对齐（创作者视图）
 - [购买] [下载] [详情] — 卡片内
 
-### 6.6 声音市场页面（/marketplace/voices）
+### 7.6 声音市场页面（/marketplace/voices）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -730,7 +1016,7 @@ CREATE TABLE integrations (
 
 **分页：** 右下角，10/20/50/100 条
 
-### 6.7 第三方集成页面（/integrations）
+### 7.7 第三方集成页面（/integrations）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -740,7 +1026,7 @@ CREATE TABLE integrations (
 **按钮规范：**
 - [连接] [配置] [断开] — 卡片内右对齐
 
-### 6.8 管理后台页面（/admin/marketplace）
+### 7.8 管理后台页面（/admin/marketplace）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -762,7 +1048,7 @@ CREATE TABLE integrations (
 
 **分页：** 右下角，10/20/50/100 条
 
-### 6.9 弹窗规范
+### 7.9 弹窗规范
 
 | 类型 | 使用场景 |
 |------|----------|

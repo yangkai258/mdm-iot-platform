@@ -524,9 +524,9 @@ CREATE INDEX idx_safety_logs_device ON safety_logs(device_id, created_at DESC);
 
 ---
 
-## 六、页面布局规范
+## 七、页面布局规范
 
-### 6.1 环境感知面板（/embodied/:device_id/perception）
+### 7.1 环境感知面板（/embodied/:device_id/perception）
 
 **布局结构：**
 1. 面包屑 → 页面标题 + 设备信息
@@ -535,7 +535,7 @@ CREATE INDEX idx_safety_logs_device ON safety_logs(device_id, created_at DESC);
 
 **分页：** 右下角，10/20/50/100 条
 
-### 6.2 地图管理页面（/embodied/:device_id/map）
+### 7.2 地图管理页面（/embodied/:device_id/map）
 
 **布局结构：**
 1. 面包屑 → 页面标题 + 设备选择
@@ -547,7 +547,7 @@ CREATE INDEX idx_safety_logs_device ON safety_logs(device_id, created_at DESC);
 - [定位校准] [保存地图] — 左对齐
 - [编辑] [删除] — 物体标注内右对齐
 
-### 6.3 导航控制页面（/embodied/:device_id/navigate）
+### 7.3 导航控制页面（/embodied/:device_id/navigate）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -559,7 +559,7 @@ CREATE INDEX idx_safety_logs_device ON safety_logs(device_id, created_at DESC);
 
 **分页：** 右下角，10/20/50/100 条
 
-### 6.4 动作库页面（/embodied/action-library）
+### 7.4 动作库页面（/embodied/action-library）
 
 **布局结构：**
 1. 面包屑 → 页面标题
@@ -585,7 +585,7 @@ CREATE INDEX idx_safety_logs_device ON safety_logs(device_id, created_at DESC);
 
 **分页：** 右下角，10/20/50/100 条
 
-### 6.5 禁区设置页面（/embodied/:device_id/safety/zones）
+### 7.5 禁区设置页面（/embodied/:device_id/safety/zones）
 
 **布局结构：**
 1. 面包屑 → 页面标题 + 设备信息
@@ -598,7 +598,7 @@ CREATE INDEX idx_safety_logs_device ON safety_logs(device_id, created_at DESC);
 
 **分页：** 右下角，10/20/50/100 条
 
-### 6.6 决策日志页面（/embodied/:device_id/decision/logs）
+### 7.6 决策日志页面（/embodied/:device_id/decision/logs）
 
 **布局结构：**
 1. 面包屑 → 页面标题 + 设备信息
@@ -618,7 +618,7 @@ CREATE INDEX idx_safety_logs_device ON safety_logs(device_id, created_at DESC);
 
 **分页：** 右下角，10/20/50/100 条
 
-### 6.7 弹窗规范
+### 7.7 弹窗规范
 
 | 类型 | 使用场景 |
 |------|----------|

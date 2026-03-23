@@ -144,6 +144,36 @@ func main() {
 		&models.ExploreTask{},
 		&models.FollowTask{},
 		&models.DecisionStrategy{},
+		// Sprint 23: 仿真测试模块
+		&models.SimulationScene{},
+		&models.SimulationSession{},
+		&models.SimulationTask{},
+		&models.SimulationResult{},
+		&models.SimulationDataset{},
+		&models.DatasetVersion{},
+		&models.StressTestConfig{},
+		&models.ABExperiment{},
+		&models.ABExperimentResult{},
+		&models.Recording{},
+		&models.TestCase{},
+		&models.TestExecution{},
+		&models.TestReport{},
+		// Sprint 25: 开放平台生态
+		&models.DeveloperApp{},
+		&models.APIKey{},
+		&models.WebhookSubscription{},
+		&models.WebhookEventRecord{},
+		&models.WebhookDelivery{},
+		&models.WebhookTemplate{},
+		// Sprint 27: 第三方集成
+		&models.Integration{},
+		&models.SmartHomeDevice{},
+		&models.SmartHomeTrigger{},
+		&models.PetMedicalRecord{},
+		&models.InsuranceClaim{},
+		&models.InsurancePolicy{},
+		&models.PetLostReport{},
+		&models.ThirdPartyMapConfig{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -261,6 +291,16 @@ func main() {
 
 	// 注册业务路由
 	controllers.RegisterRoutes(r, db, redisClient)
+
+	// Sprint 27: 第三方集成路由
+	integrationCtrl := &controllers.IntegrationController{DB: db}
+	integrationGroup := r.Group("/api/v1")
+	integrationCtrl.RegisterIntegrationRoutes(integrationGroup)
+
+	// Sprint 23: 仿真测试路由
+	simCtrl := &controllers.SimulationController{DB: db, Redis: redisClient}
+	simGroup := r.Group("/api/v1")
+	simCtrl.RegisterSimulationRoutes(simGroup)
 
 	// 注册系统管理路由
 	sys := r.Group("/api/v1")
@@ -507,6 +547,39 @@ func main() {
 	apiV1.PUT("/data-permissions/users/:user_id", dataPermCtrl.UpdateUserDataPermissions)
 	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
 	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
+
+	// ============ Sprint 25: 开放平台生态路由 ============
+	// 初始化 Webhook 服务
+	webhookSvc := services.NewWebhookService(db)
+	// 初始化默认 Webhook 模板
+	go webhookSvc.InitDefaultTemplates()
+
+	// 开发者 API
+	devAppCtrl := &controllers.DeveloperAppController{DB: db}
+	apiKeyCtrl := &controllers.APIKeyController{DB: db}
+	webhookCtrl := &controllers.WebhookController{DB: db, WebhookSvc: webhookSvc}
+
+	// 开发者应用管理
+	apiV1.GET("/developer/apps", devAppCtrl.ListApps)
+	apiV1.POST("/developer/apps", devAppCtrl.CreateApp)
+	apiV1.GET("/developer/apps/:id", devAppCtrl.GetApp)
+	apiV1.PUT("/developer/apps/:id", devAppCtrl.UpdateApp)
+	apiV1.DELETE("/developer/apps/:id", devAppCtrl.DeleteApp)
+	apiV1.POST("/developer/apps/:id/regenerate-key", devAppCtrl.RegenerateKey)
+
+	// API Key 管理
+	apiV1.GET("/developer/api-keys", apiKeyCtrl.ListAPIKeys)
+	apiV1.POST("/developer/api-keys", apiKeyCtrl.CreateAPIKey)
+	apiV1.DELETE("/developer/api-keys/:id", apiKeyCtrl.DeleteAPIKey)
+
+	// Webhook 市场
+	apiV1.GET("/webhooks/templates", webhookCtrl.ListTemplates)
+	apiV1.GET("/webhooks/templates/:id", webhookCtrl.GetTemplate)
+	apiV1.POST("/webhooks/subscriptions", webhookCtrl.CreateSubscription)
+	apiV1.GET("/webhooks/subscriptions", webhookCtrl.ListSubscriptions)
+	apiV1.DELETE("/webhooks/subscriptions/:id", webhookCtrl.DeleteSubscription)
+	apiV1.GET("/webhooks/deliveries/:id", webhookCtrl.GetDelivery)
+	apiV1.POST("/webhooks/deliveries/:id/retry", webhookCtrl.RetryDelivery)
 
 	// 获取端口
 	port := os.Getenv("PORT")
