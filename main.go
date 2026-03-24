@@ -899,6 +899,44 @@ func main() {
 		c.JSON(200, gin.H{"code": 0, "data": config})
 	})
 
+	// ============ 会员管理路由 (9个子模块) ============
+	memberCtrl := controllers.NewMemberController(db)
+	memberGroup := apiV1.Group("/members")
+	{
+		// 会员基础 CRUD
+		memberGroup.GET("/list", memberCtrl.MemberList)
+		memberGroup.POST("/create", memberCtrl.MemberCreate)
+		memberGroup.PUT("/update", memberCtrl.MemberUpdate)
+		memberGroup.DELETE("/delete", memberCtrl.MemberDelete)
+		memberGroup.GET("/detail/:id", memberCtrl.MemberDetail)
+		// 会员卡
+		memberGroup.GET("/cards/list", memberCtrl.CardList)
+		memberGroup.POST("/cards/create", memberCtrl.CardCreate)
+		memberGroup.PUT("/cards/update", memberCtrl.CardUpdate)
+		memberGroup.DELETE("/cards/delete", memberCtrl.CardDelete)
+		// 优惠券
+		memberGroup.GET("/coupons/list", memberCtrl.CouponList)
+		memberGroup.POST("/coupons/create", memberCtrl.CouponCreate)
+		memberGroup.PUT("/coupons/update", memberCtrl.CouponUpdate)
+		memberGroup.DELETE("/coupons/delete", memberCtrl.CouponDelete)
+		// 门店
+		memberGroup.GET("/stores/list", memberCtrl.StoreList)
+		memberGroup.POST("/stores/create", memberCtrl.StoreCreate)
+		memberGroup.PUT("/stores/update", memberCtrl.StoreUpdate)
+		memberGroup.DELETE("/stores/delete", memberCtrl.StoreDelete)
+		// 积分
+		memberGroup.GET("/points/records", memberCtrl.PointsRecordList)
+		// 标签
+		memberGroup.GET("/tags/list", memberCtrl.TagList)
+		memberGroup.POST("/tags/create", memberCtrl.TagCreate)
+		memberGroup.PUT("/tags/update", memberCtrl.TagUpdate)
+		memberGroup.DELETE("/tags/delete", memberCtrl.TagDelete)
+		// 等级
+		memberGroup.GET("/levels/list", memberCtrl.LevelList)
+		// 操作记录
+		memberGroup.GET("/operations/list", memberCtrl.OperationRecordList)
+	}
+
 	// ============ DaaS 设备即服务 API ============
 	daasCtrl := &controllers.DaaSController{DB: db, Redis: redisClient}
 	daasGroup := apiV1.Group("/daas")

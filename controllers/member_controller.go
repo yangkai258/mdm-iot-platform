@@ -735,3 +735,34 @@ func (c *MemberController) PointsRuleDelete(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
 }
+
+// OperationRecordList 会员操作记录列表
+func (c *MemberController) OperationRecordList(ctx *gin.Context) {
+	var records []models.MemberOperationRecord
+	var total int64
+
+	query := c.DB.Model(&models.MemberOperationRecord{})
+	if memberID := ctx.Query("member_id"); memberID != "" {
+		query = query.Where("member_id = ?", memberID)
+	}
+	if operation := ctx.Query("operation"); operation != "" {
+		query = query.Where("operation = ?", operation)
+	}
+	query.Count(&total)
+
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(ctx.DefaultQuery("page_size", "10"))
+	offset := (page - 1) * pageSize
+
+	if err := query.Offset(offset).Limit(pageSize).Order("id DESC").Find(&records).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": gin.H{
+		"list":      records,
+		"total":     total,
+		"page":      page,
+		"page_size": pageSize,
+	}})
+}
