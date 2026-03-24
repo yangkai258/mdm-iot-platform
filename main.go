@@ -247,6 +247,15 @@ func main() {
 		&models.SubscriptionPlan{},
 		&models.UserSubscription{},
 		&models.SubscriptionChange{},
+		// BLE Mesh 网络
+		&models.MeshNetwork{},
+		&models.MeshDevice{},
+		&models.MeshNetworkMember{},
+		// 宠物商店
+		&models.Product{},
+		&models.ProductCategory{},
+		&models.Order{},
+		&models.OrderItem{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
