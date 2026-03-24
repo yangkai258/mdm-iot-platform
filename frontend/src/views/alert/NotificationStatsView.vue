@@ -30,14 +30,14 @@ import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useNotificationStats } from '@/composables/useNotification'
 
-const { loading, stats, loadStats } = useNotificationStats()
+const { loading, stats, dateRange, loadStats } = useNotificationStats()
 
-const loading = ref(false)
 const data = ref([])
 const modalVisible = ref(false)
 const modalTitle = ref('新建')
 
 const form = reactive({
+  name: '',
   dateRange: []
 })
 
@@ -55,11 +55,13 @@ const columns = [
 ]
 
 const handleSearch = () => {
+  dateRange.value = [form.dateRange[0] || '', form.dateRange[1] || '']
   loadData()
 }
 
 const handleReset = () => {
   form.dateRange = []
+  dateRange.value = ['', '']
   loadData()
 }
 
@@ -74,15 +76,12 @@ const handleSubmit = () => {
 }
 
 const loadData = async () => {
-  loading.value = true
   try {
     await loadStats()
     data.value = stats.value?.by_channel || []
     pagination.total = data.value.length
   } catch (e) {
     Message.error('加载失败')
-  } finally {
-    loading.value = false
   }
 }
 

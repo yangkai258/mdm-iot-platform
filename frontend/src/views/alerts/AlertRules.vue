@@ -16,6 +16,14 @@
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="规则名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="告警类型"><a-input v-model="form.alert_type" placeholder="如 battery_low" /></a-form-item>
+        <a-form-item label="条件"><a-select v-model="form.condition" style="width: 80px">
+          <a-option value="<">&lt;</a-option>
+          <a-option value=">">&gt;</a-option>
+          <a-option value="=">=</a-option>
+        </a-select></a-form-item>
+        <a-form-item label="阈值"><a-input-number v-model="form.threshold" :min="0" style="width: 120px" /></a-form-item>
+        <a-form-item label="严重程度"><a-input-number v-model="form.severity" :min="1" :max="4" style="width: 120px" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>

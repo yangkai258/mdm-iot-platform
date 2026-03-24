@@ -15,7 +15,15 @@
     <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="渠道名称"><a-input v-model="form.channel_name" /></a-form-item>
+        <a-form-item label="服务商"><a-select v-model="form.sms_provider" style="width: 200px">
+          <a-option value="aliyun">阿里云</a-option>
+          <a-option value="tencent">腾讯云</a-option>
+          <a-option value="huawei">华为云</a-option>
+        </a-select></a-form-item>
+        <a-form-item label="AccessKey"><a-input v-model="form.access_key" /></a-form-item>
+        <a-form-item label="SecretKey"><a-input-password v-model="form.secret_key" /></a-form-item>
+        <a-form-item label="签名"><a-input v-model="form.sign_name" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
@@ -30,9 +38,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useNotificationChannels } from '@/composables/useNotification'
 
-const { createChannel } = useNotificationChannels()
+const { loading, channels, loadChannels, createChannel } = useNotificationChannels()
 
-const loading = ref(false)
 const data = ref([])
 const modalVisible = ref(false)
 const modalTitle = ref('新建')
@@ -53,8 +60,8 @@ const pagination = reactive({
 
 const columns = [
   { title: '渠道名称', dataIndex: 'channel_name', width: 200 },
-  { title: '服务商', dataIndex: 'sms_provider', width: 120 },
-  { title: '签名', dataIndex: 'sign_name', width: 180 }
+  { title: '服务商', dataIndex: 'config', customRender: ({ record }) => record.config?.sms_provider || '-', width: 120 },
+  { title: '签名', dataIndex: 'config', customRender: ({ record }) => record.config?.sign_name || '-', width: 180 }
 ]
 
 const handleSearch = () => {
@@ -93,7 +100,13 @@ const handleSubmit = async () => {
 }
 
 const loadData = async () => {
-  loading.value = false
+  try {
+    await loadChannels()
+    data.value = channels.value.filter(ch => ch.channel_type === 'sms')
+    pagination.total = data.value.length
+  } catch (e) {
+    Message.error('加载失败')
+  }
 }
 
 onMounted(() => {

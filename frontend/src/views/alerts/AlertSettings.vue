@@ -16,6 +16,13 @@
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="设置名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="类型"><a-select v-model="form.type" style="width: 200px">
+          <a-option value="email">邮件</a-option>
+          <a-option value="sms">短信</a-option>
+          <a-option value="webhook">Webhook</a-option>
+        </a-select></a-form-item>
+        <a-form-item label="配置值"><a-input v-model="form.config_value" /></a-form-item>
+        <a-form-item label="描述"><a-input v-model="form.description" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>

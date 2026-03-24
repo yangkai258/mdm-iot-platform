@@ -15,7 +15,12 @@
     <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="渠道名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="渠道类型"><a-select v-model="form.channel_type" style="width: 200px">
+          <a-option value="email">邮件</a-option>
+          <a-option value="sms">短信</a-option>
+          <a-option value="webhook">Webhook</a-option>
+        </a-select></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
@@ -28,7 +33,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import * as api from '@/api/alerts'
+import * as api from '@/api/notification'
 
 const loading = ref(false)
 const data = ref([])
@@ -37,8 +42,7 @@ const modalTitle = ref('新建')
 
 const form = reactive({
   name: '',
-  channel_type: 'smtp',
-  enabled: true
+  channel_type: 'email'
 })
 
 const pagination = reactive({
@@ -60,7 +64,7 @@ const handleSearch = () => {
 
 const handleReset = () => {
   form.name = ''
-  form.channel_type = 'smtp'
+  form.channel_type = 'email'
   loadData()
 }
 
@@ -84,7 +88,7 @@ const loadData = async () => {
   loading.value = true
   try {
     const resData = await api.getNotificationChannels()
-    data.value = resData.data?.list || []
+    data.value = resData.data || []
     pagination.total = data.value.length
   } catch (e) {
     Message.error('加载失败')

@@ -15,7 +15,13 @@
     <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="渠道名称"><a-input v-model="form.channel_name" /></a-form-item>
+        <a-form-item label="Webhook URL"><a-input v-model="form.webhook_url" placeholder="https://example.com/webhook" /></a-form-item>
+        <a-form-item label="请求方式"><a-select v-model="form.webhook_method" style="width: 120px">
+          <a-option value="POST">POST</a-option>
+          <a-option value="PUT">PUT</a-option>
+        </a-select></a-form-item>
+        <a-form-item label="密钥"><a-input-password v-model="form.webhook_secret" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
@@ -30,9 +36,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useNotificationChannels } from '@/composables/useNotification'
 
-const { createChannel } = useNotificationChannels()
+const { loading, channels, loadChannels, createChannel } = useNotificationChannels()
 
-const loading = ref(false)
 const data = ref([])
 const modalVisible = ref(false)
 const modalTitle = ref('新建')
@@ -52,8 +57,8 @@ const pagination = reactive({
 
 const columns = [
   { title: '渠道名称', dataIndex: 'channel_name', width: 200 },
-  { title: 'Webhook URL', dataIndex: 'webhook_url', ellipsis: true },
-  { title: '请求方式', dataIndex: 'webhook_method', width: 100 }
+  { title: 'Webhook URL', dataIndex: 'config', customRender: ({ record }) => record.config?.webhook_url || '-', ellipsis: true },
+  { title: '请求方式', dataIndex: 'config', customRender: ({ record }) => record.config?.webhook_method || '-', width: 100 }
 ]
 
 const handleSearch = () => {
@@ -91,7 +96,13 @@ const handleSubmit = async () => {
 }
 
 const loadData = async () => {
-  loading.value = false
+  try {
+    await loadChannels()
+    data.value = channels.value.filter(ch => ch.channel_type === 'webhook')
+    pagination.total = data.value.length
+  } catch (e) {
+    Message.error('加载失败')
+  }
 }
 
 onMounted(() => {

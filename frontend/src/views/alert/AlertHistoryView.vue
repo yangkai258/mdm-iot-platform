@@ -4,6 +4,8 @@
       <a-form :model="form" layout="inline">
         <a-form-item label="设备"><a-input v-model="form.device_id" placeholder="设备ID" /></a-form-item>
         <a-form-item label="告警类型"><a-select v-model="form.alert_type" placeholder="选择类型" style="width: 140px" /></a-form-item>
+        <a-form-item label="级别"><a-select v-model="form.severity" placeholder="选择级别" style="width: 100px" /></a-form-item>
+        <a-form-item label="状态"><a-select v-model="form.status" placeholder="选择状态" style="width: 100px" /></a-form-item>
         <a-form-item>
           <a-button type="primary" @click="handleSearch">搜索</a-button>
           <a-button @click="handleReset">重置</a-button>
@@ -29,25 +31,20 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { useAlertHistory, SEVERITY_MAP, STATUS_MAP } from '@/composables/useNotification'
+import { useAlertHistory } from '@/composables/useNotification'
 
-const { loading, alerts, pagination, filters, loadAlerts, confirmAlert, resolveAlert } = useAlertHistory()
+const { loading, alerts, pagination, filters, loadAlerts } = useAlertHistory()
 
 const data = ref([])
 const modalVisible = ref(false)
 const modalTitle = ref('新建')
 
 const form = reactive({
+  name: '',
   device_id: '',
   alert_type: '',
-  severity: '',
-  status: ''
-})
-
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
+  severity: undefined,
+  status: undefined
 })
 
 const columns = [
@@ -61,14 +58,24 @@ const columns = [
 ]
 
 const handleSearch = () => {
+  filters.device_id = form.device_id || undefined
+  filters.alert_type = form.alert_type || undefined
+  filters.severity = form.severity ?? undefined
+  filters.status = form.status ?? undefined
+  pagination.current = 1
   loadData()
 }
 
 const handleReset = () => {
   form.device_id = ''
   form.alert_type = ''
-  form.severity = ''
-  form.status = ''
+  form.severity = undefined
+  form.status = undefined
+  filters.device_id = undefined
+  filters.alert_type = undefined
+  filters.severity = undefined
+  filters.status = undefined
+  pagination.current = 1
   loadData()
 }
 
@@ -86,7 +93,6 @@ const loadData = async () => {
   try {
     await loadAlerts()
     data.value = alerts.value
-    pagination.total = pagination.total
   } catch (e) {
     Message.error('加载失败')
   }

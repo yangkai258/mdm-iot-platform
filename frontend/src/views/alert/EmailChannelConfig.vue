@@ -15,7 +15,12 @@
     <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="渠道名称"><a-input v-model="form.channel_name" /></a-form-item>
+        <a-form-item label="SMTP服务器"><a-input v-model="form.smtp_host" placeholder="smtp.example.com" /></a-form-item>
+        <a-form-item label="端口"><a-input-number v-model="form.smtp_port" :min="1" :max="65535" style="width: 120px" /></a-form-item>
+        <a-form-item label="用户名"><a-input v-model="form.smtp_user" /></a-form-item>
+        <a-form-item label="密码"><a-input-password v-model="form.smtp_password" /></a-form-item>
+        <a-form-item label="发件人"><a-input v-model="form.smtp_from" placeholder="noreply@example.com" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
@@ -30,9 +35,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useNotificationChannels } from '@/composables/useNotification'
 
-const { createChannel, updateChannel } = useNotificationChannels()
+const { loading, channels, loadChannels, createChannel } = useNotificationChannels()
 
-const loading = ref(false)
 const data = ref([])
 const modalVisible = ref(false)
 const modalTitle = ref('新建')
@@ -54,9 +58,9 @@ const pagination = reactive({
 
 const columns = [
   { title: '渠道名称', dataIndex: 'channel_name', width: 200 },
-  { title: 'SMTP服务器', dataIndex: 'smtp_host', width: 200 },
-  { title: '端口', dataIndex: 'smtp_port', width: 80 },
-  { title: '发件人', dataIndex: 'smtp_from', width: 180 }
+  { title: 'SMTP服务器', dataIndex: 'config', customRender: ({ record }) => record.config?.smtp_host || '-', width: 200 },
+  { title: '端口', dataIndex: 'config', customRender: ({ record }) => record.config?.smtp_port || '-', width: 80 },
+  { title: '发件人', dataIndex: 'config', customRender: ({ record }) => record.config?.smtp_from || '-', width: 180 }
 ]
 
 const handleSearch = () => {
@@ -96,7 +100,13 @@ const handleSubmit = async () => {
 }
 
 const loadData = async () => {
-  loading.value = false
+  try {
+    await loadChannels()
+    data.value = channels.value.filter(ch => ch.channel_type === 'email')
+    pagination.total = data.value.length
+  } catch (e) {
+    Message.error('加载失败')
+  }
 }
 
 onMounted(() => {

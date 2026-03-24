@@ -31,21 +31,16 @@ import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { useNotificationLogs } from '@/composables/useNotification'
 
-const { loading, logs, pagination, filters, loadLogs, getLogDetail } = useNotificationLogs()
+const { loading, logs, pagination, filters, loadLogs } = useNotificationLogs()
 
 const data = ref([])
 const modalVisible = ref(false)
 const modalTitle = ref('新建')
 
 const form = reactive({
+  name: '',
   channel_type: '',
   status: ''
-})
-
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
 })
 
 const columns = [
@@ -59,12 +54,18 @@ const columns = [
 ]
 
 const handleSearch = () => {
+  filters.channel_type = form.channel_type || undefined
+  filters.status = form.status || undefined
+  pagination.current = 1
   loadData()
 }
 
 const handleReset = () => {
   form.channel_type = ''
   form.status = ''
+  filters.channel_type = undefined
+  filters.status = undefined
+  pagination.current = 1
   loadData()
 }
 
@@ -82,7 +83,6 @@ const loadData = async () => {
   try {
     await loadLogs()
     data.value = logs.value
-    pagination.total = pagination.total
   } catch (e) {
     Message.error('加载失败')
   }

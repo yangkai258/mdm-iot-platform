@@ -35,6 +35,7 @@ const modalVisible = ref(false)
 const modalTitle = ref('新建')
 
 const form = reactive({
+  name: '',
   keyword: '',
   severity: '',
   category: ''
@@ -78,9 +79,26 @@ const handleSubmit = () => {
 
 const loadData = async () => {
   loading.value = true
-  setTimeout(() => {
+  try {
+    const token = localStorage.getItem('token')
+    const params = {}
+    if (form.keyword) params.keyword = form.keyword
+    if (form.severity) params.severity = form.severity
+    const res = await fetch('/api/v1/alerts/list?' + new URLSearchParams(params), {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const resData = await res.json()
+    if (resData.code === 0) {
+      data.value = resData.data?.list || []
+      pagination.total = resData.data?.total || 0
+    }
+  } catch (e) {
+    // fallback mock
+    data.value = []
+    pagination.total = 0
+  } finally {
     loading.value = false
-  }, 300)
+  }
 }
 
 onMounted(() => {
