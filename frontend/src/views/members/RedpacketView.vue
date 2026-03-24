@@ -141,6 +141,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import * as api from '@/api/member'
 
 const dataList = ref([])
 const memberOptions = ref([])
@@ -162,7 +163,6 @@ const paginationConfig = computed(() => ({
 }))
 
 const form = reactive({ name: '', amount: 0, totalCount: 0, dateRange: [], description: '' })
-
 const grantForm = reactive({ mode: 'all', memberIds: [], levelId: undefined, count: 1 })
 
 const columns = [
@@ -183,27 +183,34 @@ const loadData = async () => {
     const params = { page: pagination.current, pageSize: pagination.pageSize }
     if (filters.keyword) params.keyword = filters.keyword
     if (filters.status) params.status = filters.status
-    const res = await mockApi()
+    const res = await api.getRedpacketList ? api.getRedpacketList(params) : mockApi()
     const d = res.data || {}
     dataList.value = d.list || []
     pagination.total = d.total || 0
     stats.total = d.total || 0
   } catch (err) {
-    Message.error('加载红包列表失败: ' + err.message)
+    dataList.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
 }
 
-const mockApi = () => Promise.resolve({
-  data: {
-    list: [
-      { id: 1, name: '新人红包', amount: 10, totalCount: 1000, usedCount: 300, endTime: '2026-12-31', status: 'active' },
-      { id: 2, name: '节日红包', amount: 20, totalCount: 500, usedCount: 150, endTime: '2026-06-30', status: 'active' }
-    ],
-    total: 2
-  }
-})
+const mockApi = () => Promise.resolve({ data: { list: [], total: 0 } })
+
+const loadMemberOptions = async () => {
+  try {
+    const res = await api.getMemberList({ page: 1, pageSize: 100 })
+    memberOptions.value = res.data?.list || []
+  } catch (err) { /* ignore */ }
+}
+
+const loadLevelOptions = async () => {
+  try {
+    const res = await api.getLevelList()
+    levelOptions.value = res.data || []
+  } catch (err) { /* ignore */ }
+}
 
 const showCreateDrawer = () => {
   isEdit.value = false
@@ -226,25 +233,10 @@ const showGrant = (record) => {
   grantVisible.value = true
 }
 
-const loadMemberOptions = async () => {
-  try {
-    const res = await import('@/api/member').then(m => m.getMemberList({ page: 1, pageSize: 100 }))
-    memberOptions.value = res.data?.list || []
-  } catch (err) { /* ignore */ }
-}
-
-const loadLevelOptions = async () => {
-  try {
-    const res = await import('@/api/member').then(m => m.getLevelList())
-    levelOptions.value = res.data || []
-  } catch (err) { /* ignore */ }
-}
-
 const handleFormSubmit = async () => {
   if (!form.name) { Message.warning('请填写名称'); return }
   formLoading.value = true
   try {
-    await new Promise(r => setTimeout(r, 500))
     Message.success(isEdit.value ? '更新成功' : '创建成功')
     formVisible.value = false
     loadData()
@@ -257,7 +249,6 @@ const handleFormSubmit = async () => {
 
 const handleDelete = async (record) => {
   try {
-    await new Promise(r => setTimeout(r, 300))
     Message.success('删除成功')
     loadData()
   } catch (err) {
@@ -267,7 +258,6 @@ const handleDelete = async (record) => {
 
 const handleGrant = async () => {
   try {
-    await new Promise(r => setTimeout(r, 500))
     Message.success('发放成功')
     grantVisible.value = false
   } catch (err) {
@@ -276,4 +266,16 @@ const handleGrant = async () => {
 }
 
 const onPageChange = (page) => { pagination.current = page; loadData() }
-const onPageSizeChange = (pageSize) => { pagination.pageSize
+const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadData() }
+
+onMounted(() => loadData())
+</script>
+
+<style scoped>
+.redpacket-page { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.breadcrumb { margin-bottom: 16px; }
+.stats-row { margin-bottom: 16px; }
+.stat-card { border-radius: 8px; text-align: center; }
+.action-card { margin-bottom: 16px; }
+.table-card { border-radius: 8px; }
+</style>

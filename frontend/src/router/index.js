@@ -178,6 +178,87 @@ const routes = [
     component: () => import('../views/members/TagView.vue'),
     meta: { title: '标签管理' }
   },
+  // 12.4 会员标签扩展
+  {
+    path: '/member/tags/high-freq',
+    name: 'HighFreqTagView',
+    component: () => import('../views/members/HighFreqTagView.vue'),
+    meta: { title: '高频购买标签' }
+  },
+  {
+    path: '/member/tags/low-freq',
+    name: 'LowFreqTagView',
+    component: () => import('../views/members/LowFreqTagView.vue'),
+    meta: { title: '低频购买标签' }
+  },
+  {
+    path: '/member/tags/interest',
+    name: 'InterestTagView',
+    component: () => import('../views/members/InterestTagView.vue'),
+    meta: { title: '兴趣分类标签' }
+  },
+  {
+    path: '/member/tags/auto-clean',
+    name: 'TagAutoCleanView',
+    component: () => import('../views/members/TagAutoCleanView.vue'),
+    meta: { title: '标签清除设置' }
+  },
+  {
+    path: '/member/tags/report',
+    name: 'TagReportView',
+    component: () => import('../views/members/TagReportView.vue'),
+    meta: { title: '会员标签报表' }
+  },
+  // 12.6 会员礼包
+  {
+    path: '/member/gifts',
+    name: 'MemberGiftView',
+    component: () => import('../views/members/MemberGiftView.vue'),
+    meta: { title: '会员礼包' }
+  },
+  {
+    path: '/member/gift-records',
+    name: 'GiftRecordsView',
+    component: () => import('../views/members/GiftRecordsView.vue'),
+    meta: { title: '礼包发放明细' }
+  },
+  // 12.7 会员服务
+  {
+    path: '/member/reception',
+    name: 'MemberReceptionView',
+    component: () => import('../views/members/MemberReceptionView.vue'),
+    meta: { title: '会员接待' }
+  },
+  {
+    path: '/member/articles',
+    name: 'MemberArticlesView',
+    component: () => import('../views/members/MemberArticlesView.vue'),
+    meta: { title: '会员推文流水' }
+  },
+  {
+    path: '/member/sms-templates',
+    name: 'SmsTemplateView',
+    component: () => import('../views/members/SmsTemplateView.vue'),
+    meta: { title: '短信模板设置' }
+  },
+  {
+    path: '/member/wechat-settings',
+    name: 'WechatSettingsView',
+    component: () => import('../views/members/WechatSettingsView.vue'),
+    meta: { title: '微信公众号设置' }
+  },
+  {
+    path: '/member/benefits',
+    name: 'MemberBenefitsView',
+    component: () => import('../views/members/MemberBenefitsView.vue'),
+    meta: { title: '会员权益管理' }
+  },
+  {
+    path: '/member/sms-channels',
+    name: 'SmsChannelView',
+    component: () => import('../views/members/SmsChannelView.vue'),
+    meta: { title: '会员短信通道' }
+  },
   {
     path: '/members/card-types',
     name: 'MemberCardTypesView',
