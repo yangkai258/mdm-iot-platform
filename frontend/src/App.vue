@@ -90,40 +90,22 @@ const menuItems = [
     key: '/members',
     label: '会员管理',
     children: [
+      { key: '/members', label: '会员列表' },
+      { key: '/members/cards', label: '会员卡管理' },
+      { key: '/members/coupons', label: '优惠券' },
+      { key: '/members/stores', label: '门店管理' },
+      { key: '/members/levels', label: '会员等级' },
+      { key: '/members/tags', label: '标签管理' },
       {
         key: '/members/points',
-        label: '会员积分',
+        label: '积分管理',
         children: [
           { key: '/members/points', label: '积分总览' },
           { key: '/members/points/rules', label: '积分规则' },
-          { key: '/members/points/inventory', label: '积分库存' },
-          { key: '/members/points/records', label: '积分流水' },
-          { key: '/members/points/settings', label: '积分设置' },
-          { key: '/members/points/exclude', label: '不积分规则' }
+          { key: '/members/points/records', label: '积分流水' }
         ]
       },
-      { key: '/members/coupons', label: '优惠券' },
-      { key: '/members/promotions', label: '促销活动' },
-      {
-        key: '/members/stores',
-        label: '店铺管理',
-        children: [
-          { key: '/members/stores', label: '店铺信息' },
-          { key: '/members/store-sources', label: '店铺来源' },
-          { key: '/members/store-locations', label: '门店位置' },
-          { key: '/members/channels', label: '会员渠道' },
-          { key: '/members/miniprogram', label: '小程序数据' },
-          { key: '/members/printers', label: '云打印设备' }
-        ]
-      },
-      {
-        key: '/members/temp-members',
-        label: '临时会员',
-        children: [
-          { key: '/members/temp-members', label: '临时会员管理' },
-          { key: '/members/temp-coupons', label: '临时优惠券发放' }
-        ]
-      }
+      { key: '/members/promotions', label: '促销活动' }
     ]
   },
   {

@@ -129,21 +129,90 @@ const routes = [
     name: 'ComplianceRules',
     component: () => import('../views/policies/ComplianceRules.vue')
   },
-  // 会员管理
+  // ─── 会员管理 ───────────────────────────────────────────────
   {
-    path: '/members/points',
-    name: 'MemberPoints',
-    component: () => import('../views/members/MemberPoints.vue')
+    path: '/members',
+    name: 'MemberListView',
+    component: () => import('../views/members/MemberListView.vue'),
+    meta: { title: '会员列表' }
+  },
+  {
+    path: '/members/detail/:id',
+    name: 'MemberDetailView',
+    component: () => import('../views/members/MemberDetailView.vue'),
+    meta: { title: '会员详情' }
+  },
+  {
+    path: '/members/cards',
+    name: 'MemberCardView',
+    component: () => import('../views/members/MemberCardView.vue'),
+    meta: { title: '会员卡管理' }
   },
   {
     path: '/members/coupons',
-    name: 'MemberCoupons',
-    component: () => import('../views/members/MemberCoupons.vue')
+    name: 'CouponView',
+    component: () => import('../views/members/CouponView.vue'),
+    meta: { title: '优惠券管理' }
   },
   {
-    path: '/members/promotions',
-    name: 'MemberPromotions',
-    component: () => import('../views/members/MemberPromotions.vue')
+    path: '/members/stores',
+    name: 'StoreView',
+    component: () => import('../views/members/StoreView.vue'),
+    meta: { title: '门店管理' }
+  },
+  {
+    path: '/members/levels',
+    name: 'LevelView',
+    component: () => import('../views/members/LevelView.vue'),
+    meta: { title: '会员等级' }
+  },
+  {
+    path: '/members/points',
+    name: 'PointsView',
+    component: () => import('../views/members/PointsView.vue'),
+    meta: { title: '积分规则' }
+  },
+  {
+    path: '/members/tags',
+    name: 'TagView',
+    component: () => import('../views/members/TagView.vue'),
+    meta: { title: '标签管理' }
+  },
+  {
+    path: '/members/card-types',
+    name: 'MemberCardTypesView',
+    component: () => import('../views/members/MemberCardTypesView.vue'),
+    meta: { title: '会员卡类型' }
+  },
+  {
+    path: '/members/card-groups',
+    name: 'MemberCardGroupsView',
+    component: () => import('../views/members/MemberCardGroupsView.vue'),
+    meta: { title: '会员卡分组' }
+  },
+  {
+    path: '/members/level-rules',
+    name: 'MemberLevelRulesView',
+    component: () => import('../views/members/MemberLevelRulesView.vue'),
+    meta: { title: '会员升级规则' }
+  },
+  {
+    path: '/members/settings',
+    name: 'MemberSettingsView',
+    component: () => import('../views/members/MemberSettingsView.vue'),
+    meta: { title: '会员参数设置' }
+  },
+  {
+    path: '/members/orders',
+    name: 'MemberOrdersView',
+    component: () => import('../views/members/MemberOrdersView.vue'),
+    meta: { title: '会员订单' }
+  },
+  {
+    path: '/members/occupation-types',
+    name: 'OccupationTypesView',
+    component: () => import('../views/members/OccupationTypesView.vue'),
+    meta: { title: '从业类型' }
   },
   // 告警中心
   {
