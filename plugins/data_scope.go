@@ -226,7 +226,7 @@ func LoadDataScopeFromDB(db *gorm.DB, userID uint) *DataScopeInfo {
 	// 获取用户所有角色的数据权限配置（多角色合并）
 	var roleScopes []models.DataScopeRole
 	err := db.Table("data_scopes").
-		Select("role_id, scope_type, scope_value").
+		Select("role_id, scope_type, dept_ids, store_ids").
 		Where("role_id = ? AND deleted_at IS NULL", user.RoleID).
 		Scan(&roleScopes).Error
 
@@ -240,11 +240,17 @@ func LoadDataScopeFromDB(db *gorm.DB, userID uint) *DataScopeInfo {
 	merged := mergeDataScopes(roleScopes)
 	info.ScopeType = merged.ScopeType
 
-	// 解析 ScopeValue
-	if merged.ScopeValue != "" {
-		field, values := models.ParseScopeValue(merged.ScopeType, merged.ScopeValue)
-		info.CustomField = field
-		info.CustomValues = values
+	// 解析 ScopeValue - 根据 scopeType 决定使用 dept_ids 还是 store_ids
+	if merged.ScopeType == models.DataScopeCustom {
+		if merged.DeptIDs != "" {
+			_, values := models.ParseScopeValue(merged.ScopeType, merged.DeptIDs)
+			info.CustomField = "dept_ids"
+			info.CustomValues = values
+		} else if merged.StoreIDs != "" {
+			_, values := models.ParseScopeValue(merged.ScopeType, merged.StoreIDs)
+			info.CustomField = "store_ids"
+			info.CustomValues = values
+		}
 	}
 
 	// 如果是 org_and_children，收集所有下级机构

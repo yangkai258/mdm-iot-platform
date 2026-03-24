@@ -808,7 +808,7 @@ func main() {
 
 	// ============ Sprint 31: 国际化扩展 API ============
 	// 多语言翻译管理
-	i18nCtrl := &controllers.I18nController{DB: db}
+	i18nCtrl := controllers.NewI18nController(db)
 	i18nGroup := apiV1.Group("/i18n")
 	{
 		i18nGroup.GET("/translations", i18nCtrl.ListTranslations)

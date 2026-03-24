@@ -31,7 +31,8 @@ type DataScope struct {
 type DataScopeRole struct {
 	RoleID     uint   `gorm:"column:role_id" json:"role_id"`
 	ScopeType  DataScopeType `gorm:"column:scope_type" json:"scope_type"`
-	ScopeValue string `gorm:"column:scope_value" json:"scope_value"`
+	DeptIDs    string `gorm:"column:dept_ids" json:"dept_ids"`
+	StoreIDs   string `gorm:"column:store_ids" json:"store_ids"`
 }
 
 // ParseScopeValue 解析自定义数据范围的值
