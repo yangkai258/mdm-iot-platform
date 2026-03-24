@@ -227,7 +227,7 @@ func LoadDataScopeFromDB(db *gorm.DB, userID uint) *DataScopeInfo {
 	var roleScopes []models.DataScopeRole
 	err := db.Table("data_scopes").
 		Select("role_id, scope_type, dept_ids, store_ids").
-		Where("role_id = ? AND deleted_at IS NULL", user.RoleID).
+		Where("role_id = ?", user.RoleID).
 		Scan(&roleScopes).Error
 
 	if err != nil || len(roleScopes) == 0 {
