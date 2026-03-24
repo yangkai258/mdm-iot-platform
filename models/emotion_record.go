@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/lib/pq"
 )
 
 // EmotionType 情绪类型枚举
@@ -40,7 +42,7 @@ type EmotionRecord struct {
 	Confidence   float64    `gorm:"default:0" json:"confidence"`
 	Context      JSON       `gorm:"type:jsonb" json:"context"`
 	TriggerEvent string     `gorm:"type:text" json:"trigger_event"`
-	Tags         StringArray `gorm:"type:text[]" json:"tags"`
+	Tags         pq.StringArray `gorm:"type:text[]" json:"tags"`
 	Note         string     `gorm:"type:text" json:"note"`
 	RecordedAt   time.Time  `gorm:"not null;index" json:"recorded_at"`
 	CreatedAt    time.Time  `json:"created_at"`

@@ -36,7 +36,7 @@ type InsuranceProduct struct {
 	AnnualMaxClaim float64        `gorm:"type:decimal(12,2);default:0" json:"annual_max_claim"`  // 年度最高赔付
 	IsActive       bool           `gorm:"type:boolean;default:true" json:"is_active"`
 	SortOrder      int            `gorm:"type:int;default:0" json:"sort_order"`
-	TenantID       string         `gorm:"type:uuid;index" json:"tenant_id"`
+	TenantID       *uuid.UUID    `gorm:"type:uuid;index" json:"tenant_id"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"-"`
@@ -79,7 +79,7 @@ type InsuranceClaim struct {
 	PaidAt          *time.Time     `json:"paid_at"`                                            // 支付时间
 	PolicyNo        string         `gorm:"type:varchar(64)" json:"policy_no"`                   // 保单号
 	ClaimDocuments  []InsuranceClaimDocument `gorm:"foreignKey:ClaimUUID;references:ClaimUUID" json:"claim_documents"`
-	TenantID        string         `gorm:"type:uuid;index" json:"tenant_id"`
+	TenantID        *uuid.UUID    `gorm:"type:uuid;index" json:"tenant_id"`
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`
 	DeletedAt       gorm.DeletedAt `gorm:"index" json:"-"`
@@ -123,7 +123,7 @@ type InsuranceClaimDocument struct {
 	IsVerified  bool           `gorm:"type:boolean;default:false" json:"is_verified"` // 是否已验证
 	VerifiedBy  *uint          `json:"verified_by"`                                   // 验证人
 	VerifiedAt  *time.Time     `json:"verified_at"`                                   // 验证时间
-	TenantID    string         `gorm:"type:uuid;index" json:"tenant_id"`
+	TenantID    *uuid.UUID    `gorm:"type:uuid;index" json:"tenant_id"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
@@ -167,7 +167,7 @@ type PetHealthRecord struct {
 	Attachments   pq.StringArray `gorm:"type:text[]" json:"attachments"`             // 附件URL列表
 	IsInsured     bool           `gorm:"type:boolean;default:false" json:"is_insured"` // 是否已关联保险
 	InsuranceClaimUUID string    `gorm:"type:varchar(64)" json:"insurance_claim_uuid"` // 关联的理赔UUID
-	TenantID      string         `gorm:"type:uuid;index" json:"tenant_id"`
+	TenantID      *uuid.UUID   `gorm:"type:uuid;index" json:"tenant_id"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`

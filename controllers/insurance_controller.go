@@ -9,6 +9,7 @@ import (
 	"mdm-backend/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -151,7 +152,7 @@ func (ic *InsuranceController) CreateProduct(c *gin.Context) {
 		MaxClaimAmount: input.MaxClaimAmount,
 		AnnualMaxClaim: input.AnnualMaxClaim,
 		SortOrder:      input.SortOrder,
-		TenantID:       tenantID,
+		TenantID:       func() *uuid.UUID { id, _ := uuid.Parse(tenantID); return &id }(),
 	}
 
 	if err := ic.DB.Create(&product).Error; err != nil {
@@ -302,7 +303,7 @@ func (ic *InsuranceController) CreateClaim(c *gin.Context) {
 		ClaimAmount:  input.ClaimAmount,
 		PolicyNo:     input.PolicyNo,
 		Status:       "draft",
-		TenantID:     tenantID,
+		TenantID:     func() *uuid.UUID { id, _ := uuid.Parse(tenantID); return &id }(),
 	}
 
 	if err := ic.DB.Create(&claim).Error; err != nil {
@@ -481,7 +482,7 @@ func (ic *InsuranceController) UploadClaimDocument(c *gin.Context) {
 		FileSize:    input.FileSize,
 		MimeType:    input.MimeType,
 		Description: input.Description,
-		TenantID:    tenantID,
+		TenantID:    func() *uuid.UUID { id, _ := uuid.Parse(tenantID); return &id }(),
 	}
 
 	if err := ic.DB.Create(&doc).Error; err != nil {
@@ -614,7 +615,7 @@ func (ic *InsuranceController) CreateHealthRecord(c *gin.Context) {
 		Attachments:         input.Attachments,
 		IsInsured:           input.IsInsured,
 		InsuranceClaimUUID:   input.InsuranceClaimUUID,
-		TenantID:             tenantID,
+		TenantID:             func() *uuid.UUID { id, _ := uuid.Parse(tenantID); return &id }(),
 	}
 
 	if err := ic.DB.Create(&record).Error; err != nil {
