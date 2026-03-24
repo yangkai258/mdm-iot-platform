@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -22,17 +23,17 @@ type InsuranceProduct struct {
 	WaitPeriodDays int64          `gorm:"default:0" json:"wait_period_days"`
 	CoverAgeMin    int64          `gorm:"default:0" json:"cover_age_min"`
 	CoverAgeMax    int64          `gorm:"default:240" json:"cover_age_max"`
-	BreedCodes     []string       `gorm:"type:text[]" json:"breed_codes"`
-	SpeciesAllowed []string       `gorm:"type:text[]" json:"species_allowed"`
+	BreedCodes     pq.StringArray `gorm:"type:text[]" json:"breed_codes"`
+	SpeciesAllowed pq.StringArray `gorm:"type:text[]" json:"species_allowed"`
 	Description    string         `gorm:"type:text" json:"description"`
 	Terms          string         `gorm:"type:text" json:"terms"`
 	Exclusions     string         `gorm:"type:text" json:"exclusions"`
-	CoverageItems  []string       `gorm:"type:text[]" json:"coverage_items"`
+	CoverageItems  pq.StringArray `gorm:"type:text[]" json:"coverage_items"`
 	MaxClaimAmount float64        `gorm:"type:numeric(12,2);default:0" json:"max_claim_amount"`
 	AnnualMaxClaim float64        `gorm:"type:numeric(12,2);default:0" json:"annual_max_claim"`
 	IsActive       bool           `gorm:"default:true" json:"is_active"`
 	SortOrder      int64          `gorm:"default:0" json:"sort_order"`
-	TenantID       string         `gorm:"size:50;index" json:"tenant_id"`
+	TenantID       *uuid.UUID     `gorm:"type:uuid;index" json:"tenant_id"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at"`
@@ -67,7 +68,7 @@ type InsuranceClaim struct {
 	ReviewNotes    string         `gorm:"type:text" json:"review_notes"`
 	PaidAt         *time.Time     `json:"paid_at"`
 	PolicyNo       string         `gorm:"size:64" json:"policy_no"`
-	TenantID       string         `gorm:"size:50;index" json:"tenant_id"`
+	TenantID       *uuid.UUID     `gorm:"type:uuid;index" json:"tenant_id"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at"`
@@ -99,7 +100,7 @@ type InsuranceClaimDocument struct {
 	IsVerified  bool           `gorm:"default:false" json:"is_verified"`
 	VerifiedBy  int64          `json:"verified_by"`
 	VerifiedAt  *time.Time     `json:"verified_at"`
-	TenantID    string         `gorm:"size:50;index" json:"tenant_id"`
+	TenantID    *uuid.UUID     `gorm:"type:uuid;index" json:"tenant_id"`
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at"`
