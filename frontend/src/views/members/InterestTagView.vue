@@ -1,85 +1,37 @@
 <template>
-  <div class="member-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>兴趣分类标签</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="标签总数" :value="stats.total || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="兴趣分类数" :value="stats.categoryCount || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="已标记会员" :value="stats.taggedMembers || 0" />
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-input-search v-model="filters.keyword" placeholder="搜索标签名称" style="width: 220px" search-button @search="loadData" />
-        <a-select v-model="filters.category" placeholder="兴趣分类" allow-clear style="width: 160px" @change="loadData">
-          <a-option value="food">美食</a-option>
-          <a-option value="travel">旅游</a-option>
-          <a-option value="digital">数码</a-option>
-          <a-option value="fashion">时尚</a-option>
-          <a-option value="sports">运动</a-option>
-        </a-select>
-        <a-button type="primary" @click="showCreate">新建</a-button>
-        <a-button @click="loadData">刷新</a-button>
-      </a-space>
-    </a-card>
-
-    <a-card class="table-card">
-      <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" :scroll="{ x: 900 }">
-        <template #category="{ record }">
-          <a-tag>{{ categoryMap[record.category] || record.category }}</a-tag>
-        </template>
-        <template #status="{ record }">
-          <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
-        </template>
-        <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-        </template>
-      </a-table>
-    </a-card>
-
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑兴趣标签' : '新建兴趣标签'" :width="480" @before-ok="handleSubmit" @cancel="formVisible = false">
-      <a-form :model="form" layout="vertical">
-        <a-form-item label="标签名称" required>
-          <a-input v-model="form.name" placeholder="请输入标签名称" />
-        </a-form-item>
-        <a-form-item label="兴趣分类" required>
-          <a-select v-model="form.category" placeholder="请选择兴趣分类" style="width: 100%;">
-            <a-option value="food">美食</a-option>
-            <a-option value="travel">旅游</a-option>
-            <a-option value="digital">数码</a-option>
-            <a-option value="fashion">时尚</a-option>
-            <a-option value="sports">运动</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="描述">
-          <a-textarea v-model="form.description" placeholder="标签描述" :rows="3" />
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-switch v-model="form.status" checked-value="1" unchecked-value="0" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
     </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
@@ -128,13 +80,11 @@ const handleSubmit = (done) => {
 const handleDelete = () => { Message.success('删除成功'); loadData() }
 
 loadData()
+
 </script>
 
 <style scoped>
-.member-page { padding: 20px; }
-.breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { text-align: center; }
-.action-card { margin-bottom: 16px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>
-

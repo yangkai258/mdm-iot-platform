@@ -1,82 +1,102 @@
 <template>
-  <div class="emotion-report-view">
-    <a-card title="情绪报告">
-      <a-row :gutter="16" style="margin-bottom: 24px">
-        <a-col :span="6">
-          <a-statistic title="今日平均情绪" :value="summary.today_avg" :suffix="summary.today_label" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="本周情绪趋势" :value="summary.weekly_trend" suffix="%">
-            <template #prefix><icon-arrow-rise /></template>
-          </a-statistic>
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="情绪事件数" :value="summary.event_count" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="情绪稳定指数" :value="summary.stability" suffix="/100" />
-        </a-col>
-      </a-row>
-
-      <a-tabs>
-        <a-tab-pane key="daily" title="日报">
-          <a-table :columns="dailyColumns" :data="dailyData" :loading="loading" :pagination="false" />
-        </a-tab-pane>
-        <a-tab-pane key="weekly" title="周报">
-          <a-table :columns="weeklyColumns" :data="weeklyData" :loading="loading" :pagination="false" />
-        </a-tab-pane>
-        <a-tab-pane key="monthly" title="月报">
-          <a-table :columns="monthlyColumns" :data="monthlyData" :loading="loading" :pagination="false" />
-        </a-tab-pane>
-      </a-tabs>
-    </a-card>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="报告周期">
+          <a-select v-model="form.period" placeholder="请选择" style="width: 140px">
+            <a-option value="daily">日报</a-option>
+            <a-option value="weekly">周报</a-option>
+            <a-option value="monthly">月报</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleExport">导出报告</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
-const summary = reactive({ today_avg: 75, today_label: '开心', weekly_trend: 12, event_count: 23, stability: 82 })
-const dailyData = ref([])
-const weeklyData = ref([])
-const monthlyData = ref([])
+const data = ref<any[]>([])
 
-const dailyColumns = [
-  { title: '日期', dataIndex: 'date' },
-  { title: '主要情绪', dataIndex: 'primary_emotion' },
-  { title: '情绪占比', dataIndex: 'emotion_ratio' },
-  { title: '异常事件', dataIndex: 'anomaly_count' }
+const form = reactive({
+  period: 'daily'
+})
+
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0
+})
+
+const columns = [
+  { title: '日期/周期', dataIndex: 'period', width: 140 },
+  { title: '主要情绪', dataIndex: 'primary_emotion', width: 120 },
+  { title: '情绪占比', dataIndex: 'emotion_ratio', width: 120 },
+  { title: '异常事件', dataIndex: 'anomaly_count', width: 100 },
+  { title: '建议', dataIndex: 'suggestion', ellipsis: true }
 ]
 
-const weeklyColumns = [
-  { title: '周期', dataIndex: 'week' },
-  { title: '平均情绪', dataIndex: 'avg_emotion' },
-  { title: '情绪变化', dataIndex: 'change' },
-  { title: '建议', dataIndex: 'suggestion' }
-]
-
-const monthlyColumns = [
-  { title: '月份', dataIndex: 'month' },
-  { title: '整体情绪', dataIndex: 'overall' },
-  { title: '峰值情绪', dataIndex: 'peak' },
-  { title: '情绪多样性', dataIndex: 'diversity' }
-]
-
-onMounted(async () => {
+async function loadData() {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/emotion/reports', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    })
+    const res = await fetch(`/api/v1/emotion/reports?period=${form.period}`)
     const json = await res.json()
-    dailyData.value = json.daily || []
-    weeklyData.value = json.weekly || []
-    monthlyData.value = json.monthly || []
-  } catch (e) {
-    console.error(e)
+    data.value = json.data || []
+    pagination.total = data.value.length
+  } catch {
+    Message.error('加载失败')
   } finally {
     loading.value = false
   }
-})
+}
+
+function handleSearch() {
+  pagination.current = 1
+  loadData()
+}
+
+function handleReset() {
+  form.period = 'daily'
+  pagination.current = 1
+  loadData()
+}
+
+function onPageChange(page: number) {
+  pagination.current = page
+  loadData()
+}
+
+function handleExport() {
+  Message.info('导出功能开发中')
+}
+
+onMounted(() => loadData())
 </script>
+
+<style scoped>
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+}
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+.toolbar {
+  margin-bottom: 16px;
+}
+</style>

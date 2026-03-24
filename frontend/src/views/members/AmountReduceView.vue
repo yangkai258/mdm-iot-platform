@@ -1,95 +1,37 @@
 <template>
-  <div class="promotion-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>促销活动</a-breadcrumb-item>
-      <a-breadcrumb-item>满额减</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 搜索筛选 -->
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-input-search v-model="filters.keyword" placeholder="搜索活动名称" style="width: 220px" search-button @search="loadData" />
-        <a-select v-model="filters.status" placeholder="状态" allow-clear style="width: 120px" @change="loadData">
-          <a-option value="active">进行中</a-option>
-          <a-option value="pending">未开始</a-option>
-          <a-option value="ended">已结束</a-option>
-        </a-select>
-        <a-button type="primary" @click="showCreateDrawer">新建活动</a-button>
-        <a-button @click="loadData">刷新</a-button>
-      </a-space>
-    </a-card>
-
-    <!-- 活动列表 -->
-    <a-card class="table-card">
-      <a-table
-        :columns="columns"
-        :data="dataList"
-        :loading="loading"
-        :pagination="paginationConfig"
-        @page-change="onPageChange"
-        @page-size-change="onPageSizeChange"
-        row-key="id"
-        :scroll="{ x: 1100 }"
-      >
-        <template #rule="{ record }">
-          <span>满 <strong>¥{{ record.threshold }}</strong> 减 <strong style="color: #ff6b00;">¥{{ record.reduceAmount }}</strong></span>
-        </template>
-        <template #status="{ record }">
-          <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
-        </template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 新建/编辑抽屉 -->
-    <a-drawer v-model:visible="formVisible" :title="isEdit ? '编辑满额减活动' : '新建满额减活动'" :width="560">
-      <a-form :model="form" layout="vertical">
-        <a-form-item label="活动名称" required>
-          <a-input v-model="form.name" placeholder="请输入活动名称" />
-        </a-form-item>
-        <a-row :gutter="12">
-          <a-col :span="12">
-            <a-form-item label="满额门槛">
-              <a-input-number v-model="form.threshold" :min="0" :precision="2" style="width: 100%" />
-            </a-form-item>
-          </a-col>
-          <a-col :span="12">
-            <a-form-item label="减免金额">
-              <a-input-number v-model="form.reduceAmount" :min="0" :precision="2" style="width: 100%" />
-            </a-form-item>
-          </a-col>
-        </a-row>
-        <a-form-item label="每人限用">
-          <a-input-number v-model="form.perLimit" :min="0" style="width: 100%" placeholder="0=不限" />
-        </a-form-item>
-        <a-form-item label="适用商品">
-          <a-select v-model="form.productIds" placeholder="选择适用商品" multiple>
-            <a-option v-for="p in productOptions" :key="p.id" :value="p.id">{{ p.name }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="活动时间">
-          <a-range-picker v-model="form.dateRange" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="活动说明">
-          <a-textarea v-model="form.description" :rows="3" placeholder="描述活动规则" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
-      <template #footer>
-        <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" :loading="formLoading" @click="handleFormSubmit">{{ isEdit ? '保存' : '创建' }}</a-button>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
       </template>
-    </a-drawer>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
@@ -185,11 +127,11 @@ const onPageChange = (page) => { pagination.current = page; loadData() }
 const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadData() }
 
 onMounted(() => loadData())
+
 </script>
 
 <style scoped>
-.promotion-page { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.breadcrumb { margin-bottom: 16px; }
-.action-card { margin-bottom: 16px; }
-.table-card { border-radius: 8px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

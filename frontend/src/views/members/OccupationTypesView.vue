@@ -1,82 +1,37 @@
 <template>
-  <div class="occupation-types-page">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>从业类型</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 搜索筛选区 -->
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-input-search
-          v-model="filters.keyword"
-          placeholder="搜索类型名称"
-          style="width: 220px"
-          search-button
-          @search="handleSearch"
-        />
-        <a-button @click="handleSearch">筛选</a-button>
-        <a-button @click="resetFilters">重置</a-button>
-      </a-space>
-    </a-card>
-
-    <!-- 操作+表格 -->
-    <a-card class="table-card">
-      <template #title>
-        <a-space>
-          <span style="font-weight: 600; font-size: 15px;">从业类型</span>
-          <a-badge :count="pagination.total" :max-count="99999" />
-        </a-space>
-      </template>
-      <template #extra>
-        <a-space>
-          <a-button type="primary" @click="showCreateModal">新建</a-button>
-        </a-space>
-      </template>
-
-      <a-table
-        :columns="columns"
-        :data="dataList"
-        :loading="loading"
-        :pagination="paginationConfig"
-        @page-change="onPageChange"
-        @page-size-change="onPageSizeChange"
-        row-key="id"
-        :scroll="{ x: 700 }"
-      >
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 新增/编辑弹窗 -->
-    <a-modal
-      v-model:visible="formVisible"
-      :title="isEdit ? '编辑从业类型' : '新建从业类型'"
-      @before-ok="handleFormSubmit"
-      @cancel="formVisible = false"
-      :width="460"
-      :loading="formLoading"
-    >
-      <a-form :model="form" layout="vertical">
-        <a-form-item label="类型名称" field="name" :rules="[{ required: true, message: '请输入类型名称' }]">
-          <a-input v-model="form.name" placeholder="如：美容师、理发师" />
-        </a-form-item>
-        <a-form-item label="描述">
-          <a-textarea v-model="form.description" :rows="3" placeholder="类型描述" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
     </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import * as api from '@/api/member'
@@ -195,15 +150,11 @@ const handleDelete = async (record) => {
 onMounted(() => {
   loadData()
 })
+
 </script>
 
 <style scoped>
-.occupation-types-page {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
-}
-.breadcrumb { margin-bottom: 16px; }
-.action-card { margin-bottom: 16px; }
-.table-card { border-radius: 8px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

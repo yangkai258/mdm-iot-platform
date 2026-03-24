@@ -1,92 +1,37 @@
 <template>
-  <div class="member-orders-page">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>会员订单</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 搜索筛选区 -->
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-input-search
-          v-model="filters.keyword"
-          placeholder="搜索订单编号/会员名称"
-          style="width: 220px"
-          search-button
-          @search="handleSearch"
-        />
-        <a-select v-model="filters.payStatus" placeholder="支付状态" allow-clear style="width: 130px" @change="handleSearch">
-          <a-option :value="1">已支付</a-option>
-          <a-option :value="0">未支付</a-option>
-          <a-option :value="2">已退款</a-option>
-        </a-select>
-        <a-range-picker v-model="filters.dateRange" style="width: 260px" @change="handleSearch" />
-        <a-button @click="handleSearch">筛选</a-button>
-        <a-button @click="resetFilters">重置</a-button>
-      </a-space>
-    </a-card>
-
-    <!-- 操作+表格 -->
-    <a-card class="table-card">
-      <template #title>
-        <a-space>
-          <span style="font-weight: 600; font-size: 15px;">会员订单</span>
-          <a-badge :count="pagination.total" :max-count="99999" />
-        </a-space>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
       </template>
-      <template #extra>
-        <a-button @click="handleExport">导出</a-button>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
-
-      <a-table
-        :columns="columns"
-        :data="dataList"
-        :loading="loading"
-        :pagination="paginationConfig"
-        @page-change="onPageChange"
-        @page-size-change="onPageSizeChange"
-        row-key="id"
-        :scroll="{ x: 1100 }"
-      >
-        <template #payStatus="{ record }">
-          <a-tag :color="getPayStatusColor(record.payStatus)">{{ getPayStatusText(record.payStatus) }}</a-tag>
-        </template>
-        <template #amount="{ record }">
-          <span style="color: #ff4d4f; font-weight: 600;">¥{{ (record.amount || 0).toFixed(2) }}</span>
-        </template>
-        <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showDetail(record)">查看详情</a-button>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 订单详情抽屉 -->
-    <a-drawer v-model:visible="detailVisible" title="订单详情" :width="520">
-      <template v-if="currentOrder">
-        <a-descriptions :column="1" bordered size="small">
-          <a-descriptions-item label="订单编号">{{ currentOrder.orderNo }}</a-descriptions-item>
-          <a-descriptions-item label="会员名称">{{ currentOrder.memberName }}</a-descriptions-item>
-          <a-descriptions-item label="会员手机">{{ currentOrder.memberMobile || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="商品信息">{{ currentOrder.goodsName || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="订单金额">
-            <span style="color: #ff4d4f; font-weight: 600;">¥{{ (currentOrder.amount || 0).toFixed(2) }}</span>
-          </a-descriptions-item>
-          <a-descriptions-item label="支付状态">
-            <a-tag :color="getPayStatusColor(currentOrder.payStatus)">{{ getPayStatusText(currentOrder.payStatus) }}</a-tag>
-          </a-descriptions-item>
-          <a-descriptions-item label="支付方式">{{ currentOrder.payMethod || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="支付时间">{{ currentOrder.payTime || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="门店">{{ currentOrder.storeName || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="创建时间">{{ currentOrder.createdAt || '-' }}</a-descriptions-item>
-        </a-descriptions>
-      </template>
-    </a-drawer>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import * as api from '@/api/member'
@@ -189,15 +134,11 @@ const handleExport = () => {
 onMounted(() => {
   loadData()
 })
+
 </script>
 
 <style scoped>
-.member-orders-page {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
-}
-.breadcrumb { margin-bottom: 16px; }
-.action-card { margin-bottom: 16px; }
-.table-card { border-radius: 8px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

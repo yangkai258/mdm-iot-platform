@@ -1,82 +1,37 @@
 <template>
-  <div class="member-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>短信模板设置</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="模板总数" :value="stats.total || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="营销类" :value="stats.marketing || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="通知类" :value="stats.notice || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="验证码类" :value="stats.verify || 0" />
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <a-card class="table-card">
-      <a-space direction="vertical" :size="12" style="width: 100%">
-        <a-space wrap>
-          <a-input-search v-model="filters.keyword" placeholder="搜索模板名称" style="width: 220px" search-button @search="loadData" />
-          <a-select v-model="filters.type" placeholder="模板类型" allow-clear style="width: 140px" @change="loadData">
-            <a-option value="marketing">营销类</a-option>
-            <a-option value="notice">通知类</a-option>
-            <a-option value="verify">验证码类</a-option>
-          </a-select>
-          <a-button type="primary" @click="showCreate">新建</a-button>
-          <a-button @click="loadData">刷新</a-button>
-        </a-space>
-
-        <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" :scroll="{ x: 900 }">
-          <template #type="{ record }">
-            <a-tag :color="record.type === 'marketing' ? 'orange' : record.type === 'notice' ? 'blue' : 'green'">
-              {{ record.type === 'marketing' ? '营销类' : record.type === 'notice' ? '通知类' : '验证码类' }}
-            </a-tag>
-          </template>
-          <template #actions="{ record }">
-            <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
-          </template>
-        </a-table>
-      </a-space>
-    </a-card>
-
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑模板' : '新建模板'" :width="520" @before-ok="handleSubmit" @cancel="formVisible = false">
-      <a-form :model="form" layout="vertical">
-        <a-form-item label="模板名称" required>
-          <a-input v-model="form.name" placeholder="请输入模板名称" />
-        </a-form-item>
-        <a-form-item label="模板类型" required>
-          <a-select v-model="form.type" placeholder="请选择模板类型">
-            <a-option value="marketing">营销类</a-option>
-            <a-option value="notice">通知类</a-option>
-            <a-option value="verify">验证码类</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="模板内容" required>
-          <a-textarea v-model="form.content" placeholder="请输入模板内容，使用{var}表示变量" :rows="4" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
     </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, onMounted } from 'vue';
 import { Message } from '@arco-design/web-vue';
 
@@ -157,12 +112,11 @@ const handleSubmit = (done) => {
 onMounted(() => {
   loadData();
 });
+
 </script>
 
 <style scoped>
-.member-page { padding: 16px; }
-.breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { text-align: center; }
-.table-card { margin-top: 16px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

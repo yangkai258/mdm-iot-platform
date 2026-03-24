@@ -1,249 +1,37 @@
 <template>
-  <div class="member-list-page">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>会员列表</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 统计卡片 -->
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="会员总数" :value="stats.total || 0">
-            <template #prefix><icon-user /></template>
-          </a-statistic>
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="活跃会员" :value="stats.active || 0" :value-style="{ color: '#52c41a' }">
-            <template #prefix><icon-check-circle /></template>
-          </a-statistic>
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="今日新增" :value="stats.todayNew || 0">
-            <template #prefix><icon-user-add /></template>
-          </a-statistic>
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="总积分" :value="stats.totalPoints || 0" :value-style="{ color: '#faad14' }">
-            <template #prefix><icon-star /></template>
-          </a-statistic>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- 搜索筛选区 -->
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-input-search
-          v-model="filters.keyword"
-          placeholder="搜索姓名/手机号/会员编号"
-          style="width: 240px"
-          search-button
-          @search="handleSearch"
-        />
-        <a-select v-model="filters.levelId" placeholder="会员等级" allow-clear style="width: 140px" @change="handleSearch">
-          <a-option v-for="lv in levelList" :key="lv.id" :value="lv.id">{{ lv.name }}</a-option>
-        </a-select>
-        <a-select v-model="filters.status" placeholder="会员状态" allow-clear style="width: 120px" @change="handleSearch">
-          <a-option :value="1">正常</a-option>
-          <a-option :value="2">冻结</a-option>
-          <a-option :value="3">禁用</a-option>
-        </a-select>
-        <a-button @click="handleSearch">筛选</a-button>
-        <a-button @click="resetFilters">重置</a-button>
-      </a-space>
-    </a-card>
-
-    <!-- 操作+表格 -->
-    <a-card class="table-card">
-      <template #title>
-        <a-space>
-          <span style="font-weight: 600; font-size: 15px;">会员列表</span>
-          <a-badge :count="pagination.total" :max-count="99999" />
-        </a-space>
-      </template>
-      <template #extra>
-        <a-space>
-          <a-button type="primary" @click="showCreateModal">新增会员</a-button>
-          <a-button @click="loadMembers">刷新</a-button>
-        </a-space>
-      </template>
-
-      <a-table
-        :columns="columns"
-        :data="memberList"
-        :loading="loading"
-        :pagination="paginationConfig"
-        @page-change="onPageChange"
-        @page-size-change="onPageSizeChange"
-        row-key="id"
-        :scroll="{ x: 1100 }"
-      >
-        <template #avatar="{ record }">
-          <a-avatar :style="{ backgroundColor: getLevelColor(record.levelId) }" :size="32">
-            {{ (record.name || record.mobile || '?').charAt(0) }}
-          </a-avatar>
-        </template>
-        <template #level="{ record }">
-          <a-tag :color="getLevelColor(record.levelId)">{{ record.levelName || '普通' }}</a-tag>
-        </template>
-        <template #status="{ record }">
-          <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
-        </template>
-        <template #totalPoints="{ record }">
-          <span style="color: #ff6b00; font-weight: 600;">{{ record.totalPoints || 0 }}</span>
-        </template>
-        <template #totalConsume="{ record }">
-          <span>¥{{ (record.totalConsume || 0).toFixed(2) }}</span>
-        </template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="showDetail(record)">详情</a-button>
-            <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" @click="showPointsAdjust(record)">积分</a-button>
-            <a-dropdown trigger="click">
-              <a-button type="text" size="small">更多</a-button>
-              <template #content>
-                <a-doption @click="showAdjustLevel(record)">调整等级</a-doption>
-                <a-doption @click="showStatusModal(record)" v-if="record.status !== 3">禁用</a-doption>
-                <a-doption status="danger" @click="handleDelete(record)">删除</a-doption>
-              </template>
-            </a-dropdown>
-          </a-space>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 新增/编辑弹窗 -->
-    <a-modal
-      v-model:visible="formVisible"
-      :title="isEdit ? '编辑会员' : '新增会员'"
-      @before-ok="handleFormSubmit"
-      @cancel="formVisible = false"
-      :width="520"
-      :loading="formLoading"
-    >
-      <a-form :model="form" layout="vertical" ref="formRef">
-        <a-form-item label="手机号" field="mobile" :rules="[{ required: !isEdit, message: '请输入手机号' }]">
-          <a-input v-model="form.mobile" placeholder="请输入手机号" :disabled="isEdit" />
-        </a-form-item>
-        <a-form-item label="姓名" field="name" :rules="[{ required: true, message: '请输入姓名' }]">
-          <a-input v-model="form.name" placeholder="请输入姓名" />
-        </a-form-item>
-        <a-form-item label="性别">
-          <a-radio-group v-model="form.gender">
-            <a-radio :value="0">未知</a-radio>
-            <a-radio :value="1">男</a-radio>
-            <a-radio :value="2">女</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="生日">
-          <a-date-picker v-model="form.birthday" format="YYYY-MM-DD" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="邮箱">
-          <a-input v-model="form.email" placeholder="请输入邮箱" />
-        </a-form-item>
-        <a-form-item label="备注">
-          <a-textarea v-model="form.remark" :rows="2" placeholder="备注信息" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
-    </a-modal>
-
-    <!-- 积分调整抽屉 -->
-    <a-drawer v-model:visible="pointsVisible" title="积分调整" :width="420">
-      <a-form :model="pointsForm" layout="vertical">
-        <a-form-item label="会员">
-          <a-input :value="currentMember?.name + ' (' + currentMember?.mobile + ')'" disabled />
-        </a-form-item>
-        <a-form-item label="调整类型" required>
-          <a-radio-group v-model="pointsForm.type">
-            <a-radio value="add">增加</a-radio>
-            <a-radio value="deduct">扣除</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="积分数量" required>
-          <a-input-number v-model="pointsForm.points" :min="1" :max="1000000" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="调整原因" required>
-          <a-textarea v-model="pointsForm.reason" :rows="3" placeholder="请输入调整原因" />
-        </a-form-item>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="pointsVisible = false">取消</a-button>
-        <a-button type="primary" :loading="formLoading" @click="handlePointsSubmit">确认调整</a-button>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
-    </a-drawer>
-
-    <!-- 会员详情 -->
-    <a-drawer v-model:visible="detailVisible" title="会员详情" :width="520">
-      <template v-if="currentMember">
-        <a-descriptions :column="1" bordered size="small">
-          <a-descriptions-item label="会员编号">{{ currentMember.memberNo }}</a-descriptions-item>
-          <a-descriptions-item label="姓名">{{ currentMember.name }}</a-descriptions-item>
-          <a-descriptions-item label="手机号">{{ currentMember.mobile }}</a-descriptions-item>
-          <a-descriptions-item label="性别">{{ getGenderText(currentMember.gender) }}</a-descriptions-item>
-          <a-descriptions-item label="生日">{{ currentMember.birthday || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="会员等级">
-            <a-tag :color="getLevelColor(currentMember.levelId)">{{ currentMember.levelName || '普通' }}</a-tag>
-          </a-descriptions-item>
-          <a-descriptions-item label="状态">
-            <a-tag :color="getStatusColor(currentMember.status)">{{ getStatusText(currentMember.status) }}</a-tag>
-          </a-descriptions-item>
-          <a-descriptions-item label="可用积分">
-            <span style="color: #ff6b00; font-weight: 600;">{{ currentMember.totalPoints || 0 }}</span>
-          </a-descriptions-item>
-          <a-descriptions-item label="累计消费">
-            <span>¥{{ (currentMember.totalConsume || 0).toFixed(2) }}</span>
-          </a-descriptions-item>
-          <a-descriptions-item label="订单数">{{ currentMember.totalOrderCount || 0 }}</a-descriptions-item>
-          <a-descriptions-item label="所属门店">{{ currentMember.storeName || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="注册时间">{{ currentMember.createdAt || '-' }}</a-descriptions-item>
-        </a-descriptions>
-        <div style="margin-top: 16px">
-          <a-space>
-            <a-button type="primary" size="small" @click="goDetail(currentMember)">查看完整详情</a-button>
-            <a-button size="small" @click="showEdit(currentMember)">编辑</a-button>
-          </a-space>
-        </div>
-      </template>
-    </a-drawer>
-
-    <!-- 调整等级弹窗 -->
-    <a-modal v-model:visible="levelModalVisible" title="调整会员等级" @before-ok="handleLevelSubmit" :width="400" :loading="formLoading">
-      <a-form :model="levelForm" layout="vertical">
-        <a-form-item label="会员">
-          <a-input :value="currentMember?.name + ' (' + currentMember?.mobile + ')'" disabled />
-        </a-form-item>
-        <a-form-item label="目标等级" required>
-          <a-select v-model="levelForm.levelId" placeholder="请选择目标等级">
-            <a-option v-for="lv in levelList" :key="lv.id" :value="lv.id">{{ lv.name }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="调整原因" required>
-          <a-select v-model="levelForm.reason" placeholder="请选择调整原因">
-            <a-option value="upgrade">升级</a-option>
-            <a-option value="downgrade">降级</a-option>
-            <a-option value="vip">VIP专属</a-option>
-            <a-option value="other">其他</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="备注说明">
-          <a-textarea v-model="levelForm.remark" :rows="2" placeholder="备注说明" />
-        </a-form-item>
-      </a-form>
     </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
@@ -519,17 +307,11 @@ onMounted(() => {
   loadLevels()
   loadStats()
 })
+
 </script>
 
 <style scoped>
-.member-list-page {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
-}
-.breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { border-radius: 8px; }
-.action-card { margin-bottom: 16px; }
-.table-card { border-radius: 8px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

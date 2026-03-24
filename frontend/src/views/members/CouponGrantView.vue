@@ -1,91 +1,40 @@
 <template>
-  <div class="coupon-grant-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>优惠券发放</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 搜索筛选 -->
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-input-search v-model="filters.keyword" placeholder="搜索优惠券名称" style="width: 220px" search-button @search="loadData" />
-        <a-select v-model="filters.mode" placeholder="发放方式" allow-clear style="width: 140px" @change="loadData">
-          <a-option value="member">指定会员</a-option>
-          <a-option value="level">指定等级</a-option>
-          <a-option value="all">全部会员</a-option>
-        </a-select>
-        <a-range-picker v-model="filters.dateRange" style="width: 260px" @change="loadData" />
-        <a-button type="primary" @click="showGrantDrawer">发放优惠券</a-button>
-        <a-button @click="handleExport">导出</a-button>
-        <a-button @click="loadData">刷新</a-button>
-      </a-space>
-    </a-card>
-
-    <!-- 发放记录列表 -->
-    <a-card class="table-card">
-      <a-table
-        :columns="columns"
-        :data="dataList"
-        :loading="loading"
-        :pagination="paginationConfig"
-        @page-change="onPageChange"
-        @page-size-change="onPageSizeChange"
-        row-key="id"
-        :scroll="{ x: 1100 }"
-      >
-        <template #mode="{ record }">
-          <a-tag :color="getModeColor(record.mode)">{{ getModeText(record.mode) }}</a-tag>
-        </template>
-        <template #target="{ record }">
-          <span v-if="record.mode === 'member'">{{ record.memberName || '-' }}</span>
-          <span v-else-if="record.mode === 'level'">{{ record.levelName || '-' }}</span>
-          <span v-else>全部会员</span>
-        </template>
-        <template #status="{ record }">
-          <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 发放优惠券抽屉 -->
-    <a-drawer v-model:visible="grantVisible" title="发放优惠券" :width="520">
-      <a-form layout="vertical">
-        <a-form-item label="优惠券" required>
-          <a-select v-model="grantForm.couponId" placeholder="选择优惠券" searchable>
-            <a-option v-for="c in couponOptions" :key="c.id" :value="c.id">{{ c.name }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="发放方式" required>
-          <a-radio-group v-model="grantForm.mode">
-            <a-radio value="member">指定会员</a-radio>
-            <a-radio value="level">指定等级</a-radio>
-            <a-radio value="all">全部会员</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item v-if="grantForm.mode === 'member'" label="选择会员">
-          <a-select v-model="grantForm.memberIds" placeholder="选择会员" multiple searchable>
-            <a-option v-for="m in memberOptions" :key="m.id" :value="m.id">{{ m.name }} ({{ m.mobile }})</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item v-if="grantForm.mode === 'level'" label="选择等级">
-          <a-select v-model="grantForm.levelId" placeholder="选择会员等级">
-            <a-option v-for="lv in levelOptions" :key="lv.id" :value="lv.id">{{ lv.name }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="发放数量">
-          <a-input-number v-model="grantForm.count" :min="1" :max="10" style="width: 100%" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
-      <template #footer>
-        <a-button @click="grantVisible = false">取消</a-button>
-        <a-button type="primary" :loading="formLoading" @click="handleGrant">确认发放</a-button>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #status="{ record }">
+        <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
       </template>
-    </a-drawer>
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import * as api from '@/api/member'
@@ -201,11 +150,11 @@ const onPageChange = (page) => { pagination.current = page; loadData() }
 const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadData() }
 
 onMounted(() => loadData())
+
 </script>
 
 <style scoped>
-.coupon-grant-page { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.breadcrumb { margin-bottom: 16px; }
-.action-card { margin-bottom: 16px; }
-.table-card { border-radius: 8px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

@@ -1,274 +1,40 @@
 <template>
-  <div class="member-detail-page">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item><a @click="$router.push('/members')">会员管理</a></a-breadcrumb-item>
-      <a-breadcrumb-item>会员详情</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 基本信息卡片 -->
-    <a-row :gutter="16" class="info-row">
-      <a-col :span="16">
-        <a-card class="profile-card">
-          <a-row :gutter="24">
-            <a-col :span="4" style="text-align:center">
-              <a-avatar :style="{ backgroundColor: levelColor, width: '72px', height: '72px', fontSize: '28px' }">
-                {{ (member.name || member.mobile || '?').charAt(0) }}
-              </a-avatar>
-            </a-col>
-            <a-col :span="20">
-              <div class="profile-header">
-                <div class="profile-name">
-                  <span style="font-size: 20px; font-weight: 600;">{{ member.name || '-' }}</span>
-                  <a-tag :color="levelColor" style="margin-left: 8px">{{ member.levelName || '普通会员' }}</a-tag>
-                  <a-tag :color="statusColor">{{ statusText }}</a-tag>
-                </div>
-                <div class="profile-meta">
-                  <span><icon-mobile /> {{ member.mobile || '-' }}</span>
-                  <span style="margin-left: 16px"><icon-user /> 会员编号: {{ member.memberNo || '-' }}</span>
-                  <span style="margin-left: 16px"><icon-clock /> 注册: {{ member.createdAt || '-' }}</span>
-                </div>
-              </div>
-            </a-col>
-          </a-row>
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="quick-action-card">
-          <a-space direction="vertical" style="width:100%">
-            <a-button type="primary" long @click="showPointsAdjust">积分调整</a-button>
-            <a-button long @click="showRechargeModal">充值</a-button>
-            <a-button type="outline" long @click="showCouponModal">发放优惠券</a-button>
-          </a-space>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- 标签 + 统计 -->
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="可用积分" :value="member.totalPoints || 0" :value-style="{ color: '#ff6b00' }">
-            <template #prefix><icon-star /></template>
-          </a-statistic>
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="累计消费" :value="member.totalConsume || 0" prefix="¥" :precision="2" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="订单数" :value="member.totalOrderCount || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="优惠券" :value="member.couponCount || 0" />
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- Tab 区域 -->
-    <a-card class="tab-card">
-      <a-tabs v-model:active-key="activeTab">
-        <!-- 基本信息 -->
-        <a-tab-pane key="info" title="基本信息">
-          <a-descriptions :column="2" bordered size="small">
-            <a-descriptions-item label="姓名">{{ member.name || '-' }}</a-descriptions-item>
-            <a-descriptions-item label="手机号">{{ member.mobile || '-' }}</a-descriptions-item>
-            <a-descriptions-item label="性别">{{ getGenderText(member.gender) }}</a-descriptions-item>
-            <a-descriptions-item label="生日">{{ member.birthday || '-' }}</a-descriptions-item>
-            <a-descriptions-item label="邮箱">{{ member.email || '-' }}</a-descriptions-item>
-            <a-descriptions-item label="会员等级">
-              <a-tag :color="levelColor">{{ member.levelName || '普通' }}</a-tag>
-            </a-descriptions-item>
-            <a-descriptions-item label="所属门店">{{ member.storeName || '-' }}</a-descriptions-item>
-            <a-descriptions-item label="状态">
-              <a-tag :color="statusColor">{{ statusText }}</a-tag>
-            </a-descriptions-item>
-            <a-descriptions-item label="注册时间" :span="2">{{ member.createdAt || '-' }}</a-descriptions-item>
-            <a-descriptions-item label="备注" :span="2">{{ member.remark || '-' }}</a-descriptions-item>
-          </a-descriptions>
-          <div style="margin-top: 16px">
-            <a-button type="primary" @click="showEditInfo">编辑信息</a-button>
-          </div>
-        </a-tab-pane>
-
-        <!-- 会员卡信息 -->
-        <a-tab-pane key="card" title="会员卡信息">
-          <a-space style="margin-bottom: 12px">
-            <a-button type="primary" size="small" @click="showBindCard">绑定会员卡</a-button>
-          </a-space>
-          <a-table :columns="cardColumns" :data="cards" :loading="cardsLoading" :pagination="false" row-key="id">
-            <template #cardType="{ record }">
-              <a-tag>{{ record.cardTypeName || '-' }}</a-tag>
-            </template>
-            <template #status="{ record }">
-              <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '正常' : '失效' }}</a-tag>
-            </template>
-            <template #expireDate="{ record }">
-              {{ record.expireDate || '永久' }}
-            </template>
-          </a-table>
-          <a-empty v-if="!cards.length && !cardsLoading" description="暂无会员卡" style="margin-top: 32px" />
-        </a-tab-pane>
-
-        <!-- 积分记录 -->
-        <a-tab-pane key="points" title="积分记录">
-          <a-space style="margin-bottom: 12px">
-            <a-button type="primary" size="small" @click="showPointsAdjust">调整积分</a-button>
-          </a-space>
-          <a-table :columns="pointsColumns" :data="pointsRecords" :loading="pointsLoading"
-            :pagination="pointsPaginationConfig" @page-change="onPointsPageChange" row-key="id">
-            <template #type="{ record }">
-              <a-tag :color="record.type === 'add' ? 'green' : 'red'">
-                {{ record.type === 'add' ? '获得' : '消耗' }}
-              </a-tag>
-            </template>
-          </a-table>
-          <a-empty v-if="!pointsRecords.length && !pointsLoading" description="暂无积分记录" style="margin-top: 32px" />
-        </a-tab-pane>
-
-        <!-- 消费记录 -->
-        <a-tab-pane key="orders" title="消费记录">
-          <a-table :columns="orderColumns" :data="orders" :loading="ordersLoading"
-            :pagination="ordersPaginationConfig" @page-change="onOrdersPageChange" row-key="id">
-            <template #status="{ record }">
-              <a-tag :color="getOrderStatusColor(record.status)">{{ getOrderStatusText(record.status) }}</a-tag>
-            </template>
-            <template #amount="{ record }">
-              <span style="color: #ff6b00; font-weight: 600;">¥{{ (record.amount || 0).toFixed(2) }}</span>
-            </template>
-          </a-table>
-          <a-empty v-if="!orders.length && !ordersLoading" description="暂无消费记录" style="margin-top: 32px" />
-        </a-tab-pane>
-
-        <!-- 标签 -->
-        <a-tab-pane key="tags" title="会员标签">
-          <a-space style="margin-bottom: 12px">
-            <a-button type="primary" size="small" @click="showAddTag">添加标签</a-button>
-          </a-space>
-          <a-space wrap>
-            <a-tag v-for="tag in memberTags" :key="tag.id" closable @close="handleRemoveTag(tag)">
-              {{ tag.name }}
-            </a-tag>
-            <a-tag v-if="!memberTags.length" style="color: #999">暂无标签</a-tag>
-          </a-space>
-        </a-tab-pane>
-
-        <!-- 优惠券 -->
-        <a-tab-pane key="coupons" title="优惠券">
-          <a-space style="margin-bottom: 12px">
-            <a-button type="primary" size="small" @click="showCouponModal">发放优惠券</a-button>
-          </a-space>
-          <a-table :columns="couponColumns" :data="memberCoupons" :loading="couponsLoading"
-            :pagination="couponPaginationConfig" @page-change="onCouponsPageChange" row-key="id">
-            <template #status="{ record }">
-              <a-tag :color="getCouponStatusColor(record.status)">{{ getCouponStatusText(record.status) }}</a-tag>
-            </template>
-          </a-table>
-          <a-empty v-if="!memberCoupons.length && !couponsLoading" description="暂无优惠券" style="margin-top: 32px" />
-        </a-tab-pane>
-      </a-tabs>
-    </a-card>
-
-    <!-- 编辑信息弹窗 -->
-    <a-modal v-model:visible="editInfoVisible" title="编辑会员信息" @before-ok="handleEditInfo" :width="520">
-      <a-form :model="editForm" layout="vertical">
-        <a-form-item label="姓名" required><a-input v-model="editForm.name" placeholder="请输入姓名" /></a-form-item>
-        <a-form-item label="性别">
-          <a-radio-group v-model="editForm.gender">
-            <a-radio :value="0">未知</a-radio><a-radio :value="1">男</a-radio><a-radio :value="2">女</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="生日"><a-date-picker v-model="editForm.birthday" format="YYYY-MM-DD" style="width:100%" /></a-form-item>
-        <a-form-item label="邮箱"><a-input v-model="editForm.email" placeholder="请输入邮箱" /></a-form-item>
-        <a-form-item label="备注"><a-textarea v-model="editForm.remark" :rows="2" /></a-form-item>
-      </a-form>
-    </a-modal>
-
-    <!-- 积分调整抽屉 -->
-    <a-drawer v-model:visible="pointsAdjustVisible" title="积分调整" :width="420">
-      <a-form :model="pointsForm" layout="vertical">
-        <a-form-item label="会员"><a-input :value="member.name + ' (' + member.mobile + ')'" disabled /></a-form-item>
-        <a-form-item label="调整类型" required>
-          <a-radio-group v-model="pointsForm.type">
-            <a-radio value="add">增加</a-radio><a-radio value="deduct">扣除</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="积分数量" required>
-          <a-input-number v-model="pointsForm.points" :min="1" :max="1000000" style="width:100%" />
-        </a-form-item>
-        <a-form-item label="原因" required>
-          <a-textarea v-model="pointsForm.reason" :rows="3" placeholder="请输入调整原因" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
-      <template #footer>
-        <a-button @click="pointsAdjustVisible = false">取消</a-button>
-        <a-button type="primary" :loading="pointsLoading" @click="handlePointsAdjust">确认调整</a-button>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #status="{ record }">
+        <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
       </template>
-    </a-drawer>
-
-    <!-- 发放优惠券抽屉 -->
-    <a-drawer v-model:visible="grantCouponVisible" title="发放优惠券" :width="420">
-      <a-form :model="couponForm" layout="vertical">
-        <a-form-item label="会员"><a-input :value="member.name + ' (' + member.mobile + ')'" disabled /></a-form-item>
-        <a-form-item label="选择优惠券" required>
-          <a-select v-model="couponForm.couponId" placeholder="请选择优惠券">
-            <a-option v-for="c in couponOptions" :key="c.id" :value="c.id">{{ c.name }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="发放数量">
-          <a-input-number v-model="couponForm.count" :min="1" :max="10" style="width:100%" />
-        </a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="grantCouponVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleGrantCoupon">确认发放</a-button>
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
       </template>
-    </a-drawer>
-
-    <!-- 添加标签弹窗 -->
-    <a-modal v-model:visible="addTagVisible" title="添加标签" :width="400">
-      <a-form :model="tagForm" layout="vertical">
-        <a-form-item label="选择标签" required>
-          <a-select v-model="tagForm.tagId" placeholder="请选择标签" multiple>
-            <a-option v-for="t in availableTags" :key="t.id" :value="t.id">{{ t.name }}</a-option>
-          </a-select>
-        </a-form-item>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="addTagVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleAddTag">确认添加</a-button>
-      </template>
-    </a-modal>
-
-    <!-- 充值弹窗 -->
-    <a-modal v-model:visible="rechargeVisible" title="账户充值" :width="400">
-      <a-form :model="rechargeForm" layout="vertical">
-        <a-form-item label="会员"><a-input :value="member.name + ' (' + member.mobile + ')'" disabled /></a-form-item>
-        <a-form-item label="充值类型" required>
-          <a-select v-model="rechargeForm.type" placeholder="选择充值类型">
-            <a-option value="balance">余额</a-option>
-            <a-option value="points">积分</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="金额" required>
-          <a-input-number v-model="rechargeForm.amount" :min="0.01" style="width:100%" />
-        </a-form-item>
-        <a-form-item label="备注"><a-textarea v-model="rechargeForm.remark" :rows="2" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="rechargeVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleRecharge">确认充值</a-button>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
     </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
@@ -575,19 +341,11 @@ const couponColumns2 = [
 onMounted(() => {
   loadMemberDetail()
 })
+
 </script>
 
 <style scoped>
-.member-detail-page { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.breadcrumb { margin-bottom: 16px; }
-.info-row { margin-bottom: 16px; }
-.profile-card { border-radius: 8px; }
-.profile-header { padding: 8px 0; }
-.profile-name { margin-bottom: 8px; }
-.profile-meta { color: #666; font-size: 14px; }
-.profile-meta span { display: inline-flex; align-items: center; gap: 4px; }
-.quick-action-card { border-radius: 8px; height: 100%; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { border-radius: 8px; text-align: center; }
-.tab-card { border-radius: 8px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

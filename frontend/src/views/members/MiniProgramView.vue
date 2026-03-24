@@ -1,98 +1,37 @@
 <template>
-  <div class="pro-page-container">
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>小程序基础数据</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="8"><a-card class="stat-card"><a-statistic title="小程序名称" :value="form.miniprogram_name || '-'" /></a-card></a-col>
-      <a-col :span="8"><a-card class="stat-card"><a-statistic title="AppID" :value="form.app_id ? '已配置' : '未配置'" /></a-card></a-col>
-      <a-col :span="8"><a-card class="stat-card"><a-statistic title="配置状态" :value="form.app_id && form.app_secret ? '已完成' : '未完成'" :value-style="{ color: form.app_id && form.app_secret ? '#52c41a' : '#ff6b00' }" /></a-card></a-col>
-    </a-row>
-
-    <div class="pro-content-area" style="margin-top: 16px;">
-      <a-form :model="form" layout="vertical" style="max-width: 600px;">
-        <a-divider>小程序基本信息</a-divider>
-
-        <a-form-item label="小程序名称">
-          <a-input v-model="form.miniprogram_name" placeholder="请输入小程序名称" />
-        </a-form-item>
-
-        <a-form-item label="AppID">
-          <a-input v-model="form.app_id" placeholder="微信小程序AppID" />
-        </a-form-item>
-
-        <a-form-item label="AppSecret">
-          <a-input v-model="form.app_secret" placeholder="微信小程序AppSecret" type="password" />
-        </a-form-item>
-
-        <a-form-item label="小程序Logo">
-          <a-space direction="vertical">
-            <a-input v-model="form.logo_url" placeholder="请输入logo URL" style="width: 300px;" />
-            <img v-if="form.logo_url" :src="form.logo_url" style="max-width: 80px; max-height: 80px; border-radius: 8px; border: 1px solid #eee;" />
-          </a-space>
-        </a-form-item>
-
-        <a-divider>版本配置</a-divider>
-
-        <a-form-item label="当前版本">
-          <a-input v-model="form.version" placeholder="如: 1.0.0" style="width: 200px;" />
-        </a-form-item>
-
-        <a-form-item label="最低支持版本">
-          <a-input v-model="form.min_version" placeholder="如: 1.0.0" style="width: 200px;" />
-        </a-form-item>
-
-        <a-form-item label="更新说明">
-          <a-textarea v-model="form.update_note" :rows="2" placeholder="版本更新说明" />
-        </a-form-item>
-
-        <a-divider>会员卡配置</a-divider>
-
-        <a-form-item label="会员卡背景图">
-          <a-input v-model="form.card_bg" placeholder="会员卡背景图URL" />
-        </a-form-item>
-
-        <a-form-item label="会员卡激活链接">
-          <a-input v-model="form.card_activate_url" placeholder="https://..." />
-        </a-form-item>
-
-        <a-form-item label="显示积分">
-          <a-switch v-model="form.show_points" checked-value="1" unchecked-value="0" />
-        </a-form-item>
-
-        <a-form-item label="显示等级">
-          <a-switch v-model="form.show_level" checked-value="1" unchecked-value="0" />
-        </a-form-item>
-
-        <a-form-item label="显示优惠券">
-          <a-switch v-model="form.show_coupons" checked-value="1" unchecked-value="0" />
-        </a-form-item>
-
-        <a-divider>消息推送配置</a-divider>
-
-        <a-form-item label="关注回复">
-          <a-textarea v-model="form.subscribe_reply" :rows="2" placeholder="用户关注时的自动回复" />
-        </a-form-item>
-
-        <a-form-item label="生日祝福">
-          <a-textarea v-model="form.birthday_wish" :rows="2" placeholder="会员生日祝福语" />
-        </a-form-item>
-
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
         <a-form-item>
-          <a-space>
-            <a-button type="primary" @click="handleSave">保存</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
     </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
@@ -149,12 +88,11 @@ const handleReset = () => {
 }
 
 onMounted(() => loadData())
+
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.pro-breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { border-radius: 8px; text-align: center; }
-.pro-content-area { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

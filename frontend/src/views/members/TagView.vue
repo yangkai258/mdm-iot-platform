@@ -1,86 +1,37 @@
 <template>
-  <div class="tag-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>标签管理</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="6"><a-card class="stat-card"><a-statistic title="标签总数" :value="stats.total || 0" /></a-card></a-col>
-      <a-col :span="6"><a-card class="stat-card"><a-statistic title="手动标签" :value="stats.manual || 0" :value-style="{ color: '#1890ff' }" /></a-card></a-col>
-      <a-col :span="6"><a-card class="stat-card"><a-statistic title="自动标签" :value="stats.auto || 0" :value-style="{ color: '#52c41a' }" /></a-card></a-col>
-      <a-col :span="6"><a-card class="stat-card"><a-statistic title="覆盖会员" :value="stats.covered || 0" /></a-card></a-col>
-    </a-row>
-
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-input-search v-model="filters.keyword" placeholder="搜索标签名称" style="width: 240px" search-button @search="loadTags" />
-        <a-select v-model="filters.tagType" placeholder="标签类型" allow-clear style="width: 140px" @change="loadTags">
-          <a-option value="manual">手动标签</a-option>
-          <a-option value="auto">自动标签</a-option>
-          <a-option value="system">系统标签</a-option>
-        </a-select>
-        <a-button type="primary" @click="showCreate">新建标签</a-button>
-        <a-button @click="loadTags">刷新</a-button>
-      </a-space>
-    </a-card>
-
-    <a-card class="table-card">
-      <a-table :columns="columns" :data="tagList" :loading="loading" :pagination="paginationConfig"
-        @page-change="onPageChange" @page-size-change="onPageSizeChange" row-key="id" :scroll="{ x: 900 }">
-        <template #tagType="{ record }"><a-tag :color="getTagTypeColor(record.tagType)">{{ getTagTypeText(record.tagType) }}</a-tag></template>
-        <template #memberCount="{ record }"><a-badge :value="record.memberCount || 0" :max-count="99999" /></template>
-        <template #autoCondition="{ record }"><span style="color: #666; font-size: 12px;">{{ record.autoCondition || '-' }}</span></template>
-        <template #status="{ record }"><a-switch v-model="record._status" :checked-value="1" :unchecked-value="0" @change="handleStatusChange(record)" /></template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" @click="previewTag(record)">预览</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </a-card>
-
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑标签' : '新建标签'" @before-ok="handleFormSubmit" :width="520" :loading="formLoading">
-      <a-form :model="form" layout="vertical">
-        <a-form-item label="标签名称" required><a-input v-model="form.name" placeholder="如：优质客户" /></a-form-item>
-        <a-form-item label="标签类型" required>
-          <a-select v-model="form.tagType" placeholder="选择标签类型">
-            <a-option value="manual">手动标签</a-option>
-            <a-option value="auto">自动标签</a-option>
-            <a-option value="system">系统标签</a-option>
-          </a-select>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
-        <a-form-item v-if="form.tagType === 'auto'" label="自动规则条件">
-          <a-textarea v-model="form.autoCondition" :rows="3" placeholder="如：累计消费满1000元" />
-          <template #extra>设置自动打标的规则条件</template>
-        </a-form-item>
-        <a-form-item label="标签颜色"><a-input v-model="form.color" placeholder="#1890ff" /></a-form-item>
-        <a-form-item label="描述"><a-textarea v-model="form.description" :rows="2" placeholder="简要描述" /></a-form-item>
       </a-form>
-    </a-modal>
-
-    <a-drawer v-model:visible="previewVisible" title="标签预览" :width="520">
-      <template v-if="currentTag">
-        <a-descriptions :column="1" bordered size="small">
-          <a-descriptions-item label="标签名称">{{ currentTag.name }}</a-descriptions-item>
-          <a-descriptions-item label="标签类型"><a-tag :color="getTagTypeColor(currentTag.tagType)">{{ getTagTypeText(currentTag.tagType) }}</a-tag></a-descriptions-item>
-          <a-descriptions-item label="覆盖会员">{{ currentTag.memberCount || 0 }}</a-descriptions-item>
-          <a-descriptions-item label="自动规则">{{ currentTag.autoCondition || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="描述">{{ currentTag.description || '-' }}</a-descriptions-item>
-        </a-descriptions>
-        <a-divider>该标签下的会员</a-divider>
-        <a-table :columns="memberColumns" :data="tagMembers" :loading="tagMemberLoading" :pagination="false" row-key="id" size="small">
-          <template #level="{ record }"><a-tag :color="getLevelColor(record.levelId)">{{ record.levelName || '普通' }}</a-tag></template>
-        </a-table>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
       </template>
-    </a-drawer>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
 import * as api from '@/api/member'
@@ -184,13 +135,11 @@ const onPageChange = (page) => { pagination.current = page; loadTags() }
 const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadTags() }
 
 onMounted(() => loadTags())
+
 </script>
 
 <style scoped>
-.tag-page { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { border-radius: 8px; text-align: center; }
-.action-card { margin-bottom: 16px; }
-.table-card { border-radius: 8px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

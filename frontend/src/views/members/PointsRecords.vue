@@ -1,100 +1,37 @@
 <template>
-  <div class="pro-page-container">
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>积分流水</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 统计卡片 -->
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="6">
-        <a-card class="stat-card"><a-statistic title="总流水笔数" :value="stats.total" /></a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card"><a-statistic title="收入积分" :value="stats.income" :value-style="{ color: '#52c41a' }" /></a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card"><a-statistic title="支出积分" :value="stats.expense" :value-style="{ color: '#ff4d4f' }" /></a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card"><a-statistic title="本月笔数" :value="stats.monthCount" /></a-card>
-      </a-col>
-    </a-row>
-
-    <!-- 搜索栏 -->
-    <div class="pro-search-bar">
-      <a-space wrap>
-        <a-input-search v-model="filters.keyword" placeholder="搜索会员名称/手机" style="width: 220px" search-button @search="loadRecords" />
-        <a-select v-model="filters.type" placeholder="变动类型" allow-clear style="width: 120px" @change="loadRecords">
-          <a-option value="add">收入</a-option>
-          <a-option value="deduct">支出</a-option>
-        </a-select>
-        <a-input v-model="filters.startDate" type="date" placeholder="开始日期" style="width: 150px" @change="loadRecords" />
-        <a-input v-model="filters.endDate" type="date" placeholder="结束日期" style="width: 150px" @change="loadRecords" />
-      </a-space>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
     </div>
-
-    <!-- 操作栏 -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button @click="loadRecords">刷新</a-button>
-        <a-button @click="exportData">导出</a-button>
-      </a-space>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
     </div>
-
-    <!-- 数据表格 -->
-    <div class="pro-content-area">
-      <a-table
-        :columns="columns"
-        :data="records"
-        :loading="loading"
-        :pagination="pagination"
-        @page-change="onPageChange"
-        row-key="id"
-      >
-        <template #type="{ record }">
-          <a-tag :color="record.type === 'add' ? 'green' : 'red'">{{ record.type === 'add' ? '收入' : '支出' }}</a-tag>
-        </template>
-        <template #points="{ record }">
-          <span :style="{ color: record.type === 'add' ? '#52c41a' : '#ff4d4f', fontWeight: 600 }">
-            {{ record.type === 'add' ? '+' : '-' }}{{ record.points }}
-          </span>
-        </template>
-        <template #member="{ record }">
-          {{ record.member_name }} ({{ record.phone }})
-        </template>
-        <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showDetail(record)">详情</a-button>
-        </template>
-      </a-table>
-    </div>
-
-    <!-- 详情抽屉 -->
-    <a-drawer v-model:visible="detailVisible" title="流水详情" :width="480">
-      <template v-if="current">
-        <a-descriptions :column="1" bordered size="small">
-          <a-descriptions-item label="会员">{{ current.member_name }} ({{ current.phone }})</a-descriptions-item>
-          <a-descriptions-item label="变动类型">
-            <a-tag :color="current.type === 'add' ? 'green' : 'red'">{{ current.type === 'add' ? '收入' : '支出' }}</a-tag>
-          </a-descriptions-item>
-          <a-descriptions-item label="积分变动">
-            <span :style="{ color: current.type === 'add' ? '#52c41a' : '#ff4d4f', fontWeight: 600 }">
-              {{ current.type === 'add' ? '+' : '-' }}{{ current.points }}
-            </span>
-          </a-descriptions-item>
-          <a-descriptions-item label="变动前积分">{{ current.balance_before || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="变动后积分">{{ current.balance_after || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="来源/用途">{{ current.source || current.usage || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="备注">{{ current.remark || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="时间">{{ formatTime(current.created_at) }}</a-descriptions-item>
-        </a-descriptions>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
       </template>
-    </a-drawer>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
@@ -151,14 +88,11 @@ const onPageChange = (page) => { pagination.current = page; loadRecords() }
 const exportData = () => Message.info('导出功能开发中')
 
 onMounted(() => loadRecords())
+
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.pro-breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { border-radius: 8px; text-align: center; }
-.pro-search-bar { margin-bottom: 12px; }
-.pro-action-bar { margin-bottom: 16px; }
-.pro-content-area { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

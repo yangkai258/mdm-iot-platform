@@ -1,97 +1,101 @@
 <template>
-  <div class="emotion-trend">
-    <a-card title="情绪趋势分析">
-      <template #extra>
-        <a-select v-model="period" style="width: 120px" @change="load">
-          <a-option value="week">近一周</a-option>
-          <a-option value="month">近一月</a-option>
-        </a-select>
-      </template>
-      
-      <a-spin :loading="loading">
-        <a-row :gutter="16" style="margin-bottom: 24px">
-          <a-col :span="6">
-            <a-statistic title="平均情绪强度" :value="stats.avg_intensity" suffix="/ 10" />
-          </a-col>
-          <a-col :span="6">
-            <a-statistic title="主要情绪" :value="stats.dominant_emotion" />
-          </a-col>
-          <a-col :span="6">
-            <a-statistic title="情绪趋势" :value="stats.trend">
-              <template #suffix>
-                <icon-arrow-up v-if="stats.trend === 'improving'" color="green" />
-                <icon-arrow-down v-else-if="stats.trend === 'declining'" color="red" />
-              </template>
-            </a-statistic>
-          </a-col>
-          <a-col :span="6">
-            <a-statistic title="情绪记录数" :value="stats.total_records" />
-          </a-col>
-        </a-row>
-        
-        <a-divider>情绪分布</a-divider>
-        <div class="emotion-distribution">
-          <div v-for="(pct, emotion) in stats.emotion_distribution" :key="emotion" class="emotion-bar">
-            <span class="label">{{ emotion }}</span>
-            <a-progress :percent="pct" :color="getEmotionColor(emotion)" />
-          </div>
-        </div>
-        
-        <a-divider>周趋势</a-divider>
-        <div class="weekly-chart">
-          <a-table :columns="chartColumns" :data="stats.weekly_data" size="small" />
-        </div>
-      </a-spin>
-    </a-card>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="时间周期">
+          <a-select v-model="form.period" placeholder="请选择" style="width: 140px">
+            <a-option value="week">近一周</a-option>
+            <a-option value="month">近一月</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleExport">导出趋势</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
-const API_BASE = '/api/v1'
 const loading = ref(false)
-const period = ref('week')
-const stats = ref({
-  avg_intensity: 0,
-  dominant_emotion: '-',
-  trend: '-',
-  total_records: 0,
-  emotion_distribution: {},
-  weekly_data: []
+const data = ref<any[]>([])
+
+const form = reactive({
+  period: 'week'
 })
 
-const chartColumns = [
-  { title: '日期', dataIndex: 'date' },
-  { title: '平均强度', dataIndex: 'avg_intensity' },
-  { title: '主要情绪', dataIndex: 'dominant_emotion' }
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0
+})
+
+const columns = [
+  { title: '日期', dataIndex: 'date', width: 140 },
+  { title: '平均强度', dataIndex: 'avg_intensity', width: 120 },
+  { title: '主要情绪', dataIndex: 'dominant_emotion', width: 120 },
+  { title: '情绪趋势', dataIndex: 'trend', width: 120 },
+  { title: '记录数', dataIndex: 'total_records', width: 100 }
 ]
 
-const getEmotionColor = (e) => ({
-  happy: '#52c41a', sad: '#1890ff', angry: '#ff4d4f', 
-  calm: '#722ed1', excited: '#faad14', anxious: '#f5222d'
-}[e] || '#1890ff')
-
-const load = async () => {
+async function loadData() {
   loading.value = true
   try {
-    const res = await fetch(`${API_BASE}/emotions/records/stats?period=${period.value}&pet_id=1`)
-    stats.value = await res.json()
-  } catch (e) {
+    const res = await fetch(`/api/v1/emotions/records/stats?period=${form.period}`)
+    const json = await res.json()
+    data.value = json.weekly_data || []
+    pagination.total = data.value.length
+  } catch {
     Message.error('加载失败')
   } finally {
     loading.value = false
   }
 }
 
-onMounted(load)
+function handleSearch() {
+  pagination.current = 1
+  loadData()
+}
+
+function handleReset() {
+  form.period = 'week'
+  pagination.current = 1
+  loadData()
+}
+
+function onPageChange(page: number) {
+  pagination.current = page
+  loadData()
+}
+
+function handleExport() {
+  Message.info('导出功能开发中')
+}
+
+onMounted(() => loadData())
 </script>
 
 <style scoped>
-.emotion-distribution { max-width: 500px; }
-.emotion-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.emotion-bar .label { width: 60px; font-weight: 500; }
-.emotion-bar :deep(.arco-progress-line) { flex: 1; }
-.weekly-chart { margin-top: 16px; }
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+}
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+.toolbar {
+  margin-bottom: 16px;
+}
 </style>

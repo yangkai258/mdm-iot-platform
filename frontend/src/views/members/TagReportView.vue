@@ -1,76 +1,37 @@
 <template>
-  <div class="member-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>会员标签报表</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-select v-model="filters.tagType" placeholder="标签类型" allow-clear style="width: 160px" @change="loadData">
-          <a-option value="highfreq">高频购买</a-option>
-          <a-option value="lowfreq">低频购买</a-option>
-          <a-option value="interest">兴趣分类</a-option>
-        </a-select>
-        <a-range-picker v-model="filters.dateRange" style="width: 260px;" @change="loadData" />
-        <a-button type="primary" @click="loadData">搜索</a-button>
-        <a-button @click="handleExport">导出</a-button>
-        <a-button @click="loadData">刷新</a-button>
-      </a-space>
-    </a-card>
-
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="标签总数" :value="stats.total || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="本月新增" :value="stats.monthNew || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="本月清除" :value="stats.monthClean || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card class="stat-card">
-          <a-statistic title="活跃标签" :value="stats.active || 0" />
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <a-row :gutter="16" style="margin-bottom: 16px;">
-      <a-col :span="12">
-        <a-card>
-          <template #title><span style="font-weight:600;">标签分布</span></template>
-          <div ref="pieChartRef" style="height: 280px;"></div>
-        </a-card>
-      </a-col>
-      <a-col :span="12">
-        <a-card>
-          <template #title><span style="font-weight:600;">标签趋势（近6月）</span></template>
-          <div ref="lineChartRef" style="height: 280px;"></div>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <a-card class="table-card">
-      <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" :scroll="{ x: 1000 }">
-        <template #trend="{ record }">
-          <span :style="{ color: record.trend > 0 ? '#52c41a' : record.trend < 0 ? '#ff4d4f' : '#999' }">
-            {{ record.trend > 0 ? '↑' : record.trend < 0 ? '↓' : '-' }}{{ Math.abs(record.trend) }}
-          </span>
-        </template>
-      </a-table>
-    </a-card>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
@@ -121,12 +82,11 @@ const handleExport = () => {
 onMounted(() => {
   loadData()
 })
+
 </script>
 
 <style scoped>
-.member-page { padding: 20px; }
-.breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { text-align: center; }
-.action-card { margin-bottom: 16px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

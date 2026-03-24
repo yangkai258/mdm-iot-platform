@@ -1,79 +1,101 @@
 <template>
-  <div class="emotion-log-view">
-    <a-card title="情绪日志">
-      <template #extra>
-        <a-space>
-          <a-select v-model="filterType" placeholder="情绪类型" style="width: 120px" allow-clear>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="情绪类型">
+          <a-select v-model="form.emotion" placeholder="请选择" allow-clear style="width: 140px">
             <a-option value="happy">开心</a-option>
             <a-option value="sad">难过</a-option>
             <a-option value="angry">生气</a-option>
             <a-option value="fear">害怕</a-option>
             <a-option value="neutral">平静</a-option>
           </a-select>
-          <a-button type="primary" @click="loadData">刷新</a-button>
-        </a-space>
-      </template>
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange">
-        <template #device="{ record }">
-          <a-tag>{{ record.device_id }}</a-tag>
-        </template>
-        <template #emotion="{ record }">
-          <a-tag :color="getEmotionColor(record.emotion)">{{ record.emotion_label }}</a-tag>
-        </template>
-        <template #intensity="{ record }">
-          <a-progress :percent="record.intensity" :color="getEmotionColor(record.emotion)" size="small" />
-        </template>
-      </a-table>
-    </a-card>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleExport">导出</a-button>
+    </div>
+    <a-table
+      :columns="columns"
+      :data="data"
+      :loading="loading"
+      :pagination="pagination"
+      @page-change="onPageChange"
+    />
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { getEmotionLogs } from '@/api/emotion'
 
 const loading = ref(false)
-const filterType = ref('')
-const data = ref([])
+const data = ref<any[]>([])
+
+const form = reactive({
+  emotion: ''
+})
+
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0
+})
 
 const columns = [
   { title: '时间', dataIndex: 'created_at', width: 180 },
-  { title: '设备', dataIndex: 'device_id', slotName: 'device' },
-  { title: '情绪类型', dataIndex: 'emotion_label', slotName: 'emotion' },
-  { title: '强度', dataIndex: 'intensity', slotName: 'intensity' },
-  { title: '触发原因', dataIndex: 'trigger' }
+  { title: '设备', dataIndex: 'device_id', width: 120 },
+  { title: '情绪类型', dataIndex: 'emotion_label', width: 120 },
+  { title: '强度', dataIndex: 'intensity', width: 150 },
+  { title: '触发原因', dataIndex: 'trigger', ellipsis: true }
 ]
 
-const pagination = {
-  total: 0,
-  current: 1,
-  pageSize: 20
-}
-
-function getEmotionColor(emotion) {
-  const colors = { happy: 'green', sad: 'blue', angry: 'red', fear: 'orange', neutral: 'gray' }
-  return colors[emotion] || 'gray'
-}
-
 async function loadData() {
-  loading.value = true
   try {
-    const res = await fetch('/api/v1/emotion/logs?page=' + pagination.current + '&page_size=' + pagination.pageSize + (filterType.value ? '&emotion=' + filterType.value : ''), {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    })
-    const json = await res.json()
-    data.value = json.data?.list || []
-    pagination.total = json.data?.total || 0
-  } catch (e) {
-    console.error(e)
+    loading.value = true
+    const params: any = { page: pagination.current, page_size: pagination.pageSize }
+    if (form.emotion) params.emotion = form.emotion
+    const res = await getEmotionLogs(params)
+    data.value = res.data?.list || res.data || []
+    pagination.total = res.data?.total || 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-function onPageChange(page) {
+function handleSearch() {
+  pagination.current = 1
+  loadData()
+}
+
+function handleReset() {
+  form.emotion = ''
+  pagination.current = 1
+  loadData()
+}
+
+function onPageChange(page: number) {
   pagination.current = page
   loadData()
 }
 
+function handleExport() {
+  Message.info('导出功能开发中')
+}
+
 onMounted(() => loadData())
 </script>
+
+<style scoped>
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
+</style>

@@ -1,259 +1,128 @@
 <template>
-  <div class="voice-emotion-container">
-    <a-card>
-      <template #title>
-        <span>语音情绪识别</span>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="情绪类型">
+          <a-select v-model="form.emotion" placeholder="请选择" allow-clear style="width: 140px">
+            <a-option value="calm">平静</a-option>
+            <a-option value="happy">开心</a-option>
+            <a-option value="anxious">焦虑</a-option>
+            <a-option value="angry">愤怒</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleAnalyze">分析录音</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
+    <a-modal v-model:visible="modalVisible" title="分析结果" :width="520">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="情绪类型">
+          <a-input v-model="form.emotion" readonly />
+        </a-form-item>
+        <a-form-item label="强度">
+          <a-input v-model="form.intensity" readonly />
+        </a-form-item>
+        <a-form-item label="置信度">
+          <a-input v-model="form.confidence" readonly />
+        </a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">关闭</a-button>
       </template>
-
-      <!-- 录音分析 -->
-      <a-card class="record-card">
-        <div class="record-area">
-          <div class="waveform" :class="{ recording: isRecording }">
-            <div v-for="i in 20" :key="i" class="wave-bar" :style="{ height: waveHeights[i-1] + 'px' }"></div>
-          </div>
-          <a-button v-if="!isRecording" type="primary" size="large" @click="startRecording">
-            <template #icon><icon-mic /></template>
-            开始录音
-          </a-button>
-          <a-button v-else type="danger" size="large" status="error" @click="stopRecording">
-            <template #icon><icon-stop /></template>
-            停止录音
-          </a-button>
-        </div>
-
-        <!-- 分析结果 -->
-        <div v-if="analysisResult" class="analysis-result">
-          <a-divider>分析结果</a-divider>
-          <a-descriptions :column="2">
-            <a-descriptions-item label="情绪类型">
-              <a-tag :color="getEmotionColor(analysisResult.emotion)">
-                {{ getEmotionText(analysisResult.emotion) }}
-              </a-tag>
-            </a-descriptions-item>
-            <a-descriptions-item label="强度">
-              <a-progress :percent="analysisResult.intensity * 10" :show-text="false" />
-              {{ analysisResult.intensity }}/10
-            </a-descriptions-item>
-            <a-descriptions-item label="置信度">
-              {{ (analysisResult.confidence * 100).toFixed(1) }}%
-            </a-descriptions-item>
-            <a-descriptions-item label="转录文本">
-              {{ analysisResult.transcript || '无' }}
-            </a-descriptions-item>
-          </a-descriptions>
-        </div>
-      </a-card>
-
-      <!-- 历史记录 -->
-      <a-tabs default-active-key="records">
-        <a-tab key="records" title="情绪记录">
-          <a-table :data="records" :loading="loading" :pagination="pagination">
-            <a-table-column title="宠物" dataIndex="pet_id"></a-table-column>
-            <a-table-column title="情绪类型" dataIndex="emotion_type">
-              <template #cell="{ record }">
-                <a-tag :color="getEmotionColor(record.emotion_type)">
-                  {{ getEmotionText(record.emotion_type) }}
-                </a-tag>
-              </template>
-            </a-table-column>
-            <a-table-column title="强度" dataIndex="intensity">
-              <template #cell="{ record }">
-                <a-progress :percent="record.intensity * 10" :show-text="false" size="small" />
-              </template>
-            </a-table-column>
-            <a-table-column title="置信度" dataIndex="confidence">
-              <template #cell="{ record }">
-                {{ (record.confidence * 100).toFixed(1) }}%
-              </a-template>
-            </a-table-column>
-            <a-table-column title="转录" dataIndex="transcript" :ellipsis="true"></a-table-column>
-            <a-table-column title="时间" dataIndex="created_at"></a-table-column>
-          </a-table>
-        </a-tab>
-
-        <a-tab key="trend" title="情绪趋势">
-          <div class="trend-chart">
-            <div v-for="(item, index) in trendData" :key="index" class="trend-bar">
-              <div class="trend-label">{{ item.date }}</div>
-              <div class="trend-bars">
-                <div v-for="emotion in ['calm', 'happy', 'anxious', 'angry']" :key="emotion" 
-                     class="trend-segment" 
-                     :style="{ height: (item[emotion] || 0) * 3 + 'px', backgroundColor: getEmotionColor(emotion) }">
-                </div>
-              </div>
-            </div>
-          </div>
-        </a-tab>
-      </a-tabs>
-    </a-card>
+    </a-modal>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
-const isRecording = ref(false)
-const waveHeights = ref(Array(20).fill(10))
-const analysisResult = ref(null)
-const records = ref([])
+const data = ref<any[]>([])
+const modalVisible = ref(false)
 
-const pagination = ref({
+const form = reactive({
+  emotion: '',
+  intensity: '',
+  confidence: ''
+})
+
+const pagination = reactive({
   current: 1,
   pageSize: 20,
   total: 0
 })
 
-const trendData = ref([
-  { date: '周一', calm: 5, happy: 3, anxious: 1, angry: 1 },
-  { date: '周二', calm: 4, happy: 4, anxious: 2, angry: 0 },
-  { date: '周三', calm: 6, happy: 2, anxious: 1, angry: 1 },
-  { date: '周四', calm: 3, happy: 5, anxious: 1, angry: 1 },
-  { date: '周五', calm: 4, happy: 4, anxious: 2, angry: 0 },
-])
+const columns = [
+  { title: '宠物ID', dataIndex: 'pet_id', width: 100 },
+  { title: '情绪类型', dataIndex: 'emotion_type', width: 120 },
+  { title: '强度', dataIndex: 'intensity', width: 120 },
+  { title: '置信度', dataIndex: 'confidence', width: 120 },
+  { title: '转录', dataIndex: 'transcript', ellipsis: true },
+  { title: '时间', dataIndex: 'created_at', width: 180 }
+]
 
-let waveInterval = null
-
-const getEmotionColor = (emotion) => {
-  const colors = { calm: 'green', happy: 'arcoblue', anxious: 'orange', angry: 'red', sad: 'purple' }
-  return colors[emotion] || 'gray'
-}
-
-const getEmotionText = (emotion) => {
-  const texts = { calm: '平静', happy: '开心', anxious: '焦虑', angry: '愤怒', sad: '悲伤' }
-  return texts[emotion] || emotion
-}
-
-const startRecording = () => {
-  isRecording.value = true
-  waveInterval = setInterval(() => {
-    waveHeights.value = waveHeights.value.map(() => Math.random() * 40 + 10)
-  }, 100)
-  Message.success('开始录音...')
-}
-
-const stopRecording = async () => {
-  isRecording.value = false
-  if (waveInterval) {
-    clearInterval(waveInterval)
-    waveInterval = null
-  }
-  
-  try {
-    const res = await fetch('/api/v1/voice-emotion/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ audio_url: '/temp/recording.mp3' })
-    })
-    const data = await res.json()
-    if (data.code === 0) {
-      analysisResult.value = data.data
-      Message.success('分析完成')
-      loadRecords()
-    }
-  } catch (e) {
-    Message.error('分析失败')
-  }
-}
-
-const loadRecords = async () => {
+async function loadData() {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/voice-emotion/records?user_id=1')
-    const data = await res.json()
-    if (data.code === 0) {
-      records.value = data.data.list || []
-      pagination.value.total = data.data.total || 0
-    }
-  } catch (e) {
-    Message.error('加载记录失败')
+    const params = new URLSearchParams()
+    params.append('page', String(pagination.current))
+    params.append('page_size', String(pagination.pageSize))
+    if (form.emotion) params.append('emotion', form.emotion)
+
+    const res = await fetch(`/api/v1/voice-emotion/records?${params}`)
+    const json = await res.json()
+    data.value = json.data?.list || []
+    pagination.total = json.data?.total || 0
+  } catch {
+    Message.error('加载失败')
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  loadRecords()
-})
+function handleSearch() {
+  pagination.current = 1
+  loadData()
+}
+
+function handleReset() {
+  form.emotion = ''
+  pagination.current = 1
+  loadData()
+}
+
+function handleAnalyze() {
+  Message.info('录音分析功能开发中')
+}
+
+function onPageChange(page: number) {
+  pagination.current = page
+  loadData()
+}
+
+onMounted(() => loadData())
 </script>
 
 <style scoped>
-.voice-emotion-container {
-  padding: 16px;
-}
-
-.record-card {
-  margin-bottom: 16px;
-}
-
-.record-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-  padding: 20px;
-}
-
-.waveform {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  height: 60px;
-}
-
-.wave-bar {
-  width: 8px;
-  background: #165dff;
+.page-container {
+  background: #fff;
   border-radius: 4px;
-  transition: height 0.1s;
-}
-
-.waveform.recording .wave-bar {
-  background: #00b42a;
-  animation: pulse 0.5s infinite alternate;
-}
-
-@keyframes pulse {
-  from { opacity: 0.7; }
-  to { opacity: 1; }
-}
-
-.analysis-result {
-  margin-top: 20px;
-}
-
-.trend-chart {
-  display: flex;
-  justify-content: space-around;
-  align-items: flex-end;
-  height: 200px;
   padding: 20px;
+}
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
   background: #f7f8fa;
-  border-radius: 8px;
+  border-radius: 4px;
 }
-
-.trend-bar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.trend-label {
-  font-size: 12px;
-  color: #666;
-}
-
-.trend-bars {
-  display: flex;
-  gap: 2px;
-  align-items: flex-end;
-}
-
-.trend-segment {
-  width: 16px;
-  border-radius: 2px;
+.toolbar {
+  margin-bottom: 16px;
 }
 </style>

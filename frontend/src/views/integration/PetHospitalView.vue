@@ -1,61 +1,29 @@
 <template>
-  <div class="pet-hospital-view">
-    <a-card title="宠物医疗">
-      <a-alert type="info" style="margin-bottom: 16px">
-        第三方宠物医疗服务集成，可在紧急情况下自动联系附近宠物医院。
-      </a-alert>
-
-      <a-row :gutter="16" style="margin-bottom: 24px">
-        <a-col :span="8">
-          <a-statistic title="绑定医院" :value="stats.hospital_count" />
-        </a-col>
-        <a-col :span="8">
-          <a-statistic title="紧急联系人" :value="stats.emergency_contacts" />
-        </a-col>
-        <a-col :span="8">
-          <a-statistic title="本月问诊" :value="stats.consultations" />
-        </a-col>
-      </a-row>
-
-      <a-tabs>
-        <a-tab-pane key="hospitals" title="合作医院">
-          <a-space style="margin-bottom: 12px">
-            <a-button type="primary" @click="showAddHospital = true">添加医院</a-button>
-            <a-input-search v-model="searchKeyword" placeholder="搜索医院名称" style="width: 240px" @search="loadHospitals" />
-          </a-space>
-          <a-table :columns="hospitalColumns" :data="hospitals" :loading="loading" :pagination="pagination" @page-change="onPageChange">
-            <template #status="{ record }">
-              <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '已绑定' : '未绑定' }}</a-tag>
-            </template>
-            <template #actions="{ record }">
-              <a-space>
-                <a-button type="text" size="small" @click="viewHospital(record)">查看</a-button>
-                <a-button type="text" size="small" status="danger" @click="unbindHospital(record)">解绑</a-button>
-              </a-space>
-            </template>
-          </a-table>
-        </a-tab-pane>
-        <a-tab-pane key="records" title="问诊记录">
-          <a-table :columns="recordColumns" :data="records" :loading="loading" />
-        </a-tab-pane>
-        <a-tab-pane key="settings" title="急救设置">
-          <a-form layout="vertical">
-            <a-form-item label="自动拨打急救电话">
-              <a-switch v-model="settings.auto_emergency_call" />
-            </a-form-item>
-            <a-form-item label="紧急联系人手机">
-              <a-input v-model="settings.emergency_phone" placeholder="请输入手机号" />
-            </a-form-item>
-            <a-form-item label="健康异常自动通知">
-              <a-switch v-model="settings.auto_notify" />
-            </a-form-item>
-            <a-form-item>
-              <a-button type="primary" @click="saveSettings">保存设置</a-button>
-            </a-form-item>
-          </a-form>
-        </a-tab-pane>
-      </a-tabs>
-    </a-card>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    <a-modal v-model:visible="modalVisible" :title="modalTitle">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="医院名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="地址"><a-input v-model="form.address" /></a-form-item>
+        <a-form-item label="电话"><a-input v-model="form.phone" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
@@ -64,78 +32,83 @@ import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
-const showAddHospital = ref(false)
-const searchKeyword = ref('')
-const hospitals = ref([])
-const records = ref([])
+const modalVisible = ref(false)
+const modalTitle = ref('新建')
+const isEdit = ref(false)
 
-const stats = reactive({ hospital_count: 3, emergency_contacts: 2, consultations: 7 })
+const form = reactive({ id: '', name: '', address: '', phone: '' })
 
-const settings = reactive({
-  auto_emergency_call: true,
-  emergency_phone: '',
-  auto_notify: true
-})
-
-const hospitalColumns = [
+const columns = [
   { title: '医院名称', dataIndex: 'name' },
   { title: '地址', dataIndex: 'address' },
   { title: '电话', dataIndex: 'phone' },
-  { title: '距离', dataIndex: 'distance', suffix: 'km' },
-  { title: '状态', slotName: 'status' },
-  { title: '操作', slotName: 'actions' }
-]
-
-const recordColumns = [
-  { title: '日期', dataIndex: 'date' },
-  { title: '宠物', dataIndex: 'pet_name' },
-  { title: '医院', dataIndex: 'hospital' },
-  { title: '诊断', dataIndex: 'diagnosis' },
-  { title: '状态', dataIndex: 'status' }
+  { title: '距离(km)', dataIndex: 'distance' },
+  { title: '状态', dataIndex: 'status_name' }
 ]
 
 const pagination = reactive({ total: 0, current: 1, pageSize: 10 })
+const data = ref([])
 
-async function loadHospitals() {
+const getStatusName = (status) => status === 'active' ? '已绑定' : '未绑定'
+
+const loadHospitals = async () => {
   loading.value = true
   try {
-    hospitals.value = [
-      { id: 1, name: '阳光宠物医院', address: '朝阳区建国路88号', phone: '010-12345678', distance: 2.3, status: 'active' },
-      { id: 2, name: '爱康宠物诊所', address: '海淀区中关村大街1号', phone: '010-87654321', distance: 5.1, status: 'active' },
-      { id: 3, name: '宠物急救中心', address: '东城区东单北大街3号', phone: '010-11223344', distance: 8.7, status: 'inactive' }
-    ]
-    pagination.total = 3
+    const token = localStorage.getItem('token')
+    const res = await fetch('/api/v1/integration/hospitals', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const resData = await res.json()
+    if (resData.code === 0) {
+      data.value = (resData.data || []).map(h => ({ ...h, status_name: getStatusName(h.status) }))
+    } else {
+      loadMockData()
+    }
+  } catch {
+    loadMockData()
   } finally {
+    pagination.total = data.value.length
     loading.value = false
   }
 }
 
-async function loadRecords() {
-  records.value = [
-    { date: '2026-03-20', pet_name: '小白', hospital: '阳光宠物医院', diagnosis: '皮肤炎症', status: '已完成' },
-    { date: '2026-03-15', pet_name: '小白', hospital: '爱康宠物诊所', diagnosis: '常规体检', status: '已完成' }
+const loadMockData = () => {
+  data.value = [
+    { id: '1', name: '阳光宠物医院', address: '朝阳区建国路88号', phone: '010-12345678', distance: 2.3, status: 'active', status_name: '已绑定' },
+    { id: '2', name: '爱康宠物诊所', address: '海淀区中关村大街1号', phone: '010-87654321', distance: 5.1, status: 'active', status_name: '已绑定' },
+    { id: '3', name: '宠物急救中心', address: '东城区东单北大街3号', phone: '010-11223344', distance: 8.7, status: 'inactive', status_name: '未绑定' }
   ]
 }
 
-function onPageChange(page) {
-  pagination.current = page
-  loadHospitals()
+const handleSearch = () => loadHospitals()
+const handleReset = () => { form.name = ''; loadHospitals() }
+
+const handleCreate = () => {
+  isEdit.value = false
+  modalTitle.value = '新建'
+  Object.assign(form, { id: '', name: '', address: '', phone: '' })
+  modalVisible.value = true
 }
 
-function viewHospital(record) {
-  Message.info('查看医院: ' + record.name)
+const handleSubmit = () => {
+  if (!form.name) { Message.warning('请填写医院名称'); return }
+  if (isEdit.value) {
+    const idx = data.value.findIndex(h => h.id === form.id)
+    if (idx !== -1) data.value[idx] = { ...form }
+    Message.success('编辑成功')
+  } else {
+    data.value.unshift({ ...form, id: Date.now().toString(), distance: 0, status: 'active', status_name: '已绑定' })
+    pagination.total++
+    Message.success('添加成功')
+  }
+  modalVisible.value = false
 }
 
-function unbindHospital(record) {
-  Message.warning('解绑医院: ' + record.name)
-}
-
-async function saveSettings() {
-  Message.success('设置已保存')
-}
-
-onMounted(() => {
-  loadHospitals()
-  loadRecords()
-})
+onMounted(() => { loadHospitals() })
 </script>
+
+<style scoped>
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
+</style>

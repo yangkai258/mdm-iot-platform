@@ -1,73 +1,37 @@
 <template>
-  <div class="member-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>会员推文流水</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="文章总数" :value="stats.total || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="今日发布" :value="stats.today || 0" />
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="总阅读量" :value="stats.views || 0" />
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <a-card class="table-card">
-      <a-space direction="vertical" :size="12" style="width: 100%">
-        <a-space wrap>
-          <a-input-search v-model="filters.keyword" placeholder="搜索文章标题" style="width: 240px" search-button @search="loadData" />
-          <a-select v-model="filters.status" placeholder="状态" allow-clear style="width: 120px" @change="loadData">
-            <a-option value="1">已发布</a-option>
-            <a-option value="0">草稿</a-option>
-          </a-select>
-          <a-button type="primary" @click="showCreate">新建</a-button>
-          <a-button @click="loadData">刷新</a-button>
-        </a-space>
-
-        <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" :scroll="{ x: 1200 }">
-          <template #status="{ record }">
-            <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '已发布' : '草稿' }}</a-tag>
-          </template>
-          <template #actions="{ record }">
-            <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
-          </template>
-        </a-table>
-      </a-space>
-    </a-card>
-
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑推文' : '新建推文'" :width="520" @before-ok="handleSubmit" @cancel="formVisible = false">
-      <a-form :model="form" layout="vertical">
-        <a-form-item label="文章标题" required>
-          <a-input v-model="form.title" placeholder="请输入文章标题" />
-        </a-form-item>
-        <a-form-item label="内容摘要">
-          <a-textarea v-model="form.summary" placeholder="请输入内容摘要" :rows="3" />
-        </a-form-item>
-        <a-form-item label="发布状态">
-          <a-radio-group v-model="form.status">
-            <a-radio :value="1">已发布</a-radio>
-            <a-radio :value="0">草稿</a-radio>
-          </a-radio-group>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
     </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, onMounted } from 'vue';
 import { Message } from '@arco-design/web-vue';
 
@@ -149,12 +113,11 @@ const handleSubmit = (done) => {
 onMounted(() => {
   loadData();
 });
+
 </script>
 
 <style scoped>
-.member-page { padding: 16px; }
-.breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { text-align: center; }
-.table-card { margin-top: 16px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

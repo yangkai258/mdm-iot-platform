@@ -1,84 +1,103 @@
 <template>
-  <div class="family-emotion-map">
-    <a-card title="家庭情绪地图">
-      <a-spin :loading="loading">
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <div class="family-index">
-              <a-progress type="circle" :percent="familyData.family_mood_index" :color="getIndexColor(familyData.family_mood_index)" />
-              <div class="index-label">家庭情绪指数</div>
-            </div>
-          </a-col>
-          <a-col :span="12">
-            <div class="members-list">
-              <div v-for="member in familyData.members" :key="member.pet_id" class="member-item">
-                <a-avatar :size="36">{{ member.pet_id }}</a-avatar>
-                <div class="member-info">
-                  <div class="name">宠物 #{{ member.pet_id }}</div>
-                  <div class="mood">
-                    <a-tag :color="getEmotionColor(member.current_mood)">{{ member.current_mood }}</a-tag>
-                    强度: {{ member.intensity }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </a-col>
-        </a-row>
-        
-        <a-divider>互动热点</a-divider>
-        <div class="hotspots">
-          <div v-for="(hs, idx) in familyData.hotspots" :key="idx" class="hotspot-item">
-            宠物 #{{ hs.from_pet_id }} ↔ 宠物 #{{ hs.to_pet_id }}: {{ hs.interaction_count }} 次互动
-          </div>
-          <div v-if="!familyData.hotspots?.length" class="empty">暂无互动数据</div>
-        </div>
-      </a-spin>
-    </a-card>
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="家庭ID">
+          <a-input v-model="form.family_id" placeholder="请输入" style="width: 160px" />
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleRefresh">刷新</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
-const API_BASE = '/api/v1'
 const loading = ref(false)
-const familyData = ref({
-  family_mood_index: 0,
-  members: [],
-  hotspots: []
+const data = ref<any[]>([])
+
+const form = reactive({
+  family_id: ''
 })
 
-const getIndexColor = (v) => v >= 70 ? '#52c41a' : v >= 40 ? '#faad14' : '#ff4d4f'
-const getEmotionColor = (e) => ({
-  happy: '#52c41a', sad: '#1890ff', angry: '#ff4d4f',
-  calm: '#722ed1', excited: '#faad14', anxious: '#f5222d'
-}[e] || '#1890ff')
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0
+})
 
-const load = async () => {
+const columns = [
+  { title: '宠物ID', dataIndex: 'pet_id', width: 100 },
+  { title: '当前情绪', dataIndex: 'current_mood', width: 120 },
+  { title: '情绪强度', dataIndex: 'intensity', width: 120 },
+  { title: '互动次数', dataIndex: 'interaction_count', width: 120 },
+  { title: '更新时间', dataIndex: 'updated_at', width: 180 }
+]
+
+async function loadData() {
   loading.value = true
   try {
-    const res = await fetch(`${API_BASE}/emotions/family-map?family_id=1`)
-    familyData.value = await res.json()
-  } catch (e) {
+    const params = new URLSearchParams()
+    if (form.family_id) params.append('family_id', form.family_id)
+    params.append('page', String(pagination.current))
+    params.append('page_size', String(pagination.pageSize))
+
+    const res = await fetch(`/api/v1/emotions/family-map?${params}`)
+    const json = await res.json()
+    data.value = json.data?.members || []
+    pagination.total = json.data?.total || 0
+  } catch {
     Message.error('加载失败')
   } finally {
     loading.value = false
   }
 }
 
-onMounted(load)
+function handleSearch() {
+  pagination.current = 1
+  loadData()
+}
+
+function handleReset() {
+  form.family_id = ''
+  pagination.current = 1
+  loadData()
+}
+
+function handleRefresh() {
+  loadData()
+}
+
+function onPageChange(page: number) {
+  pagination.current = page
+  loadData()
+}
+
+onMounted(() => loadData())
 </script>
 
 <style scoped>
-.family-index { text-align: center; padding: 20px; }
-.index-label { margin-top: 12px; font-size: 16px; font-weight: 500; }
-.members-list { display: flex; flex-direction: column; gap: 12px; }
-.member-item { display: flex; align-items: center; gap: 12px; }
-.member-info { flex: 1; }
-.member-info .name { font-weight: 500; }
-.member-info .mood { font-size: 12px; display: flex; gap: 8px; align-items: center; }
-.hotspots { display: flex; flex-direction: column; gap: 8px; }
-.hotspot-item { padding: 8px 12px; background: var(--color-fill-1); border-radius: 4px; }
-.empty { color: var(--color-text-3); text-align: center; padding: 20px; }
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+}
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+.toolbar {
+  margin-bottom: 16px;
+}
 </style>

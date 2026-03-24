@@ -1,99 +1,37 @@
 <template>
-  <div class="pro-page-container">
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>积分规则设置</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 统计卡片 -->
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="抵扣比例" :value="settings.deduct_ratio" suffix="积分 = 1元" />
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="单笔最高抵扣" :value="settings.max_deduct_percent" suffix="%" />
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="最低抵扣门槛" :value="settings.min_points" suffix="积分" />
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- 表单区域 -->
-    <div class="pro-content-area">
-      <a-form :model="settings" layout="vertical" style="max-width: 640px;">
-        <a-divider>积分抵扣规则</a-divider>
-
-        <a-form-item label="积分抵扣比例">
-          <a-space>
-            <span>{{ settings.deduct_ratio }}</span>
-            <span>积分 = </span>
-            <a-input-number v-model="settings.deduct_ratio" :min="1" style="width: 100px;" />
-            <span>元</span>
-          </a-space>
-          <div style="color: #999; font-size: 12px; margin-top: 4px;">例：100积分 = 1元，请填写100</div>
-        </a-form-item>
-
-        <a-form-item label="单笔订单最高抵扣比例">
-          <a-slider v-model="settings.max_deduct_percent" :min="0" :max="100" :step="5" />
-          <div style="color: #999; font-size: 12px;">当前值：{{ settings.max_deduct_percent }}%（0=不限制）</div>
-        </a-form-item>
-
-        <a-form-item label="最低抵扣门槛">
-          <a-input-number v-model="settings.min_points" :min="0" :step="100" style="width: 200px;" />
-          <div style="color: #999; font-size: 12px; margin-top: 4px;">积分不足此值时不可抵扣，0=不限制</div>
-        </a-form-item>
-
-        <a-divider>积分获取规则</a-divider>
-
-        <a-form-item label="消费积分基础倍率">
-          <a-space>
-            <span>每消费</span>
-            <a-input-number v-model="settings.points_per_yuan_base" :min="1" style="width: 80px;" />
-            <span>元获得</span>
-            <a-input-number v-model="settings.points_per_yuan" :min="0" :precision="1" style="width: 80px;" />
-            <span>积分</span>
-          </a-space>
-        </a-form-item>
-
-        <a-form-item label="积分过期规则">
-          <a-select v-model="settings.expire_type" style="width: 300px;">
-            <a-option value="never">永不过期</a-option>
-            <a-option value="year">每年12月31日过期</a-option>
-            <a-option value="monthly">获取后12个月过期</a-option>
-          </a-select>
-        </a-form-item>
-
-        <a-form-item label="生日双倍积分">
-          <a-switch v-model="settings.birthday_double" checked-value="1" unchecked-value="0" />
-          <span style="margin-left: 8px; color: #999;">开启后会员生日当天消费获得双倍积分</span>
-        </a-form-item>
-
-        <a-divider>其他设置</a-divider>
-
-        <a-form-item label="允许积分互转">
-          <a-switch v-model="settings.allow_transfer" checked-value="1" unchecked-value="0" />
-          <span style="margin-left: 8px; color: #999;">允许会员之间互相转让积分</span>
-        </a-form-item>
-
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
         <a-form-item>
-          <a-space>
-            <a-button type="primary" @click="handleSave">保存</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
     </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
@@ -145,12 +83,11 @@ const handleReset = () => {
 }
 
 onMounted(() => loadSettings())
+
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.pro-breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { border-radius: 8px; text-align: center; }
-.pro-content-area { background: #fff; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

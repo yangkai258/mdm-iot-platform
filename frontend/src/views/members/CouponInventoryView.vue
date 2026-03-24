@@ -1,69 +1,37 @@
 <template>
-  <div class="coupon-inventory-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>优惠券库存</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 搜索筛选 -->
-    <a-card class="action-card">
-      <a-space wrap>
-        <a-input-search v-model="filters.keyword" placeholder="搜索优惠券名称" style="width: 220px" search-button @search="loadData" />
-        <a-button type="primary" @click="showRechargeDrawer">充值库存</a-button>
-        <a-button @click="loadData">刷新</a-button>
-      </a-space>
-    </a-card>
-
-    <!-- 库存列表 -->
-    <a-card class="table-card">
-      <a-table
-        :columns="columns"
-        :data="dataList"
-        :loading="loading"
-        :pagination="paginationConfig"
-        @page-change="onPageChange"
-        @page-size-change="onPageSizeChange"
-        row-key="id"
-        :scroll="{ x: 900 }"
-      >
-        <template #usage="{ record }">
-          <span style="color: #52c41a; font-weight: 600;">{{ record.usedCount || 0 }}</span>
-          <span style="color: #999; margin: 0 4px;">/</span>
-          <span>{{ record.totalCount || 0 }}</span>
-        </template>
-        <template #remaining="{ record }">
-          <span :style="{ color: (record.totalCount - (record.usedCount || 0)) > 0 ? '#1890ff' : '#ff4d4f', fontWeight: 600 }">
-            {{ (record.totalCount || 0) - (record.usedCount || 0) }}
-          </span>
-        </template>
-        <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showRechargeDrawer(record)">充值</a-button>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 充值库存抽屉 -->
-    <a-drawer v-model:visible="rechargeVisible" title="充值库存" :width="480">
-      <a-form layout="vertical">
-        <a-form-item label="优惠券">
-          <a-select v-model="rechargeForm.couponId" placeholder="选择优惠券" searchable>
-            <a-option v-for="c in couponOptions" :key="c.id" :value="c.id">{{ c.name }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="充值数量">
-          <a-input-number v-model="rechargeForm.addCount" :min="1" style="width: 100%" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
-      <template #footer>
-        <a-button @click="rechargeVisible = false">取消</a-button>
-        <a-button type="primary" :loading="formLoading" @click="handleRecharge">确认充值</a-button>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
       </template>
-    </a-drawer>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import * as api from '@/api/member'
@@ -142,11 +110,11 @@ const onPageChange = (page) => { pagination.current = page; loadData() }
 const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadData() }
 
 onMounted(() => loadData())
+
 </script>
 
 <style scoped>
-.coupon-inventory-page { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.breadcrumb { margin-bottom: 16px; }
-.action-card { margin-bottom: 16px; }
-.table-card { border-radius: 8px; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

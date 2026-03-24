@@ -1,99 +1,37 @@
 <template>
-  <div class="pro-page-container">
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>积分库存</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 统计卡片 -->
-    <a-row :gutter="16" class="stats-row">
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="积分总池" :value="stats.totalPool" />
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="已发放" :value="stats.issued" :value-style="{ color: '#1890ff' }" />
-        </a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card class="stat-card">
-          <a-statistic title="本月消耗" :value="stats.consumed" :value-style="{ color: '#52c41a' }" />
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- 搜索栏 -->
-    <div class="pro-search-bar">
-      <a-space wrap>
-        <a-input-search v-model="filters.keyword" placeholder="搜索说明" style="width: 240px" search-button @search="loadData" />
-      </a-space>
-    </div>
-
-    <!-- 操作栏 -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button type="primary" @click="showRechargeModal = true">充值</a-button>
-        <a-button @click="loadData">刷新</a-button>
-      </a-space>
-    </div>
-
-    <!-- 数据表格 -->
-    <div class="pro-content-area">
-      <a-table
-        :columns="columns"
-        :data="data"
-        :loading="loading"
-        :pagination="pagination"
-        @page-change="onPageChange"
-        row-key="id"
-      >
-        <template #type="{ record }">
-          <a-tag :color="record.type === 'add' ? 'green' : 'red'">{{ record.type === 'add' ? '充值' : '消耗' }}</a-tag>
-        </template>
-        <template #amount="{ record }">
-          <span :style="{ color: record.type === 'add' ? '#52c41a' : '#ff4d4f', fontWeight: 600 }">
-            {{ record.type === 'add' ? '+' : '-' }}{{ record.amount }}
-          </span>
-        </template>
-        <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showDetail(record)">详情</a-button>
-        </template>
-      </a-table>
-    </div>
-
-    <!-- 充值弹窗 -->
-    <a-modal v-model:visible="showRechargeModal" title="积分充值" @ok="handleRecharge" :width="400" :mask-closable="false">
-      <a-form :model="rechargeForm" layout="vertical">
-        <a-form-item label="充值积分数量" required>
-          <a-input-number v-model="rechargeForm.amount" :min="1" placeholder="请输入充值积分" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="说明">
-          <a-textarea v-model="rechargeForm.remark" :rows="3" placeholder="请输入说明" />
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
-    </a-modal>
-
-    <!-- 详情抽屉 -->
-    <a-drawer v-model:visible="detailVisible" title="库存详情" :width="480">
-      <template v-if="current">
-        <a-descriptions :column="1" bordered size="small">
-          <a-descriptions-item label="类型">
-            <a-tag :color="current.type === 'add' ? 'green' : 'red'">{{ current.type === 'add' ? '充值' : '消耗' }}</a-tag>
-          </a-descriptions-item>
-          <a-descriptions-item label="积分数量">{{ current.amount }}</a-descriptions-item>
-          <a-descriptions-item label="说明">{{ current.description || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="操作人">{{ current.operator || '-' }}</a-descriptions-item>
-          <a-descriptions-item label="时间">{{ formatTime(current.created_at) }}</a-descriptions-item>
-        </a-descriptions>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
+    </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
       </template>
-    </a-drawer>
+    </a-table>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
+
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
@@ -162,14 +100,11 @@ const showDetail = (record) => { current.value = record; detailVisible.value = t
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())
+
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.pro-breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { border-radius: 8px; text-align: center; }
-.pro-search-bar { margin-bottom: 12px; }
-.pro-action-bar { margin-bottom: 16px; }
-.pro-content-area { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>
