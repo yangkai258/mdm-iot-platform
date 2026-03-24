@@ -1,68 +1,101 @@
 <template>
-  <div class="ota-packages-container">
-    <a-card class="stats-card">
-      <a-row :gutter="16">
-        <a-col :span="8">
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>OTA管理</a-breadcrumb-item>
+      <a-breadcrumb-item>固件包管理</a-breadcrumb-item>
+    </a-breadcrumb>
+
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
+      <a-col :span="8">
+        <a-card>
           <a-statistic title="固件包总数" :value="stats.total" />
-        </a-col>
-        <a-col :span="8">
+        </a-card>
+      </a-col>
+      <a-col :span="8">
+        <a-card>
           <a-statistic title="激活数" :value="stats.active" :value-style="{ color: '#52c41a' }" />
-        </a-col>
-        <a-col :span="8">
+        </a-card>
+      </a-col>
+      <a-col :span="8">
+        <a-card>
           <a-statistic title="停用数" :value="stats.inactive" :value-style="{ color: '#ff4d4f' }" />
-        </a-col>
-      </a-row>
-    </a-card>
+        </a-card>
+      </a-col>
+    </a-row>
 
-    <a-card class="table-card">
-      <template #title>
-        <div class="card-title">
-          <span>固件包管理</span>
+    <!-- 搜索筛选区 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="硬件型号">
+          <a-select v-model="searchForm.hardware_model" placeholder="选择型号" allow-clear style="width: 160px">
+            <a-option v-for="model in hardwareModels" :key="model" :value="model">{{ model }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="版本号">
+          <a-input v-model="searchForm.version" placeholder="版本号搜索" allow-clear />
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 120px">
+            <a-option :value="true">激活</a-option>
+            <a-option :value="false">停用</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
           <a-space>
-            <a-select v-model="filterHardwareModel" placeholder="硬件型号" allow-clear style="width: 160px" @change="handleFilter">
-              <a-option v-for="model in hardwareModels" :key="model" :value="model">{{ model }}</a-option>
-            </a-select>
-            <a-input-search v-model="filterVersion" placeholder="版本号搜索" style="width: 160px" @search="handleFilter" />
-            <a-select v-model="filterStatus" placeholder="状态" allow-clear style="width: 120px" @change="handleFilter">
-              <a-option :value="true">激活</a-option>
-              <a-option :value="false">停用</a-option>
-            </a-select>
-            <a-button type="primary" @click="showAddDrawer">上传固件包</a-button>
+            <a-button type="primary" @click="handleFilter">搜索</a-button>
+            <a-button @click="handleReset">重置</a-button>
           </a-space>
-        </div>
+        </a-form-item>
+      </a-form>
+    </div>
+
+    <!-- 操作栏 -->
+    <div class="toolbar">
+      <a-button type="primary" @click="showAddDrawer">上传固件包</a-button>
+    </div>
+
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="packages"
+      :loading="loading"
+      :pagination="paginationConfig"
+      row-key="id"
+      @page-change="handlePageChange"
+      @page-size-change="handlePageSizeChange"
+    >
+      <template #version="{ record }">
+        <a-tag color="blue">{{ record.version }}</a-tag>
       </template>
-
-      <a-table :columns="columns" :data="packages" :loading="loading" :pagination="paginationConfig" row-key="id" @page-change="handlePageChange" @page-size-change="handlePageSizeChange">
-        <template #version="{ record }">
-          <a-tag color="blue">{{ record.version }}</a-tag>
-        </template>
-        <template #file_size="{ record }">
-          {{ formatFileSize(record.file_size) }}
-        </template>
-        <template #upload_source="{ record }">
-          <a-tag :color="record.upload_source === 'local' ? 'green' : 'arcoblue'">
-            {{ record.upload_source === 'local' ? '本地上传' : '远程URL' }}
-          </a-tag>
-        </template>
-        <template #is_mandatory="{ record }">
-          <a-tag :color="record.is_mandatory ? 'red' : 'gray'">
-            {{ record.is_mandatory ? '强制' : '可选' }}
-          </a-tag>
-        </template>
-        <template #is_active="{ record }">
-          <a-badge :status="record.is_active ? 'success' : 'default'" :text="record.is_active ? '激活' : '停用'" />
-        </template>
-        <template #created_at="{ record }">
-          {{ formatTime(record.created_at) }}
-        </template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </a-card>
+      <template #file_size="{ record }">
+        {{ formatFileSize(record.file_size) }}
+      </template>
+      <template #upload_source="{ record }">
+        <a-tag :color="record.upload_source === 'local' ? 'green' : 'arcoblue'">
+          {{ record.upload_source === 'local' ? '本地上传' : '远程URL' }}
+        </a-tag>
+      </template>
+      <template #is_mandatory="{ record }">
+        <a-tag :color="record.is_mandatory ? 'red' : 'gray'">
+          {{ record.is_mandatory ? '强制' : '可选' }}
+        </a-tag>
+      </template>
+      <template #is_active="{ record }">
+        <a-badge :status="record.is_active ? 'success' : 'default'" :text="record.is_active ? '激活' : '停用'" />
+      </template>
+      <template #created_at="{ record }">
+        {{ formatTime(record.created_at) }}
+      </template>
+      <template #actions="{ record }">
+        <a-space>
+          <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
+      </template>
+    </a-table>
 
     <!-- 上传/编辑抽屉 -->
     <a-drawer v-model:visible="drawerVisible" :title="isEdit ? '编辑固件包' : '上传固件包'" width="480px" @before-ok="handleSubmit" :unmount-on-close="false">
@@ -125,9 +158,11 @@ const stats = reactive({
 const packages = ref<any[]>([])
 const hardwareModels = ref<string[]>(['M5Stack-Core2', 'M5Stack-Basic', 'M5Stack-Fire'])
 
-const filterHardwareModel = ref('')
-const filterVersion = ref('')
-const filterStatus = ref<boolean | ''>('')
+const searchForm = reactive({
+  hardware_model: '',
+  version: '',
+  status: ''
+})
 
 const paginationConfig = reactive({
   current: 1,
@@ -174,28 +209,26 @@ const formatTime = (time: string) => {
 const loadPackages = async () => {
   loading.value = true
   try {
-    const params: any = {
+    const params = {
       page: paginationConfig.current,
       page_size: paginationConfig.pageSize
     }
-    if (filterHardwareModel.value) params.hardware_model = filterHardwareModel.value
-    if (filterVersion.value) params.version = filterVersion.value
-    if (filterStatus.value !== '') params.is_active = filterStatus.value
+    if (searchForm.hardware_model) params.hardware_model = searchForm.hardware_model
+    if (searchForm.version) params.version = searchForm.version
+    if (searchForm.status !== '') params.is_active = searchForm.status
 
     const res = await axios.get(`${API_BASE}/ota/packages`, { params })
     const data = res.data
     if (data.code === 0) {
       packages.value = data.data.list || []
       paginationConfig.total = data.data.pagination?.total || 0
-      // 更新统计数据
       const all = packages.value
       stats.total = data.data.pagination?.total || all.length
-      stats.active = all.filter((p: any) => p.is_active).length
-      stats.inactive = all.filter((p: any) => !p.is_active).length
+      stats.active = all.filter((p) => p.is_active).length
+      stats.inactive = all.filter((p) => !p.is_active).length
     }
-  } catch (e: any) {
+  } catch (e) {
     console.error('加载固件包失败', e)
-    // 模拟数据
     packages.value = [
       { id: 1, name: 'M5Stack-Core2 固件 v1.2.3', hardware_model: 'M5Stack-Core2', version: 'v1.2.3', file_size: 1048576, upload_source: 'remote', is_mandatory: false, is_active: true, created_at: '2026-03-20T08:00:00Z' },
       { id: 2, name: 'M5Stack-Core2 固件 v1.2.4', hardware_model: 'M5Stack-Core2', version: 'v1.2.4', file_size: 1258291, upload_source: 'remote', is_mandatory: true, is_active: true, created_at: '2026-03-20T09:00:00Z' },
@@ -211,6 +244,14 @@ const loadPackages = async () => {
 }
 
 const handleFilter = () => {
+  paginationConfig.current = 1
+  loadPackages()
+}
+
+const handleReset = () => {
+  searchForm.hardware_model = ''
+  searchForm.version = ''
+  searchForm.status = ''
   paginationConfig.current = 1
   loadPackages()
 }
@@ -242,7 +283,7 @@ const showAddDrawer = () => {
   drawerVisible.value = true
 }
 
-const handleEdit = (record: any) => {
+const handleEdit = (record) => {
   isEdit.value = true
   editId.value = record.id
   Object.assign(form, {
@@ -258,7 +299,7 @@ const handleEdit = (record: any) => {
   drawerVisible.value = true
 }
 
-const handleFileChange = (fileList: any[]) => {
+const handleFileChange = (fileList) => {
   if (fileList.length > 0) {
     form.file = fileList[0].file
   }
@@ -284,7 +325,6 @@ const handleSubmit = async (done: (arg: boolean) => void) => {
       })
       Message.success('更新成功')
     } else {
-      // 新增
       const res = await axios.post(`${API_BASE}/ota/packages`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -295,12 +335,11 @@ const handleSubmit = async (done: (arg: boolean) => void) => {
     drawerVisible.value = false
     loadPackages()
     done(true)
-  } catch (e: any) {
+  } catch (e) {
     if (e.errorFields) {
       done(false)
       return
     }
-    // 模拟成功
     Message.success(isEdit.value ? '更新成功' : '上传成功')
     drawerVisible.value = false
     loadPackages()
@@ -308,7 +347,7 @@ const handleSubmit = async (done: (arg: boolean) => void) => {
   }
 }
 
-const handleDelete = (record: any) => {
+const handleDelete = (record) => {
   Modal.confirm({
     title: '确认删除',
     content: `确定要删除固件包「${record.name}」吗？`,
@@ -323,7 +362,6 @@ const handleDelete = (record: any) => {
         Message.success('删除成功')
         loadPackages()
       } catch (e) {
-        // 模拟删除
         packages.value = packages.value.filter(p => p.id !== record.id)
         Message.success('删除成功')
       }
@@ -337,23 +375,28 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.ota-packages-container {
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
   padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
 }
 
-.stats-card {
+.stats-row {
   margin-bottom: 16px;
 }
 
-.table-card {
+.toolbar {
   margin-bottom: 16px;
-}
-
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 </style>

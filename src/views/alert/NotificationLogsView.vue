@@ -157,7 +157,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconSearch, IconRefresh } from '@arco-design/web-icons/vue'
+import { IconSearch, IconRefresh } from '@arco-design/web-vue/es/icon'
 import { useNotificationLogs, LOG_STATUS_MAP } from '@/composables/useNotification'
 import { CHANNEL_TYPE_MAP } from '@/composables/useNotification'
 
@@ -192,7 +192,7 @@ const paginationConfig = computed(() => ({
   pageSize: pagination.pageSize,
   total: pagination.total,
   showSizeChanger: true,
-  showTotal: (total: number) => `共 ${total} 条`
+  showTotal: (total) => `共 ${total} 条`
 }))
 
 function channelTypeLabel(type) {

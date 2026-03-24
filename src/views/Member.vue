@@ -1,10 +1,34 @@
 <template>
-  <div class="pro-page-container">
+  <div class="page-container">
     <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
+    <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
       <a-breadcrumb-item>会员管理</a-breadcrumb-item>
     </a-breadcrumb>
+
+    <!-- 搜索筛选区 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="关键词">
+          <a-input-search
+            v-model="searchForm.keyword"
+            placeholder="搜索会员姓名/编号/手机"
+            style="width: 280px"
+            @search="handleSearch"
+            search-button
+          />
+        </a-form-item>
+        <a-form-item label="会员等级">
+          <a-select v-model="searchForm.level" placeholder="选择等级" allow-clear style="width: 160px">
+            <a-option v-for="lv in levels" :key="lv.id" :value="lv.level_code">{{ lv.level_name }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
 
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stats-row">
@@ -38,60 +62,41 @@
       </a-col>
     </a-row>
 
-    <!-- 搜索框 -->
-    <div class="pro-search-bar">
-      <a-space>
-        <a-input-search
-          v-model="keyword"
-          placeholder="搜索会员姓名/编号/手机"
-          style="width: 280px"
-          @search="loadMembers"
-          search-button
-        />
-        <a-select v-model="level" placeholder="会员等级" allow-clear style="width: 160px" @change="loadMembers">
-          <a-option v-for="lv in levels" :key="lv.id" :value="lv.level_code">{{ lv.level_name }}</a-option>
-        </a-select>
-      </a-space>
-    </div>
-
-    <!-- 操作按钮组 -->
-    <div class="pro-action-bar">
+    <!-- 操作栏 -->
+    <div class="toolbar">
       <a-space>
         <a-button type="primary" @click="showAddModal">新增会员</a-button>
-        <a-button @click="loadMembers">刷新</a-button>
+        <a-button @click="handleSearch">刷新</a-button>
       </a-space>
     </div>
 
-    <!-- 数据表格 -->
-    <div class="pro-content-area">
-      <a-table
-        :columns="columns"
-        :data="members"
-        :loading="loading"
-        :pagination="pagination"
-        @page-change="onPageChange"
-        row-key="id"
-      >
-        <template #avatar="{ record }">
-          <a-avatar :style="{ backgroundColor: getLevelColor(record.member_level) }">
-            {{ record.member_name?.charAt(0) || '?' }}
-          </a-avatar>
-        </template>
-        <template #member_level="{ record }">
-          <a-tag :color="getLevelColor(record.member_level)">{{ record.level_name || record.member_level }}</a-tag>
-        </template>
-        <template #status="{ record }">
-          <a-tag :color="record.status === 1 ? 'green' : 'red'">{{ record.status === 1 ? '正常' : '禁用' }}</a-tag>
-        </template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="showDetail(record)">详情</a-button>
-            <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </div>
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="members"
+      :loading="loading"
+      :pagination="pagination"
+      @page-change="onPageChange"
+      row-key="id"
+    >
+      <template #avatar="{ record }">
+        <a-avatar :style="{ backgroundColor: getLevelColor(record.member_level) }">
+          {{ record.member_name?.charAt(0) || '?' }}
+        </a-avatar>
+      </template>
+      <template #member_level="{ record }">
+        <a-tag :color="getLevelColor(record.member_level)">{{ record.level_name || record.member_level }}</a-tag>
+      </template>
+      <template #status="{ record }">
+        <a-tag :color="record.status === 1 ? 'green' : 'red'">{{ record.status === 1 ? '正常' : '禁用' }}</a-tag>
+      </template>
+      <template #actions="{ record }">
+        <a-space>
+          <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
+      </template>
+    </a-table>
 
     <!-- 新增/编辑弹窗 -->
     <a-modal v-model:visible="modalVisible" :title="isEdit ? '编辑会员' : '新增会员'" @ok="handleSubmit" :width="520">
@@ -126,11 +131,14 @@ const API_BASE = '/api/v1'
 const members = ref([])
 const levels = ref([])
 const loading = ref(false)
-const keyword = ref('')
-const level = ref('')
 const modalVisible = ref(false)
 const isEdit = ref(false)
 const currentId = ref(null)
+
+const searchForm = reactive({
+  keyword: '',
+  level: ''
+})
 
 const form = reactive({
   member_name: '', member_code: '', phone: '', member_level: '', status: '1'
@@ -149,7 +157,7 @@ const columns = [
   { title: '状态', slotName: 'status', width: 80 },
   { title: '积分', dataIndex: 'points', width: 80 },
   { title: '注册时间', dataIndex: 'created_at', width: 170 },
-  { title: '操作', slotName: 'actions', width: 180 }
+  { title: '操作', slotName: 'actions', width: 140 }
 ]
 
 const getLevelColor = (lvl) => {
@@ -161,7 +169,14 @@ const loadMembers = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch(`${API_BASE}/members?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${keyword.value}&level=${level.value}`, {
+    const params = {
+      page: pagination.current,
+      page_size: pagination.pageSize
+    }
+    if (searchForm.keyword) params.keyword = searchForm.keyword
+    if (searchForm.level) params.level = searchForm.level
+
+    const res = await fetch(`${API_BASE}/members?page=${params.page}&page_size=${params.page_size}&keyword=${params.keyword || ''}&level=${params.level || ''}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
@@ -208,6 +223,18 @@ const loadLevels = async () => {
   } catch (e) {}
 }
 
+const handleSearch = () => {
+  pagination.current = 1
+  loadMembers()
+}
+
+const handleReset = () => {
+  searchForm.keyword = ''
+  searchForm.level = ''
+  pagination.current = 1
+  loadMembers()
+}
+
 const showAddModal = () => {
   isEdit.value = false
   Object.assign(form, { member_name: '', member_code: '', phone: '', member_level: '', status: '1' })
@@ -220,8 +247,6 @@ const showEdit = (record) => {
   Object.assign(form, record)
   modalVisible.value = true
 }
-
-const showDetail = (record) => showEdit(record)
 
 const handleSubmit = async () => {
   try {
@@ -254,7 +279,6 @@ const handleDelete = async (record) => {
     const data = await res.json()
     if (data && data.code === 0) {
       Message.success({ content: '删除成功', id: 'del-' + record.id })
-      // 从本地列表移除该记录，不必等重新请求
       const idx = members.value.findIndex(m => m.id === record.id)
       if (idx !== -1) members.value.splice(idx, 1)
       pagination.total = Math.max(0, pagination.total - 1)
@@ -272,21 +296,32 @@ onMounted(() => { loadMembers(); loadLevels(); loadMemberStats() })
 </script>
 
 <style scoped>
-.pro-page-container {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
 }
 
-.pro-breadcrumb { margin-bottom: 16px; }
-.stats-row { margin-bottom: 16px; }
-.stat-card { border-radius: 8px; text-align: center; }
-.pro-search-bar { margin-bottom: 12px; }
-.pro-action-bar { margin-bottom: 16px; }
-.pro-content-area {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+
+.stats-row {
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.toolbar {
+  margin-bottom: 16px;
 }
 </style>

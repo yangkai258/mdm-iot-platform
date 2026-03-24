@@ -1,76 +1,109 @@
 <template>
-  <div class="ota-deployments-container">
-    <a-card class="stats-card">
-      <a-row :gutter="16">
-        <a-col :span="6">
-          <a-statistic title="总任务数" :value="stats.total" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="进行中" :value="stats.running" :value-style="{ color: '#1650d8' }" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="成功率" :value="stats.successRate + '%'" :value-style="{ color: stats.successRate < 80 ? '#ff4d4f' : '#52c41a' }" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="待升级设备" :value="stats.pendingDevices" :value-style="{ color: '#faad14' }" />
-        </a-col>
-      </a-row>
-    </a-card>
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>OTA管理</a-breadcrumb-item>
+      <a-breadcrumb-item>部署任务</a-breadcrumb-item>
+    </a-breadcrumb>
 
-    <a-card class="table-card">
-      <template #title>
-        <div class="card-title">
-          <span>部署任务</span>
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="总任务数" :value="stats.total" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="进行中" :value="stats.running" :value-style="{ color: '#1650d8' }" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="成功率" :value="stats.successRate + '%'" :value-style="{ color: stats.successRate < 80 ? '#ff4d4f' : '#52c41a' }" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="待升级设备" :value="stats.pendingDevices" :value-style="{ color: '#faad14' }" />
+        </a-card>
+      </a-col>
+    </a-row>
+
+    <!-- 搜索筛选区 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="任务状态">
+          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 130px">
+            <a-option value="pending">待执行</a-option>
+            <a-option value="running">进行中</a-option>
+            <a-option value="paused">已暂停</a-option>
+            <a-option value="completed">已完成</a-option>
+            <a-option value="failed">失败</a-option>
+            <a-option value="cancelled">已取消</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="硬件型号">
+          <a-select v-model="searchForm.hardware_model" placeholder="选择型号" allow-clear style="width: 160px">
+            <a-option v-for="model in hardwareModels" :key="model" :value="model">{{ model }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
           <a-space>
-            <a-select v-model="filterStatus" placeholder="任务状态" allow-clear style="width: 130px" @change="handleFilter">
-              <a-option value="pending">待执行</a-option>
-              <a-option value="running">进行中</a-option>
-              <a-option value="paused">已暂停</a-option>
-              <a-option value="completed">已完成</a-option>
-              <a-option value="failed">失败</a-option>
-              <a-option value="cancelled">已取消</a-option>
-            </a-select>
-            <a-select v-model="filterHardwareModel" placeholder="硬件型号" allow-clear style="width: 160px" @change="handleFilter">
-              <a-option v-for="model in hardwareModels" :key="model" :value="model">{{ model }}</a-option>
-            </a-select>
-            <a-button type="primary" @click="showCreateDrawer">新建部署任务</a-button>
+            <a-button type="primary" @click="handleFilter">搜索</a-button>
+            <a-button @click="handleReset">重置</a-button>
           </a-space>
+        </a-form-item>
+      </a-form>
+    </div>
+
+    <!-- 操作栏 -->
+    <div class="toolbar">
+      <a-button type="primary" @click="showCreateDrawer">新建部署任务</a-button>
+    </div>
+
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="deployments"
+      :loading="loading"
+      :pagination="paginationConfig"
+      row-key="id"
+      @page-change="handlePageChange"
+      @page-size-change="handlePageSizeChange"
+    >
+      <template #status="{ record }">
+        <a-tag :color="getStatusColor(record.status)">
+          {{ getStatusText(record.status) }}
+        </a-tag>
+      </template>
+      <template #strategy_type="{ record }">
+        <a-tag :color="getStrategyColor(record.strategy_type)">
+          {{ getStrategyText(record.strategy_type) }}
+        </a-tag>
+      </template>
+      <template #progress="{ record }">
+        <div class="progress-cell">
+          <a-progress :percent="getProgress(record)" :stroke-width="6" size="small" :show-text="false" style="width: 100px" />
+          <span class="progress-text">{{ getProgress(record) }}%</span>
         </div>
       </template>
-
-      <a-table :columns="columns" :data="deployments" :loading="loading" :pagination="paginationConfig" row-key="id" @page-change="handlePageChange" @page-size-change="handlePageSizeChange">
-        <template #status="{ record }">
-          <a-tag :color="getStatusColor(record.status)">
-            {{ getStatusText(record.status) }}
-          </a-tag>
-        </template>
-        <template #strategy_type="{ record }">
-          <a-tag :color="getStrategyColor(record.strategy_type)">
-            {{ getStrategyText(record.strategy_type) }}
-          </a-tag>
-        </template>
-        <template #progress="{ record }">
-          <div class="progress-cell">
-            <a-progress :percent="getProgress(record)" :stroke-width="6" size="small" :show-text="false" style="width: 100px" />
-            <span class="progress-text">{{ getProgress(record) }}%</span>
-          </div>
-        </template>
-        <template #success_rate="{ record }">
-          <span :style="{ color: getSuccessRateColor(record) }">{{ getSuccessRate(record) }}%</span>
-        </template>
-        <template #created_at="{ record }">
-          {{ formatTime(record.created_at) }}
-        </template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="handleDetail(record)">详情</a-button>
-            <a-button v-if="record.status === 'running' || record.status === 'pending'" type="text" size="small" @click="handlePause(record)">暂停</a-button>
-            <a-button v-if="record.status === 'paused'" type="text" size="small" @click="handleResume(record)">恢复</a-button>
-            <a-button v-if="record.status !== 'completed' && record.status !== 'cancelled' && record.status !== 'failed'" type="text" size="small" status="danger" @click="handleCancel(record)">取消</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </a-card>
+      <template #success_rate="{ record }">
+        <span :style="{ color: getSuccessRateColor(record) }">{{ getSuccessRate(record) }}%</span>
+      </template>
+      <template #created_at="{ record }">
+        {{ formatTime(record.created_at) }}
+      </template>
+      <template #actions="{ record }">
+        <a-space>
+          <a-button type="text" size="small" @click="handleDetail(record)">详情</a-button>
+          <a-button v-if="record.status === 'running' || record.status === 'pending'" type="text" size="small" @click="handlePause(record)">暂停</a-button>
+          <a-button v-if="record.status === 'paused'" type="text" size="small" @click="handleResume(record)">恢复</a-button>
+          <a-button v-if="record.status !== 'completed' && record.status !== 'cancelled' && record.status !== 'failed'" type="text" size="small" status="danger" @click="handleCancel(record)">取消</a-button>
+        </a-space>
+      </template>
+    </a-table>
 
     <!-- 创建部署任务抽屉 -->
     <a-drawer v-model:visible="createDrawerVisible" title="新建部署任务" width="520px" @before-ok="handleCreate" :unmount-on-close="false">
@@ -199,8 +232,11 @@ const progressList = ref<any[]>([])
 
 const hardwareModels = ref<string[]>(['M5Stack-Core2', 'M5Stack-Basic', 'M5Stack-Fire'])
 
-const filterStatus = ref('')
-const filterHardwareModel = ref('')
+const searchForm = reactive({
+  status: '',
+  hardware_model: ''
+})
+
 const progressFilterStatus = ref('')
 
 const paginationConfig = reactive({
@@ -295,13 +331,13 @@ const getStrategyText = (type: string) => {
   return texts[type] || type
 }
 
-const getProgress = (record: any) => {
+const getProgress = (record) => {
   if (!record || !record.target_device_count) return 0
   const done = (record.success_count || 0) + (record.failed_count || 0)
   return Math.round((done / record.target_device_count) * 100)
 }
 
-const getSuccessRate = (record: any) => {
+const getSuccessRate = (record) => {
   if (!record) return '0'
   const success = record.success_count || 0
   const failed = record.failed_count || 0
@@ -310,7 +346,7 @@ const getSuccessRate = (record: any) => {
   return ((success / total) * 100).toFixed(1)
 }
 
-const getSuccessRateColor = (record: any) => {
+const getSuccessRateColor = (record) => {
   const rate = parseFloat(getSuccessRate(record))
   if (rate >= 90) return '#52c41a'
   if (rate >= 70) return '#faad14'
@@ -344,12 +380,12 @@ const getOtaStatusText = (status: string) => {
 const loadDeployments = async () => {
   loading.value = true
   try {
-    const params: any = {
+    const params = {
       page: paginationConfig.current,
       page_size: paginationConfig.pageSize
     }
-    if (filterStatus.value) params.status = filterStatus.value
-    if (filterHardwareModel.value) params.hardware_model = filterHardwareModel.value
+    if (searchForm.status) params.status = searchForm.status
+    if (searchForm.hardware_model) params.hardware_model = searchForm.hardware_model
 
     const res = await axios.get(`${API_BASE}/ota/deployments`, { params })
     const data = res.data
@@ -358,9 +394,8 @@ const loadDeployments = async () => {
       paginationConfig.total = data.data.pagination?.total || 0
       updateStats(data.data.list || [])
     }
-  } catch (e: any) {
+  } catch (e) {
     console.error('加载部署任务失败', e)
-    // 模拟数据
     deployments.value = getMockDeployments()
     paginationConfig.total = 3
     updateStats(deployments.value)
@@ -415,7 +450,7 @@ const getMockDeployments = () => [
   }
 ]
 
-const updateStats = (list: any[]) => {
+const updateStats = (list) => {
   stats.total = list.length
   stats.running = list.filter(d => d.status === 'running' || d.status === 'pending').length
   let totalSuccess = 0
@@ -437,7 +472,6 @@ const loadPackages = async () => {
       packages.value = res.data.data.list || []
     }
   } catch (e) {
-    // 模拟固件包数据
     packages.value = [
       { id: 1, name: 'M5Stack-Core2 固件 v1.3.0', version: 'v1.3.0' },
       { id: 2, name: 'M5Stack-Basic 固件 v1.2.0', version: 'v1.2.0' },
@@ -447,6 +481,13 @@ const loadPackages = async () => {
 }
 
 const handleFilter = () => {
+  paginationConfig.current = 1
+  loadDeployments()
+}
+
+const handleReset = () => {
+  searchForm.status = ''
+  searchForm.hardware_model = ''
   paginationConfig.current = 1
   loadDeployments()
 }
@@ -484,11 +525,11 @@ const handlePackageChange = (packageId: number) => {
   }
 }
 
-const handleCreate = async (done: (arg: boolean) => void) => {
+const handleCreate = async (done) => {
   try {
     await formRef.value?.validate()
     const token = localStorage.getItem('token')
-    const payload: any = {
+    const payload = {
       name: form.name,
       package_id: form.package_id,
       hardware_model: form.hardware_model,
@@ -512,12 +553,11 @@ const handleCreate = async (done: (arg: boolean) => void) => {
     createDrawerVisible.value = false
     loadDeployments()
     done(true)
-  } catch (e: any) {
+  } catch (e) {
     if (e.errorFields) {
       done(false)
       return
     }
-    // 模拟成功
     Message.success('部署任务创建成功')
     createDrawerVisible.value = false
     loadDeployments()
@@ -525,7 +565,7 @@ const handleCreate = async (done: (arg: boolean) => void) => {
   }
 }
 
-const handlePause = (record: any) => {
+const handlePause = (record) => {
   Modal.confirm({
     title: '确认暂停',
     content: `确定要暂停任务「${record.name}」吗？`,
@@ -546,7 +586,7 @@ const handlePause = (record: any) => {
   })
 }
 
-const handleResume = (record: any) => {
+const handleResume = (record) => {
   Modal.confirm({
     title: '确认恢复',
     content: `确定要恢复任务「${record.name}」吗？`,
@@ -567,7 +607,7 @@ const handleResume = (record: any) => {
   })
 }
 
-const handleCancel = (record: any) => {
+const handleCancel = (record) => {
   Modal.confirm({
     title: '确认取消',
     content: `确定要取消任务「${record.name}」吗？取消后待升级设备将不再下发指令。`,
@@ -589,7 +629,7 @@ const handleCancel = (record: any) => {
   })
 }
 
-const handleDetail = async (record: any) => {
+const handleDetail = async (record) => {
   currentDeployment.value = record
   detailDrawerVisible.value = true
   progressPagination.current = 1
@@ -601,7 +641,7 @@ const loadProgress = async () => {
   if (!currentDeployment.value) return
   progressLoading.value = true
   try {
-    const params: any = {
+    const params = {
       page: progressPagination.current,
       page_size: progressPagination.pageSize
     }
@@ -614,7 +654,6 @@ const loadProgress = async () => {
       progressPagination.total = data.data.pagination?.total || 0
     }
   } catch (e) {
-    // 模拟进度数据
     progressList.value = getMockProgress()
     progressPagination.total = 5
   } finally {
@@ -642,24 +681,29 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.ota-deployments-container {
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
   padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
 }
 
-.stats-card {
+.stats-row {
   margin-bottom: 16px;
 }
 
-.table-card {
+.toolbar {
   margin-bottom: 16px;
-}
-
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 
 .progress-cell {

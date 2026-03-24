@@ -1,9 +1,17 @@
 <template>
-  <div class="monitor-container">
-    <a-row :gutter="16">
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>系统管理</a-breadcrumb-item>
+      <a-breadcrumb-item>系统监控</a-breadcrumb-item>
+    </a-breadcrumb>
+
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
       <a-col :span="8">
         <a-card>
-          <a-statistic title="CPU 使用率" :value="cpuUsage" :suffix="'%'" :precision="1">
+          <a-statistic title="CPU 使用率" :value="cpuUsage" suffix="%" :precision="1">
             <template #prefix>
               <span>💻</span>
             </template>
@@ -13,7 +21,7 @@
       </a-col>
       <a-col :span="8">
         <a-card>
-          <a-statistic title="内存使用" :value="memUsage" :suffix="'%'" :precision="1">
+          <a-statistic title="内存使用" :value="memUsage" suffix="%" :precision="1">
             <template #prefix>
               <span>🧠</span>
             </template>
@@ -35,6 +43,7 @@
       </a-col>
     </a-row>
 
+    <!-- 详情卡片 -->
     <a-row :gutter="16" style="margin-top: 16px;">
       <a-col :span="12">
         <a-card title="系统运行时间">
@@ -54,7 +63,7 @@
               </a-list-item-meta>
               <template #actions>
                 <a-tag :color="svc.status === 'running' ? 'green' : 'red'">
-                  {{ svc.status }}
+                  {{ svc.status === 'running' ? '运行中' : '已停止' }}
                 </a-tag>
               </template>
             </a-list-item>
@@ -84,7 +93,6 @@ let timer = null
 
 const fetchStatus = async () => {
   try {
-    // Check backend health
     const res = await fetch('/health')
     if (res.ok) {
       services.value[0].status = 'running'
@@ -93,7 +101,6 @@ const fetchStatus = async () => {
     services.value[0].status = 'stopped'
   }
   
-  // Simulate CPU/Memory for demo
   cpuUsage.value = Math.random() * 30 + 10
   memUsage.value = Math.random() * 40 + 30
   pgStatus.value = 'connected'
@@ -110,8 +117,18 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.monitor-container {
-  padding: 16px;
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.stats-row {
+  margin-bottom: 16px;
 }
 
 .status-badge {

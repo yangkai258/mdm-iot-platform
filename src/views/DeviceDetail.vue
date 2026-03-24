@@ -1,336 +1,306 @@
 <template>
-  <a-layout class="device-detail">
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo">
-        <span v-if="!collapsed">MDM 控制台</span>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleMenuClick">
-        <a-menu-item key="dashboard">
-          <span>设备大盘</span>
-        </a-menu-item>
-        <a-menu-item key="status">
-          <span>设备状态</span>
-        </a-menu-item>
-        <a-menu-item key="pet">
-          <span>宠物配置</span>
-        </a-menu-item>
-        <a-menu-item key="ota">
-          <span>OTA 固件</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>设备管理</a-breadcrumb-item>
+      <a-breadcrumb-item>
+        <a @click="goBack">设备列表</a>
+      </a-breadcrumb-item>
+      <a-breadcrumb-item>设备详情</a-breadcrumb-item>
+    </a-breadcrumb>
 
-    <a-layout>
-      <a-layout-header class="header">
-        <div class="header-left">
-          <a-button type="text" @click="goBack">
-            <span>← 返回</span>
-          </a-button>
-          <a-button type="text" @click="collapsed = !collapsed">
-            <span v-if="collapsed">☰</span>
-            <span v-else>✕</span>
-          </a-button>
-        </div>
-        <div class="header-title">
-          <span>设备详情 - {{ deviceId }}</span>
-        </div>
-        <div class="header-right">
-        </div>
-      </a-layout-header>
+    <!-- 加载状态 -->
+    <a-spin :spinning="loading">
+      <!-- Tab 1: 基本信息 -->
+      <a-tabs v-model:active-key="activeTab" class="device-tabs">
+        <a-tab-pane key="info" title="基本信息">
+          <a-card class="detail-card">
+            <template #title>
+              <span>设备基本信息</span>
+            </template>
+            <a-descriptions :column="3" bordered>
+              <a-descriptions-item label="设备ID">{{ deviceInfo.device_id }}</a-descriptions-item>
+              <a-descriptions-item label="MAC地址">{{ deviceInfo.mac_address }}</a-descriptions-item>
+              <a-descriptions-item label="硬件型号">{{ deviceInfo.hardware_model }}</a-descriptions-item>
+              <a-descriptions-item label="固件版本">{{ deviceInfo.firmware_version }}</a-descriptions-item>
+              <a-descriptions-item label="硬件版本">{{ deviceInfo.hardware_version }}</a-descriptions-item>
+              <a-descriptions-item label="产品名称">{{ deviceInfo.product_name }}</a-descriptions-item>
+            </a-descriptions>
+          </a-card>
 
-      <a-layout-content class="content">
-        <a-spin :spinning="loading">
-          <a-tabs v-model:active-key="activeTab" class="device-tabs">
-            <!-- Tab 1: 基本信息 -->
-            <a-tab-pane key="info" title="基本信息">
-              <a-card class="detail-card">
-                <template #title>
-                  <span>设备基本信息</span>
-                </template>
-                <a-descriptions :column="3" bordered>
-                  <a-descriptions-item label="设备ID">{{ deviceInfo.device_id }}</a-descriptions-item>
-                  <a-descriptions-item label="MAC地址">{{ deviceInfo.mac_address }}</a-descriptions-item>
-                  <a-descriptions-item label="硬件型号">{{ deviceInfo.hardware_model }}</a-descriptions-item>
-                  <a-descriptions-item label="固件版本">{{ deviceInfo.firmware_version }}</a-descriptions-item>
-                  <a-descriptions-item label="硬件版本">{{ deviceInfo.hardware_version }}</a-descriptions-item>
-                  <a-descriptions-item label="产品名称">{{ deviceInfo.product_name }}</a-descriptions-item>
-                </a-descriptions>
-              </a-card>
-
-              <a-card class="detail-card">
-                <template #title>
-                  <span>状态管理</span>
-                </template>
-                <a-row :gutter="16">
-                  <a-col :span="12">
-                    <div class="status-current">
-                      <span class="label">当前状态：</span>
-                      <a-tag :color="getStatusColor(deviceInfo.lifecycle_status)" size="large">
-                        {{ getStatusText(deviceInfo.lifecycle_status) }}
-                      </a-tag>
-                    </div>
-                  </a-col>
-                  <a-col :span="12">
-                    <a-space>
-                      <a-button 
-                        type="primary" 
-                        :disabled="deviceInfo.lifecycle_status === 3"
-                        @click="handleChangeStatus(3)"
-                        :loading="statusLoading === 3"
-                      >
-                        设为维修中
-                      </a-button>
-                      <a-button 
-                        :disabled="deviceInfo.lifecycle_status === 4"
-                        @click="handleChangeStatus(4)"
-                        :loading="statusLoading === 4"
-                      >
-                        设为挂失
-                      </a-button>
-                      <a-button 
-                        danger 
-                        :disabled="deviceInfo.lifecycle_status === 5"
-                        @click="handleChangeStatus(5)"
-                        :loading="statusLoading === 5"
-                      >
-                        设为报废
-                      </a-button>
-                    </a-space>
-                  </a-col>
-                </a-row>
-              </a-card>
-
-              <a-card class="detail-card">
-                <template #title>
-                  <span>指令下发</span>
-                </template>
-                <a-space wrap>
-                  <a-button type="primary" @click="handleSendCommand('reboot')" :loading="commandLoading === 'reboot'">
-                    🔄 重启设备
+          <a-card class="detail-card">
+            <template #title>
+              <span>状态管理</span>
+            </template>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <div class="status-current">
+                  <span class="label">当前状态：</span>
+                  <a-tag :color="getStatusColor(deviceInfo.lifecycle_status)" size="large">
+                    {{ getStatusText(deviceInfo.lifecycle_status) }}
+                  </a-tag>
+                </div>
+              </a-col>
+              <a-col :span="12">
+                <a-space>
+                  <a-button 
+                    type="primary" 
+                    :disabled="deviceInfo.lifecycle_status === 3"
+                    @click="handleChangeStatus(3)"
+                    :loading="statusLoading === 3"
+                  >
+                    设为维修中
                   </a-button>
-                  <a-button @click="handleSendCommand('factory_reset')" :loading="commandLoading === 'factory_reset'">
-                    恢复出厂设置
+                  <a-button 
+                    :disabled="deviceInfo.lifecycle_status === 4"
+                    @click="handleChangeStatus(4)"
+                    :loading="statusLoading === 4"
+                  >
+                    设为挂失
                   </a-button>
-                  <a-button @click="handleSendCommand('sync_time')" :loading="commandLoading === 'sync_time'">
-                    同步时间
-                  </a-button>
-                  <a-button @click="handleSendCommand('update_config')" :loading="commandLoading === 'update_config'">
-                    更新配置
-                  </a-button>
-                  <a-button @click="handleSendCommand('self_test')" :loading="commandLoading === 'self_test'">
-                    设备自检
+                  <a-button 
+                    danger 
+                    :disabled="deviceInfo.lifecycle_status === 5"
+                    @click="handleChangeStatus(5)"
+                    :loading="statusLoading === 5"
+                  >
+                    设为报废
                   </a-button>
                 </a-space>
-              </a-card>
-            </a-tab-pane>
+              </a-col>
+            </a-row>
+          </a-card>
 
-            <!-- Tab 2: 实时状态 -->
-            <a-tab-pane key="shadow" title="实时状态">
-              <a-card class="detail-card">
-                <template #title>
-                  <span>设备影子状态</span>
-                  <a-button type="text" size="small" @click="loadDeviceShadow" style="float: right; margin-left: 8px;">
-                    🔄 刷新
-                  </a-button>
-                  <span style="float: right; font-size: 12px; color: #999;">
-                    每30秒自动刷新
+          <a-card class="detail-card">
+            <template #title>
+              <span>指令下发</span>
+            </template>
+            <a-space wrap>
+              <a-button type="primary" @click="handleSendCommand('reboot')" :loading="commandLoading === 'reboot'">
+                🔄 重启设备
+              </a-button>
+              <a-button @click="handleSendCommand('factory_reset')" :loading="commandLoading === 'factory_reset'">
+                恢复出厂设置
+              </a-button>
+              <a-button @click="handleSendCommand('sync_time')" :loading="commandLoading === 'sync_time'">
+                同步时间
+              </a-button>
+              <a-button @click="handleSendCommand('update_config')" :loading="commandLoading === 'update_config'">
+                更新配置
+              </a-button>
+              <a-button @click="handleSendCommand('self_test')" :loading="commandLoading === 'self_test'">
+                设备自检
+              </a-button>
+            </a-space>
+          </a-card>
+        </a-tab-pane>
+
+        <!-- Tab 2: 实时状态 -->
+        <a-tab-pane key="shadow" title="实时状态">
+          <a-card class="detail-card">
+            <template #title>
+              <span>设备影子状态</span>
+              <a-button type="text" size="small" @click="loadDeviceShadow" style="float: right; margin-left: 8px;">
+                🔄 刷新
+              </a-button>
+              <span style="float: right; font-size: 12px; color: #999;">
+                每30秒自动刷新
+              </span>
+            </template>
+            <a-row :gutter="16">
+              <a-col :span="6">
+                <a-statistic title="在线状态">
+                  <template #prefix>
+                    <a-badge :status="shadow.is_online ? 'success' : 'default'" />
+                  </template>
+                  <span :style="{ color: shadow.is_online ? '#52c41a' : '#999', fontWeight: 'bold' }">
+                    {{ shadow.is_online ? '在线' : '离线' }}
                   </span>
-                </template>
-                <a-row :gutter="16">
-                  <a-col :span="6">
-                    <a-statistic title="在线状态">
-                      <template #prefix>
-                        <a-badge :status="shadow.is_online ? 'success' : 'default'" />
-                      </template>
-                      <span :style="{ color: shadow.is_online ? '#52c41a' : '#999', fontWeight: 'bold' }">
-                        {{ shadow.is_online ? '在线' : '离线' }}
-                      </span>
-                    </a-statistic>
-                  </a-col>
-                  <a-col :span="6">
-                    <a-statistic title="电量">
-                      <template #prefix>
-                        <span>🔋</span>
-                      </template>
-                      <template #suffix>
-                        <span>%</span>
-                      </template>
-                      <a-progress 
-                        :percent="shadow.battery_level || 0" 
-                        :stroke-width="10"
-                        :show-text="false"
-                        :stroke-color="getBatteryColor(shadow.battery_level)"
-                        style="width: 120px; display: inline-block; vertical-align: middle; margin-left: 8px;"
-                      />
-                      <div style="margin-top: 4px;">{{ shadow.battery_level || 0 }}%</div>
-                    </a-statistic>
-                  </a-col>
-                  <a-col :span="6">
-                    <a-statistic title="当前模式">
-                      <template #prefix>
-                        <span>⚙️</span>
-                      </template>
-                      <a-tag :color="getModeColor(shadow.current_mode)" style="margin-left: 8px;">
-                        {{ getModeText(shadow.current_mode) }}
-                      </a-tag>
-                    </a-statistic>
-                  </a-col>
-                  <a-col :span="6">
-                    <a-statistic title="信号强度">
-                      <template #prefix>
-                        <span>📶</span>
-                      </template>
-                      <template #suffix>
-                        <span style="font-size: 12px;">dBm</span>
-                      </template>
-                      <div style="margin-top: 4px;">{{ shadow.rssi || '-' }}</div>
-                    </a-statistic>
-                  </a-col>
-                </a-row>
-              </a-card>
+                </a-statistic>
+              </a-col>
+              <a-col :span="6">
+                <a-statistic title="电量">
+                  <template #prefix>
+                    <span>🔋</span>
+                  </template>
+                  <template #suffix>
+                    <span>%</span>
+                  </template>
+                  <a-progress 
+                    :percent="shadow.battery_level || 0" 
+                    :stroke-width="10"
+                    :show-text="false"
+                    :stroke-color="getBatteryColor(shadow.battery_level)"
+                    style="width: 120px; display: inline-block; vertical-align: middle; margin-left: 8px;"
+                  />
+                  <div style="margin-top: 4px;">{{ shadow.battery_level || 0 }}%</div>
+                </a-statistic>
+              </a-col>
+              <a-col :span="6">
+                <a-statistic title="当前模式">
+                  <template #prefix>
+                    <span>⚙️</span>
+                  </template>
+                  <a-tag :color="getModeColor(shadow.current_mode)" style="margin-left: 8px;">
+                    {{ getModeText(shadow.current_mode) }}
+                  </a-tag>
+                </a-statistic>
+              </a-col>
+              <a-col :span="6">
+                <a-statistic title="信号强度">
+                  <template #prefix>
+                    <span>📶</span>
+                  </template>
+                  <template #suffix>
+                    <span style="font-size: 12px;">dBm</span>
+                  </template>
+                  <div style="margin-top: 4px;">{{ shadow.rssi || '-' }}</div>
+                </a-statistic>
+              </a-col>
+            </a-row>
+          </a-card>
 
-              <a-card class="detail-card">
-                <template #title>
-                  <span>详细信息</span>
-                </template>
-                <a-descriptions :column="2" bordered>
-                  <a-descriptions-item label="最后心跳时间">
-                    {{ formatTime(shadow.last_heartbeat) }}
-                  </a-descriptions-item>
-                  <a-descriptions-item label="最后IP地址">
-                    {{ shadow.last_ip || '-' }}
-                  </a-descriptions-item>
-                  <a-descriptions-item label="免打扰开始">
-                    {{ shadow.desired_config?.dnd_start_time || '-' }}
-                  </a-descriptions-item>
-                  <a-descriptions-item label="免打扰结束">
-                    {{ shadow.desired_config?.dnd_end_time || '-' }}
-                  </a-descriptions-item>
-                </a-descriptions>
-              </a-card>
-            </a-tab-pane>
+          <a-card class="detail-card">
+            <template #title>
+              <span>详细信息</span>
+            </template>
+            <a-descriptions :column="2" bordered>
+              <a-descriptions-item label="最后心跳时间">
+                {{ formatTime(shadow.last_heartbeat) }}
+              </a-descriptions-item>
+              <a-descriptions-item label="最后IP地址">
+                {{ shadow.last_ip || '-' }}
+              </a-descriptions-item>
+              <a-descriptions-item label="免打扰开始">
+                {{ shadow.desired_config?.dnd_start_time || '-' }}
+              </a-descriptions-item>
+              <a-descriptions-item label="免打扰结束">
+                {{ shadow.desired_config?.dnd_end_time || '-' }}
+              </a-descriptions-item>
+            </a-descriptions>
+          </a-card>
+        </a-tab-pane>
 
-            <!-- Tab 3: 宠物配置 -->
-            <a-tab-pane key="profile" title="宠物配置">
-              <a-card class="detail-card">
-                <template #title>
-                  <span>宠物配置</span>
-                </template>
-                <a-form :model="petProfile" layout="vertical" class="pet-form">
-                  <a-row :gutter="16">
-                    <a-col :span="12">
-                      <a-form-item label="宠物名称">
-                        <a-input v-model="petProfile.pet_name" placeholder="请输入宠物名称" />
-                      </a-form-item>
-                    </a-col>
-                    <a-col :span="12">
-                      <a-form-item label="宠物性格">
-                        <a-select v-model="petProfile.personality" placeholder="选择宠物性格">
-                          <a-option value="lively">活泼好动</a-option>
-                          <a-option value="cool">冷静沉稳</a-option>
-                          <a-option value="angry">高冷傲娇</a-option>
-                          <a-option value="clingy">粘人依赖</a-option>
-                        </a-select>
-                      </a-form-item>
-                    </a-col>
-                  </a-row>
-
-                  <a-row :gutter="16">
-                    <a-col :span="12">
-                      <a-form-item label="交互频率">
-                        <a-select v-model="petProfile.interaction_freq" placeholder="选择交互频率">
-                          <a-option value="high">高频互动</a-option>
-                          <a-option value="medium">中等频率</a-option>
-                          <a-option value="low">低频互动</a-option>
-                        </a-select>
-                      </a-form-item>
-                    </a-col>
-                  </a-row>
-
-                  <a-divider>免打扰设置</a-divider>
-
-                  <a-row :gutter="16">
-                    <a-col :span="8">
-                      <a-form-item label="免打扰">
-                        <a-switch v-model="petProfile.dnd_enabled" />
-                      </a-form-item>
-                    </a-col>
-                    <a-col :span="8">
-                      <a-form-item label="开始时间" :disabled="!petProfile.dnd_enabled">
-                        <a-time-picker 
-                          v-model="petProfile.dnd_start_time" 
-                          format="HH:mm" 
-                          placeholder="选择开始时间" 
-                          style="width: 100%" 
-                          :disabled="!petProfile.dnd_enabled"
-                        />
-                      </a-form-item>
-                    </a-col>
-                    <a-col :span="8">
-                      <a-form-item label="结束时间" :disabled="!petProfile.dnd_enabled">
-                        <a-time-picker 
-                          v-model="petProfile.dnd_end_time" 
-                          format="HH:mm" 
-                          placeholder="选择结束时间" 
-                          style="width: 100%" 
-                          :disabled="!petProfile.dnd_enabled"
-                        />
-                      </a-form-item>
-                    </a-col>
-                  </a-row>
-
-                  <a-form-item>
-                    <a-space>
-                      <a-button type="primary" @click="savePetProfile" :loading="saving">
-                        保存配置
-                      </a-button>
-                      <a-button @click="loadPetProfile">
-                        重置
-                      </a-button>
-                    </a-space>
+        <!-- Tab 3: 宠物配置 -->
+        <a-tab-pane key="profile" title="宠物配置">
+          <a-card class="detail-card">
+            <template #title>
+              <span>宠物配置</span>
+            </template>
+            <a-form :model="petProfile" layout="vertical" class="pet-form">
+              <a-row :gutter="16">
+                <a-col :span="12">
+                  <a-form-item label="宠物名称">
+                    <a-input v-model="petProfile.pet_name" placeholder="请输入宠物名称" />
                   </a-form-item>
-                </a-form>
-              </a-card>
-            </a-tab-pane>
+                </a-col>
+                <a-col :span="12">
+                  <a-form-item label="宠物性格">
+                    <a-select v-model="petProfile.personality" placeholder="选择宠物性格">
+                      <a-option value="lively">活泼好动</a-option>
+                      <a-option value="cool">冷静沉稳</a-option>
+                      <a-option value="angry">高冷傲娇</a-option>
+                      <a-option value="clingy">粘人依赖</a-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
 
-            <!-- Tab 4: 指令历史 -->
-            <a-tab-pane key="commands" title="指令历史">
-              <a-card class="detail-card">
-                <template #title>
-                  <span>指令下发历史</span>
-                  <a-button type="text" size="small" @click="loadCommandHistory" style="float: right;">
-                    🔄 刷新
+              <a-row :gutter="16">
+                <a-col :span="12">
+                  <a-form-item label="交互频率">
+                    <a-select v-model="petProfile.interaction_freq" placeholder="选择交互频率">
+                      <a-option value="high">高频互动</a-option>
+                      <a-option value="medium">中等频率</a-option>
+                      <a-option value="low">低频互动</a-option>
+                    </a-select>
+                  </a-form-item>
+                </a-col>
+              </a-row>
+
+              <a-divider>免打扰设置</a-divider>
+
+              <a-row :gutter="16">
+                <a-col :span="8">
+                  <a-form-item label="免打扰">
+                    <a-switch v-model="petProfile.dnd_enabled" />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="8">
+                  <a-form-item label="开始时间" :disabled="!petProfile.dnd_enabled">
+                    <a-time-picker 
+                      v-model="petProfile.dnd_start_time" 
+                      format="HH:mm" 
+                      placeholder="选择开始时间" 
+                      style="width: 100%" 
+                      :disabled="!petProfile.dnd_enabled"
+                    />
+                  </a-form-item>
+                </a-col>
+                <a-col :span="8">
+                  <a-form-item label="结束时间" :disabled="!petProfile.dnd_enabled">
+                    <a-time-picker 
+                      v-model="petProfile.dnd_end_time" 
+                      format="HH:mm" 
+                      placeholder="选择结束时间" 
+                      style="width: 100%" 
+                      :disabled="!petProfile.dnd_enabled"
+                    />
+                  </a-form-item>
+                </a-col>
+              </a-row>
+
+              <a-form-item>
+                <a-space>
+                  <a-button type="primary" @click="savePetProfile" :loading="saving">
+                    保存配置
                   </a-button>
-                </template>
-                <a-table
-                  :columns="commandColumns"
-                  :data="commandHistory"
-                  :loading="commandLoading"
-                  :pagination="{ pageSize: 10 }"
-                  row-key="cmd_id"
-                >
-                  <template #cmd_type="{ record }">
-                    <a-tag :color="getCmdColor(record.cmd_type)">
-                      {{ getCmdText(record.cmd_type) }}
-                    </a-tag>
-                  </template>
-                  <template #status="{ record }">
-                    <a-badge :status="record.status === 'success' ? 'success' : record.status === 'failed' ? 'error' : 'processing'" />
-                    <span style="margin-left: 4px;">
-                      {{ record.status === 'success' ? '成功' : record.status === 'failed' ? '失败' : '处理中' }}
-                    </span>
-                  </template>
-                  <template #sent_at="{ record }">
-                    {{ formatTime(record.sent_at) }}
-                  </template>
-                </a-table>
-              </a-card>
-            </a-tab-pane>
-          </a-tabs>
-        </a-spin>
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+                  <a-button @click="loadPetProfile">
+                    重置
+                  </a-button>
+                </a-space>
+              </a-form-item>
+            </a-form>
+          </a-card>
+        </a-tab-pane>
+
+        <!-- Tab 4: 指令历史 -->
+        <a-tab-pane key="commands" title="指令历史">
+          <a-card class="detail-card">
+            <template #title>
+              <span>指令下发历史</span>
+              <a-button type="text" size="small" @click="loadCommandHistory" style="float: right;">
+                🔄 刷新
+              </a-button>
+            </template>
+            <a-table
+              :columns="commandColumns"
+              :data="commandHistory"
+              :loading="commandLoading"
+              :pagination="{ pageSize: 10 }"
+              row-key="cmd_id"
+            >
+              <template #cmd_type="{ record }">
+                <a-tag :color="getCmdColor(record.cmd_type)">
+                  {{ getCmdText(record.cmd_type) }}
+                </a-tag>
+              </template>
+              <template #status="{ record }">
+                <a-badge :status="record.status === 'success' ? 'success' : record.status === 'failed' ? 'error' : 'processing'" />
+                <span style="margin-left: 4px;">
+                  {{ record.status === 'success' ? '成功' : record.status === 'failed' ? '失败' : '处理中' }}
+                </span>
+              </template>
+              <template #sent_at="{ record }">
+                {{ formatTime(record.sent_at) }}
+              </template>
+            </a-table>
+          </a-card>
+        </a-tab-pane>
+      </a-tabs>
+    </a-spin>
+  </div>
 </template>
 
 <script setup>
@@ -344,8 +314,6 @@ const route = useRoute()
 const router = useRouter()
 
 const deviceId = ref(route.params.id || '')
-const collapsed = ref(false)
-const selectedKeys = ref(['dashboard'])
 const loading = ref(false)
 const activeTab = ref('info')
 
@@ -398,6 +366,7 @@ const commandColumns = [
 ]
 
 const statusLoading = ref(null)
+const commandLoading = ref(null)
 const saving = ref(false)
 let shadowPollingTimer = null
 
@@ -412,7 +381,6 @@ const loadDeviceDetail = async () => {
       Object.assign(deviceInfo, res.data.data)
     }
   } catch (err) {
-    // 使用模拟数据
     Object.assign(deviceInfo, {
       device_id: deviceId.value,
       mac_address: '00:11:22:33:44:55',
@@ -437,7 +405,6 @@ const loadDeviceShadow = async () => {
       Object.assign(shadow, res.data.data)
     }
   } catch (err) {
-    // 使用模拟数据
     Object.assign(shadow, {
       device_id: deviceId.value,
       is_online: true,
@@ -468,7 +435,6 @@ const loadPetProfile = async () => {
       petProfile.dnd_end_time = data.dnd_end_time ? dayjs(data.dnd_end_time, 'HH:mm') : null
     }
   } catch (err) {
-    // 使用模拟数据
     Object.assign(petProfile, {
       pet_name: 'Mimi',
       personality: 'lively',
@@ -499,7 +465,6 @@ const savePetProfile = async () => {
       Message.error(res.data.message || '保存失败')
     }
   } catch (err) {
-    // 模拟保存成功
     setTimeout(() => {
       Message.success('宠物配置已保存（模拟）')
     }, 500)
@@ -510,13 +475,13 @@ const savePetProfile = async () => {
 
 // 加载指令历史
 const loadCommandHistory = async () => {
+  commandLoading.value = 'loading'
   try {
     const res = await axios.get(`${API_BASE}/devices/${deviceId.value}/commands`)
     if (res.data.code === 0) {
       commandHistory.value = res.data.data || []
     }
   } catch (err) {
-    // 使用模拟数据
     commandHistory.value = [
       { cmd_id: 'cmd-001', cmd_type: 'reboot', status: 'success', sent_at: '2026-03-20T10:30:00Z', remark: '设备重启成功' },
       { cmd_id: 'cmd-002', cmd_type: 'sync_time', status: 'success', sent_at: '2026-03-20T09:00:00Z', remark: '时间同步完成' },
@@ -524,6 +489,8 @@ const loadCommandHistory = async () => {
       { cmd_id: 'cmd-004', cmd_type: 'factory_reset', status: 'failed', sent_at: '2026-03-18T11:00:00Z', remark: '恢复出厂设置失败-设备未响应' },
       { cmd_id: 'cmd-005', cmd_type: 'self_test', status: 'success', sent_at: '2026-03-17T14:30:00Z', remark: '设备自检通过' }
     ]
+  } finally {
+    commandLoading.value = null
   }
 }
 
@@ -598,27 +565,8 @@ const executeCommand = async (command, commandText) => {
   }
 }
 
-// Tab切换时加载数据
-const handleTabChange = (key) => {
-  if (key === 'shadow') {
-    loadDeviceShadow()
-  } else if (key === 'profile') {
-    loadPetProfile()
-  } else if (key === 'commands') {
-    loadCommandHistory()
-  }
-}
-
-// 辅助函数
 const goBack = () => {
-  router.push('/dashboard')
-}
-
-const handleMenuClick = ({ key }) => {
-  if (key === 'dashboard') router.push('/dashboard')
-  else if (key === 'ota') router.push('/ota')
-  else if (key === 'pet') router.push('/pet')
-  else if (key === 'status') router.push('/status')
+  router.push('/devices')
 }
 
 const getStatusColor = (status) => {
@@ -686,7 +634,6 @@ const formatTime = (time) => {
   return dayjs(time).format('YYYY-MM-DD HH:mm:ss')
 }
 
-// 启动影子轮询
 const startShadowPolling = () => {
   shadowPollingTimer = setInterval(() => {
     if (activeTab.value === 'shadow') {
@@ -708,52 +655,22 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.device-detail {
-  min-height: 100vh;
-}
-
-.logo {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
-  color: #fff;
-}
-
-.header {
+.page-container {
   background: #fff;
-  padding: 0 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  border-radius: 4px;
+  padding: 20px;
 }
 
-.header-left, .header-right {
-  display: flex;
-  align-items: center;
-}
-
-.header-title {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.content {
-  margin: 16px;
-  padding: 0;
-}
-
-.detail-card {
+.breadcrumb {
   margin-bottom: 16px;
 }
 
 .device-tabs {
   background: #fff;
-  padding: 16px;
-  border-radius: 4px;
+}
+
+.detail-card {
+  margin-bottom: 16px;
 }
 
 .status-current {

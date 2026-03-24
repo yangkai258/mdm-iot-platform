@@ -1,68 +1,68 @@
 <template>
-  <div class="pro-page-container">
+  <div class="page-container">
     <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
+    <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
       <a-breadcrumb-item>健康中心</a-breadcrumb-item>
       <a-breadcrumb-item>运动统计</a-breadcrumb-item>
     </a-breadcrumb>
 
     <!-- 搜索筛选区 -->
-    <div class="pro-search-bar">
-      <a-space>
-        <a-select v-model="timeRange" placeholder="时间范围" style="width: 120px" @change="loadStats">
-          <a-option value="day">今日</a-option>
-          <a-option value="week">本周</a-option>
-          <a-option value="month">本月</a-option>
-        </a-select>
-        <a-range-picker v-model="dateRange" style="width: 260px" @change="loadStats" />
-      </a-space>
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="时间范围">
+          <a-select v-model="searchForm.timeRange" placeholder="选择范围" style="width: 120px" @change="loadStats">
+            <a-option value="day">今日</a-option>
+            <a-option value="week">本周</a-option>
+            <a-option value="month">本月</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="自定义日期">
+          <a-range-picker v-model="searchForm.dateRange" style="width: 260px" @change="loadStats" />
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="loadStats">刷新</a-button>
+        </a-form-item>
+      </a-form>
     </div>
 
-    <!-- 操作按钮区 -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button type="primary" @click="loadStats">刷新</a-button>
-      </a-space>
-    </div>
-
-    <!-- 数据卡片区 -->
-    <a-row :gutter="16" class="stats-card-row">
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
       <a-col :span="6">
-        <a-card class="stat-card" hoverable>
+        <a-card class="stat-card">
           <a-statistic :value="statsData.duration" :precision="0" suffix="分钟">
             <template #prefix>
-              <icon-clock :size="24" style="color: #0fc6c8" />
+              <span>⏱️</span>
             </template>
             <template #title>运动时长</template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card class="stat-card" hoverable>
+        <a-card class="stat-card">
           <a-statistic :value="statsData.distance" :precision="1" suffix="公里">
             <template #prefix>
-              <icon-location :size="24" style="color: #1650d8" />
+              <span>📍</span>
             </template>
             <template #title>运动距离</template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card class="stat-card" hoverable>
+        <a-card class="stat-card">
           <a-statistic :value="statsData.calories" :precision="0" suffix="千卡">
             <template #prefix>
-              <icon-fire :size="24" style="color: #ff6700" />
+              <span>🔥</span>
             </template>
             <template #title>消耗卡路里</template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card class="stat-card" hoverable>
+        <a-card class="stat-card">
           <a-statistic :value="statsData.completion_rate" :precision="0" suffix="%">
             <template #prefix>
-              <icon-check-circle :size="24" style="color: #00b42a" />
+              <span>✅</span>
             </template>
             <template #title>目标完成率</template>
           </a-statistic>
@@ -70,18 +70,18 @@
       </a-col>
     </a-row>
 
-    <!-- 趋势图表区 -->
+    <!-- 操作栏 -->
+    <div class="toolbar">
+      <a-radio-group v-model="chartType" type="button" size="small">
+        <a-radio value="day">日</a-radio>
+        <a-radio value="week">周</a-radio>
+        <a-radio value="month">月</a-radio>
+      </a-radio-group>
+    </div>
+
+    <!-- 图表卡片 -->
     <a-card class="chart-card">
-      <template #title>
-        <a-space>
-          <span>运动趋势</span>
-          <a-radio-group v-model="chartType" type="button" size="small">
-            <a-radio value="day">日</a-radio>
-            <a-radio value="week">周</a-radio>
-            <a-radio value="month">月</a-radio>
-          </a-radio-group>
-        </a-space>
-      </template>
+      <template #title>运动趋势</template>
       <div class="chart-placeholder">
         <a-empty v-if="loading" description="加载中..." />
         <div v-else class="chart-content">
@@ -97,36 +97,36 @@
       </div>
     </a-card>
 
-    <!-- 运动记录列表 -->
-    <div class="pro-content-area">
-      <a-table :columns="columns" :data="exerciseRecords" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
-        <template #type="{ record }">
-          <a-tag :color="getExerciseColor(record.type)">
-            {{ getExerciseTypeName(record.type) }}
-          </a-tag>
-        </template>
-        <template #duration="{ record }">
-          {{ record.duration }} 分钟
-        </template>
-        <template #distance="{ record }">
-          {{ record.distance }} 公里
-        </template>
-        <template #calories="{ record }">
-          {{ record.calories }} 千卡
-        </template>
-      </a-table>
-    </div>
+    <!-- 表格 -->
+    <a-table :columns="columns" :data="exerciseRecords" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
+      <template #type="{ record }">
+        <a-tag :color="getExerciseColor(record.type)">
+          {{ getExerciseTypeName(record.type) }}
+        </a-tag>
+      </template>
+      <template #duration="{ record }">
+        {{ record.duration }} 分钟
+      </template>
+      <template #distance="{ record }">
+        {{ record.distance }} 公里
+      </template>
+      <template #calories="{ record }">
+        {{ record.calories }} 千卡
+      </template>
+    </a-table>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
-const timeRange = ref('week')
 const chartType = ref('week')
-const dateRange = ref([])
+
+const searchForm = reactive({
+  timeRange: 'week',
+  dateRange: []
+})
 
 const statsData = reactive({
   duration: 0,
@@ -164,7 +164,7 @@ const loadStats = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch(`/api/v1/health/exercise/stats?range=${timeRange.value}&chart=${chartType.value}`, {
+    const res = await fetch(`/api/v1/health/exercise/stats?range=${searchForm.timeRange}&chart=${chartType.value}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
@@ -172,7 +172,6 @@ const loadStats = async () => {
       Object.assign(statsData, data.data.stats || {})
       trendData.value = data.data.trend || []
     } else {
-      // 使用模拟数据
       loadMockData()
     }
   } catch (e) {
@@ -201,9 +200,7 @@ const exerciseRecords = ref([
   { id: 2, date: '2026-03-21', type: 'walk', duration: 60, distance: 4.5, calories: 180, completion: '100%' },
   { id: 3, date: '2026-03-20', type: 'cycling', duration: 90, distance: 18.5, calories: 650, completion: '92%' },
   { id: 4, date: '2026-03-19', type: 'swim', duration: 40, distance: 1.0, calories: 280, completion: '75%' },
-  { id: 5, date: '2026-03-18', type: 'gym', duration: 60, distance: 0, calories: 400, completion: '80%' },
-  { id: 6, date: '2026-03-17', type: 'run', duration: 30, distance: 3.0, calories: 200, completion: '60%' },
-  { id: 7, date: '2026-03-16', type: 'walk', duration: 45, distance: 3.5, calories: 140, completion: '90%' }
+  { id: 5, date: '2026-03-18', type: 'gym', duration: 60, distance: 0, calories: 400, completion: '80%' }
 ])
 
 onMounted(() => {
@@ -212,47 +209,33 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.pro-page-container {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
 }
 
-.pro-breadcrumb {
+.breadcrumb {
   margin-bottom: 16px;
 }
 
-.pro-search-bar {
-  margin-bottom: 12px;
-}
-
-.pro-action-bar {
+.search-form {
   margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
 }
 
-.stats-card-row {
+.stats-row {
   margin-bottom: 16px;
 }
 
 .stat-card {
-  border-radius: 8px;
   text-align: center;
-}
-
-.stat-card :deep(.arco-statistic .arco-statistic-title) {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #666;
-}
-
-.stat-card :deep(.arco-statistic .arco-statistic-value) {
-  font-size: 28px;
-  font-weight: 600;
 }
 
 .chart-card {
   margin-bottom: 16px;
-  border-radius: 8px;
 }
 
 .chart-placeholder {
@@ -307,10 +290,7 @@ onMounted(() => {
   color: #666;
 }
 
-.pro-content-area {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+.toolbar {
+  margin-bottom: 16px;
 }
 </style>

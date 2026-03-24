@@ -1,68 +1,76 @@
 <template>
-  <div class="pro-page-container">
+  <div class="page-container">
     <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
+    <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
       <a-breadcrumb-item>健康中心</a-breadcrumb-item>
       <a-breadcrumb-item>健康预警</a-breadcrumb-item>
     </a-breadcrumb>
 
     <!-- 搜索筛选区 -->
-    <div class="pro-search-bar">
-      <a-space>
-        <a-input-search
-          v-model="searchKeyword"
-          placeholder="搜索预警内容"
-          style="width: 280px"
-          @search="loadWarnings"
-          search-button
-        />
-        <a-select v-model="filterLevel" placeholder="预警级别" allow-clear style="width: 120px" @change="loadWarnings">
-          <a-option value="critical">危急</a-option>
-          <a-option value="high">高</a-option>
-          <a-option value="medium">中</a-option>
-          <a-option value="low">低</a-option>
-        </a-select>
-        <a-select v-model="filterStatus" placeholder="处理状态" allow-clear style="width: 120px" @change="loadWarnings">
-          <a-option value="pending">待处理</a-option>
-          <a-option value="confirmed">已确认</a-option>
-          <a-option value="ignored">已忽略</a-option>
-        </a-select>
-      </a-space>
-    </div>
-
-    <!-- 操作按钮区 -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button type="primary" @click="loadWarnings">刷新</a-button>
-      </a-space>
-    </div>
-
-    <!-- 预警列表 -->
-    <div class="pro-content-area">
-      <a-table :columns="columns" :data="warnings" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
-        <template #level="{ record }">
-          <a-tag :color="getLevelColor(record.level)">
-            {{ getLevelText(record.level) }}
-          </a-tag>
-        </template>
-        <template #status="{ record }">
-          <a-tag :color="getStatusColor(record.status)">
-            {{ getStatusText(record.status) }}
-          </a-tag>
-        </template>
-        <template #disease_name="{ record }">
-          <a-link @click="showDetail(record)">{{ record.disease_name }}</a-link>
-        </template>
-        <template #actions="{ record }">
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="关键词">
+          <a-input-search
+            v-model="searchForm.keyword"
+            placeholder="搜索预警内容"
+            style="width: 280px"
+            @search="loadWarnings"
+            search-button
+          />
+        </a-form-item>
+        <a-form-item label="预警级别">
+          <a-select v-model="searchForm.level" placeholder="选择级别" allow-clear style="width: 120px">
+            <a-option value="critical">危急</a-option>
+            <a-option value="high">高</a-option>
+            <a-option value="medium">中</a-option>
+            <a-option value="low">低</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="处理状态">
+          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 120px">
+            <a-option value="pending">待处理</a-option>
+            <a-option value="confirmed">已确认</a-option>
+            <a-option value="ignored">已忽略</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
           <a-space>
-            <a-button type="text" size="small" @click="showDetail(record)">详情</a-button>
-            <a-button type="text" size="small" status="success" @click="confirmWarning(record)" :disabled="record.status !== 'pending'">确认</a-button>
-            <a-button type="text" size="small" status="warning" @click="ignoreWarning(record)" :disabled="record.status !== 'pending'">忽略</a-button>
+            <a-button type="primary" @click="handleSearch">搜索</a-button>
+            <a-button @click="handleReset">重置</a-button>
           </a-space>
-        </template>
-      </a-table>
+        </a-form-item>
+      </a-form>
     </div>
+
+    <!-- 操作栏 -->
+    <div class="toolbar">
+      <a-button type="primary" @click="loadWarnings">刷新</a-button>
+    </div>
+
+    <!-- 表格 -->
+    <a-table :columns="columns" :data="warnings" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
+      <template #level="{ record }">
+        <a-tag :color="getLevelColor(record.level)">
+          {{ getLevelText(record.level) }}
+        </a-tag>
+      </template>
+      <template #status="{ record }">
+        <a-tag :color="getStatusColor(record.status)">
+          {{ getStatusText(record.status) }}
+        </a-tag>
+      </template>
+      <template #disease_name="{ record }">
+        <a-link @click="showDetail(record)">{{ record.disease_name }}</a-link>
+      </template>
+      <template #actions="{ record }">
+        <a-space>
+          <a-button type="text" size="small" @click="showDetail(record)">详情</a-button>
+          <a-button type="text" size="small" status="success" @click="confirmWarning(record)" :disabled="record.status !== 'pending'">确认</a-button>
+          <a-button type="text" size="small" status="warning" @click="ignoreWarning(record)" :disabled="record.status !== 'pending'">忽略</a-button>
+        </a-space>
+      </template>
+    </a-table>
 
     <!-- 预警详情弹窗 -->
     <a-modal v-model:visible="detailVisible" title="预警详情" :width="600" :footer="modalFooter">
@@ -94,11 +102,14 @@ import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
 const warnings = ref([])
-const searchKeyword = ref('')
-const filterLevel = ref('')
-const filterStatus = ref('')
 const detailVisible = ref(false)
 const currentWarning = ref(null)
+
+const searchForm = reactive({
+  keyword: '',
+  level: '',
+  status: ''
+})
 
 const columns = [
   { title: '预警编号', dataIndex: 'id', width: 100 },
@@ -137,9 +148,9 @@ const loadWarnings = async () => {
   try {
     const token = localStorage.getItem('token')
     const params = new URLSearchParams()
-    if (searchKeyword.value) params.append('keyword', searchKeyword.value)
-    if (filterLevel.value) params.append('level', filterLevel.value)
-    if (filterStatus.value) params.append('status', filterStatus.value)
+    if (searchForm.keyword) params.append('keyword', searchForm.keyword)
+    if (searchForm.level) params.append('level', searchForm.level)
+    if (searchForm.status) params.append('status', searchForm.status)
     
     const res = await fetch(`/api/v1/health/warnings?${params}`, {
       headers: { 'Authorization': `Bearer ${token}` }
@@ -148,7 +159,6 @@ const loadWarnings = async () => {
     if (data.code === 0) {
       warnings.value = data.data?.list || []
     } else {
-      // 使用模拟数据
       warnings.value = generateMockData()
     }
   } catch (e) {
@@ -161,11 +171,22 @@ const loadWarnings = async () => {
 
 const generateMockData = () => [
   { id: 1, disease_name: '高血压风险', level: 'high', description: '连续3天血压监测偏高，建议密切观察', risk_factors: '高盐饮食、缺乏运动', suggestion: '减少盐分摄入，增加有氧运动', status: 'pending', created_at: '2026-03-22 10:30:00' },
-  { id: 2, disease_name: '睡眠呼吸暂停', level: 'critical', description: '夜间血氧饱和度多次低于90%', risk_factors: '肥胖、鼻腔阻塞', suggestion: '建议就医进行睡眠监测', status: 'pending', created_at: '2026-03-22 08:00:00' },
+  { id: 2, disease_name: '睡眠呼吸暂停', level: 'critical', description: '夜间血氧饱和度多次低于90%', risk_factors: '肥胖，鼻腔阻塞', suggestion: '建议就医进行睡眠监测', status: 'pending', created_at: '2026-03-22 08:00:00' },
   { id: 3, disease_name: '心律不齐', level: 'medium', description: '心电图检测到偶发早搏', risk_factors: '咖啡因摄入过多、压力大', suggestion: '减少咖啡因摄入，保持规律作息', status: 'confirmed', created_at: '2026-03-21 15:20:00' },
   { id: 4, disease_name: '体重异常波动', level: 'low', description: '一周内体重下降超过5%', risk_factors: '未知', suggestion: '关注饮食，如有持续请就医', status: 'ignored', created_at: '2026-03-20 09:00:00' },
   { id: 5, disease_name: '血糖偏高', level: 'high', description: '空腹血糖持续高于正常值上限', risk_factors: '高糖饮食、缺乏运动', suggestion: '调整饮食结构，增加运动', status: 'pending', created_at: '2026-03-22 11:45:00' }
 ]
+
+const handleSearch = () => {
+  loadWarnings()
+}
+
+const handleReset = () => {
+  searchForm.keyword = ''
+  searchForm.level = ''
+  searchForm.status = ''
+  loadWarnings()
+}
 
 const showDetail = (record) => {
   currentWarning.value = record
@@ -220,28 +241,24 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.pro-page-container {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
-}
-
-.pro-breadcrumb {
-  margin-bottom: 16px;
-}
-
-.pro-search-bar {
-  margin-bottom: 12px;
-}
-
-.pro-action-bar {
-  margin-bottom: 16px;
-}
-
-.pro-content-area {
+.page-container {
   background: #fff;
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
 }
 </style>

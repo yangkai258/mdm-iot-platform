@@ -1,45 +1,47 @@
 <template>
-  <div class="login-container">
-    <a-card class="login-card">
-      <template #title>
-        <div class="login-title">
-          <span>MDM 控制中台</span>
-        </div>
-      </template>
-      
-      <a-form
-        :model="form"
-        :rules="rules"
-        @submit.prevent="handleLogin"
-      >
-        <a-form-item field="username" label="用户名">
-          <a-input v-model="form.username" placeholder="请输入用户名" allow-clear>
-            <template #prefix>
-              <span>👤</span>
-            </template>
-          </a-input>
-        </a-form-item>
+  <div class="login-wrapper">
+    <div class="login-container">
+      <a-card class="login-card">
+        <template #title>
+          <div class="login-title">
+            <span>MDM 控制中台</span>
+          </div>
+        </template>
         
-        <a-form-item field="password" label="密码">
-          <a-input
-            v-model="form.password"
-            placeholder="请输入密码"
-            password
-            allow-clear
-          >
-            <template #prefix>
-              <span>🔒</span>
-            </template>
-          </a-input>
-        </a-form-item>
-        
-        <a-form-item>
-          <a-button type="primary" html-type="submit" long :loading="loading">
-            登录
-          </a-button>
-        </a-form-item>
-      </a-form>
-    </a-card>
+        <a-form
+          :model="form"
+          :rules="rules"
+          @submit.prevent="handleLogin"
+        >
+          <a-form-item field="username" label="用户名">
+            <a-input v-model="form.username" placeholder="请输入用户名" allow-clear>
+              <template #prefix>
+                <icon-user />
+              </template>
+            </a-input>
+          </a-form-item>
+          
+          <a-form-item field="password" label="密码">
+            <a-input
+              v-model="form.password"
+              placeholder="请输入密码"
+             Password
+              allow-clear
+            >
+              <template #prefix>
+                <icon-lock />
+              </template>
+            </a-input>
+          </a-form-item>
+          
+          <a-form-item>
+            <a-button type="primary" html-type="submit" long :loading="loading">
+              登录
+            </a-button>
+          </a-form-item>
+        </a-form>
+      </a-card>
+    </div>
   </div>
 </template>
 
@@ -93,7 +95,7 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-.login-container {
+.login-wrapper {
   min-height: 100vh;
   display: flex;
   align-items: center;

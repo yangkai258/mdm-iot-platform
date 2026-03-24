@@ -230,14 +230,14 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import {
   IconRefresh,
-  IconDriveInfo,
-  IconLight,
+  IconDriveFile,
+  IconSunFill,
   IconHome,
   IconVideoCamera,
-  IconPower,
+  IconPoweroff,
   IconLink,
   IconClose
-} from '@arco-design/web-icons/vue'
+} from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const devices = ref([])
@@ -285,9 +285,9 @@ function getDeviceIconClass(type) {
 
 function getDeviceIcon(type) {
   const map = {
-    light: IconLight,
-    ac: IconLight,
-    switch: IconPower,
+    light: IconSunFill,
+    ac: IconSunFill,
+    switch: IconPoweroff,
     camera: IconVideoCamera
   }
   return map[type] || IconHome

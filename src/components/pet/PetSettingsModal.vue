@@ -1,6 +1,6 @@
 <template>
   <a-modal
-    v-model:visible="visible"
+    :visible="visible"
     title="宠物设置"
     :width="480"
     @ok="handleSave"

@@ -177,8 +177,8 @@ import {
   IconSend,
   IconClose,
   IconCheckCircle,
-  IconAllApplication
-} from '@arco-design/web-icons/vue'
+  IconApps
+} from '@arco-design/web-vue/es/icon'
 import { useNotificationStats } from '@/composables/useNotification'
 import { CHANNEL_TYPE_MAP } from '@/composables/useNotification'
 

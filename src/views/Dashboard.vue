@@ -38,7 +38,7 @@
       </a-col>
     </a-row>
 
-    <!-- 最近告警卡片 -->
+    <!-- 数据展示区 -->
     <a-row :gutter="16" style="margin-top: 16px;">
       <a-col :span="12">
         <a-card title="设备状态分布">
@@ -55,6 +55,9 @@
       <a-col :span="12">
         <a-card title="最近告警">
           <a-list :data-source="recentAlerts">
+            <template #empty>
+              <a-empty description="暂无告警" />
+            </template>
             <a-list-item v-for="alert in recentAlerts" :key="alert.id">
               <a-list-item-meta>
                 <template #avatar>
@@ -66,7 +69,6 @@
                 <template #description>{{ alert.device_id }} - {{ alert.created_at }}</template>
               </a-list-item-meta>
             </a-list-item>
-            <a-empty v-if="recentAlerts.length === 0" description="暂无告警" />
           </a-list>
         </a-card>
       </a-col>
@@ -136,9 +138,9 @@ onMounted(() => {
 
 <style scoped>
 .page-container {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
 }
 
 .breadcrumb {

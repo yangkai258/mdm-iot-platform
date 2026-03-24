@@ -62,3 +62,29 @@ export async function deleteConversation(petId, conversationId) {
   const res = await axios.delete(`${BASE_URL}/pets/${petId}/conversations/${conversationId}`, { headers: headers() })
   return res.data
 }
+
+// ========== 宠物状态 & 设置（兼容别名） ==========
+export async function getPetStatus(id) {
+  const res = await axios.get(`${BASE_URL}/pets/${id}/status`, { headers: headers() })
+  return res.data
+}
+
+export async function sendMessage(petId, data) {
+  const res = await axios.post(`${BASE_URL}/pets/${petId}/messages`, data, { headers: headers() })
+  return res.data
+}
+
+export async function executeAction(petId, data) {
+  const res = await axios.post(`${BASE_URL}/pets/${petId}/actions`, data, { headers: headers() })
+  return res.data
+}
+
+export async function updatePetSettings(petId, settings) {
+  const res = await axios.put(`${BASE_URL}/pets/${petId}/settings`, settings, { headers: headers() })
+  return res.data
+}
+
+export async function createConversation(petId, data) {
+  const res = await axios.post(`${BASE_URL}/pets/${petId}/conversations`, data, { headers: headers() })
+  return res.data
+}

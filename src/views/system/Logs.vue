@@ -1,59 +1,77 @@
 <template>
-  <div class="logs-container">
-    <a-card>
-      <template #title>
-        <div class="card-title">
-          <span>操作日志</span>
-        </div>
-      </template>
-      
-      <a-form :model="query" layout="inline">
-        <a-form-item field="username" label="用户名">
-          <a-input v-model="query.username" placeholder="请输入用户名" allow-clear style="width: 150px" />
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>系统管理</a-breadcrumb-item>
+      <a-breadcrumb-item>操作日志</a-breadcrumb-item>
+    </a-breadcrumb>
+
+    <!-- 搜索筛选区 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="用户名">
+          <a-input v-model="searchForm.username" placeholder="请输入用户名" allow-clear style="width: 150px" />
         </a-form-item>
-        <a-form-item field="module" label="模块">
-          <a-select v-model="query.module" placeholder="选择模块" allow-clear style="width: 150px">
+        <a-form-item label="模块">
+          <a-select v-model="searchForm.module" placeholder="选择模块" allow-clear style="width: 150px">
             <a-option value="devices">设备管理</a-option>
             <a-option value="ota">OTA管理</a-option>
             <a-option value="auth">认证</a-option>
           </a-select>
         </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 120px">
+            <a-option :value="1">成功</a-option>
+            <a-option :value="2">失败</a-option>
+          </a-select>
+        </a-form-item>
         <a-form-item>
-          <a-button type="primary" @click="loadLogs">查询</a-button>
+          <a-space>
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-space>
         </a-form-item>
       </a-form>
+    </div>
 
-      <a-table
-        :columns="columns"
-        :data="logs"
-        :loading="loading"
-        :pagination="pagination"
-        @change="handleTableChange"
-        row-key="id"
-        style="margin-top: 16px"
-      >
-        <template #status="{ record }">
-          <a-tag :color="record.status === 1 ? 'green' : 'red'">
-            {{ record.status === 1 ? '成功' : '失败' }}
-          </a-tag>
-        </template>
-        <template #duration="{ record }">
-          {{ record.duration }}ms
-        </template>
-      </a-table>
-    </a-card>
+    <!-- 操作栏 -->
+    <div class="toolbar">
+      <a-button @click="handleExport">导出日志</a-button>
+    </div>
+
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="logs"
+      :loading="loading"
+      :pagination="pagination"
+      @change="handleTableChange"
+      row-key="id"
+    >
+      <template #status="{ record }">
+        <a-tag :color="record.status === 1 ? 'green' : 'red'">
+          {{ record.status === 1 ? '成功' : '失败' }}
+        </a-tag>
+      </template>
+      <template #duration="{ record }">
+        {{ record.duration }}ms
+      </template>
+    </a-table>
   </div>
 </template>
 
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
 const logs = ref([])
 
-const query = reactive({
+const searchForm = reactive({
   username: '',
-  module: ''
+  module: '',
+  status: ''
 })
 
 const pagination = reactive({
@@ -93,9 +111,26 @@ const loadLogs = async () => {
   }
 }
 
+const handleSearch = () => {
+  pagination.current = 1
+  loadLogs()
+}
+
+const handleReset = () => {
+  searchForm.username = ''
+  searchForm.module = ''
+  searchForm.status = ''
+  pagination.current = 1
+  loadLogs()
+}
+
 const handleTableChange = (pag) => {
   pagination.current = pag.current
   loadLogs()
+}
+
+const handleExport = () => {
+  Message.success('日志导出功能开发中')
 }
 
 onMounted(() => {
@@ -104,12 +139,24 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.logs-container {
-  padding: 16px;
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
 }
 
-.card-title {
-  font-size: 16px;
-  font-weight: bold;
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
 }
 </style>

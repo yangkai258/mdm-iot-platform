@@ -280,13 +280,11 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import {
-  IconShoppingCart,
   IconThumbUp,
   IconImage,
-  IconCart,
   IconDelete,
   IconCheckCircle
-} from '@arco-design/web-icons/vue'
+} from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const products = ref([])

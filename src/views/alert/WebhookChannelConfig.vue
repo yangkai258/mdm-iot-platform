@@ -103,10 +103,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconDelete, IconPlus } from '@arco-design/web-icons/vue'
+import { IconDelete, IconPlus } from '@arco-design/web-vue/es/icon'
 import { useNotificationChannels } from '@/composables/useNotification'
 import type { NotificationChannel } from '@/api/notification'
 

@@ -161,7 +161,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
 import {

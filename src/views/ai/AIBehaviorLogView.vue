@@ -1,99 +1,106 @@
 <template>
-  <div class="pro-page-container">
+  <div class="page-container">
     <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
+    <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
       <a-breadcrumb-item>AI 管理</a-breadcrumb-item>
       <a-breadcrumb-item>AI 行为日志</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- 搜索栏 -->
-    <div class="pro-search-bar">
-      <a-space wrap>
-        <a-input-search
-          v-model="filters.keyword"
-          placeholder="搜索设备/用户"
-          style="width: 200px"
-          search-button
-          @search="loadLogs"
-        />
-        <a-select v-model="filters.model_version" placeholder="模型版本" allow-clear style="width: 160px" @change="loadLogs">
-          <a-option value="MiniClaw-v2.1.3">MiniClaw v2.1.3</a-option>
-          <a-option value="MiniClaw-v2.1.2">MiniClaw v2.1.2</a-option>
-          <a-option value="Behavior-v1.5.0">Behavior v1.5.0</a-option>
-        </a-select>
-        <a-select v-model="filters.behavior_type" placeholder="事件类型" allow-clear style="width: 160px" @change="loadLogs">
-          <a-option value="intent_recognition">意图识别</a-option>
-          <a-option value="response_generation">响应生成</a-option>
-          <a-option value="action_selection">动作选择</a-option>
-        </a-select>
-        <a-select v-model="filters.status" placeholder="状态" allow-clear style="width: 120px" @change="loadLogs">
-          <a-option value="success">成功</a-option>
-          <a-option value="error">错误</a-option>
-          <a-option value="anomaly">异常</a-option>
-        </a-select>
-        <a-range-picker
-          v-model="filters.time_range"
-          show-time
-          format="YYYY-MM-DD HH:mm"
-          @change="loadLogs"
-          style="width: 280px"
-        />
-      </a-space>
+    <!-- 搜索筛选区 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="关键词">
+          <a-input-search
+            v-model="searchForm.keyword"
+            placeholder="搜索设备/用户"
+            style="width: 200px"
+            search-button
+            @search="loadLogs"
+          />
+        </a-form-item>
+        <a-form-item label="模型版本">
+          <a-select v-model="searchForm.model_version" placeholder="选择版本" allow-clear style="width: 160px">
+            <a-option value="MiniClaw-v2.1.3">MiniClaw v2.1.3</a-option>
+            <a-option value="MiniClaw-v2.1.2">MiniClaw v2.1.2</a-option>
+            <a-option value="Behavior-v1.5.0">Behavior v1.5.0</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="事件类型">
+          <a-select v-model="searchForm.behavior_type" placeholder="选择类型" allow-clear style="width: 160px">
+            <a-option value="intent_recognition">意图识别</a-option>
+            <a-option value="response_generation">响应生成</a-option>
+            <a-option value="action_selection">动作选择</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 120px">
+            <a-option value="success">成功</a-option>
+            <a-option value="error">错误</a-option>
+            <a-option value="anomaly">异常</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="时间范围">
+          <a-range-picker
+            v-model="searchForm.time_range"
+            show-time
+            format="YYYY-MM-DD HH:mm"
+            style="width: 280px"
+          />
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="loadLogs">搜索</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
     </div>
 
-    <!-- 操作按钮 -->
-    <div class="pro-action-bar">
+    <!-- 操作栏 -->
+    <div class="toolbar">
       <a-space>
-        <a-button type="primary" @click="loadLogs">
-          <template #icon><icon-refresh /></template>
-          刷新
-        </a-button>
-        <a-button @click="handleExport">
-          <template #icon><icon-download /></template>
-          导出
-        </a-button>
+        <a-button type="primary" @click="loadLogs">刷新</a-button>
+        <a-button @click="handleExport">导出</a-button>
       </a-space>
     </div>
 
-    <!-- 数据表格 -->
-    <div class="pro-content-area">
-      <a-table
-        :columns="columns"
-        :data="logList"
-        :loading="logLoading"
-        :pagination="pagination"
-        row-key="id"
-        @page-change="handlePageChange"
-        @page-size-change="handlePageSizeChange"
-        @row-click="handleRowClick"
-        :row-class="getRowClass"
-        :scroll="{ x: 1200 }"
-      >
-        <template #created_at="{ record }">
-          {{ formatTime(record.created_at) }}
-        </template>
-        <template #behavior_type="{ record }">
-          <a-tag :color="getBehaviorTypeColor(record.behavior_type)">
-            {{ getBehaviorTypeText(record.behavior_type) }}
-          </a-tag>
-        </template>
-        <template #latency_ms="{ record }">
-          {{ record.latency_ms }}ms
-        </template>
-        <template #confidence="{ record }">
-          <span>{{ record.confidence ? (record.confidence * 100).toFixed(1) : '--' }}%</span>
-        </template>
-        <template #status="{ record }">
-          <a-tag v-if="record.is_anomaly" color="red">异常</a-tag>
-          <a-tag v-else-if="record.error_code" color="orange">错误</a-tag>
-          <a-tag v-else color="green">正常</a-tag>
-        </template>
-        <template #actions="{ record }">
-          <a-button type="text" size="small" @click.stop="goToDetail(record.id)">详情</a-button>
-        </template>
-      </a-table>
-    </div>
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="logList"
+      :loading="logLoading"
+      :pagination="pagination"
+      row-key="id"
+      @page-change="handlePageChange"
+      @page-size-change="handlePageSizeChange"
+      @row-click="handleRowClick"
+      :row-class="getRowClass"
+      :scroll="{ x: 1200 }"
+    >
+      <template #created_at="{ record }">
+        {{ formatTime(record.created_at) }}
+      </template>
+      <template #behavior_type="{ record }">
+        <a-tag :color="getBehaviorTypeColor(record.behavior_type)">
+          {{ getBehaviorTypeText(record.behavior_type) }}
+        </a-tag>
+      </template>
+      <template #latency_ms="{ record }">
+        {{ record.latency_ms }}ms
+      </template>
+      <template #confidence="{ record }">
+        <span>{{ record.confidence ? (record.confidence * 100).toFixed(1) : '--' }}%</span>
+      </template>
+      <template #status="{ record }">
+        <a-tag v-if="record.is_anomaly" color="red">异常</a-tag>
+        <a-tag v-else-if="record.error_code" color="orange">错误</a-tag>
+        <a-tag v-else color="green">正常</a-tag>
+      </template>
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click.stop="goToDetail(record.id)">详情</a-button>
+      </template>
+    </a-table>
   </div>
 </template>
 
@@ -101,15 +108,13 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
-import { getAiMonitorEvents } from '@/api/ai'
 
 const router = useRouter()
 
 const logLoading = ref(false)
 const logList = ref([])
-const logTotal = ref(0)
 
-const filters = reactive({
+const searchForm = reactive({
   keyword: '',
   model_version: undefined,
   behavior_type: undefined,
@@ -165,25 +170,41 @@ const loadLogs = async () => {
       page: pagination.current,
       page_size: pagination.pageSize
     }
-    if (filters.keyword) params.keyword = filters.keyword
-    if (filters.model_version) params.model_version = filters.model_version
-    if (filters.behavior_type) params.behavior_type = filters.behavior_type
-    if (filters.status) params.status = filters.status
-    if (filters.time_range && filters.time_range.length === 2) {
-      params.start_time = filters.time_range[0].toISOString()
-      params.end_time = filters.time_range[1].toISOString()
+    if (searchForm.keyword) params.keyword = searchForm.keyword
+    if (searchForm.model_version) params.model_version = searchForm.model_version
+    if (searchForm.behavior_type) params.behavior_type = searchForm.behavior_type
+    if (searchForm.status) params.status = searchForm.status
+    if (searchForm.time_range && searchForm.time_range.length === 2) {
+      params.start_time = searchForm.time_range[0].toISOString()
+      params.end_time = searchForm.time_range[1].toISOString()
     }
 
-    const res = await getAiMonitorEvents(params)
-    if (res.code === 0) {
-      logList.value = res.data.list || []
-      pagination.total = res.data.total || 0
+    const token = localStorage.getItem('token')
+    const res = await fetch('/api/v1/ai/events', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const data = await res.json()
+    if (data.code === 0) {
+      logList.value = data.data?.list || []
+      pagination.total = data.data?.total || 0
+    } else {
+      logList.value = []
     }
   } catch (e) {
     Message.error('加载失败')
   } finally {
     logLoading.value = false
   }
+}
+
+const handleReset = () => {
+  searchForm.keyword = ''
+  searchForm.model_version = undefined
+  searchForm.behavior_type = undefined
+  searchForm.status = undefined
+  searchForm.time_range = []
+  pagination.current = 1
+  loadLogs()
 }
 
 const handlePageChange = (page) => {
@@ -239,16 +260,38 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.pro-breadcrumb { margin-bottom: 16px; }
-.pro-search-bar { margin-bottom: 12px; }
-.pro-action-bar { margin-bottom: 16px; display: flex; justify-content: flex-start; }
-.pro-content-area {
-  background: #fff; border-radius: 8px; padding: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
 }
 
-:deep(.row-anomaly) { background: #fff1f0; cursor: pointer; }
-:deep(.row-error) { background: #fff7e6; cursor: pointer; }
-:deep(.arco-table-tr) { cursor: pointer; }
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
+}
+
+:deep(.row-anomaly) {
+  background: #fff1f0;
+  cursor: pointer;
+}
+
+:deep(.row-error) {
+  background: #fff7e6;
+  cursor: pointer;
+}
+
+:deep(.arco-table-tr) {
+  cursor: pointer;
+}
 </style>

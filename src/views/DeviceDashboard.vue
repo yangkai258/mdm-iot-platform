@@ -1,95 +1,95 @@
 <template>
-  <a-layout class="device-dashboard">
-    <a-layout-sider v-model:collapsed="collapsed" :trigger="null" collapsible>
-      <div class="logo">
-        <span v-if="!collapsed">MDM 控制台</span>
-      </div>
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline" @click="handleMenuClick">
-        <a-menu-item key="dashboard">
-          <span>设备大盘</span>
-        </a-menu-item>
-        <a-menu-item key="status">
-          <span>设备状态</span>
-        </a-menu-item>
-        <a-menu-item key="pet">
-          <span>宠物配置</span>
-        </a-menu-item>
-        <a-menu-item key="ota">
-          <span>OTA 固件</span>
-        </a-menu-item>
-      </a-menu>
-    </a-layout-sider>
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>设备管理</a-breadcrumb-item>
+      <a-breadcrumb-item>设备大盘</a-breadcrumb-item>
+    </a-breadcrumb>
 
-    <a-layout>
-      <a-layout-header class="header">
-        <div class="header-left">
-          <a-button type="text" @click="collapsed = !collapsed">
-            <span v-if="collapsed">☰</span>
-            <span v-else>✕</span>
-          </a-button>
-        </div>
-        <div class="header-right">
-          <a-badge :count="warningCount">
-            <span>🔔</span>
-          </a-badge>
-        </div>
-      </a-layout-header>
+    <!-- 搜索筛选区 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="设备ID">
+          <a-input v-model="searchForm.device_id" placeholder="请输入设备ID" allow-clear />
+        </a-form-item>
+        <a-form-item label="硬件型号">
+          <a-select v-model="searchForm.hardware_model" placeholder="选择型号" allow-clear style="width: 160px">
+            <a-option value="MDM-Pro-200">MDM-Pro-200</a-option>
+            <a-option value="MDM-Mini-100">MDM-Mini-100</a-option>
+            <a-option value="MDM-Lite-50">MDM-Lite-50</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 120px">
+            <a-option :value="1">待激活</a-option>
+            <a-option :value="2">服役中</a-option>
+            <a-option :value="3">维修中</a-option>
+            <a-option :value="4">已挂失</a-option>
+            <a-option :value="5">已报废</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleSearch">搜索</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </div>
 
-      <a-layout-content class="content">
-        <a-row :gutter="16" class="stats-row">
-          <a-col :span="8">
-            <a-card>
-              <a-statistic title="总设备数" :value="stats.total" />
-            </a-card>
-          </a-col>
-          <a-col :span="8">
-            <a-card>
-              <a-statistic title="当前在线" :value="stats.online" :value-style="{ color: '#52c41a' }" />
-            </a-card>
-          </a-col>
-          <a-col :span="8">
-            <a-card>
-              <a-statistic title="离线告警" :value="stats.offline" :value-style="{ color: '#ff4d4f' }" />
-            </a-card>
-          </a-col>
-        </a-row>
-
-        <a-card class="device-table-card">
-          <template #title>
-            <div class="table-title">
-              <span>设备列表</span>
-              <a-button type="primary" @click="loadDevices">刷新</a-button>
-            </div>
-          </template>
-
-          <a-table
-            :columns="columns"
-            :data="devices"
-            :loading="loading"
-            :pagination="pagination"
-            @change="handleTableChange"
-            row-key="device_id"
-          >
-            <template #isOnline="{ record }">
-              <a-badge :status="record.is_online ? 'success' : 'default'" :text="record.is_online ? '在线' : '离线'" />
-            </template>
-            <template #batteryLevel="{ record }">
-              <a-progress :percent="record.battery_level" :stroke-width="6" :show-text="true" v-if="record.battery_level > 0" />
-              <span v-else>-</span>
-            </template>
-            <template #lifecycleStatus="{ record }">
-              <a-tag :color="getStatusColor(record.lifecycle_status)">
-                {{ getStatusText(record.lifecycle_status) }}
-              </a-tag>
-            </template>
-            <template #actions="{ record }">
-              <a-button type="primary" size="small" @click="viewDevice(record)">详情</a-button>
-            </template>
-          </a-table>
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
+      <a-col :span="8">
+        <a-card>
+          <a-statistic title="总设备数" :value="stats.total" />
         </a-card>
-      </a-layout-content>
-    </a-layout>
-  </a-layout>
+      </a-col>
+      <a-col :span="8">
+        <a-card>
+          <a-statistic title="当前在线" :value="stats.online" :value-style="{ color: '#52c41a' }" />
+        </a-card>
+      </a-col>
+      <a-col :span="8">
+        <a-card>
+          <a-statistic title="离线告警" :value="stats.offline" :value-style="{ color: '#ff4d4f' }" />
+        </a-card>
+      </a-col>
+    </a-row>
+
+    <!-- 操作栏 -->
+    <div class="toolbar">
+      <a-button type="primary" @click="loadDevices">刷新</a-button>
+    </div>
+
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="devices"
+      :loading="loading"
+      :pagination="pagination"
+      @change="handleTableChange"
+      row-key="device_id"
+    >
+      <template #isOnline="{ record }">
+        <a-badge :status="record.is_online ? 'success' : 'default'" :text="record.is_online ? '在线' : '离线'" />
+      </template>
+      <template #batteryLevel="{ record }">
+        <a-progress :percent="record.battery_level" :stroke-width="6" :show-text="true" v-if="record.battery_level > 0" />
+        <span v-else>-</span>
+      </template>
+      <template #lifecycleStatus="{ record }">
+        <a-tag :color="getStatusColor(record.lifecycle_status)">
+          {{ getStatusText(record.lifecycle_status) }}
+        </a-tag>
+      </template>
+      <template #actions="{ record }">
+        <a-space>
+          <a-button type="text" size="small" @click="viewDevice(record)">详情</a-button>
+        </a-space>
+      </template>
+    </a-table>
+  </div>
 </template>
 
 <script setup>
@@ -100,11 +100,14 @@ import axios from 'axios'
 
 const router = useRouter()
 
-const collapsed = ref(false)
-const selectedKeys = ref(['dashboard'])
 const devices = ref([])
 const loading = ref(false)
-const warningCount = ref(0)
+
+const searchForm = reactive({
+  device_id: '',
+  hardware_model: '',
+  status: ''
+})
 
 const stats = reactive({
   total: 0,
@@ -136,12 +139,15 @@ const API_BASE = '/api/v1'
 const loadDevices = async () => {
   loading.value = true
   try {
-    const res = await axios.get(`${API_BASE}/devices`, {
-      params: {
-        page: pagination.current,
-        page_size: pagination.pageSize
-      }
-    })
+    const params = {
+      page: pagination.current,
+      page_size: pagination.pageSize
+    }
+    if (searchForm.device_id) params.device_id = searchForm.device_id
+    if (searchForm.hardware_model) params.hardware_model = searchForm.hardware_model
+    if (searchForm.status !== '') params.status = searchForm.status
+
+    const res = await axios.get(`${API_BASE}/devices`, { params })
     if (res.data.code === 0) {
       devices.value = res.data.data.list
       pagination.total = res.data.data.pagination.total
@@ -150,7 +156,6 @@ const loadDevices = async () => {
       stats.total = res.data.data.pagination.total
       stats.online = devices.value.filter(d => d.is_online).length
       stats.offline = stats.total - stats.online
-      warningCount.value = stats.offline
     }
   } catch (err) {
     // 使用模拟数据
@@ -166,11 +171,23 @@ const loadDevices = async () => {
     stats.total = mockDevices.length
     stats.online = mockDevices.filter(d => d.is_online).length
     stats.offline = stats.total - stats.online
-    warningCount.value = stats.offline
     Message.warning('使用模拟数据')
   } finally {
     loading.value = false
   }
+}
+
+const handleSearch = () => {
+  pagination.current = 1
+  loadDevices()
+}
+
+const handleReset = () => {
+  searchForm.device_id = ''
+  searchForm.hardware_model = ''
+  searchForm.status = ''
+  pagination.current = 1
+  loadDevices()
 }
 
 const handleTableChange = (pag) => {
@@ -181,16 +198,6 @@ const handleTableChange = (pag) => {
 
 const viewDevice = (record) => {
   router.push(`/device/${record.device_id}`)
-}
-
-const handleMenuClick = ({ key }) => {
-  if (key === 'ota') {
-    router.push('/ota')
-  } else if (key === 'pet') {
-    router.push('/pet')
-  } else if (key === 'status') {
-    router.push('/status')
-  }
 }
 
 const getStatusColor = (status) => {
@@ -209,45 +216,28 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.device-dashboard {
-  min-height: 100vh;
-}
-
-.logo {
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  font-weight: bold;
-  color: #fff;
-}
-
-.header {
+.page-container {
   background: #fff;
-  padding: 0 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  border-radius: 4px;
+  padding: 20px;
 }
 
-.header-left, .header-right {
-  display: flex;
-  align-items: center;
+.breadcrumb {
+  margin-bottom: 16px;
 }
 
-.content {
-  margin: 16px;
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
 }
 
 .stats-row {
   margin-bottom: 16px;
 }
 
-.table-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.toolbar {
+  margin-bottom: 16px;
 }
 </style>

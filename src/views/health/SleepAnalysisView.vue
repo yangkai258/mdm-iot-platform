@@ -1,68 +1,68 @@
 <template>
-  <div class="pro-page-container">
+  <div class="page-container">
     <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
+    <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
       <a-breadcrumb-item>健康中心</a-breadcrumb-item>
       <a-breadcrumb-item>睡眠分析</a-breadcrumb-item>
     </a-breadcrumb>
 
     <!-- 搜索筛选区 -->
-    <div class="pro-search-bar">
-      <a-space>
-        <a-select v-model="timeRange" placeholder="时间范围" style="width: 120px" @change="loadStats">
-          <a-option value="day">今日</a-option>
-          <a-option value="week">本周</a-option>
-          <a-option value="month">本月</a-option>
-        </a-select>
-        <a-range-picker v-model="dateRange" style="width: 260px" @change="loadStats" />
-      </a-space>
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="时间范围">
+          <a-select v-model="searchForm.timeRange" placeholder="选择范围" style="width: 120px" @change="loadStats">
+            <a-option value="day">今日</a-option>
+            <a-option value="week">本周</a-option>
+            <a-option value="month">本月</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="自定义日期">
+          <a-range-picker v-model="searchForm.dateRange" style="width: 260px" @change="loadStats" />
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="loadStats">刷新</a-button>
+        </a-form-item>
+      </a-form>
     </div>
 
-    <!-- 操作按钮区 -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button type="primary" @click="loadStats">刷新</a-button>
-      </a-space>
-    </div>
-
-    <!-- 睡眠统计卡片 -->
-    <a-row :gutter="16" class="stats-card-row">
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
       <a-col :span="6">
-        <a-card class="stat-card" hoverable>
+        <a-card class="stat-card">
           <a-statistic :value="sleepData.total_hours" :precision="1" suffix="小时">
             <template #prefix>
-              <icon-clock :size="24" style="color: #722ed1" />
+              <span>⏰</span>
             </template>
             <template #title>睡眠时长</template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card class="stat-card" hoverable>
+        <a-card class="stat-card">
           <a-statistic :value="sleepData.quality_score" :precision="0" suffix="分">
             <template #prefix>
-              <icon-star :size="24" style="color: #f7ba1e" />
+              <span>⭐</span>
             </template>
             <template #title>睡眠质量评分</template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card class="stat-card" hoverable>
+        <a-card class="stat-card">
           <a-statistic :value="sleepData.deep_sleep_ratio" :precision="0" suffix="%">
             <template #prefix>
-              <icon-moon :size="24" style="color: #1650d8" />
+              <span>🌙</span>
             </template>
             <template #title>深睡比例</template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card class="stat-card" hoverable>
+        <a-card class="stat-card">
           <a-statistic :value="sleepData.light_sleep_ratio" :precision="0" suffix="%">
             <template #prefix>
-              <icon-sun :size="24" style="color: #f7ba1e" />
+              <span>☀️</span>
             </template>
             <template #title>浅睡比例</template>
           </a-statistic>
@@ -70,10 +70,10 @@
       </a-col>
     </a-row>
 
-    <!-- 睡眠质量趋势 -->
-    <a-row :gutter="16" class="chart-row">
+    <!-- 图表区 -->
+    <a-row :gutter="16" style="margin-bottom: 16px;">
       <a-col :span="12">
-        <a-card class="chart-card" title="睡眠时长趋势">
+        <a-card title="睡眠时长趋势">
           <div class="chart-placeholder">
             <a-empty v-if="loading" description="加载中..." />
             <div v-else class="chart-content">
@@ -96,7 +96,7 @@
         </a-card>
       </a-col>
       <a-col :span="12">
-        <a-card class="chart-card" title="睡眠构成">
+        <a-card title="睡眠构成">
           <div class="chart-placeholder">
             <a-empty v-if="loading" description="加载中..." />
             <div v-else class="sleep-composition">
@@ -134,30 +134,30 @@
       </a-col>
     </a-row>
 
-    <!-- 睡眠记录列表 -->
-    <div class="pro-content-area">
-      <a-table :columns="columns" :data="sleepRecords" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
-        <template #quality="{ record }">
-          <a-progress :percent="record.quality" :color="getQualityColor(record.quality)" size="small" />
-        </template>
-        <template #deep_sleep="{ record }">
-          {{ record.deep_sleep }} 小时
-        </template>
-        <template #light_sleep="{ record }">
-          {{ record.light_sleep }} 小时
-        </template>
-      </a-table>
-    </div>
+    <!-- 表格 -->
+    <a-table :columns="columns" :data="sleepRecords" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
+      <template #quality="{ record }">
+        <a-progress :percent="record.quality" :color="getQualityColor(record.quality)" size="small" />
+      </template>
+      <template #deep_sleep="{ record }">
+        {{ record.deep_sleep }} 小时
+      </template>
+      <template #light_sleep="{ record }">
+        {{ record.light_sleep }} 小时
+      </template>
+    </a-table>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
-const timeRange = ref('week')
-const dateRange = ref([])
+
+const searchForm = reactive({
+  timeRange: 'week',
+  dateRange: []
+})
 
 const sleepData = reactive({
   total_hours: 0,
@@ -214,7 +214,7 @@ const loadStats = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch(`/api/v1/health/sleep/stats?range=${timeRange.value}`, {
+    const res = await fetch(`/api/v1/health/sleep/stats?range=${searchForm.timeRange}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
@@ -245,9 +245,7 @@ const sleepRecords = ref([
   { id: 2, date: '2026-03-21', sleep_time: '23:00', wake_time: '06:30', total_hours: '7.5h', deep_sleep: 1.9, light_sleep: 4.1, quality: 88 },
   { id: 3, date: '2026-03-20', sleep_time: '22:45', wake_time: '06:15', total_hours: '7.5h', deep_sleep: 1.7, light_sleep: 4.3, quality: 78 },
   { id: 4, date: '2026-03-19', sleep_time: '23:30', wake_time: '07:00', total_hours: '7.5h', deep_sleep: 1.5, light_sleep: 4.5, quality: 65 },
-  { id: 5, date: '2026-03-18', sleep_time: '22:00', wake_time: '05:30', total_hours: '7.5h', deep_sleep: 2.0, light_sleep: 4.0, quality: 92 },
-  { id: 6, date: '2026-03-17', sleep_time: '23:15', wake_time: '06:45', total_hours: '7.5h', deep_sleep: 1.6, light_sleep: 4.4, quality: 72 },
-  { id: 7, date: '2026-03-16', sleep_time: '22:30', wake_time: '06:00', total_hours: '7.5h', deep_sleep: 1.8, light_sleep: 4.2, quality: 82 }
+  { id: 5, date: '2026-03-18', sleep_time: '22:00', wake_time: '05:30', total_hours: '7.5h', deep_sleep: 2.0, light_sleep: 4.0, quality: 92 }
 ])
 
 onMounted(() => {
@@ -256,51 +254,29 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.pro-page-container {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
 }
 
-.pro-breadcrumb {
+.breadcrumb {
   margin-bottom: 16px;
 }
 
-.pro-search-bar {
-  margin-bottom: 12px;
-}
-
-.pro-action-bar {
+.search-form {
   margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
 }
 
-.stats-card-row {
+.stats-row {
   margin-bottom: 16px;
 }
 
 .stat-card {
-  border-radius: 8px;
   text-align: center;
-}
-
-.stat-card :deep(.arco-statistic .arco-statistic-title) {
-  margin-top: 8px;
-  font-size: 14px;
-  color: #666;
-}
-
-.stat-card :deep(.arco-statistic .arco-statistic-value) {
-  font-size: 28px;
-  font-weight: 600;
-}
-
-.chart-row {
-  margin-bottom: 16px;
-}
-
-.chart-card {
-  border-radius: 8px;
-  height: 100%;
 }
 
 .chart-placeholder {
@@ -384,12 +360,5 @@ onMounted(() => {
 
 .composition-fill.awake {
   background: linear-gradient(90deg, #f7ba1e 0%, #ffc107 100%);
-}
-
-.pro-content-area {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 </style>

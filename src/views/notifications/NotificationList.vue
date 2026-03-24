@@ -1,66 +1,97 @@
 <template>
-  <div class="notification-list-container">
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>消息中心</a-breadcrumb-item>
+      <a-breadcrumb-item>推送通知</a-breadcrumb-item>
+    </a-breadcrumb>
+
     <!-- 统计卡片 -->
-    <a-card class="stats-card">
-      <a-row :gutter="16">
-        <a-col :span="6">
+    <a-row :gutter="16" class="stats-row">
+      <a-col :span="6">
+        <a-card>
           <a-statistic title="今日发送" :value="stats.todaySent" />
-        </a-col>
-        <a-col :span="6">
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
           <a-statistic title="送达率" :value="stats.deliveryRate" suffix="%" :value-style="{ color: deliveryRateColor }" />
-        </a-col>
-        <a-col :span="6">
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
           <a-statistic title="已读率" :value="stats.readRate" suffix="%" :value-style="{ color: readRateColor }" />
-        </a-col>
-        <a-col :span="6">
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
           <a-statistic title="待发送" :value="stats.pending" />
-        </a-col>
-      </a-row>
-    </a-card>
+        </a-card>
+      </a-col>
+    </a-row>
 
-    <!-- 操作栏 + 表格 -->
-    <a-card class="table-card">
-      <template #title>
-        <div class="card-title">
-          <span>推送通知</span>
+    <!-- 搜索筛选区 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="通知类型">
+          <a-select v-model="searchForm.type" placeholder="选择类型" allow-clear style="width: 140px">
+            <a-option value="push">推送通知</a-option>
+            <a-option value="announcement">公告</a-option>
+            <a-option value="command_response">命令反馈</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 120px">
+            <a-option value="pending">待发送</a-option>
+            <a-option value="sent">已发送</a-option>
+            <a-option value="failed">失败</a-option>
+            <a-option value="read">已读</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
           <a-space>
-            <a-select v-model="filterType" placeholder="通知类型" allow-clear style="width: 140px" @change="handleFilter">
-              <a-option value="push">推送通知</a-option>
-              <a-option value="announcement">公告</a-option>
-              <a-option value="command_response">命令反馈</a-option>
-            </a-select>
-            <a-select v-model="filterStatus" placeholder="状态" allow-clear style="width: 120px" @change="handleFilter">
-              <a-option value="pending">待发送</a-option>
-              <a-option value="sent">已发送</a-option>
-              <a-option value="failed">失败</a-option>
-              <a-option value="read">已读</a-option>
-            </a-select>
-            <a-button type="primary" @click="showSendDrawer">发送通知</a-button>
+            <a-button type="primary" @click="handleSearch">搜索</a-button>
+            <a-button @click="handleReset">重置</a-button>
           </a-space>
-        </div>
+        </a-form-item>
+      </a-form>
+    </div>
+
+    <!-- 操作栏 -->
+    <div class="toolbar">
+      <a-button type="primary" @click="showSendDrawer">发送通知</a-button>
+    </div>
+
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="notifications"
+      :loading="loading"
+      :pagination="paginationConfig"
+      row-key="id"
+      @page-change="handlePageChange"
+      @page-size-change="handlePageSizeChange"
+    >
+      <template #notification_type="{ record }">
+        <a-tag :color="typeColor(record.notification_type)">{{ typeLabel(record.notification_type) }}</a-tag>
       </template>
-
-      <a-table :columns="columns" :data="notifications" :loading="loading" :pagination="paginationConfig" row-key="id" @page-change="handlePageChange" @page-size-change="handlePageSizeChange">
-        <template #notification_type="{ record }">
-          <a-tag :color="typeColor(record.notification_type)">{{ typeLabel(record.notification_type) }}</a-tag>
-        </template>
-        <template #target_type="{ record }">
-          {{ targetLabel(record.target_type) }}
-        </template>
-        <template #status="{ record }">
-          <a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag>
-        </template>
-        <template #sent_at="{ record }">
-          {{ formatTime(record.sent_at) }}
-        </template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="handleDetail(record)">详情</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)" v-if="record.status === 'pending'">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </a-card>
+      <template #target_type="{ record }">
+        {{ targetLabel(record.target_type) }}
+      </template>
+      <template #status="{ record }">
+        <a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag>
+      </template>
+      <template #sent_at="{ record }">
+        {{ formatTime(record.sent_at) }}
+      </template>
+      <template #actions="{ record }">
+        <a-space>
+          <a-button type="text" size="small" @click="handleDetail(record)">详情</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)" v-if="record.status === 'pending'">删除</a-button>
+        </a-space>
+      </template>
+    </a-table>
 
     <!-- 发送通知抽屉 -->
     <a-drawer v-model:visible="sendDrawerVisible" title="发送通知" width="500px" @before-ok="handleSend" :unmount-on-close="false">
@@ -145,8 +176,11 @@ const sendFormRef = ref()
 const currentNotification = ref<any>(null)
 
 const notifications = ref<any[]>([])
-const filterType = ref('')
-const filterStatus = ref('')
+
+const searchForm = reactive({
+  type: '',
+  status: ''
+})
 
 const paginationConfig = reactive({
   current: 1,
@@ -223,12 +257,12 @@ const formatTime = (time: string) => {
 const loadNotifications = async () => {
   loading.value = true
   try {
-    const params: any = {
+    const params = {
       page: paginationConfig.current,
       page_size: paginationConfig.pageSize
     }
-    if (filterType.value) params.notification_type = filterType.value
-    if (filterStatus.value) params.status = filterStatus.value
+    if (searchForm.type) params.notification_type = searchForm.type
+    if (searchForm.status) params.status = searchForm.status
 
     const token = localStorage.getItem('token')
     const res = await axios.get(`${API_BASE}/notifications`, {
@@ -244,7 +278,6 @@ const loadNotifications = async () => {
       stats.pending = res.data.data.pending || 0
     }
   } catch (e) {
-    // 模拟数据
     notifications.value = [
       { id: 1, title: '固件升级通知', notification_type: 'push', target_type: 'device', target_ids: ['550e8400-e29b-41d4-a716-446655440000'], status: 'sent', sent_at: '2026-03-20T10:30:00Z', created_by: 'admin', read_count: 45, failed_count: 1, total_targets: 50, delivered_count: 48 },
       { id: 2, title: '系统维护通知', notification_type: 'push', target_type: 'all', target_ids: [], status: 'sent', sent_at: '2026-03-20T09:00:00Z', created_by: 'admin', read_count: 120, failed_count: 0, total_targets: 130, delivered_count: 130 },
@@ -261,7 +294,14 @@ const loadNotifications = async () => {
   }
 }
 
-const handleFilter = () => {
+const handleSearch = () => {
+  paginationConfig.current = 1
+  loadNotifications()
+}
+
+const handleReset = () => {
+  searchForm.type = ''
+  searchForm.status = ''
   paginationConfig.current = 1
   loadNotifications()
 }
@@ -302,7 +342,6 @@ const handleSend = async (done: (arg: boolean) => void) => {
     done(true)
   } catch (e: any) {
     if (e.errorFields) { done(false); return }
-    // 模拟成功
     Message.success('发送成功')
     sendDrawerVisible.value = false
     loadNotifications()
@@ -310,12 +349,12 @@ const handleSend = async (done: (arg: boolean) => void) => {
   }
 }
 
-const handleDetail = async (record: any) => {
+const handleDetail = async (record) => {
   currentNotification.value = record
   detailDrawerVisible.value = true
 }
 
-const handleDelete = (record: any) => {
+const handleDelete = (record) => {
   Modal.confirm({
     title: '确认删除',
     content: `确定要删除通知「${record.title}」吗？`,
@@ -343,20 +382,28 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.notification-list-container {
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
   padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
 }
-.stats-card {
+
+.stats-row {
   margin-bottom: 16px;
 }
-.table-card {
+
+.toolbar {
   margin-bottom: 16px;
-}
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 </style>

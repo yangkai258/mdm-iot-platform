@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import { IconSend } from '@arco-design/web-vue/icons/icon'
+import { IconSend } from '@arco-design/web-vue/es/icon'
 
 const props = defineProps({
   disabled: {

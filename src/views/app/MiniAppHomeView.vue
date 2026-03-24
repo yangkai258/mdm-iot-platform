@@ -143,7 +143,6 @@ const router = useRouter()
 const loading = ref(false)
 const overview = ref({ total: 0, online: 0, offline: 0, alert: 0 })
 const onlineDevices = ref([])
-const recentActivities = ref([])
 
 const greeting = computed(() => {
   const hour = new Date().getHours()

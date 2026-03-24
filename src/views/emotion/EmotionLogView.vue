@@ -1,68 +1,78 @@
 <template>
-  <div class="pro-page-container">
+  <div class="page-container">
     <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
+    <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
       <a-breadcrumb-item>情绪管理</a-breadcrumb-item>
       <a-breadcrumb-item>情绪日志</a-breadcrumb-item>
     </a-breadcrumb>
 
     <!-- 搜索筛选区 -->
-    <div class="pro-search-bar">
-      <a-space wrap>
-        <a-select v-model="filterForm.pet_id" placeholder="选择宠物" style="width: 160px" allow-clear>
-          <a-option v-for="pet in pets" :key="pet.pet_id" :value="pet.pet_id">{{ pet.pet_name }}</a-option>
-        </a-select>
-        <a-select v-model="filterForm.emotion_type" placeholder="情绪类型" style="width: 140px" allow-clear>
-          <a-option v-for="(emo, key) in emotionTypes" :key="key" :value="key">{{ emo.emoji }} {{ emo.text }}</a-option>
-        </a-select>
-        <a-select v-model="filterForm.source" placeholder="来源" style="width: 120px" allow-clear>
-          <a-option value="voice">语音</a-option>
-          <a-option value="text">文字</a-option>
-          <a-option value="expression">表情</a-option>
-        </a-select>
-        <a-range-picker v-model="filterForm.dateRange" style="width: 260px" />
-        <a-button @click="loadLogs">查询</a-button>
-        <a-button @click="resetFilter">重置</a-button>
-      </a-space>
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="宠物">
+          <a-select v-model="searchForm.pet_id" placeholder="选择宠物" allow-clear style="width: 160px">
+            <a-option v-for="pet in pets" :key="pet.pet_id" :value="pet.pet_id">{{ pet.pet_name }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="情绪类型">
+          <a-select v-model="searchForm.emotion_type" placeholder="选择类型" allow-clear style="width: 140px">
+            <a-option v-for="(emo, key) in emotionTypes" :key="key" :value="key">{{ emo.emoji }} {{ emo.text }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="来源">
+          <a-select v-model="searchForm.source" placeholder="选择来源" allow-clear style="width: 120px">
+            <a-option value="voice">语音</a-option>
+            <a-option value="text">文字</a-option>
+            <a-option value="expression">表情</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="日期">
+          <a-range-picker v-model="searchForm.dateRange" style="width: 260px" />
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleSearch">搜索</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
     </div>
 
-    <!-- 操作按钮区 -->
-    <div class="pro-action-bar">
+    <!-- 操作栏 -->
+    <div class="toolbar">
       <a-space>
         <a-button type="primary" status="warning" @click="exportLogs">导出日志</a-button>
-        <a-button @click="loadLogs">刷新</a-button>
+        <a-button @click="handleSearch">刷新</a-button>
       </a-space>
     </div>
 
-    <!-- 内容区 -->
-    <div class="pro-content-area">
-      <a-table
-        :columns="columns"
-        :data="logs"
-        :loading="loading"
-        :pagination="pagination"
-        @change="handleTableChange"
-        row-key="log_id"
-      >
-        <template #emotion="{ record }">
-          <span class="emotion-cell">
-            <span class="emotion-emoji">{{ getEmotionEmoji(record.emotion_type) }}</span>
-            <span>{{ getEmotionText(record.emotion_type) }}</span>
-          </span>
-        </template>
-        <template #source="{ record }">
-          <a-tag :color="getSourceColor(record.source)">{{ getSourceText(record.source) }}</a-tag>
-        </template>
-        <template #confidence="{ record }">
-          <a-progress :percent="(record.confidence * 100).toFixed(1)" :show-text="false" :color="getConfidenceColor(record.confidence)" />
-          <span class="confidence-text">{{ (record.confidence * 100).toFixed(1) }}%</span>
-        </template>
-        <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showDetail(record)">详情</a-button>
-        </template>
-      </a-table>
-    </div>
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="logs"
+      :loading="loading"
+      :pagination="pagination"
+      @change="handleTableChange"
+      row-key="log_id"
+    >
+      <template #emotion="{ record }">
+        <span class="emotion-cell">
+          <span class="emotion-emoji">{{ getEmotionEmoji(record.emotion_type) }}</span>
+          <span>{{ getEmotionText(record.emotion_type) }}</span>
+        </span>
+      </template>
+      <template #source="{ record }">
+        <a-tag :color="getSourceColor(record.source)">{{ getSourceText(record.source) }}</a-tag>
+      </template>
+      <template #confidence="{ record }">
+        <a-progress :percent="(record.confidence * 100).toFixed(1)" :show-text="false" :color="getConfidenceColor(record.confidence)" />
+        <span class="confidence-text">{{ (record.confidence * 100).toFixed(1) }}%</span>
+      </template>
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="showDetail(record)">详情</a-button>
+      </template>
+    </a-table>
 
     <!-- 日志详情弹窗 -->
     <a-modal
@@ -120,7 +130,7 @@ const emotionTypes = {
   tired: { emoji: '😴', text: '疲惫' }
 }
 
-const filterForm = reactive({
+const searchForm = reactive({
   pet_id: '',
   emotion_type: '',
   source: '',
@@ -153,11 +163,11 @@ const loadLogs = async () => {
     const params = {
       page: pagination.current,
       page_size: pagination.pageSize,
-      pet_id: filterForm.pet_id || undefined,
-      emotion_type: filterForm.emotion_type || undefined,
-      source: filterForm.source || undefined,
-      start_date: filterForm.dateRange?.[0]?.format('YYYY-MM-DD') || undefined,
-      end_date: filterForm.dateRange?.[1]?.format('YYYY-MM-DD') || undefined
+      pet_id: searchForm.pet_id || undefined,
+      emotion_type: searchForm.emotion_type || undefined,
+      source: searchForm.source || undefined,
+      start_date: searchForm.dateRange?.[0]?.format('YYYY-MM-DD') || undefined,
+      end_date: searchForm.dateRange?.[1]?.format('YYYY-MM-DD') || undefined
     }
     const res = await axios.get(`${API_BASE}/logs`, { params })
     if (res.data.code === 0) {
@@ -165,7 +175,6 @@ const loadLogs = async () => {
       pagination.total = res.data.data.pagination.total
     }
   } catch (err) {
-    // 使用模拟数据
     logs.value = generateMockLogs()
     pagination.total = logs.value.length
     Message.warning('使用模拟数据')
@@ -204,17 +213,23 @@ const generateMockLogs = () => {
   })
 }
 
-const handleTableChange = (pag) => {
-  pagination.current = pag.current
-  pagination.pageSize = pag.pageSize
+const handleSearch = () => {
+  pagination.current = 1
   loadLogs()
 }
 
-const resetFilter = () => {
-  filterForm.pet_id = ''
-  filterForm.emotion_type = ''
-  filterForm.source = ''
-  filterForm.dateRange = []
+const handleReset = () => {
+  searchForm.pet_id = ''
+  searchForm.emotion_type = ''
+  searchForm.source = ''
+  searchForm.dateRange = []
+  pagination.current = 1
+  loadLogs()
+}
+
+const handleTableChange = (pag) => {
+  pagination.current = pag.current
+  pagination.pageSize = pag.pageSize
   loadLogs()
 }
 
@@ -232,15 +247,39 @@ onMounted(() => loadLogs())
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.pro-breadcrumb { margin-bottom: 16px; }
-.pro-search-bar { margin-bottom: 12px; }
-.pro-action-bar { margin-bottom: 16px; }
-.pro-content-area {
-  background: #fff; border-radius: 8px; padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
 }
-.emotion-cell { display: flex; align-items: center; gap: 6px; }
-.emotion-emoji { font-size: 18px; }
-.confidence-text { font-size: 12px; margin-left: 8px; }
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
+}
+
+.emotion-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.emotion-emoji {
+  font-size: 18px;
+}
+
+.confidence-text {
+  font-size: 12px;
+  margin-left: 8px;
+}
 </style>

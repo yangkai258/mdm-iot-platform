@@ -252,7 +252,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconPlus, IconCalendar } from '@arco-design/web-icons/vue'
+import { IconPlus, IconCalendar } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const appointments = ref([])

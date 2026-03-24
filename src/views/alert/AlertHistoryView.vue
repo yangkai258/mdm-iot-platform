@@ -209,7 +209,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconSearch, IconRefresh, IconDownload } from '@arco-design/web-icons/vue'
+import { IconSearch, IconRefresh, IconDownload } from '@arco-design/web-vue/es/icon'
 import { useAlertHistory, SEVERITY_MAP, STATUS_MAP } from '@/composables/useNotification'
 
 const {
@@ -249,7 +249,7 @@ const paginationConfig = computed(() => ({
   pageSize: pagination.pageSize,
   total: pagination.total,
   showSizeChanger: true,
-  showTotal: (total: number) => `共 ${total} 条`
+  showTotal: (total) => `共 ${total} 条`
 }))
 
 function alertTypeLabel(type) {

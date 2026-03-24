@@ -1,49 +1,75 @@
 <template>
-  <div class="announcements-container">
-    <a-card class="table-card">
-      <template #title>
-        <div class="card-title">
-          <span>公告管理</span>
-          <a-space>
-            <a-select v-model="filterPriority" placeholder="优先级" allow-clear style="width: 120px" @change="handleFilter">
-              <a-option value="normal">普通</a-option>
-              <a-option value="important">重要</a-option>
-              <a-option value="urgent">紧急</a-option>
-            </a-select>
-            <a-select v-model="filterStatus" placeholder="状态" allow-clear style="width: 120px" @change="handleFilter">
-              <a-option value="draft">草稿</a-option>
-              <a-option value="published">已发布</a-option>
-              <a-option value="expired">已过期</a-option>
-              <a-option value="withdrawn">已撤回</a-option>
-            </a-select>
-            <a-button type="primary" @click="showAddDrawer">新建公告</a-button>
-          </a-space>
-        </div>
-      </template>
+  <div class="page-container">
+    <!-- 面包屑 -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>首页</a-breadcrumb-item>
+      <a-breadcrumb-item>消息中心</a-breadcrumb-item>
+      <a-breadcrumb-item>公告管理</a-breadcrumb-item>
+    </a-breadcrumb>
 
-      <a-table :columns="columns" :data="announcements" :loading="loading" :pagination="paginationConfig" row-key="id" @page-change="handlePageChange" @page-size-change="handlePageSizeChange">
-        <template #priority="{ record }">
-          <a-tag :color="priorityColor(record.priority)">{{ priorityLabel(record.priority) }}</a-tag>
-        </template>
-        <template #status="{ record }">
-          <a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag>
-        </template>
-        <template #effective_period="{ record }">
-          {{ formatTime(record.effective_start) }} ~ {{ formatTime(record.effective_end) }}
-        </template>
-        <template #published_at="{ record }">
-          {{ formatTime(record.published_at) }}
-        </template>
-        <template #actions="{ record }">
+    <!-- 搜索筛选区 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="优先级">
+          <a-select v-model="searchForm.priority" placeholder="选择优先级" allow-clear style="width: 120px">
+            <a-option value="normal">普通</a-option>
+            <a-option value="important">重要</a-option>
+            <a-option value="urgent">紧急</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 120px">
+            <a-option value="draft">草稿</a-option>
+            <a-option value="published">已发布</a-option>
+            <a-option value="expired">已过期</a-option>
+            <a-option value="withdrawn">已撤回</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
           <a-space>
-            <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" v-if="record.status === 'draft'" @click="handlePublish(record)">发布</a-button>
-            <a-button type="text" size="small" v-if="record.status === 'published'" @click="handleWithdraw(record)">撤回</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+            <a-button type="primary" @click="handleSearch">搜索</a-button>
+            <a-button @click="handleReset">重置</a-button>
           </a-space>
-        </template>
-      </a-table>
-    </a-card>
+        </a-form-item>
+      </a-form>
+    </div>
+
+    <!-- 操作栏 -->
+    <div class="toolbar">
+      <a-button type="primary" @click="showAddDrawer">新建公告</a-button>
+    </div>
+
+    <!-- 表格 -->
+    <a-table
+      :columns="columns"
+      :data="announcements"
+      :loading="loading"
+      :pagination="paginationConfig"
+      row-key="id"
+      @page-change="handlePageChange"
+      @page-size-change="handlePageSizeChange"
+    >
+      <template #priority="{ record }">
+        <a-tag :color="priorityColor(record.priority)">{{ priorityLabel(record.priority) }}</a-tag>
+      </template>
+      <template #status="{ record }">
+        <a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag>
+      </template>
+      <template #effective_period="{ record }">
+        {{ formatTime(record.effective_start) }} ~ {{ formatTime(record.effective_end) }}
+      </template>
+      <template #published_at="{ record }">
+        {{ formatTime(record.published_at) }}
+      </template>
+      <template #actions="{ record }">
+        <a-space>
+          <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" v-if="record.status === 'draft'" @click="handlePublish(record)">发布</a-button>
+          <a-button type="text" size="small" v-if="record.status === 'published'" @click="handleWithdraw(record)">撤回</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </a-space>
+      </template>
+    </a-table>
 
     <!-- 新建/编辑公告抽屉 -->
     <a-drawer v-model:visible="drawerVisible" :title="isEdit ? '编辑公告' : '新建公告'" width="560px" @before-ok="handleSubmit" :unmount-on-close="false">
@@ -102,8 +128,11 @@ const editId = ref<number | null>(null)
 const formRef = ref()
 
 const announcements = ref<any[]>([])
-const filterPriority = ref('')
-const filterStatus = ref('')
+
+const searchForm = reactive({
+  priority: '',
+  status: ''
+})
 
 const paginationConfig = reactive({
   current: 1,
@@ -142,18 +171,13 @@ const formatTime = (time: string) => {
   return new Date(time).toLocaleString('zh-CN')
 }
 
-const targetTypeLabel = (type: string) => {
-  const map: Record<string, string> = { all: '全部', device: '指定设备', user: '指定用户', org_unit: '组织' }
-  return map[type] || type
-}
-
 const loadAnnouncements = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const params: any = { page: paginationConfig.current, page_size: paginationConfig.pageSize }
-    if (filterPriority.value) params.priority = filterPriority.value
-    if (filterStatus.value) params.status = filterStatus.value
+    const params = { page: paginationConfig.current, page_size: paginationConfig.pageSize }
+    if (searchForm.priority) params.priority = searchForm.priority
+    if (searchForm.status) params.status = searchForm.status
 
     const res = await axios.get(`${API_BASE}/announcements`, {
       params,
@@ -164,7 +188,6 @@ const loadAnnouncements = async () => {
       paginationConfig.total = res.data.data.pagination?.total || 0
     }
   } catch (e) {
-    // 模拟数据
     announcements.value = [
       { id: 1, title: '2026年度公司年会通知', content: '<p>公司将于2026年12月31日举办年度年会...</p>', priority: 'important', target_type: 'all', status: 'published', effective_start: '2026-03-20T00:00:00Z', effective_end: '2026-03-25T23:59:59Z', published_at: '2026-03-20T08:00:00Z', created_by: 'admin' },
       { id: 2, title: '系统升级公告', content: '<p>系统将于本周日凌晨进行例行升级...</p>', priority: 'normal', target_type: 'all', status: 'published', effective_start: '2026-03-15T00:00:00Z', effective_end: '2026-03-22T00:00:00Z', published_at: '2026-03-15T10:00:00Z', created_by: 'admin' },
@@ -177,7 +200,14 @@ const loadAnnouncements = async () => {
   }
 }
 
-const handleFilter = () => {
+const handleSearch = () => {
+  paginationConfig.current = 1
+  loadAnnouncements()
+}
+
+const handleReset = () => {
+  searchForm.priority = ''
+  searchForm.status = ''
   paginationConfig.current = 1
   loadAnnouncements()
 }
@@ -200,7 +230,7 @@ const showAddDrawer = () => {
   drawerVisible.value = true
 }
 
-const handleEdit = (record: any) => {
+const handleEdit = (record) => {
   isEdit.value = true
   editId.value = record.id
   Object.assign(form, {
@@ -227,7 +257,7 @@ const handleSubmit = async (done: (arg: boolean) => void) => {
       effective_start: form.effective_start ? form.effective_start.toISOString() : null,
       effective_end: form.effective_end ? form.effective_end.toISOString() : null,
       status: form.status,
-      created_by: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!).username : 'admin'
+      created_by: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}').username : 'admin'
     }
 
     if (isEdit.value && editId.value) {
@@ -244,7 +274,7 @@ const handleSubmit = async (done: (arg: boolean) => void) => {
     drawerVisible.value = false
     loadAnnouncements()
     done(true)
-  } catch (e: any) {
+  } catch (e) {
     if (e.errorFields) { done(false); return }
     Message.success(isEdit.value ? '更新成功' : '创建成功')
     drawerVisible.value = false
@@ -253,7 +283,7 @@ const handleSubmit = async (done: (arg: boolean) => void) => {
   }
 }
 
-const handlePublish = async (record: any) => {
+const handlePublish = async (record) => {
   Modal.confirm({
     title: '确认发布',
     content: `确定要发布公告「${record.title}」吗？`,
@@ -275,7 +305,7 @@ const handlePublish = async (record: any) => {
   })
 }
 
-const handleWithdraw = async (record: any) => {
+const handleWithdraw = async (record) => {
   Modal.confirm({
     title: '确认撤回',
     content: `确定要撤回公告「${record.title}」吗？`,
@@ -297,7 +327,7 @@ const handleWithdraw = async (record: any) => {
   })
 }
 
-const handleDelete = (record: any) => {
+const handleDelete = (record) => {
   Modal.confirm({
     title: '确认删除',
     content: `确定要删除公告「${record.title}」吗？`,
@@ -325,17 +355,24 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.announcements-container {
-  padding: 16px;
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
 }
-.table-card {
+
+.breadcrumb {
   margin-bottom: 16px;
 }
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
+
+.search-form {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f7f8fa;
+  border-radius: 4px;
+}
+
+.toolbar {
+  margin-bottom: 16px;
 }
 </style>
