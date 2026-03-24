@@ -628,6 +628,17 @@ func main() {
 	apiV1.GET("/gdpr/requests/:id", complianceCtrlExtra.GetGDPRRequest)
 	apiV1.PUT("/gdpr/requests/:id/process", complianceCtrlExtra.ProcessGDPRRequest)
 
+	// ============ 门店管理路由 ============
+	storesCtrl := &controllers.StoresController{DB: db}
+	apiV1.GET("/stores", storesCtrl.StoreList)
+	apiV1.POST("/stores", storesCtrl.StoreCreate)
+	apiV1.GET("/stores/:id", storesCtrl.StoreGet)
+	apiV1.PUT("/stores/:id", storesCtrl.StoreUpdate)
+	apiV1.DELETE("/stores/:id", storesCtrl.StoreDelete)
+	apiV1.PUT("/stores/:id/status", storesCtrl.StoreUpdateStatus)
+	apiV1.POST("/stores/batch-delete", storesCtrl.StoreBatchDelete)
+	apiV1.GET("/stores/statistics", storesCtrl.StoreStatistics)
+
 	// ============ 数据导入导出路由 ============
 	importExportCtrl := &controllers.ImportExportController{DB: db}
 	// 设备导入导出
