@@ -1,32 +1,70 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
     <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
+      <a-button type="primary" @click="handleSave" :loading="saving">保存设置</a-button>
+      <a-button @click="handleReset">重置</a-button>
     </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
-      </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
+    <a-form :model="form" layout="vertical" class="settings-form">
+      <a-divider>积分设置</a-divider>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="注册积分">
+            <a-input-number v-model="form.registerPoints" :min="0" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="积分有效期（天）">
+            <a-input-number v-model="form.pointsExpireDays" :min="0" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="积分抵扣比例">
+            <a-input-number v-model="form.pointsDiscountRatio" :min="0" :precision="2" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="积分抵现比例">
+            <a-input-number v-model="form.pointsToMoneyRatio" :min="1" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="会员有效期（月）">
+            <a-input-number v-model="form.memberValidMonths" :min="0" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="到期提醒天数">
+            <a-input-number v-model="form.expireReminderDays" :min="1" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-divider>规则设置</a-divider>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="最低积分余额">
+            <a-input-number v-model="form.minPointsBalance" :min="0" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="每单最高积分">
+            <a-input-number v-model="form.maxPointsPerOrder" :min="0" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="允许自行注销">
+            <a-switch v-model="form.allowSelfCancel" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="手机验证">
+            <a-switch v-model="form.requireMobileVerify" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-form-item label="备注">
+        <a-textarea v-model="form.remark" :rows="3" placeholder="请输入备注" />
+      </a-form-item>
+    </a-form>
   </div>
 </template>
 
@@ -90,6 +128,6 @@ onMounted(() => {
 
 <style scoped>
 .page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
 .toolbar { margin-bottom: 16px; }
+.settings-form { max-width: 800px; }
 </style>

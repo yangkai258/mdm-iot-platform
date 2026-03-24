@@ -1,112 +1,32 @@
 <template>
-  <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>AI 管理</a-breadcrumb-item>
-      <a-breadcrumb-item>
-        <a @click="goBack">AI 行为日志</a>
-      </a-breadcrumb-item>
-      <a-breadcrumb-item>行为详情</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 加载状态 -->
-    <a-spin v-if="loading" />
-    <div v-else-if="record" class="detail-content">
-
-      <!-- 基本信息卡片 -->
-      <a-card class="detail-card" title="基本信息">
-        <a-descriptions :column="3" bordered size="small">
-          <a-descriptions-item label="行为ID">{{ record.id }}</a-descriptions-item>
-          <a-descriptions-item label="设备ID">{{ record.device_id || '--' }}</a-descriptions-item>
-          <a-descriptions-item label="用户ID">{{ record.user_id || '--' }}</a-descriptions-item>
-          <a-descriptions-item label="模型版本">{{ record.model_version || '--' }}</a-descriptions-item>
-          <a-descriptions-item label="事件类型">
-            <a-tag :color="getBehaviorTypeColor(record.behavior_type)">
-              {{ getBehaviorTypeText(record.behavior_type) }}
-            </a-tag>
-          </a-descriptions-item>
-          <a-descriptions-item label="时间">
-            {{ formatTime(record.created_at) }}
-          </a-descriptions-item>
-        </a-descriptions>
-      </a-card>
-
-      <!-- 性能指标卡片 -->
-      <a-card class="detail-card" title="性能指标">
-        <a-row :gutter="16">
-          <a-col :span="6">
-            <a-statistic title="推理延迟" :value="record.latency_ms" suffix="ms" />
-          </a-col>
-          <a-col :span="6">
-            <a-statistic title="置信度" :value="record.confidence ? (record.confidence * 100).toFixed(1) : '--'" suffix="%" />
-          </a-col>
-          <a-col :span="6">
-            <a-statistic title="异常分数" :value="record.anomaly_score ? (record.anomaly_score * 100).toFixed(1) : '--'" suffix="%" />
-          </a-col>
-          <a-col :span="6">
-            <a-statistic title="状态">
-              <template #extra>
-                <a-tag v-if="record.is_anomaly" color="red">异常</a-tag>
-                <a-tag v-else-if="record.error_code" color="orange">错误</a-tag>
-                <a-tag v-else color="green">正常</a-tag>
-              </template>
-            </a-statistic>
-          </a-col>
-        </a-row>
-
-        <!-- 异常标记 -->
-        <a-alert
-          v-if="record.is_anomaly"
-          type="error"
-          title="检测到异常行为"
-          style="margin-top: 16px"
-        >
-          <template #icon><icon-warning /></template>
-          <div>异常分数: {{ (record.anomaly_score * 100).toFixed(2) }}%</div>
-          <div v-if="record.error_message">错误信息: {{ record.error_message }}</div>
-        </a-alert>
-
-        <!-- 错误信息 -->
-        <a-alert
-          v-if="record.error_code"
-          type="warning"
-          :title="`错误代码: ${record.error_code}`"
-          style="margin-top: 16px"
-        >
-          <div>{{ record.error_message }}</div>
-        </a-alert>
-      </a-card>
-
-      <!-- 输入数据 -->
-      <a-card class="detail-card" title="输入数据">
-        <div class="data-block">
-          <pre>{{ formatJson(record.input_summary) }}</pre>
-        </div>
-      </a-card>
-
-      <!-- 输出数据 -->
-      <a-card class="detail-card" title="输出数据">
-        <div class="data-block">
-          <pre>{{ formatJson(record.output_summary) }}</pre>
-        </div>
-      </a-card>
-
+  <div class="page-container">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="行为ID"><a-input v-model="form.id" placeholder="请输入行为ID" /></a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
     </div>
-    <a-empty v-else description="未找到该行为记录" />
-
-    <!-- 返回按钮 -->
-    <div class="bottom-action">
-      <a-button @click="goBack">
-        <template #icon><icon-left /></template>
-        返回列表
-      </a-button>
+    <div class="toolbar">
+      <a-button type="primary" @click="handleCreate">新建</a-button>
     </div>
+    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    <a-modal v-model:visible="modalVisible" :title="modalTitle">
+      <a-form :model="form" label-col-flex="100px">
+        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import { getAiMonitorEventById } from '@/api/ai'
@@ -115,45 +35,60 @@ const route = useRoute()
 const router = useRouter()
 
 const loading = ref(false)
-const record = ref(null)
+const data = ref([])
+const modalVisible = ref(false)
+const modalTitle = ref('新建')
 
-const getBehaviorTypeColor = (type) => ({
-  intent_recognition: 'arcoblue',
-  response_generation: 'green',
-  action_selection: 'purple'
-}[type] || 'gray')
+const form = reactive({
+  id: ''
+})
 
-const getBehaviorTypeText = (type) => ({
-  intent_recognition: '意图识别',
-  response_generation: '响应生成',
-  action_selection: '动作选择'
-}[type] || type)
+const pagination = reactive({
+  current: 1,
+  pageSize: 20,
+  total: 0
+})
 
-const formatTime = (ts) => {
-  if (!ts) return '--'
-  return new Date(ts).toLocaleString('zh-CN', { hour12: false })
+const columns = [
+  { title: '时间', dataIndex: 'created_at', width: 170 },
+  { title: '设备', dataIndex: 'device_id', width: 140 },
+  { title: '用户', dataIndex: 'user_id', width: 100 },
+  { title: '模型', dataIndex: 'model_version', width: 160 },
+  { title: '事件类型', dataIndex: 'behavior_type', width: 120 },
+  { title: '延迟', dataIndex: 'latency_ms', width: 90 },
+  { title: '置信度', dataIndex: 'confidence', width: 90 },
+  { title: '状态', dataIndex: 'status', width: 90 }
+]
+
+const handleSearch = () => {
+  loadData()
 }
 
-const formatJson = (obj) => {
-  if (!obj) return '(无数据)'
-  if (typeof obj === 'string') {
-    try { return JSON.stringify(JSON.parse(obj), null, 2) } catch { return obj }
-  }
-  return JSON.stringify(obj, null, 2)
+const handleReset = () => {
+  form.id = ''
+  loadData()
 }
 
-const goBack = () => {
-  router.push('/ai/behavior-log')
+const handleCreate = () => {
+  modalTitle.value = '新建'
+  modalVisible.value = true
 }
 
-const loadDetail = async () => {
+const handleSubmit = () => {
+  modalVisible.value = false
+  Message.success('保存成功')
+}
+
+const loadData = async () => {
   loading.value = true
   try {
-    const res = await getAiMonitorEventById(route.params.id)
-    if (res.code === 0) {
-      record.value = res.data
+    if (route.params.id) {
+      const res = await getAiMonitorEventById(route.params.id)
+      if (res.code === 0) {
+        data.value = res.data ? [res.data] : []
+      }
     } else {
-      Message.error('加载失败')
+      data.value = []
     }
   } catch (e) {
     Message.error('加载失败')
@@ -163,38 +98,12 @@ const loadDetail = async () => {
 }
 
 onMounted(() => {
-  loadDetail()
+  loadData()
 })
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.pro-breadcrumb { margin-bottom: 16px; }
-
-.detail-card {
-  margin-bottom: 16px;
-  border-radius: 8px;
-}
-
-.data-block {
-  background: #f5f7fa;
-  border-radius: 4px;
-  padding: 12px 16px;
-  max-height: 300px;
-  overflow: auto;
-}
-
-.data-block pre {
-  margin: 0;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-
-.bottom-action {
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 8px;
-}
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 </style>

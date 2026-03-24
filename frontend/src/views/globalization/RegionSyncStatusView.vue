@@ -1,100 +1,67 @@
 <template>
   <div class="page-container">
-    <!-- 同步状态概览 -->
-    <a-card class="overview-card">
-      <div class="overview-grid">
-        <div class="overview-item" v-for="item in overviewStats" :key="item.label">
-          <div class="overview-icon">
-            <component :is="item.icon" />
-          </div>
-          <div class="overview-info">
-            <div class="overview-value">{{ item.value }}</div>
-            <div class="overview-label">{{ item.label }}</div>
-          </div>
+    <div class="overview-grid">
+      <div class="overview-item" v-for="item in overviewStats" :key="item.label">
+        <div class="overview-icon">
+          <component :is="item.icon" />
+        </div>
+        <div class="overview-info">
+          <div class="overview-value">{{ item.value }}</div>
+          <div class="overview-label">{{ item.label }}</div>
         </div>
       </div>
-    </a-card>
-
-    <!-- 同步记录列表 -->
-    <a-card class="table-card">
-      <template #title>
-        <div class="section-title">同步记录</div>
+    </div>
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="同步状态">
+          <a-select v-model="filters.syncStatus" placeholder="请选择" allow-clear style="width: 140px">
+            <a-option value="completed">已完成</a-option>
+            <a-option value="syncing">同步中</a-option>
+            <a-option value="pending">等待中</a-option>
+            <a-option value="failed">失败</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="loadSyncRecords">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="openTriggerModal">手动触发同步</a-button>
+    </div>
+    <a-table :columns="columns" :data="filteredRecords" :loading="loading" :pagination="pagination" row-key="id">
+      <template #syncPath="{ record }">
+        <span class="sync-path">
+          <span class="region-tag">{{ record.source_region }}</span>
+          <icon-swap class="swap-icon" />
+          <span class="region-tag">{{ record.target_region }}</span>
+        </span>
       </template>
-      <div class="filter-row">
-        <a-select
-          v-model="filters.syncStatus"
-          placeholder="同步状态"
-          style="width: 140px"
-          allow-clear
-          @change="loadSyncRecords"
-        >
-          <a-option value="completed">已完成</a-option>
-          <a-option value="syncing">同步中</a-option>
-          <a-option value="pending">等待中</a-option>
-          <a-option value="failed">失败</a-option>
-        </a-select>
-        <a-button type="primary" @click="openTriggerModal">手动触发同步</a-button>
-      </div>
-
-      <a-table
-        :columns="columns"
-        :data="filteredRecords"
-        :loading="loading"
-        :pagination="{ pageSize: 20 }"
-        row-key="id"
-        style="margin-top: 12px"
-      >
-        <template #syncPath="{ record }">
-          <span class="sync-path">
-            <span class="region-tag">{{ record.source_region }}</span>
-            <icon-swap class="swap-icon" />
-            <span class="region-tag">{{ record.target_region }}</span>
-          </span>
-        </template>
-        <template #syncType="{ record }">
-          <a-tag>{{ syncTypeLabel(record.sync_type) }}</a-tag>
-        </template>
-        <template #status="{ record }">
-          <a-badge :color="syncStatusColor(record.sync_status)" :text="syncStatusLabel(record.sync_status)" />
-        </template>
-        <template #recordsCount="{ record }">
-          <span>{{ record.records_synced || 0 }}</span>
-        </template>
-        <template #duration="{ record }">
-          <span v-if="record.started_at && record.completed_at">
-            {{ calcDuration(record.started_at, record.completed_at) }}
-          </span>
-          <span v-else-if="record.started_at">--</span>
-          <span v-else>-</span>
-        </template>
-        <template #error="{ record }">
-          <span v-if="record.error_message" class="error-text">{{ record.error_message }}</span>
-          <span v-else>-</span>
-        </template>
-        <template #actions="{ record }">
-          <div class="action-btns">
-            <a-button
-              type="text"
-              size="small"
-              :disabled="record.sync_status === 'syncing'"
-              @click="handleRetry(record)"
-            >
-              重试
-            </a-button>
-          </div>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 手动触发弹窗 -->
-    <a-modal
-      v-model:visible="triggerVisible"
-      title="手动触发同步"
-      :width="480"
-      @before-ok="handleTriggerSync"
-      @cancel="triggerVisible = false"
-    >
-      <a-form :model="form" layout="vertical">
+      <template #syncType="{ record }">
+        <a-tag>{{ syncTypeLabel(record.sync_type) }}</a-tag>
+      </template>
+      <template #status="{ record }">
+        <a-badge :color="syncStatusColor(record.sync_status)" :text="syncStatusLabel(record.sync_status)" />
+      </template>
+      <template #recordsCount="{ record }">
+        <span>{{ record.records_synced || 0 }}</span>
+      </template>
+      <template #duration="{ record }">
+        <span v-if="record.started_at && record.completed_at">{{ calcDuration(record.started_at, record.completed_at) }}</span>
+        <span v-else-if="record.started_at">--</span>
+        <span v-else>-</span>
+      </template>
+      <template #error="{ record }">
+        <span v-if="record.error_message" class="error-text">{{ record.error_message }}</span>
+        <span v-else>-</span>
+      </template>
+      <template #actions="{ record }">
+        <a-button type="text" size="small" :disabled="record.sync_status === 'syncing'" @click="handleRetry(record)">重试</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="triggerVisible" title="手动触发同步" :width="480" @before-ok="handleTriggerSync">
+      <a-form :model="form" label-col-flex="100px">
         <a-form-item label="源区域" required>
           <a-select v-model="form.source_region" placeholder="选择源区域">
             <a-option v-for="r in regions" :key="r.region_code" :value="r.region_code">{{ r.region_name }}</a-option>
@@ -112,6 +79,10 @@
           </a-select>
         </a-form-item>
       </a-form>
+      <template #footer>
+        <a-button @click="triggerVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleTriggerSync">确定</a-button>
+      </template>
     </a-modal>
   </div>
 </template>
@@ -126,13 +97,9 @@ const loading = ref(false)
 const records = ref([])
 const regions = ref([])
 const filters = reactive({ syncStatus: '' })
+const pagination = reactive({ pageSize: 20, current: 1, total: 0 })
 const triggerVisible = ref(false)
-
-const form = reactive({
-  source_region: '',
-  target_region: '',
-  sync_type: 'incremental'
-})
+const form = reactive({ source_region: '', target_region: '', sync_type: 'incremental' })
 
 const columns = [
   { title: '同步路径', slotName: 'syncPath', width: 200 },
@@ -178,11 +145,17 @@ function calcDuration(start, end) {
   return `${(ms / 60000).toFixed(1)}min`
 }
 
+function handleReset() {
+  filters.syncStatus = ''
+  pagination.current = 1
+}
+
 async function loadSyncRecords() {
   loading.value = true
   try {
     const res = await getSyncRecords()
     records.value = res.data || res || []
+    pagination.total = filteredRecords.value.length
   } catch (e) {
     console.error('加载同步记录失败', e)
   } finally {
@@ -192,12 +165,10 @@ async function loadSyncRecords() {
 
 onMounted(async () => {
   try {
-    const [recordsRes, regionsRes] = await Promise.all([
-      getSyncRecords(),
-      getRegions()
-    ])
+    const [recordsRes, regionsRes] = await Promise.all([getSyncRecords(), getRegions()])
     records.value = recordsRes.data || recordsRes || []
     regions.value = regionsRes.data || regionsRes || []
+    pagination.total = records.value.length
   } catch (e) {
     console.error('加载数据失败', e)
   }
@@ -208,15 +179,13 @@ function openTriggerModal() {
   triggerVisible.value = true
 }
 
-async function handleTriggerSync(done) {
+async function handleTriggerSync() {
   if (!form.source_region || !form.target_region) {
     Message.warning('请选择源区域和目标区域')
-    done(false)
     return
   }
   if (form.source_region === form.target_region) {
     Message.warning('源区域和目标区域不能相同')
-    done(false)
     return
   }
   try {
@@ -226,17 +195,12 @@ async function handleTriggerSync(done) {
     await loadSyncRecords()
   } catch (e) {
     Message.error('触发失败')
-    done(false)
   }
 }
 
 async function handleRetry(record) {
   try {
-    await triggerSync({
-      source_region: record.source_region,
-      target_region: record.target_region,
-      sync_type: record.sync_type
-    })
+    await triggerSync({ source_region: record.source_region, target_region: record.target_region, sync_type: record.sync_type })
     Message.success('重试任务已触发')
     await loadSyncRecords()
   } catch (e) {
@@ -246,74 +210,17 @@ async function handleRetry(record) {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.overview-card { flex-shrink: 0; }
-
-.overview-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-
-.overview-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.overview-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: var(--color-fill-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: var(--color-text-3);
-}
-
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
+.overview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.overview-item { display: flex; align-items: center; gap: 12px; }
+.overview-icon { width: 40px; height: 40px; border-radius: 8px; background: var(--color-fill-2); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--color-text-3); }
 .overview-info { display: flex; flex-direction: column; }
-
 .overview-value { font-size: 24px; font-weight: 600; }
-
 .overview-label { font-size: 12px; color: var(--color-text-3); }
-
-.table-card { flex: 1; overflow: auto; }
-
-.section-title { font-size: 14px; font-weight: 600; }
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.sync-path {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.region-tag {
-  background: var(--color-fill-2);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-family: monospace;
-}
-
+.sync-path { display: flex; align-items: center; gap: 6px; }
+.region-tag { background: var(--color-fill-2); padding: 2px 8px; border-radius: 4px; font-size: 12px; font-family: monospace; }
 .swap-icon { color: var(--color-text-3); }
-
 .error-text { color: #f53f3f; font-size: 12px; }
-
-.action-btns { display: flex; gap: 4px; }
 </style>

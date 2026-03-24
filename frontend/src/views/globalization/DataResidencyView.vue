@@ -1,96 +1,47 @@
 <template>
   <div class="page-container">
-    <!-- 顶部：标题 + 添加按钮 -->
-    <a-card class="header-card">
-      <div class="header-row">
-        <div class="page-title">数据驻留规则</div>
-        <a-button type="primary" @click="openAddModal">添加规则</a-button>
-      </div>
-    </a-card>
-
-    <!-- 筛选栏 -->
-    <a-card class="filter-card">
-      <div class="filter-row">
-        <a-select
-          v-model="filters.dataType"
-          placeholder="数据类型"
-          style="width: 160px"
-          allow-clear
-          @change="handleFilterChange"
-        >
-          <a-option v-for="t in dataTypes" :key="t.value" :value="t.value">{{ t.label }}</a-option>
-        </a-select>
-        <a-select
-          v-model="filters.status"
-          placeholder="状态"
-          style="width: 140px"
-          allow-clear
-          @change="handleFilterChange"
-        >
-          <a-option value="active">生效</a-option>
-          <a-option value="pending">待审批</a-option>
-          <a-option value="inactive">停用</a-option>
-        </a-select>
-        <a-select
-          v-model="filters.tenantId"
-          placeholder="租户"
-          style="width: 160px"
-          allow-clear
-          allow-search
-          @change="handleFilterChange"
-        >
-          <a-option v-for="t in tenants" :key="t.id" :value="t.id">{{ t.name }}</a-option>
-        </a-select>
-      </div>
-    </a-card>
-
-    <!-- 列表 -->
-    <a-card class="table-card">
-      <a-table
-        :columns="columns"
-        :data="filteredRules"
-        :loading="loading"
-        :pagination="{ pageSize: 20 }"
-        row-key="id"
-      >
-        <template #dataType="{ record }">
-          <a-tag :color="dataTypeColor(record.data_type)">{{ dataTypeLabel(record.data_type) }}</a-tag>
-        </template>
-        <template #storageRegion="{ record }">
-          <span>{{ record.target_region }}</span>
-        </template>
-        <template #status="{ record }">
-          <a-badge :color="statusColor(record.is_active ? 'active' : 'inactive')" :text="record.is_active ? '生效' : '停用'" />
-        </template>
-        <template #description="{ record }">
-          <span class="desc-text">{{ record.description || '-' }}</span>
-        </template>
-        <template #actions="{ record }">
-          <div class="action-btns">
-            <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-          </div>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 提示 -->
-    <a-card class="tip-card">
-      <div class="tip-content">
-        <icon-info-circle class="tip-icon" />
-        <span>提示：数据驻留规则变更需要重新部署相关服务</span>
-      </div>
-    </a-card>
-
-    <!-- 添加/编辑弹窗 -->
-    <a-modal
-      v-model:visible="formVisible"
-      :title="editingRule ? '编辑规则' : '添加规则'"
-      :width="520"
-      @before-ok="handleSubmit"
-      @cancel="formVisible = false"
-    >
-      <a-form :model="form" layout="vertical">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="数据类型">
+          <a-select v-model="filters.dataType" placeholder="请选择" allow-clear style="width: 140px">
+            <a-option v-for="t in dataTypes" :key="t.value" :value="t.value">{{ t.label }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="filters.status" placeholder="请选择" allow-clear style="width: 120px">
+            <a-option value="active">生效</a-option>
+            <a-option value="inactive">停用</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleFilterChange">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="openAddModal">添加规则</a-button>
+    </div>
+    <a-table :columns="columns" :data="filteredRules" :loading="loading" :pagination="pagination" row-key="id">
+      <template #dataType="{ record }">
+        <a-tag :color="dataTypeColor(record.data_type)">{{ dataTypeLabel(record.data_type) }}</a-tag>
+      </template>
+      <template #storageRegion="{ record }">
+        <span>{{ record.target_region }}</span>
+      </template>
+      <template #status="{ record }">
+        <a-badge :color="statusColor(record.is_active ? 'active' : 'inactive')" :text="record.is_active ? '生效' : '停用'" />
+      </template>
+      <template #description="{ record }">
+        <span class="desc-text">{{ record.description || '-' }}</span>
+      </template>
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
+        <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="formVisible" :title="editingRule ? '编辑规则' : '添加规则'" :width="520" @before-ok="handleSubmit">
+      <a-form :model="form" label-col-flex="100px">
         <a-form-item label="规则名称" required>
           <a-input v-model="form.rule_name" placeholder="如：用户数据-中国东部" />
         </a-form-item>
@@ -107,7 +58,7 @@
         <a-form-item label="存储 Schema">
           <a-input v-model="form.storage_schema" placeholder="如：public_cn_east" />
         </a-form-item>
-        <a-form-item label="数据保留天数">
+        <a-form-item label="保留天数">
           <a-input-number v-model="form.retention_days" placeholder="如：365" :min="1" style="width: 100%" />
         </a-form-item>
         <a-form-item label="描述">
@@ -117,6 +68,10 @@
           <a-switch v-model="form.is_active" />
         </a-form-item>
       </a-form>
+      <template #footer>
+        <a-button @click="formVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
     </a-modal>
   </div>
 </template>
@@ -131,8 +86,8 @@ const dataTypes = DATA_TYPES
 const loading = ref(false)
 const rules = ref([])
 const regions = ref([])
-const tenants = ref([])
 const filters = reactive({ dataType: '', status: '', tenantId: '' })
+const pagination = reactive({ pageSize: 20, current: 1, total: 0 })
 
 const columns = [
   { title: '数据类型', slotName: 'dataType', width: 130 },
@@ -192,7 +147,15 @@ function statusColor(status) {
   return status === 'active' ? 'green' : 'gray'
 }
 
-function handleFilterChange() {}
+function handleFilterChange() {
+  pagination.current = 1
+}
+
+function handleReset() {
+  filters.dataType = ''
+  filters.status = ''
+  pagination.current = 1
+}
 
 onMounted(async () => {
   loading.value = true
@@ -203,6 +166,7 @@ onMounted(async () => {
     ])
     rules.value = rulesRes.data || rulesRes || []
     regions.value = regionsRes.data || regionsRes || []
+    pagination.total = filteredRules.value.length
   } catch (e) {
     console.error('加载数据驻留规则失败', e)
   } finally {
@@ -230,7 +194,7 @@ function openEditModal(record) {
   formVisible.value = true
 }
 
-async function handleSubmit(done) {
+async function handleSubmit() {
   try {
     if (editingRule.value) {
       await updateDataResidencyRule(editingRule.value.id, form)
@@ -244,7 +208,6 @@ async function handleSubmit(done) {
     rules.value = res.data || res || []
   } catch (e) {
     Message.error('操作失败')
-    done(false)
   }
 }
 
@@ -268,48 +231,8 @@ function handleDelete(record) {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.header-card { flex-shrink: 0; }
-
-.header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.page-title { font-size: 16px; font-weight: 600; }
-
-.filter-card { flex-shrink: 0; }
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.table-card { flex: 1; overflow: auto; }
-
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 .desc-text { color: var(--color-text-3); font-size: 13px; }
-
-.action-btns { display: flex; gap: 4px; }
-
-.tip-card { flex-shrink: 0; background: #f9f0ff; border-color: #722ed1; }
-
-.tip-content {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #722ed1;
-  font-size: 13px;
-}
-
-.tip-icon { font-size: 16px; }
 </style>

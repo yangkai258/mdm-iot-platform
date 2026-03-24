@@ -1,80 +1,55 @@
 <template>
   <div class="page-container">
-    <!-- 顶部：筛选 + 注册按钮 -->
-    <a-card class="header-card">
-      <div class="header-row">
-        <div class="filter-group">
-          <a-select
-            v-model="filters.regionCode"
-            placeholder="区域"
-            style="width: 180px"
-            allow-clear
-            @change="loadNodes"
-          >
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="区域">
+          <a-select v-model="filters.regionCode" placeholder="请选择" allow-clear style="width: 160px">
             <a-option v-for="r in regions" :key="r.region_code" :value="r.region_code">{{ r.region_name }}</a-option>
           </a-select>
-          <a-select
-            v-model="filters.status"
-            placeholder="状态"
-            style="width: 140px"
-            allow-clear
-            @change="loadNodes"
-          >
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="filters.status" placeholder="请选择" allow-clear style="width: 120px">
             <a-option value="online">在线</a-option>
             <a-option value="offline">离线</a-option>
             <a-option value="standby">备用</a-option>
           </a-select>
-        </div>
-        <a-button type="primary" @click="openRegisterModal">注册新节点</a-button>
-      </div>
-    </a-card>
-
-    <!-- 列表 -->
-    <a-card class="table-card">
-      <a-table
-        :columns="columns"
-        :data="filteredNodes"
-        :loading="loading"
-        :pagination="{ pageSize: 20 }"
-        row-key="id"
-      >
-        <template #nodeId="{ record }">
-          <span class="mono">{{ record.node_id || record.id }}</span>
-        </template>
-        <template #model="{ record }">
-          <span>{{ record.model || 'mini-claw' }}</span>
-        </template>
-        <template #status="{ record }">
-          <a-badge :color="nodeStatusColor(record.health_status)" :text="nodeStatusLabel(record.health_status)" />
-        </template>
-        <template #qps="{ record }">
-          <span v-if="record.health_status === 'online'">{{ record.qps || 0 }}/{{ record.qps_limit || 100 }}</span>
-          <span v-else class="na">--</span>
-        </template>
-        <template #load="{ record }">
-          <span v-if="record.health_status === 'online'">
-            <a-progress :percent="record.load_factor || 0" size="small" :show-text="true" />
-          </span>
-          <span v-else class="na">--</span>
-        </template>
-        <template #actions="{ record }">
-          <div class="action-btns">
-            <a-button type="text" size="small" @click="openDetailModal(record)">详情</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDeregister(record)">注销</a-button>
-          </div>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 注册弹窗 -->
-    <a-modal
-      v-model:visible="registerVisible"
-      title="注册新节点"
-      :width="480"
-      @before-ok="handleRegister"
-      @cancel="registerVisible = false"
-    >
-      <a-form :model="form" layout="vertical">
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="loadNodes">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="openRegisterModal">注册新节点</a-button>
+    </div>
+    <a-table :columns="columns" :data="filteredNodes" :loading="loading" :pagination="pagination" row-key="id">
+      <template #nodeId="{ record }">
+        <span class="mono">{{ record.node_id || record.id }}</span>
+      </template>
+      <template #model="{ record }">
+        <span>{{ record.model || 'mini-claw' }}</span>
+      </template>
+      <template #status="{ record }">
+        <a-badge :color="nodeStatusColor(record.health_status)" :text="nodeStatusLabel(record.health_status)" />
+      </template>
+      <template #qps="{ record }">
+        <span v-if="record.health_status === 'online'">{{ record.qps || 0 }}/{{ record.qps_limit || 100 }}</span>
+        <span v-else class="na">--</span>
+      </template>
+      <template #load="{ record }">
+        <span v-if="record.health_status === 'online'">
+          <a-progress :percent="record.load_factor || 0" size="small" :show-text="true" />
+        </span>
+        <span v-else class="na">--</span>
+      </template>
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="openDetailModal(record)">详情</a-button>
+        <a-button type="text" size="small" status="danger" @click="handleDeregister(record)">注销</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="registerVisible" title="注册新节点" :width="480" @before-ok="handleRegister">
+      <a-form :model="form" label-col-flex="100px">
         <a-form-item label="节点 ID" required>
           <a-input v-model="form.node_id" placeholder="如：node-001" />
         </a-form-item>
@@ -93,15 +68,12 @@
           <a-input-number v-model="form.qps_limit" placeholder="100" :min="1" style="width: 100%" />
         </a-form-item>
       </a-form>
+      <template #footer>
+        <a-button @click="registerVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleRegister">确定</a-button>
+      </template>
     </a-modal>
-
-    <!-- 详情弹窗 -->
-    <a-modal
-      v-model:visible="detailVisible"
-      title="节点详情"
-      :width="520"
-      footer=" "
-    >
+    <a-modal v-model:visible="detailVisible" title="节点详情" :width="520">
       <div class="detail-grid" v-if="detailNode">
         <div class="detail-item">
           <span class="detail-label">节点 ID</span>
@@ -138,6 +110,7 @@
           <span class="detail-value">{{ formatDate(detailNode.last_heartbeat) }}</span>
         </div>
       </div>
+      <template #footer></template>
     </a-modal>
   </div>
 </template>
@@ -152,6 +125,7 @@ const loading = ref(false)
 const nodes = ref([])
 const regions = ref([])
 const filters = reactive({ regionCode: '', status: '' })
+const pagination = reactive({ pageSize: 20, current: 1, total: 0 })
 
 const columns = [
   { title: '节点ID', slotName: 'nodeId', width: 140 },
@@ -201,11 +175,19 @@ async function loadNodes() {
   try {
     const res = await getAINodes(filters)
     nodes.value = res.data || res || []
+    pagination.total = filteredNodes.value.length
   } catch (e) {
     console.error('加载AI节点失败', e)
   } finally {
     loading.value = false
   }
+}
+
+function handleReset() {
+  filters.regionCode = ''
+  filters.status = ''
+  pagination.current = 1
+  loadNodes()
 }
 
 onMounted(async () => {
@@ -216,6 +198,7 @@ onMounted(async () => {
     ])
     nodes.value = nodesRes.data || nodesRes || []
     regions.value = regionsRes.data || regionsRes || []
+    pagination.total = nodes.value.length
   } catch (e) {
     console.error('加载数据失败', e)
   }
@@ -231,10 +214,9 @@ function openDetailModal(record) {
   detailVisible.value = true
 }
 
-async function handleRegister(done) {
+async function handleRegister() {
   if (!form.node_id || !form.region_code || !form.endpoint) {
     Message.warning('请填写必填项')
-    done(false)
     return
   }
   try {
@@ -244,7 +226,6 @@ async function handleRegister(done) {
     await loadNodes()
   } catch (e) {
     Message.error('注册失败')
-    done(false)
   }
 }
 
@@ -267,55 +248,13 @@ function handleDeregister(record) {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.header-card { flex-shrink: 0; }
-
-.header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.filter-group {
-  display: flex;
-  gap: 10px;
-}
-
-.table-card { flex: 1; overflow: auto; }
-
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
 .mono { font-family: monospace; font-size: 12px; }
-
 .na { color: var(--color-text-3); }
-
-.action-btns { display: flex; gap: 4px; }
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: var(--color-text-3);
-}
-
-.detail-value {
-  font-size: 14px;
-  word-break: break-all;
-}
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.detail-item { display: flex; flex-direction: column; gap: 4px; }
+.detail-label { font-size: 12px; color: var(--color-text-3); }
+.detail-value { font-size: 14px; word-break: break-all; }
 </style>

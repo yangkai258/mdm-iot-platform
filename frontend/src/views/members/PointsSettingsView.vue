@@ -1,32 +1,62 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
     <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
+      <a-button type="primary" @click="handleSave">保存设置</a-button>
+      <a-button @click="handleReset">重置</a-button>
     </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
-      </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
+    <a-form :model="settings" layout="vertical" class="settings-form">
+      <a-divider>积分规则</a-divider>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="每元积分">
+            <a-input-number v-model="settings.points_per_yuan" :min="0" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="积分抵现比例">
+            <a-input-number v-model="settings.deduct_ratio" :min="0" :max="100" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="最高抵扣比例（%）">
+            <a-input-number v-model="settings.max_deduct_percent" :min="0" :max="100" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="最低兑换积分">
+            <a-input-number v-model="settings.min_points" :min="0" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="每日积分上限">
+            <a-input-number v-model="settings.max_points_per_day" :min="0" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-divider>有效期设置</a-divider>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="积分过期类型">
+            <a-select v-model="settings.expire_type" placeholder="请选择">
+              <a-option value="never">永不过期</a-option>
+              <a-option value="year">每年底过期</a-option>
+              <a-option value="month">每月过期</a-option>
+              <a-option value="custom">自定义天数</a-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="生日双倍积分">
+            <a-switch v-model="settings.birthday_double" true-value="1" false-value="0" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="允许积分转让">
+            <a-switch v-model="settings.allow_transfer" true-value="1" false-value="0" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-form>
   </div>
 </template>
 
@@ -89,6 +119,6 @@ onMounted(() => loadSettings())
 
 <style scoped>
 .page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
 .toolbar { margin-bottom: 16px; }
+.settings-form { max-width: 800px; }
 </style>

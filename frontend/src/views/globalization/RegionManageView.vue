@@ -1,96 +1,60 @@
 <template>
   <div class="page-container">
-    <!-- 顶部：标题 + 添加按钮 -->
-    <a-card class="header-card">
-      <div class="header-row">
-        <div class="page-title">区域管理</div>
-        <a-button type="primary" @click="openAddModal">添加区域</a-button>
-      </div>
-    </a-card>
-
-    <!-- 筛选栏 -->
-    <a-card class="filter-card">
-      <div class="filter-row">
-        <a-select
-          v-model="filters.regionType"
-          placeholder="区域类型"
-          style="width: 160px"
-          allow-clear
-          @change="handleFilterChange"
-        >
-          <a-option v-for="t in regionTypes" :key="t.value" :value="t.value">{{ t.label }}</a-option>
-        </a-select>
-        <a-select
-          v-model="filters.status"
-          placeholder="状态"
-          style="width: 140px"
-          allow-clear
-          @change="handleFilterChange"
-        >
-          <a-option value="active">活跃</a-option>
-          <a-option value="inactive">停用</a-option>
-          <a-option value="standby">备用</a-option>
-        </a-select>
-        <a-input
-          v-model="filters.keyword"
-          placeholder="搜索区域名称..."
-          style="width: 200px"
-          allow-clear
-          @change="handleFilterChange"
-          @press-enter="handleFilterChange"
-        />
-      </div>
-    </a-card>
-
-    <!-- 列表 -->
-    <a-card class="table-card">
-      <a-table
-        :columns="columns"
-        :data="filteredRegions"
-        :loading="loading"
-        :pagination="{ pageSize: 20 }"
-        row-key="id"
-      >
-        <template #regionName="{ record }">
-          <span class="region-name">{{ record.region_name }}</span>
-        </template>
-        <template #regionCode="{ record }">
-          <span class="mono">{{ record.region_code }}</span>
-        </template>
-        <template #regionType="{ record }">
-          <a-tag :color="typeColor(record.region_type)">{{ typeLabel(record.region_type) }}</a-tag>
-        </template>
-        <template #status="{ record }">
-          <span class="status-dot">
-            <a-badge :color="statusColor(record.is_active ? 'active' : 'inactive')" />
-            {{ record.is_active ? '活跃' : '停用' }}
-          </span>
-        </template>
-        <template #dbStatus="{ record }">
-          <a-badge :color="record.db_online ? 'green' : 'gray'" :text="record.db_online ? '在线' : '离线'" />
-        </template>
-        <template #aiStatus="{ record }">
-          <a-badge :color="record.ai_online ? 'green' : 'gray'" :text="record.ai_online ? '在线' : '离线'" />
-        </template>
-        <template #actions="{ record }">
-          <div class="action-btns">
-            <a-button type="text" size="small" @click="openDetailModal(record)">详情</a-button>
-            <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-          </div>
-        </template>
-      </a-table>
-    </a-card>
-
-    <!-- 添加/编辑弹窗 -->
-    <a-modal
-      v-model:visible="formVisible"
-      :title="editingRegion ? '编辑区域' : '添加区域'"
-      :width="520"
-      @before-ok="handleSubmit"
-      @cancel="formVisible = false"
-    >
-      <a-form :model="form" layout="vertical">
+    <div class="search-form">
+      <a-form :model="form" layout="inline">
+        <a-form-item label="区域类型">
+          <a-select v-model="filters.regionType" placeholder="请选择" allow-clear style="width: 140px">
+            <a-option v-for="t in regionTypes" :key="t.value" :value="t.value">{{ t.label }}</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="状态">
+          <a-select v-model="filters.status" placeholder="请选择" allow-clear style="width: 120px">
+            <a-option value="active">活跃</a-option>
+            <a-option value="inactive">停用</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="区域名称">
+          <a-input v-model="filters.keyword" placeholder="搜索区域名称" style="width: 160px" allow-clear />
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="handleFilterChange">搜索</a-button>
+          <a-button @click="handleReset">重置</a-button>
+        </a-form-item>
+      </a-form>
+    </div>
+    <div class="toolbar">
+      <a-button type="primary" @click="openAddModal">添加区域</a-button>
+    </div>
+    <a-table :columns="columns" :data="filteredRegions" :loading="loading" :pagination="pagination" row-key="id">
+      <template #regionName="{ record }">
+        <span class="region-name">{{ record.region_name }}</span>
+      </template>
+      <template #regionCode="{ record }">
+        <span class="mono">{{ record.region_code }}</span>
+      </template>
+      <template #regionType="{ record }">
+        <a-tag :color="typeColor(record.region_type)">{{ typeLabel(record.region_type) }}</a-tag>
+      </template>
+      <template #status="{ record }">
+        <span class="status-dot">
+          <a-badge :color="statusColor(record.is_active ? 'active' : 'inactive')" />
+          {{ record.is_active ? '活跃' : '停用' }}
+        </span>
+      </template>
+      <template #dbStatus="{ record }">
+        <a-badge :color="record.db_online ? 'green' : 'gray'" :text="record.db_online ? '在线' : '离线'" />
+      </template>
+      <template #aiStatus="{ record }">
+        <a-badge :color="record.ai_online ? 'green' : 'gray'" :text="record.ai_online ? '在线' : '离线'" />
+      </template>
+      <template #actions="{ record }">
+        <a-button type="text" size="small" @click="openDetailModal(record)">详情</a-button>
+        <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
+        <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+      </template>
+    </a-table>
+    <a-modal v-model:visible="formVisible" :title="editingRegion ? '编辑区域' : '添加区域'" :width="520" @before-ok="handleSubmit">
+      <a-form :model="form" label-col-flex="100px">
         <a-form-item label="区域名称" required>
           <a-input v-model="form.region_name" placeholder="如：中国东部" />
         </a-form-item>
@@ -108,22 +72,19 @@
         <a-form-item label="AI 端点">
           <a-input v-model="form.ai_endpoint" placeholder="https://ai.cn-east.example.com" />
         </a-form-item>
-        <a-form-item label="设为默认区域">
+        <a-form-item label="设为默认">
           <a-switch v-model="form.is_default" />
         </a-form-item>
         <a-form-item label="启用状态">
           <a-switch v-model="form.is_active" />
         </a-form-item>
       </a-form>
+      <template #footer>
+        <a-button @click="formVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
     </a-modal>
-
-    <!-- 详情弹窗 -->
-    <a-modal
-      v-model:visible="detailVisible"
-      title="区域详情"
-      :width="560"
-      footer=" "
-    >
+    <a-modal v-model:visible="detailVisible" title="区域详情" :width="560">
       <div class="detail-grid" v-if="detailRegion">
         <div class="detail-item">
           <span class="detail-label">区域名称</span>
@@ -162,6 +123,7 @@
           <span class="detail-value">{{ formatDate(detailRegion.updated_at) }}</span>
         </div>
       </div>
+      <template #footer></template>
     </a-modal>
   </div>
 </template>
@@ -177,6 +139,7 @@ const regionTypes = REGION_TYPES
 const loading = ref(false)
 const regions = ref([])
 const filters = reactive({ regionType: '', status: '', keyword: '' })
+const pagination = reactive({ pageSize: 20, current: 1, total: 0 })
 
 const columns = [
   { title: '区域名称', slotName: 'regionName', width: 160 },
@@ -233,21 +196,29 @@ function formatDate(date) {
   return dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 }
 
+function handleFilterChange() {
+  pagination.current = 1
+}
+
+function handleReset() {
+  filters.regionType = ''
+  filters.status = ''
+  filters.keyword = ''
+  pagination.current = 1
+}
+
 onMounted(async () => {
   loading.value = true
   try {
     const res = await getRegions()
     regions.value = res.data || res || []
+    pagination.total = regions.value.length
   } catch (e) {
     console.error('加载区域列表失败', e)
   } finally {
     loading.value = false
   }
 })
-
-function handleFilterChange() {
-  // 筛选通过 computed 自动处理
-}
 
 function openAddModal() {
   editingRegion.value = null
@@ -274,7 +245,7 @@ function openDetailModal(record) {
   detailVisible.value = true
 }
 
-async function handleSubmit(done) {
+async function handleSubmit() {
   try {
     if (editingRegion.value) {
       await updateRegion(editingRegion.value.id, form)
@@ -288,7 +259,6 @@ async function handleSubmit(done) {
     regions.value = res.data || res || []
   } catch (e) {
     Message.error('操作失败')
-    done(false)
   }
 }
 
@@ -312,84 +282,14 @@ function handleDelete(record) {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.header-card {
-  flex-shrink: 0;
-}
-
-.header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.page-title {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.filter-card {
-  flex-shrink: 0;
-}
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.table-card {
-  flex: 1;
-  overflow: auto;
-}
-
-.region-name {
-  font-weight: 500;
-}
-
-.mono {
-  font-family: monospace;
-  font-size: 12px;
-}
-
-.status-dot {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.action-btns {
-  display: flex;
-  gap: 4px;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.detail-label {
-  font-size: 12px;
-  color: var(--color-text-3);
-}
-
-.detail-value {
-  font-size: 14px;
-  word-break: break-all;
-}
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.toolbar { margin-bottom: 16px; }
+.region-name { font-weight: 500; }
+.mono { font-family: monospace; font-size: 12px; }
+.status-dot { display: flex; align-items: center; gap: 6px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.detail-item { display: flex; flex-direction: column; gap: 4px; }
+.detail-label { font-size: 12px; color: var(--color-text-3); }
+.detail-value { font-size: 14px; word-break: break-all; }
 </style>

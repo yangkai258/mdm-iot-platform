@@ -12,7 +12,7 @@
     <div class="toolbar">
       <a-button type="primary" @click="handleCreate">新建</a-button>
     </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
       <template #actions="{ record }">
         <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
         <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>

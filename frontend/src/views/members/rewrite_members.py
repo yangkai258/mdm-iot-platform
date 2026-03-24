@@ -373,14 +373,14 @@ def process_all():
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(new_content)
                 results['rewritten'].append(filename)
-                print(f"  ✓ Normalized: {filename}")
+                print(f"  [OK] Normalized: {filename}")
             else:
                 # For unlisted files, just normalize as complex
                 new_content = normalize_complex_file(filepath)
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(new_content)
                 results['rewritten'].append(filename)
-                print(f"  ✓ Processed: {filename}")
+                print(f"  [OK] Processed: {filename}")
         except Exception as e:
             results['errors'].append((filename, str(e)))
             print(f"  ✗ Error: {filename} - {e}")

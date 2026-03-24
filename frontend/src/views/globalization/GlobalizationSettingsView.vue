@@ -1,12 +1,9 @@
 <template>
   <div class="page-container">
-    <!-- 概览卡片 -->
-    <a-card class="overview-card">
+    <div class="page-header">
       <div class="page-title">全球化设置</div>
       <div class="page-desc">统一管理多区域部署、时区配置和数据驻留策略</div>
-    </a-card>
-
-    <!-- 快捷入口 -->
+    </div>
     <div class="quick-entries">
       <div class="entry-card" v-for="entry in entries" :key="entry.path" @click="goTo(entry.path)">
         <div class="entry-icon">
@@ -22,12 +19,8 @@
         <icon-right class="entry-arrow" />
       </div>
     </div>
-
-    <!-- 当前配置状态 -->
-    <a-card class="config-status-card">
-      <template #title>
-        <div class="section-title">当前配置状态</div>
-      </template>
+    <div class="config-status">
+      <div class="section-title">当前配置状态</div>
       <div class="config-grid">
         <div class="config-item">
           <div class="config-label">当前时区</div>
@@ -56,7 +49,7 @@
           </div>
         </div>
       </div>
-    </a-card>
+    </div>
   </div>
 </template>
 
@@ -157,80 +150,31 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  height: 100%;
-  box-sizing: border-box;
-}
-
-.overview-card { flex-shrink: 0; }
-
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.page-header { margin-bottom: 20px; }
 .page-title { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-
 .page-desc { font-size: 13px; color: var(--color-text-3); }
-
-.quick-entries {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
+.quick-entries { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px; }
 .entry-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: var(--color-bg-white);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  display: flex; align-items: center; gap: 12px; padding: 16px;
+  background: var(--color-bg-white); border: 1px solid var(--color-border);
+  border-radius: 8px; cursor: pointer; transition: all 0.2s;
 }
-
-.entry-card:hover {
-  border-color: rgb(var(--primary-6));
-  background: var(--color-fill-1);
-}
-
+.entry-card:hover { border-color: rgb(var(--primary-6)); background: var(--color-fill-1); }
 .entry-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: var(--color-fill-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: var(--color-text-3);
-  flex-shrink: 0;
+  width: 44px; height: 44px; border-radius: 10px; background: var(--color-fill-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: var(--color-text-3); flex-shrink: 0;
 }
-
 .entry-info { flex: 1; }
-
 .entry-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-
 .entry-desc { font-size: 12px; color: var(--color-text-3); }
-
 .entry-status { margin-right: 8px; }
-
 .entry-arrow { color: var(--color-text-3); }
-
-.config-status-card { flex-shrink: 0; }
-
-.section-title { font-size: 14px; font-weight: 600; }
-
-.config-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
+.config-status { padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.section-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+.config-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .config-item { display: flex; flex-direction: column; gap: 4px; }
-
 .config-label { font-size: 12px; color: var(--color-text-3); }
-
 .config-value { font-size: 14px; font-weight: 500; }
 </style>

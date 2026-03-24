@@ -1,32 +1,70 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
     <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
+      <a-button type="primary" @click="handleSave">保存设置</a-button>
+      <a-button @click="handleReset">重置</a-button>
     </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
-      </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
+    <a-form :model="form" layout="vertical" class="settings-form">
+      <a-divider>基本信息</a-divider>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="小程序名称">
+            <a-input v-model="form.miniprogram_name" placeholder="请输入小程序名称" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="AppID">
+            <a-input v-model="form.app_id" placeholder="请输入AppID" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="24">
+          <a-form-item label="AppSecret">
+            <a-input v-model="form.app_secret" placeholder="请输入AppSecret" type="password" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-divider>卡面设置</a-divider>
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-form-item label="会员卡背景">
+            <a-input v-model="form.card_bg" placeholder="请输入背景图片URL" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="激活链接">
+            <a-input v-model="form.card_activate_url" placeholder="请输入激活链接" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="显示积分">
+            <a-switch v-model="form.show_points" true-value="1" false-value="0" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="显示等级">
+            <a-switch v-model="form.show_level" true-value="1" false-value="0" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="12">
+          <a-form-item label="显示优惠券">
+            <a-switch v-model="form.show_coupons" true-value="1" false-value="0" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+      <a-divider>消息设置</a-divider>
+      <a-row :gutter="16">
+        <a-col :span="24">
+          <a-form-item label="关注回复">
+            <a-textarea v-model="form.subscribe_reply" :rows="2" placeholder="请输入关注回复内容" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="24">
+          <a-form-item label="生日祝福">
+            <a-textarea v-model="form.birthday_wish" :rows="2" placeholder="请输入生日祝福内容" />
+          </a-form-item>
+        </a-col>
+      </a-row>
+    </a-form>
   </div>
 </template>
 
@@ -92,6 +130,6 @@ onMounted(() => loadData())
 
 <style scoped>
 .page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
 .toolbar { margin-bottom: 16px; }
+.settings-form { max-width: 800px; }
 </style>

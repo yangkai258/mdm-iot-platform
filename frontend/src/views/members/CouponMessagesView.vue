@@ -12,7 +12,7 @@
     <div class="toolbar">
       <a-button type="primary" @click="handleCreate">新建</a-button>
     </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
       <template #status="{ record }">
         <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
       </template>
