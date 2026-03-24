@@ -627,6 +627,84 @@ const routes = [
     meta: { title: '模型发布工作流' }
   },
 
+  // ============ Sprint 12.8: 会员积分扩展 ============
+  {
+    path: '/member/points/rules',
+    name: 'PointsRulesView',
+    component: () => import('../views/members/PointsRulesView.vue'),
+    meta: { title: '会员积分方式' }
+  },
+  {
+    path: '/member/points/exclude',
+    name: 'PointsExcludeView',
+    component: () => import('../views/members/PointsExcludeView.vue'),
+    meta: { title: '不积分规则' }
+  },
+  {
+    path: '/member/points/settings',
+    name: 'PointsSettingsView',
+    component: () => import('../views/members/PointsSettingsView.vue'),
+    meta: { title: '积分规则设置' }
+  },
+
+  // ============ Sprint 12.9: 店铺管理扩展 ============
+  {
+    path: '/member/store-sources',
+    name: 'StoreSourcesView',
+    component: () => import('../views/members/StoreSourcesView.vue'),
+    meta: { title: '店铺来源配置' }
+  },
+  {
+    path: '/member/store-locations',
+    name: 'StoreLocationsView',
+    component: () => import('../views/members/StoreLocationsView.vue'),
+    meta: { title: '门店位置管理' }
+  },
+  {
+    path: '/member/channels',
+    name: 'MemberChannelsView',
+    component: () => import('../views/members/MemberChannelsView.vue'),
+    meta: { title: '会员渠道设置' }
+  },
+  {
+    path: '/member/miniprogram',
+    name: 'MiniProgramView',
+    component: () => import('../views/members/MiniProgramView.vue'),
+    meta: { title: '小程序基础数据' }
+  },
+  {
+    path: '/member/printers',
+    name: 'PrinterManageView',
+    component: () => import('../views/members/PrinterManageView.vue'),
+    meta: { title: '云打印设备管理' }
+  },
+
+  // ============ Sprint 12.10: 临时会员 ============
+  {
+    path: '/member/temp-members',
+    name: 'TempMembersView',
+    component: () => import('../views/members/TempMembersView.vue'),
+    meta: { title: '临时会员管理' }
+  },
+  {
+    path: '/member/temp-coupons',
+    name: 'TempCouponGrantView',
+    component: () => import('../views/members/TempCouponGrantView.vue'),
+    meta: { title: '临时优惠券发放' }
+  },
+  {
+    path: '/member/temp-points',
+    name: 'TempPointsView',
+    component: () => import('../views/members/TempPointsView.vue'),
+    meta: { title: '临时积分库存' }
+  },
+  {
+    path: '/member/temp-redpackets',
+    name: 'TempRedpacketView',
+    component: () => import('../views/members/TempRedpacketView.vue'),
+    meta: { title: '临时会员红包' }
+  },
+
   // ============ Sprint 17: 宠物情绪识别和响应 ============
   {
     path: '/emotion/recognize',
