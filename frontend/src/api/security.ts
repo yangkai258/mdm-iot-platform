@@ -44,7 +44,12 @@ export async function syncLdapUsers() {
 }
 
 export async function setLdapGroupMapping(data: any) {
-  const res = await axios.post(`${BASE_URL}/ldap/group-mapping`, data, { headers: headers() })
+  const res = await axios.post(`${BASE_URL}/ldap/group-role-mapping`, data, { headers: headers() })
+  return res.data
+}
+
+export async function getLdapGroupMappings() {
+  const res = await axios.get(`${BASE_URL}/ldap/group-role-mappings`, { headers: headers() })
   return res.data
 }
 
@@ -99,23 +104,23 @@ export async function downloadCertificate(id: string) {
 // ============================================================
 // 设备安全操作
 // ============================================================
-export async function lockDevice(deviceId: string) {
-  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/lock`, {}, { headers: headers() })
+export async function lockDevice(deviceId: string, reason?: string) {
+  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/security/lock`, { reason }, { headers: headers() })
   return res.data
 }
 
-export async function unlockDevice(deviceId: string) {
-  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/unlock`, {}, { headers: headers() })
+export async function unlockDevice(deviceId: string, unlockCode?: string) {
+  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/security/unlock`, { unlock_code: unlockCode }, { headers: headers() })
   return res.data
 }
 
-export async function wipeDevice(deviceId: string) {
-  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/wipe`, {}, { headers: headers() })
+export async function wipeDevice(deviceId: string, data: any) {
+  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/security/wipe`, data, { headers: headers() })
   return res.data
 }
 
-export async function confirmWipeDevice(deviceId: string, data: any) {
-  const res = await axios.post(`${BASE_URL}/devices/${deviceId}/wipe/confirm`, data, { headers: headers() })
+export async function getDeviceSecurityStatus(deviceId: string) {
+  const res = await axios.get(`${BASE_URL}/devices/${deviceId}/security/status`, { headers: headers() })
   return res.data
 }
 

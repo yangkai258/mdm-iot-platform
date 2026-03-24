@@ -30,6 +30,17 @@
         <span>设备列表</span>
       </a-menu-item>
 
+      <!-- 设备增强 Sprint 9 -->
+      <a-sub-menu key="devices-enhanced">
+        <template #icon><icon-safe /></template>
+        <template #title>设备增强</template>
+        <a-menu-item key="devices-certificates">证书管理</a-menu-item>
+        <a-menu-item key="devices-remote">远程控制</a-menu-item>
+        <a-menu-item key="devices-geofence">地理围栏</a-menu-item>
+        <a-menu-item key="devices-monitor">监控面板</a-menu-item>
+        <a-menu-item key="devices-pairing">配对管理</a-menu-item>
+      </a-sub-menu>
+
       <!-- OTA升级 -->
       <a-sub-menu key="ota">
         <template #icon><icon-upload /></template>
@@ -106,6 +117,45 @@
         <a-menu-item key="ai-emotion">情感识别</a-menu-item>
       </a-sub-menu>
 
+      <!-- 情感计算 -->
+      <a-sub-menu key="emotion">
+        <template #icon><icon-heart /></template>
+        <template #title>情感计算</template>
+        <a-menu-item key="emotion-recognition">情绪识别</a-menu-item>
+        <a-menu-item key="emotion-response">情绪响应</a-menu-item>
+        <a-menu-item key="emotion-logs">情绪日志</a-menu-item>
+        <a-menu-item key="emotion-family-map">家庭情绪地图</a-menu-item>
+      </a-sub-menu>
+
+      <!-- 数字孪生 -->
+      <a-sub-menu key="digital-twin">
+        <template #icon><icon-heart /></template>
+        <template #title>数字孪生</template>
+        <a-menu-item key="digital-twin-vitals">实时生命体征</a-menu-item>
+        <a-menu-item key="digital-twin-prediction">行为预测</a-menu-item>
+        <a-menu-item key="digital-twin-playback">历史回放</a-menu-item>
+        <a-menu-item key="digital-twin-moments">精彩瞬间</a-menu-item>
+      </a-sub-menu>
+
+      <!-- 具身智能 -->
+      <a-sub-menu key="embodied">
+        <template #icon><icon-mind-mapping /></template>
+        <template #title>具身智能</template>
+        <a-menu-item key="embodied-perception">环境感知</a-menu-item>
+        <a-menu-item key="embodied-spatial">空间认知</a-menu-item>
+        <a-menu-item key="embodied-motion">动作模仿</a-menu-item>
+        <a-menu-item key="embodied-decision">AI决策引擎</a-menu-item>
+      </a-sub-menu>
+
+      <!-- 仿真测试 -->
+      <a-sub-menu key="simulation">
+        <template #icon><icon-tool /></template>
+        <template #title>仿真测试</template>
+        <a-menu-item key="simulation-pet">虚拟宠物仿真</a-menu-item>
+        <a-menu-item key="simulation-test">自动化测试框架</a-menu-item>
+        <a-menu-item key="simulation-replay">系统回放</a-menu-item>
+      </a-sub-menu>
+
       <!-- 应用管理 -->
       <a-sub-menu key="apps">
         <template #icon><icon-apps /></template>
@@ -179,6 +229,32 @@
         <template #icon><icon-dashboard /></template>
         <span>工作台门户</span>
       </a-menu-item>
+
+      <!-- 订阅管理 -->
+      <a-menu-item key="subscription">
+        <template #icon><icon-subscribe /></template>
+        <span>订阅管理</span>
+      </a-menu-item>
+
+      <!-- Webhook -->
+      <a-sub-menu key="webhooks">
+        <template #icon><icon-link /></template>
+        <template #title>Webhook</template>
+        <a-menu-item key="webhooks">Webhook列表</a-menu-item>
+        <a-menu-item key="webhooks-logs">调用日志</a-menu-item>
+      </a-sub-menu>
+
+      <!-- 开发者API -->
+      <a-menu-item key="developer">
+        <template #icon><icon-code /></template>
+        <span>开发者API</span>
+      </a-menu-item>
+
+      <!-- 用量计费 -->
+      <a-menu-item key="billing">
+        <template #icon><icon-receipt /></template>
+        <span>用量计费</span>
+      </a-menu-item>
     </a-menu>
   </div>
 </template>
@@ -206,6 +282,9 @@ import {
   IconStorage,
   IconTreeList,
   IconLink,
+  IconSubscribe,
+  IconCode,
+  IconReceipt,
 } from '@arco-design/web-vue/es/icon';
 
 const router = useRouter();
@@ -271,11 +350,40 @@ const routeNameToMenuKey: Record<string, string> = {
   'IntegrationPetHospitals': 'integration-pet-hospitals',
   'AiBehavior': 'ai-behavior',
   'AiEmotion': 'ai-emotion',
+  'EmotionRecognition': 'emotion-recognition',
+  'EmotionResponse': 'emotion-response',
+  'EmotionLogs': 'emotion-logs',
+  'EmotionFamilyMap': 'emotion-family-map',
   'HealthWarning': 'health-warning',
   'HealthSports': 'health-sports',
   'HealthReports': 'health-reports',
   'HealthSleep': 'health-sleep',
   'Portal': 'portal',
+  'SubscriptionList': 'subscription',
+  'WebhookList': 'webhooks',
+  'WebhookLogs': 'webhooks-logs',
+  'DeveloperApi': 'developer',
+  'BillingList': 'billing',
+  // Sprint 9 设备增强
+  'DeviceCertificates': 'devices-certificates',
+  'DeviceRemoteControl': 'devices-remote',
+  'DeviceGeofence': 'devices-geofence',
+  'DeviceMonitorPanel': 'devices-monitor',
+  'DevicePairing': 'devices-pairing',
+  // 数字孪生
+  'DigitalTwinVitals': 'digital-twin-vitals',
+  'DigitalTwinPrediction': 'digital-twin-prediction',
+  'DigitalTwinPlayback': 'digital-twin-playback',
+  'DigitalTwinMoments': 'digital-twin-moments',
+  // 具身智能
+  'EmbodiedPerception': 'embodied-perception',
+  'EmbodiedSpatial': 'embodied-spatial',
+  'EmbodiedMotion': 'embodied-motion',
+  'EmbodiedDecision': 'embodied-decision',
+  // 仿真测试
+  'SimulationPet': 'simulation-pet',
+  'SimulationTest': 'simulation-test',
+  'SimulationReplay': 'simulation-replay',
 };
 
 // 监听路由变化，更新选中状态

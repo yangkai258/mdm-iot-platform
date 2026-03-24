@@ -213,6 +213,11 @@ func main() {
 		&models.PetEmotionAction{},
 		&models.EmotionResponseConfig{},
 		&models.EmotionReport{},
+		// Sprint 26 Phase 4: 家庭相册模块
+		&models.FamilyAlbumContainer{},
+		&models.FamilyAlbumItem{},
+		// Sprint 26 Phase 4: 儿童模式模块
+		&models.ChildModeSettings{},
 		// Sprint 19: 健康医疗模块
 		&models.ExerciseRecord{},
 		&models.SleepRecord{},
@@ -523,6 +528,31 @@ func main() {
 	// Sprint 17: 情感计算路由
 	emotionCtrl := &controllers.EmotionController{DB: db}
 	emotionCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 17 Phase 3: 情感计算 - 情绪识别/响应路由（补充 /emotion/* 别名）
+	apiV1.GET("/emotion/recognition", emotionCtrl.GetRecords)
+	apiV1.GET("/emotion/recognition/stats", emotionCtrl.GetRecordStats)
+	apiV1.GET("/emotion/responses", emotionCtrl.GetEmotionConfig)
+	apiV1.POST("/emotion/responses", emotionCtrl.UpdateEmotionConfig)
+
+	// Sprint 26 Phase 4: App市场路由
+	marketAppCtrl := &controllers.MarketAppController{DB: db}
+	marketAppCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 26 Phase 4: 表情包市场路由（已由 MarketController 处理，但补充独立路由）
+	// emoticon/voice/action 路由已在 marketCtrl.RegisterMarketRoutes 中注册
+
+	// Sprint 27 Phase 4: 智能家居路由
+	smartHomeCtrl := &controllers.SmartHomeController{DB: db}
+	smartHomeCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 26 Phase 4: 家庭相册路由
+	familyAlbumCtrl := &controllers.FamilyAlbumController{DB: db}
+	familyAlbumCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 26 Phase 4: 儿童模式路由
+	childModeCtrl := &controllers.ChildModeController{DB: db}
+	childModeCtrl.RegisterRoutes(apiV1)
 
 	// MiniClaw路由
 	miniClawCtrl := &controllers.MiniClawController{}

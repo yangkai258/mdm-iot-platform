@@ -180,6 +180,30 @@ func main() {
 
 		// Sprint 13: 国际化模块
 		&models.Translation{},
+
+		// Phase 2: Webhook模块
+		&models.Webhook{},
+		&models.WebhookLog{},
+
+		// Phase 2: 开发者API模块
+		&models.DeveloperApp{},
+		&models.APIKey{},
+		&models.APIKeyUsage{},
+
+		// Phase 2: AI行为分析模块
+		&models.AiBehavior{},
+		&models.AiBehaviorStats{},
+		&models.AiAnomalyAlert{},
+
+		// Phase 2: AI监控模块
+		&models.AiModel{},
+		&models.AiModelVersion{},
+		&models.AiMonitoringMetric{},
+		&models.AiAlertRule{},
+
+		// Phase 2: 设备配对模块
+		&models.DevicePairing{},
+		&models.DeviceOpenClawBinding{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -533,6 +557,77 @@ func main() {
 	apiV1.PUT("/data-permissions/users/:user_id", dataPermCtrl.UpdateUserDataPermissions)
 	apiV1.GET("/data-permissions/columns", dataPermCtrl.GetColumnPermissions)
 	apiV1.POST("/data-permissions/validate", dataPermCtrl.ValidatePermissionExpression)
+
+	// ============ Phase 2: Webhook管理路由 ============
+	webhookCtrl := &controllers.WebhookController{DB: db}
+	apiV1.GET("/webhooks", webhookCtrl.List)
+	apiV1.POST("/webhooks", webhookCtrl.Create)
+	apiV1.GET("/webhooks/:id", webhookCtrl.Get)
+	apiV1.PUT("/webhooks/:id", webhookCtrl.Update)
+	apiV1.DELETE("/webhooks/:id", webhookCtrl.Delete)
+	apiV1.POST("/webhooks/:id/test", webhookCtrl.Test)
+	apiV1.GET("/webhooks/:id/logs", webhookCtrl.Logs)
+
+	// ============ Phase 2: 开发者API路由 ============
+	devCtrl := &controllers.DeveloperController{DB: db}
+	apiV1.GET("/developer/apps", devCtrl.ListApp)
+	apiV1.POST("/developer/apps", devCtrl.CreateApp)
+	apiV1.GET("/developer/apps/:id", devCtrl.GetApp)
+	apiV1.PUT("/developer/apps/:id", devCtrl.UpdateApp)
+	apiV1.DELETE("/developer/apps/:id", devCtrl.DeleteApp)
+	apiV1.POST("/developer/apps/:id/keys", devCtrl.CreateKey)
+	apiV1.DELETE("/developer/apps/:id/keys/:keyId", devCtrl.DeleteKey)
+
+	// ============ Phase 2: AI行为分析路由 ============
+	aiBehaviorCtrl := &controllers.AiBehaviorController{DB: db}
+	apiV1.GET("/ai/behaviors", aiBehaviorCtrl.List)
+	apiV1.GET("/ai/behaviors/stats", aiBehaviorCtrl.Stats)
+	apiV1.GET("/ai/behaviors/:id", aiBehaviorCtrl.GetBehavior)
+	apiV1.POST("/ai/behaviors", aiBehaviorCtrl.RecordBehavior)
+	apiV1.GET("/ai/behaviors/alerts", aiBehaviorCtrl.ListAlerts)
+	apiV1.POST("/ai/behaviors/alerts/:id/ack", aiBehaviorCtrl.AcknowledgeAlert)
+	apiV1.POST("/ai/behaviors/alerts/:id/resolve", aiBehaviorCtrl.ResolveAlert)
+
+	// ============ Phase 2: AI模型监控路由 ============
+	aiMonitorCtrl := &controllers.AiMonitorController{DB: db}
+	apiV1.GET("/ai/monitor/metrics", aiMonitorCtrl.Metrics)
+	apiV1.GET("/ai/monitor/metrics/stats", aiMonitorCtrl.MetricStats)
+	apiV1.GET("/ai/monitor/models", aiMonitorCtrl.ListModels)
+	apiV1.GET("/ai/monitor/models/:id", aiMonitorCtrl.GetModel)
+	apiV1.GET("/ai/monitor/models/:id/versions", aiMonitorCtrl.ListModelVersions)
+	apiV1.GET("/ai/monitor/alert-rules", aiMonitorCtrl.ListAlertRules)
+	apiV1.POST("/ai/monitor/alert-rules", aiMonitorCtrl.CreateAlertRule)
+	apiV1.PUT("/ai/monitor/alert-rules/:id", aiMonitorCtrl.UpdateAlertRule)
+	apiV1.DELETE("/ai/monitor/alert-rules/:id", aiMonitorCtrl.DeleteAlertRule)
+
+	// ============ Phase 2: AI情感识别路由 ============
+	emotionCtrl := &controllers.EmotionController{DB: db}
+	apiV1.GET("/emotions", emotionCtrl.EmotionRecordList)
+	apiV1.GET("/emotions/stats", emotionCtrl.EmotionStats)
+	apiV1.POST("/emotions", emotionCtrl.EmotionRecordCreate)
+	apiV1.GET("/emotions/:id", emotionCtrl.EmotionRecordGet)
+	apiV1.DELETE("/emotions/:id", emotionCtrl.EmotionRecordDelete)
+
+	// ============ Phase 2: 设备地理围栏路由 ============
+	geofenceCtrl := &controllers.GeofenceController{DB: db}
+	apiV1.GET("/geofences", geofenceCtrl.List)
+	apiV1.POST("/geofences", geofenceCtrl.Create)
+	apiV1.GET("/geofences/:id", geofenceCtrl.Get)
+	apiV1.PUT("/geofences/:id", geofenceCtrl.Update)
+	apiV1.DELETE("/geofences/:id", geofenceCtrl.Delete)
+	apiV1.POST("/geofences/:id/devices", geofenceCtrl.BindDevice)
+	apiV1.GET("/geofence/alerts", geofenceCtrl.ListAlerts)
+	apiV1.PUT("/geofence/alerts/:id/status", geofenceCtrl.UpdateAlertStatus)
+
+	// ============ Phase 2: 设备配对管理路由 ============
+	pairingCtrl := &controllers.PairingController{DB: db}
+	apiV1.GET("/device-pairings", pairingCtrl.List)
+	apiV1.GET("/device-pairings/:id", pairingCtrl.Get)
+	apiV1.POST("/device-pairings/code", pairingCtrl.GenerateCode)
+	apiV1.POST("/device-pairings/verify", pairingCtrl.Verify)
+	apiV1.POST("/device-pairings/:id/approve", pairingCtrl.Approve)
+	apiV1.POST("/device-pairings/:id/reject", pairingCtrl.Reject)
+	apiV1.POST("/device-pairings/:id/unbind", pairingCtrl.Unbind)
 
 	// 获取端口
 	port := os.Getenv("PORT")

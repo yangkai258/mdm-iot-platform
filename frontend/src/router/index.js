@@ -363,6 +363,32 @@ const routes = [
     name: 'DeviceStatus',
     component: () => import('../views/DeviceStatus.vue')
   },
+  // Sprint 9 企业安全功能
+  {
+    path: '/devices/certificates',
+    name: 'DeviceCertificates',
+    component: () => import('../views/devices/DeviceCertificates.vue')
+  },
+  {
+    path: '/devices/remote',
+    name: 'DeviceRemoteControl',
+    component: () => import('../views/devices/DeviceRemoteControl.vue')
+  },
+  {
+    path: '/devices/geofence',
+    name: 'DeviceGeofence',
+    component: () => import('../views/devices/DeviceGeofence.vue')
+  },
+  {
+    path: '/devices/monitor',
+    name: 'DeviceMonitorPanel',
+    component: () => import('../views/devices/DeviceMonitorPanel.vue')
+  },
+  {
+    path: '/devices/pairing',
+    name: 'DevicePairing',
+    component: () => import('../views/devices/DevicePairing.vue')
+  },
   // OTA固件
   {
     path: '/ota/firmware',
@@ -374,7 +400,130 @@ const routes = [
     path: '/portal',
     name: 'Portal',
     component: () => import('../views/Portal.vue')
-  }
+  },
+
+  // 安全配置 - LDAP
+  {
+    path: '/security/ldap',
+    name: 'LdapConfig',
+    component: () => import('../views/security/LDAPConfigView.vue')
+  },
+
+  // 订阅管理
+  {
+    path: '/subscription',
+    name: 'SubscriptionList',
+    component: () => import('../views/subscription/SubscriptionList.vue')
+  },
+
+  // Webhooks
+  {
+    path: '/webhooks/logs',
+    name: 'WebhookLogs',
+    component: () => import('../views/webhooks/WebhookLogs.vue')
+  },
+  {
+    path: '/webhooks',
+    name: 'WebhookList',
+    component: () => import('../views/webhooks/WebhookList.vue')
+  },
+
+  // 开发者API
+  {
+    path: '/developer',
+    name: 'DeveloperApi',
+    component: () => import('../views/developer/DeveloperApi.vue')
+  },
+
+  // 用量计费
+  {
+    path: '/billing',
+    name: 'BillingList',
+    component: () => import('../views/billing/BillingList.vue')
+  },
+
+  // ========== 情感计算 ==========
+  {
+    path: '/emotion/recognition',
+    name: 'EmotionRecognition',
+    component: () => import('../views/emotion/EmotionRecognizeView.vue')
+  },
+  {
+    path: '/emotion/response',
+    name: 'EmotionResponse',
+    component: () => import('../views/emotion/EmotionResponseConfigView.vue')
+  },
+  {
+    path: '/emotion/logs',
+    name: 'EmotionLogs',
+    component: () => import('../views/emotion/EmotionLogView.vue')
+  },
+  {
+    path: '/emotion/family-map',
+    name: 'EmotionFamilyMap',
+    component: () => import('../views/emotion/FamilyEmotionMapView.vue')
+  },
+
+  // ========== 数字孪生 ==========
+  {
+    path: '/digital-twin/vitals',
+    name: 'DigitalTwinVitals',
+    component: () => import('../views/digital-twin/VitalsDashboardView.vue')
+  },
+  {
+    path: '/digital-twin/prediction',
+    name: 'DigitalTwinPrediction',
+    component: () => import('../views/digital-twin/BehaviorPredictionView.vue')
+  },
+  {
+    path: '/digital-twin/playback',
+    name: 'DigitalTwinPlayback',
+    component: () => import('../views/digital-twin/HistoricalReplayView.vue')
+  },
+  {
+    path: '/digital-twin/moments',
+    name: 'DigitalTwinMoments',
+    component: () => import('../views/digital-twin/MomentsView.vue')
+  },
+
+  // ========== 具身智能 ==========
+  {
+    path: '/embodied/perception',
+    name: 'EmbodiedPerception',
+    component: () => import('../views/embodied/PerceptionView.vue')
+  },
+  {
+    path: '/embodied/spatial',
+    name: 'EmbodiedSpatial',
+    component: () => import('../views/embodied/MapView.vue')
+  },
+  {
+    path: '/embodied/motion',
+    name: 'EmbodiedMotion',
+    component: () => import('../views/embodied/ActionLibraryView.vue')
+  },
+  {
+    path: '/embodied/decision',
+    name: 'EmbodiedDecision',
+    component: () => import('../views/embodied/DecisionLogsView.vue')
+  },
+
+  // ========== 仿真测试 ==========
+  {
+    path: '/simulation/pet',
+    name: 'SimulationPet',
+    component: () => import('../views/simulation/VirtualPetSimulationView.vue')
+  },
+  {
+    path: '/simulation/test',
+    name: 'SimulationTest',
+    component: () => import('../views/simulation/TestFrameworkView.vue')
+  },
+  {
+    path: '/simulation/replay',
+    name: 'SimulationReplay',
+    component: () => import('../views/simulation/ReplayView.vue')
+  },
 ]
 
 const router = createRouter({
