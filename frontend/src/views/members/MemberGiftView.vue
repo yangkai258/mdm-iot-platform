@@ -54,7 +54,7 @@
       </a-table>
     </a-card>
 
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑礼包' : '新建礼包'" :width="520px" @before-ok="handleSubmit" @cancel="formVisible = false">
+    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑礼包' : '新建礼包'" :width="520" @before-ok="handleSubmit" @cancel="formVisible = false">
       <a-form :model="form" layout="vertical">
         <a-form-item label="礼包名称" required>
           <a-input v-model="form.name" placeholder="请输入礼包名称" />

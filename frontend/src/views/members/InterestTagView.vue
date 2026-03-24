@@ -19,7 +19,7 @@
       </a-col>
       <a-col :span="8">
         <a-card class="stat-card">
-          <a-statistic title="已打标会员" :value="stats.taggedMembers || 0" />
+          <a-statistic title="已标记会员" :value="stats.taggedMembers || 0" />
         </a-card>
       </a-col>
     </a-row>
@@ -54,7 +54,7 @@
       </a-table>
     </a-card>
 
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑兴趣标签' : '新建兴趣标签'" :width="480px" @before-ok="handleSubmit" @cancel="formVisible = false">
+    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑兴趣标签' : '新建兴趣标签'" :width="480" @before-ok="handleSubmit" @cancel="formVisible = false">
       <a-form :model="form" layout="vertical">
         <a-form-item label="标签名称" required>
           <a-input v-model="form.name" placeholder="请输入标签名称" />
@@ -137,3 +137,4 @@ loadData()
 .stat-card { text-align: center; }
 .action-card { margin-bottom: 16px; }
 </style>
+

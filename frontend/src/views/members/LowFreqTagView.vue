@@ -44,7 +44,7 @@
       </a-table>
     </a-card>
 
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑低频标签' : '新建低频标签'" :width="480px" @before-ok="handleSubmit" @cancel="formVisible = false">
+    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑低频标签' : '新建低频标签'" :width="480" @before-ok="handleSubmit" @cancel="formVisible = false">
       <a-form :model="form" layout="vertical">
         <a-form-item label="标签名称" required>
           <a-input v-model="form.name" placeholder="请输入标签名称" />
