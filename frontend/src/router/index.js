@@ -295,6 +295,69 @@ const routes = [
     component: () => import('../views/members/OccupationTypesView.vue'),
     meta: { title: '从业类型' }
   },
+  // 12.3 优惠券
+  {
+    path: '/member/coupon-grants',
+    name: 'CouponGrantView',
+    component: () => import('../views/members/CouponGrantView.vue'),
+    meta: { title: '优惠券发放' }
+  },
+  {
+    path: '/member/coupon-inventory',
+    name: 'CouponInventoryView',
+    component: () => import('../views/members/CouponInventoryView.vue'),
+    meta: { title: '优惠券库存' }
+  },
+  {
+    path: '/member/coupon-messages',
+    name: 'CouponMessagesView',
+    component: () => import('../views/members/CouponMessagesView.vue'),
+    meta: { title: '优惠消息流水' }
+  },
+  // 12.4 红包
+  {
+    path: '/member/redpackets',
+    name: 'RedpacketView',
+    component: () => import('../views/members/RedpacketView.vue'),
+    meta: { title: '会员红包' }
+  },
+  // 12.5 促销活动
+  {
+    path: '/member/promotions/buy-gift',
+    name: 'BuyGiftView',
+    component: () => import('../views/members/BuyGiftView.vue'),
+    meta: { title: '买赠促销' }
+  },
+  {
+    path: '/member/promotions/direct-reduce',
+    name: 'DirectReduceView',
+    component: () => import('../views/members/DirectReduceView.vue'),
+    meta: { title: '直减促销' }
+  },
+  {
+    path: '/member/promotions/amount-reduce',
+    name: 'AmountReduceView',
+    component: () => import('../views/members/AmountReduceView.vue'),
+    meta: { title: '满额减' }
+  },
+  {
+    path: '/member/promotions/amount-discount',
+    name: 'AmountDiscountView',
+    component: () => import('../views/members/AmountDiscountView.vue'),
+    meta: { title: '满额折' }
+  },
+  {
+    path: '/member/promotions/vip-exclusive',
+    name: 'VipExclusiveView',
+    component: () => import('../views/members/VipExclusiveView.vue'),
+    meta: { title: '最高等级促销' }
+  },
+  {
+    path: '/member/promotions/types',
+    name: 'PromotionTypesView',
+    component: () => import('../views/members/PromotionTypesView.vue'),
+    meta: { title: '促销活动类型' }
+  },
   // 告警中心
   {
     path: '/alerts/rules',

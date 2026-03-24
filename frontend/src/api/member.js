@@ -264,3 +264,84 @@ export async function getCouponMessageList(params = {}) {
   const qs = new URLSearchParams(params).toString()
   return request(`${API_BASE}/coupon/messages?${qs}`)
 }
+
+// ─── 优惠券发放记录 ───────────────────────────────────────────
+
+/** 优惠券发放记录列表 */
+export async function getCouponGrantList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/coupon/grants?${qs}`)
+}
+
+// ─── 优惠券库存充值 ───────────────────────────────────────────
+
+/** 优惠券库存充值 */
+export async function rechargeCouponInventory(data) {
+  return request(`${API_BASE}/coupon/inventory/recharge`, { method: 'POST', body: JSON.stringify(data) })
+}
+
+// ─── 红包 ────────────────────────────────────────────────────
+
+/** 红包列表 */
+export async function getRedpacketList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/redpacket/list?${qs}`)
+}
+
+/** 创建红包 */
+export async function createRedpacket(data) {
+  return request(`${API_BASE}/redpacket/create`, { method: 'POST', body: JSON.stringify(data) })
+}
+
+/** 更新红包 */
+export async function updateRedpacket(id, data) {
+  return request(`${API_BASE}/redpacket/update/${id}`, { method: 'PUT', body: JSON.stringify(data) })
+}
+
+/** 删除红包 */
+export async function deleteRedpacket(id) {
+  return request(`${API_BASE}/redpacket/delete/${id}`, { method: 'DELETE' })
+}
+
+/** 发放红包 */
+export async function grantRedpacket(data) {
+  return request(`${API_BASE}/redpacket/grant`, { method: 'POST', body: JSON.stringify(data) })
+}
+
+// ─── 促销活动 ─────────────────────────────────────────────────
+
+/** 买赠促销列表 */
+export async function getBuyGiftList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/promotion/buy-gift?${qs}`)
+}
+
+/** 直减促销列表 */
+export async function getDirectReduceList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/promotion/direct-reduce?${qs}`)
+}
+
+/** 满额减促销列表 */
+export async function getAmountReduceList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/promotion/amount-reduce?${qs}`)
+}
+
+/** 满额折促销列表 */
+export async function getAmountDiscountList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/promotion/amount-discount?${qs}`)
+}
+
+/** 最高等级促销列表 */
+export async function getVipExclusiveList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/promotion/vip-exclusive?${qs}`)
+}
+
+/** 促销活动类型列表 */
+export async function getPromotionTypeList(params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  return request(`${API_BASE}/promotion/types?${qs}`)
+}
