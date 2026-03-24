@@ -169,7 +169,12 @@ func (ic *InsuranceController) GetProduct(c *gin.Context) {
 	id := c.Param("id")
 
 	var product models.InsuranceProduct
-	query := ic.DB.Where("tenant_id = ?", tenantID)
+	var query *gorm.DB
+	if tenantID != "" {
+		query = ic.DB.Where("tenant_id = ?", tenantID)
+	} else {
+		query = ic.DB
+	}
 
 	// 支持 UUID 或数字 ID
 	if len(id) == 36 {
@@ -197,7 +202,12 @@ func (ic *InsuranceController) ListClaims(c *gin.Context) {
 	userID := getUserID(c)
 
 	var claims []models.InsuranceClaim
-	query := ic.DB.Where("tenant_id = ?", tenantID)
+	var query *gorm.DB
+	if tenantID != "" {
+		query = ic.DB.Where("tenant_id = ?", tenantID)
+	} else {
+		query = ic.DB
+	}
 
 	// 权限过滤：普通用户只能看自己的理赔
 	if role, _ := c.Get("role"); role != "admin" && role != "super_admin" {
@@ -236,7 +246,11 @@ func (ic *InsuranceController) ListClaims(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	var total int64
-	ic.DB.Model(&models.InsuranceClaim{}).Where("tenant_id = ?", tenantID).Count(&total)
+	if tenantID != "" {
+		ic.DB.Model(&models.InsuranceClaim{}).Where("tenant_id = ?", tenantID).Count(&total)
+	} else {
+		ic.DB.Model(&models.InsuranceClaim{}).Count(&total)
+	}
 
 	if err := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&claims).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败"})
@@ -285,7 +299,13 @@ func (ic *InsuranceController) CreateClaim(c *gin.Context) {
 
 	// 验证产品存在
 	var product models.InsuranceProduct
-	if err := ic.DB.Where("product_uuid = ? AND tenant_id = ? AND is_active = ?", input.ProductUUID, tenantID, true).First(&product).Error; err == gorm.ErrRecordNotFound {
+	var productQuery *gorm.DB
+	if tenantID != "" {
+		productQuery = ic.DB.Where("product_uuid = ? AND tenant_id = ? AND is_active = ?", input.ProductUUID, tenantID, true)
+	} else {
+		productQuery = ic.DB.Where("product_uuid = ? AND is_active = ?", input.ProductUUID, true)
+	}
+	if err := productQuery.First(&product).Error; err == gorm.ErrRecordNotFound {
 		c.JSON(http.StatusNotFound, gin.H{"code": 4040, "message": "保险产品不存在"})
 		return
 	}
@@ -321,7 +341,12 @@ func (ic *InsuranceController) GetClaim(c *gin.Context) {
 	id := c.Param("id")
 
 	var claim models.InsuranceClaim
-	query := ic.DB.Where("tenant_id = ?", tenantID)
+	var query *gorm.DB
+	if tenantID != "" {
+		query = ic.DB.Where("tenant_id = ?", tenantID)
+	} else {
+		query = ic.DB
+	}
 
 	// 支持 UUID 或数字 ID
 	if len(id) == 36 {
@@ -373,7 +398,12 @@ func (ic *InsuranceController) UpdateClaimStatus(c *gin.Context) {
 	}
 
 	var claim models.InsuranceClaim
-	query := ic.DB.Where("tenant_id = ?", tenantID)
+	var query *gorm.DB
+	if tenantID != "" {
+		query = ic.DB.Where("tenant_id = ?", tenantID)
+	} else {
+		query = ic.DB
+	}
 	if len(id) == 36 {
 		query = query.Where("claim_uuid = ?", id)
 	} else {
@@ -439,7 +469,12 @@ func (ic *InsuranceController) UploadClaimDocument(c *gin.Context) {
 
 	// 查找理赔记录
 	var claim models.InsuranceClaim
-	query := ic.DB.Where("tenant_id = ?", tenantID)
+	var query *gorm.DB
+	if tenantID != "" {
+		query = ic.DB.Where("tenant_id = ?", tenantID)
+	} else {
+		query = ic.DB
+	}
 	if len(id) == 36 {
 		query = query.Where("claim_uuid = ?", id)
 	} else {
@@ -501,7 +536,12 @@ func (ic *InsuranceController) ListHealthRecords(c *gin.Context) {
 	petID := c.Param("pet_id")
 
 	var records []models.PetHealthRecord
-	query := ic.DB.Where("pet_uuid = ? AND tenant_id = ?", petID, tenantID)
+	var query *gorm.DB
+	if tenantID != "" {
+		query = ic.DB.Where("pet_uuid = ? AND tenant_id = ?", petID, tenantID)
+	} else {
+		query = ic.DB.Where("pet_uuid = ?", petID)
+	}
 
 	// 过滤：记录类型
 	if recordType := c.Query("record_type"); recordType != "" {
@@ -531,7 +571,11 @@ func (ic *InsuranceController) ListHealthRecords(c *gin.Context) {
 	offset := (page - 1) * pageSize
 
 	var total int64
-	ic.DB.Model(&models.PetHealthRecord{}).Where("pet_uuid = ? AND tenant_id = ?", petID, tenantID).Count(&total)
+	if tenantID != "" {
+		ic.DB.Model(&models.PetHealthRecord{}).Where("pet_uuid = ? AND tenant_id = ?", petID, tenantID).Count(&total)
+	} else {
+		ic.DB.Model(&models.PetHealthRecord{}).Where("pet_uuid = ?", petID).Count(&total)
+	}
 
 	if err := query.Order("record_date DESC").Offset(offset).Limit(pageSize).Find(&records).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 5001, "message": "查询失败"})
