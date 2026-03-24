@@ -718,13 +718,13 @@ func (c *MeshController) GetMeshDevice(ctx *gin.Context) {
 
 	// 获取所属网络
 	var member models.MeshNetworkMember
-	c.DB.Where("device_id = ?", deviceID).Preload("MeshNetwork").First(&member)
+	c.DB.Where("device_id = ?", deviceID).First(&member)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"code": 0,
 		"data": gin.H{
 			"device":  device,
-			"network": member.MeshNetwork,
+			"member":  member,
 		},
 	})
 }

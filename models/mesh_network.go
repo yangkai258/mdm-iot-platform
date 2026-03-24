@@ -70,8 +70,6 @@ type MeshNetworkMember struct {
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`
 	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
-	// GORM 关联
-	MeshNetwork  MeshNetwork     `gorm:"foreignKey:NetworkID" json:"mesh_network,omitempty"`
 }
 
 // TableName 指定表名
