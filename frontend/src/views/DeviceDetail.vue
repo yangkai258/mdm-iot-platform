@@ -197,11 +197,13 @@
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
 import axios from 'axios'
 import dayjs from 'dayjs'
 
 const route = useRoute()
+const router = useRouter()
 const deviceId = ref(route.params.id || '')
 const loading = ref(false)
 const activeTab = ref('info')

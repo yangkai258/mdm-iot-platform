@@ -1,96 +1,90 @@
 <template>
   <div class="page-container">
-<!-- 统计卡片 -->
-        <a-row :gutter="16" class="stats-row">
-          <a-col :span="6">
-            <a-card>
-              <a-statistic title="总任务数" :value="stats.total" />
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card>
-              <a-statistic title="进行中" :value="stats.running" :value-style="{ color: '#1890ff' }" />
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card>
-              <a-statistic title="已完成" :value="stats.completed" :value-style="{ color: '#52c41a' }" />
-            </a-card>
-          </a-col>
-          <a-col :span="6">
-            <a-card>
-              <a-statistic title="成功率" :value="stats.successRate" suffix="%" />
-            </a-card>
-          </a-col>
-        </a-row>
+    <!-- 统计卡片 -->
+    <a-row :gutter="16" class="stats-row">
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="总任务数" :value="stats.total" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="进行中" :value="stats.running" :value-style="{ color: '#1890ff' }" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="已完成" :value="stats.completed" :value-style="{ color: '#52c41a' }" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="成功率" :value="stats.successRate" suffix="%" />
+        </a-card>
+      </a-col>
+    </a-row>
 
-        <!-- 操作栏 -->
-        <a-card class="action-card">
-          <a-space wrap>
-            <a-select v-model="filters.status" placeholder="任务状态" allow-clear style="width: 140px" @change="loadDistributions">
-              <a-option value="pending">待执行</a-option>
-              <a-option value="running">进行中</a-option>
-              <a-option value="completed">已完成</a-option>
-              <a-option value="failed">失败</a-option>
-              <a-option value="cancelled">已取消</a-option>
-            </a-select>
-            <a-button type="primary" @click="showCreateDrawer = true">新建分发任务</a-button>
-            <a-button @click="loadDistributions">刷新</a-button>
+    <!-- 操作栏 -->
+    <div class="action-card">
+      <a-space wrap>
+        <a-select v-model="filters.status" placeholder="任务状态" allow-clear style="width: 140px" @change="loadDistributions">
+          <a-option value="pending">待执行</a-option>
+          <a-option value="running">进行中</a-option>
+          <a-option value="completed">已完成</a-option>
+          <a-option value="failed">失败</a-option>
+          <a-option value="cancelled">已取消</a-option>
+        </a-select>
+        <a-button type="primary" @click="showCreateDrawer = true">新建分发任务</a-button>
+        <a-button @click="loadDistributions">刷新</a-button>
+      </a-space>
+    </div>
+
+    <!-- 分发任务列表 -->
+    <div class="distribution-card">
+      <a-table
+        :columns="columns"
+        :data="distributionList"
+        :loading="loading"
+        :pagination="pagination"
+        row-key="id"
+        @page-change="handlePageChange"
+      >
+        <template #distributionType="{ record }">
+          <a-tag :color="getDistTypeColor(record.distribution_type)">
+            {{ getDistTypeText(record.distribution_type) }}
+          </a-tag>
+        </template>
+        <template #status="{ record }">
+          <a-tag :color="getDistStatusColor(record.status)">
+            {{ getDistStatusText(record.status) }}
+          </a-tag>
+        </template>
+        <template #progress="{ record }">
+          <a-progress
+            v-if="record.total_count > 0"
+            :percent="Math.round((record.success_count / record.total_count) * 100)"
+            :color="getProgressColor(record.status)"
+            style="width: 120px"
+          />
+          <span v-else>-</span>
+        </template>
+        <template #targetType="{ record }">
+          {{ record.target_type }}/{{ record.target_ids?.length || 0 }}
+        </template>
+        <template #createdAt="{ record }">
+          {{ formatTime(record.created_at) }}
+        </template>
+        <template #actions="{ record }">
+          <a-space>
+            <a-button type="text" size="small" @click="openDetail(record)">详情</a-button>
+            <a-button v-if="record.status === 'pending' || record.status === 'running'" type="text" size="small" status="danger" @click="cancelTask(record)">取消</a-button>
           </a-space>
-        </a-card>
-
-        <!-- 分发任务列表 -->
-        <a-card class="distribution-card">
-          <template #title><span>分发任务列表</span></template>
-          <a-table
-            :columns="columns"
-            :data="distributionList"
-            :loading="loading"
-            :pagination="pagination"
-            row-key="id"
-            @page-change="handlePageChange"
-          >
-            <template #distributionType="{ record }">
-              <a-tag :color="getDistTypeColor(record.distribution_type)">
-                {{ getDistTypeText(record.distribution_type) }}
-              </a-tag>
-            </template>
-            <template #status="{ record }">
-              <a-tag :color="getDistStatusColor(record.status)">
-                {{ getDistStatusText(record.status) }}
-              </a-tag>
-            </template>
-            <template #progress="{ record }">
-              <a-progress
-                v-if="record.total_count > 0"
-                :percent="Math.round((record.success_count / record.total_count) * 100)"
-                :color="getProgressColor(record.status)"
-                style="width: 120px"
-              />
-              <span v-else>-</span>
-            </template>
-            <template #targetType="{ record }">
-              {{ record.target_type }}/{{ record.target_ids?.length || 0 }}
-            </template>
-            <template #createdAt="{ record }">
-              {{ formatTime(record.created_at) }}
-            </template>
-            <template #actions="{ record }">
-              <a-space>
-                <a-button type="text" size="small" @click="openDetail(record)">详情</a-button>
-                <a-button v-if="record.status === 'pending' || record.status === 'running'" type="text" size="small" status="danger" @click="cancelTask(record)">取消</a-button>
-              </a-space>
-            </template>
-          </a-table>
-        </a-card>
-</div>
+        </template>
+      </a-table>
+    </div>
 
     <!-- 创建分发任务抽屉 -->
-    <a-drawer
-      v-model:visible="showCreateDrawer"
-      title="新建分发任务"
-      :width="520"
-    >
+    <a-drawer v-model:visible="showCreateDrawer" title="新建分发任务" :width="520">
       <a-form :model="createForm" layout="vertical" @submit-success="handleCreateSubmit">
         <a-form-item label="选择应用" required>
           <a-select v-model="createForm.app_id" placeholder="请选择应用" style="width: 100%" @change="onAppChange">
@@ -138,11 +132,7 @@
     </a-drawer>
 
     <!-- 任务详情抽屉 -->
-    <a-drawer
-      v-model:visible="showDetailDrawer"
-      title="分发任务详情"
-      :width="560"
-    >
+    <a-drawer v-model:visible="showDetailDrawer" title="分发任务详情" :width="560">
       <template v-if="currentTask">
         <a-descriptions :column="1" bordered size="small" style="margin-bottom: 16px">
           <a-descriptions-item label="任务 ID">{{ currentTask.id }}</a-descriptions-item>
@@ -194,6 +184,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 import { Message, Modal } from '@arco-design/web-vue'
 
@@ -207,22 +198,11 @@ const showDetailDrawer = ref(false)
 const currentTask = ref(null)
 const targetIdsStr = ref('')
 
-const filters = reactive({
-  status: undefined
-})
+const filters = reactive({ status: undefined })
 
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
-})
+const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 
-const stats = reactive({
-  total: 0,
-  running: 0,
-  completed: 0,
-  successRate: 0
-})
+const stats = reactive({ total: 0, running: 0, completed: 0, successRate: 0 })
 
 const createForm = reactive({
   app_id: null,
@@ -245,24 +225,15 @@ const columns = [
   { title: '操作', slotName: 'actions', width: 120, fixed: 'right' }
 ]
 
-else {
-    selectedKeys.value = [key]
-    router.push('/' + key)
-  }
-}
-
 const loadDistributions = async () => {
   loading.value = true
   try {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     if (filters.status) params.status = filters.status
-
     const res = await axios.get('/api/v1/apps/distributions', { params })
     if (res.data.code === 0) {
       distributionList.value = res.data.data.list || []
       pagination.total = res.data.data.pagination?.total || 0
-
-      // 更新统计
       stats.total = distributionList.value.length
       stats.running = distributionList.value.filter(d => d.status === 'running').length
       stats.completed = distributionList.value.filter(d => d.status === 'completed').length
@@ -401,8 +372,6 @@ const formatTime = (time) => {
 onMounted(() => {
   loadDistributions()
   loadApps()
-
-  // 如果有 appId query 参数，自动打开创建
   if (route.query.appId) {
     createForm.app_id = parseInt(route.query.appId)
     onAppChange(createForm.app_id)
@@ -412,11 +381,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.app-distributions { min-height: 100vh; }
-.header { background: #fff; padding: 0 16px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
-.header-left { display: flex; align-items: center; }
-.header-title { font-size: 16px; font-weight: 500; }
-.content { padding: 16px; background: #f0f2f5; }
+.page-container { background: #fff; border-radius: 4px; padding: 20px; }
 .stats-row { margin-bottom: 16px; }
-.action-card { margin-bottom: 16px; }
+.action-card { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.distribution-card { background: #fff; }
 </style>

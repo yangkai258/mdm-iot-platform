@@ -282,6 +282,49 @@ const routes = [
     name: 'ApiPermissions',
     component: () => import('../views/permissions/ApiPermissions.vue')
   },
+  // 健康管理
+  {
+    path: '/health/exercise-stats',
+    name: 'ExerciseStats',
+    component: () => import('../views/health/ExerciseStatsView.vue')
+  },
+  {
+    path: '/health/reports',
+    name: 'HealthReports',
+    component: () => import('../views/health/HealthReportView.vue')
+  },
+  {
+    path: '/health/warnings',
+    name: 'HealthWarnings',
+    component: () => import('../views/health/HealthWarningView.vue')
+  },
+  {
+    path: '/health/sleep',
+    name: 'SleepAnalysis',
+    component: () => import('../views/health/SleepAnalysisView.vue')
+  },
+  // 应用管理
+  {
+    path: '/apps/list',
+    name: 'AppList',
+    component: () => import('../views/apps/AppList.vue')
+  },
+  {
+    path: '/apps/versions',
+    name: 'AppVersions',
+    component: () => import('../views/apps/AppVersions.vue')
+  },
+  {
+    path: '/apps/distributions',
+    name: 'AppDistributions',
+    component: () => import('../views/apps/AppDistributions.vue')
+  },
+  // 第三方接入
+  {
+    path: '/integration/pet-hospitals',
+    name: 'PetHospitals',
+    component: () => import('../views/integration/PetHospitalView.vue')
+  },
   // 组织管理
   {
     path: '/org/companies',
@@ -302,6 +345,35 @@ const routes = [
     path: '/org/employees',
     name: 'OrgEmployees',
     component: () => import('../views/org/Employees.vue')
+  },
+  {
+    path: '/org/standard-positions',
+    name: 'StandardPositions',
+    component: () => import('../views/org/StandardPositions.vue')
+  },
+  // 租户申请
+  {
+    path: '/tenants/application',
+    name: 'TenantApplication',
+    component: () => import('../views/tenants/TenantApplication.vue')
+  },
+  // 设备状态
+  {
+    path: '/devices/status',
+    name: 'DeviceStatus',
+    component: () => import('../views/DeviceStatus.vue')
+  },
+  // OTA固件
+  {
+    path: '/ota/firmware',
+    name: 'OtaFirmware',
+    component: () => import('../views/OtaFirmware.vue')
+  },
+  // 门户
+  {
+    path: '/portal',
+    name: 'Portal',
+    component: () => import('../views/Portal.vue')
   }
 ]
 

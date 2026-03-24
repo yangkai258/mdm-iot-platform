@@ -2,61 +2,71 @@
   <div class="page-container">
     <div class="search-form">
       <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item label="报告周期">
+          <a-select v-model="form.period" placeholder="请选择" style="width: 140px" allow-clear>
+            <a-option value="week">周报</a-option>
+            <a-option value="month">月报</a-option>
+            <a-option value="quarter">季报</a-option>
+          </a-select>
+        </a-form-item>
         <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button type="primary" @click="loadData">搜索</a-button>
           <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
     </div>
     <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
+      <a-button type="primary" @click="handleGenerate">生成报告</a-button>
     </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-    <a-modal v-model:visible="modalVisible" :title="modalTitle">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
+    <a-table
+      :columns="columns"
+      :data="data"
+      :loading="loading"
+      :pagination="paginationConfig"
+      @page-change="onPageChange"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
-const modalVisible = ref(false)
-const modalTitle = ref('新建')
 
-const form = reactive({ name: '' })
+const form = reactive({ period: '' })
 
 const columns = [
   { title: '报告周期', dataIndex: 'period', width: 200 },
   { title: '平均心率', dataIndex: 'heart_rate', width: 100 },
-  { title: '平均血压', dataIndex: 'blood_pressure', width: 100 },
-  { title: '平均睡眠', dataIndex: 'sleep_hours', width: 100 },
-  { title: '运动时长', dataIndex: 'exercise_minutes', width: 100 },
-  { title: '综合评分', dataIndex: 'overall_score', width: 100 }
+  { title: '平均血压', dataIndex: 'blood_pressure', width: 120 },
+  { title: '平均睡眠(小时)', dataIndex: 'sleep_hours', width: 120 },
+  { title: '运动时长(分钟)', dataIndex: 'exercise_minutes', width: 130 },
+  { title: '综合评分', dataIndex: 'overall_score', width: 100 },
+  { title: '生成时间', dataIndex: 'created_at', width: 160 }
 ]
 
 const data = ref([])
-const pagination = reactive({ total: 0, current: 1, pageSize: 10 })
+const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 
-const loadReport = async () => {
+const paginationConfig = computed(() => ({
+  current: pagination.current,
+  pageSize: pagination.pageSize,
+  total: pagination.total,
+  showTotal: true,
+  showPageSize: true
+}))
+
+const loadData = async () => {
   loading.value = true
   try {
-    const token = localStorage.getItem('token')
-    const res = await fetch(`/api/v1/health/report?type=${form.name || 'week'}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    const resData = await res.json()
-    if (resData.code === 0) {
-      data.value = resData.data?.reports || []
+    const params = { page: pagination.current, page_size: pagination.pageSize }
+    if (form.period) params.type = form.period
+    const res = await axios.get('/api/v1/health/reports', { params })
+    if (res.data.code === 0) {
+      data.value = res.data.data.list || []
+      pagination.total = res.data.data.pagination?.total || 0
     } else {
       loadMockData()
     }
@@ -65,30 +75,37 @@ const loadReport = async () => {
   } finally {
     loading.value = false
   }
-  pagination.total = data.value.length
 }
 
 const loadMockData = () => {
   data.value = [
-    { period: '2026-03-16 至 2026-03-22', heart_rate: 72, blood_pressure: '120/80', sleep_hours: 7.5, exercise_minutes: 45, overall_score: 85 },
-    { period: '2026-03-09 至 2026-03-15', heart_rate: 74, blood_pressure: '122/82', sleep_hours: 7.2, exercise_minutes: 40, overall_score: 80 },
-    { period: '2026-03-02 至 2026-03-08', heart_rate: 70, blood_pressure: '118/78', sleep_hours: 7.8, exercise_minutes: 50, overall_score: 88 }
+    { id: 1, period: '2026-03-16 至 2026-03-22', heart_rate: 72, blood_pressure: '120/80', sleep_hours: 7.5, exercise_minutes: 45, overall_score: 85, created_at: '2026-03-22 10:00:00' },
+    { id: 2, period: '2026-03-09 至 2026-03-15', heart_rate: 74, blood_pressure: '122/82', sleep_hours: 7.2, exercise_minutes: 40, overall_score: 80, created_at: '2026-03-15 10:00:00' },
+    { id: 3, period: '2026-03-02 至 2026-03-08', heart_rate: 70, blood_pressure: '118/78', sleep_hours: 7.8, exercise_minutes: 50, overall_score: 88, created_at: '2026-03-08 10:00:00' },
+    { id: 4, period: '2026-02-23 至 2026-03-01', heart_rate: 73, blood_pressure: '120/82', sleep_hours: 7.0, exercise_minutes: 35, overall_score: 78, created_at: '2026-03-01 10:00:00' }
   ]
+  pagination.total = data.value.length
 }
 
-const handleSearch = () => loadReport()
-const handleReset = () => { form.name = ''; loadReport() }
-
-const handleCreate = () => {
-  modalTitle.value = '新建'
-  modalVisible.value = true
+const handleReset = () => {
+  form.period = ''
+  loadData()
 }
 
-const handleSubmit = () => {
-  modalVisible.value = false
+const handleGenerate = () => {
+  Message.info('正在生成健康报告...')
+  setTimeout(() => {
+    Message.success('报告生成成功')
+    loadData()
+  }, 1000)
 }
 
-onMounted(() => { loadReport() })
+const onPageChange = (page) => {
+  pagination.current = page
+  loadData()
+}
+
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>

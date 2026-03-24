@@ -2,9 +2,14 @@
   <div class="page-container">
     <div class="search-form">
       <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item label="日期范围">
+          <a-range-picker v-model="form.dateRange" style="width: 240px" />
+        </a-form-item>
+        <a-form-item label="设备ID">
+          <a-input v-model="form.deviceId" placeholder="请输入设备ID" style="width: 160px" />
+        </a-form-item>
         <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
+          <a-button type="primary" @click="loadData">搜索</a-button>
           <a-button @click="handleReset">重置</a-button>
         </a-form-item>
       </a-form>
@@ -12,14 +17,25 @@
     <div class="toolbar">
       <a-button type="primary" @click="handleCreate">新建</a-button>
     </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    <a-table
+      :columns="columns"
+      :data="data"
+      :loading="loading"
+      :pagination="paginationConfig"
+      @page-change="onPageChange"
+    >
+      <template #quality="{ record }">
+        <a-progress :percent="record.quality" :color="getQualityColor(record.quality)" size="small" style="width: 80px" />
+      </template>
+    </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="日期"><a-input v-model="form.date" /></a-form-item>
-        <a-form-item label="入睡时间"><a-input v-model="form.sleep_time" /></a-form-item>
-        <a-form-item label="起床时间"><a-input v-model="form.wake_time" /></a-form-item>
-        <a-form-item label="深睡(小时)"><a-input-number v-model="form.deep_sleep" :min="0" style="width:100%" /></a-form-item>
-        <a-form-item label="浅睡(小时)"><a-input-number v-model="form.light_sleep" :min="0" style="width:100%" /></a-form-item>
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="日期"><a-date-picker v-model="form.date" style="width: 100%" /></a-form-item>
+        <a-form-item label="入睡时间"><a-time-picker v-model="form.sleep_time" format="HH:mm" style="width: 100%" /></a-form-item>
+        <a-form-item label="醒来时间"><a-time-picker v-model="form.wake_time" format="HH:mm" style="width: 100%" /></a-form-item>
+        <a-form-item label="深睡(小时)"><a-input-number v-model="form.deep_sleep" :min="0" :precision="1" style="width: 100%" /></a-form-item>
+        <a-form-item label="浅睡(小时)"><a-input-number v-model="form.light_sleep" :min="0" :precision="1" style="width: 100%" /></a-form-item>
+        <a-form-item label="睡眠质量评分"><a-input-number v-model="form.quality" :min="0" :max="100" style="width: 100%" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
@@ -30,7 +46,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
+import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
@@ -39,38 +56,60 @@ const modalTitle = ref('新建')
 const isEdit = ref(false)
 
 const form = reactive({
-  name: '',
+  dateRange: [],
+  deviceId: '',
   id: '',
-  date: '',
-  sleep_time: '',
-  wake_time: '',
+  date: null,
+  sleep_time: null,
+  wake_time: null,
   deep_sleep: 0,
-  light_sleep: 0
+  light_sleep: 0,
+  quality: 0
 })
 
 const columns = [
   { title: '日期', dataIndex: 'date', width: 120 },
-  { title: '入睡时间', dataIndex: 'sleep_time', width: 120 },
-  { title: '起床时间', dataIndex: 'wake_time', width: 120 },
-  { title: '睡眠时长', dataIndex: 'total_hours', width: 120 },
-  { title: '深睡(小时)', dataIndex: 'deep_sleep', width: 100 },
-  { title: '浅睡(小时)', dataIndex: 'light_sleep', width: 100 },
-  { title: '睡眠质量', dataIndex: 'quality', width: 100 }
+  { title: '设备ID', dataIndex: 'device_id', width: 120 },
+  { title: '入睡时间', dataIndex: 'sleep_time', width: 100 },
+  { title: '醒来时间', dataIndex: 'wake_time', width: 100 },
+  { title: '睡眠时长', dataIndex: 'total_hours', width: 100 },
+  { title: '深睡(h)', dataIndex: 'deep_sleep', width: 80 },
+  { title: '浅睡(h)', dataIndex: 'light_sleep', width: 80 },
+  { title: '睡眠质量', slotName: 'quality', width: 120 },
+  { title: '创建时间', dataIndex: 'created_at', width: 160 }
 ]
 
 const data = ref([])
-const pagination = reactive({ total: 0, current: 1, pageSize: 10 })
+const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 
-const loadStats = async () => {
+const paginationConfig = computed(() => ({
+  current: pagination.current,
+  pageSize: pagination.pageSize,
+  total: pagination.total,
+  showTotal: true,
+  showPageSize: true
+}))
+
+const getQualityColor = (quality) => {
+  if (quality >= 80) return '#52c41a'
+  if (quality >= 60) return '#1890ff'
+  if (quality >= 40) return '#faad14'
+  return '#ff4d4f'
+}
+
+const loadData = async () => {
   loading.value = true
   try {
-    const token = localStorage.getItem('token')
-    const res = await fetch(`/api/v1/health/sleep/stats?range=${form.name || 'week'}`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    const resData = await res.json()
-    if (resData.code === 0) {
-      data.value = resData.data?.records || []
+    const params = { page: pagination.current, page_size: pagination.pageSize }
+    if (form.deviceId) params.device_id = form.deviceId
+    if (form.dateRange && form.dateRange.length === 2) {
+      params.start_date = form.dateRange[0].format('YYYY-MM-DD')
+      params.end_date = form.dateRange[1].format('YYYY-MM-DD')
+    }
+    const res = await axios.get('/api/v1/health/sleep', { params })
+    if (res.data.code === 0) {
+      data.value = res.data.data.list || []
+      pagination.total = res.data.data.pagination?.total || 0
     } else {
       loadMockData()
     }
@@ -79,53 +118,43 @@ const loadStats = async () => {
   } finally {
     loading.value = false
   }
-  pagination.total = data.value.length
 }
 
 const loadMockData = () => {
   data.value = [
-    { id: 1, date: '2026-03-22', sleep_time: '22:30', wake_time: '06:00', total_hours: '7.5h', deep_sleep: 1.8, light_sleep: 4.2, quality: 85 },
-    { id: 2, date: '2026-03-21', sleep_time: '23:00', wake_time: '06:30', total_hours: '7.5h', deep_sleep: 1.9, light_sleep: 4.1, quality: 88 },
-    { id: 3, date: '2026-03-20', sleep_time: '22:45', wake_time: '06:15', total_hours: '7.5h', deep_sleep: 1.7, light_sleep: 4.3, quality: 78 },
-    { id: 4, date: '2026-03-19', sleep_time: '23:30', wake_time: '07:00', total_hours: '7.5h', deep_sleep: 1.5, light_sleep: 4.5, quality: 65 },
-    { id: 5, date: '2026-03-18', sleep_time: '22:00', wake_time: '05:30', total_hours: '7.5h', deep_sleep: 2.0, light_sleep: 4.0, quality: 92 }
+    { id: 1, date: '2026-03-22', device_id: 'DEV001', sleep_time: '22:30', wake_time: '06:00', total_hours: '7.5h', deep_sleep: 1.8, light_sleep: 4.2, quality: 85, created_at: '2026-03-22 06:30:00' },
+    { id: 2, date: '2026-03-21', device_id: 'DEV001', sleep_time: '23:00', wake_time: '06:30', total_hours: '7.5h', deep_sleep: 1.9, light_sleep: 4.1, quality: 88, created_at: '2026-03-21 06:30:00' },
+    { id: 3, date: '2026-03-20', device_id: 'DEV002', sleep_time: '22:45', wake_time: '06:15', total_hours: '7.5h', deep_sleep: 1.7, light_sleep: 4.3, quality: 78, created_at: '2026-03-20 06:30:00' },
+    { id: 4, date: '2026-03-19', device_id: 'DEV001', sleep_time: '23:30', wake_time: '07:00', total_hours: '7.5h', deep_sleep: 1.5, light_sleep: 4.5, quality: 65, created_at: '2026-03-19 07:00:00' },
+    { id: 5, date: '2026-03-18', device_id: 'DEV003', sleep_time: '22:00', wake_time: '05:30', total_hours: '7.5h', deep_sleep: 2.0, light_sleep: 4.0, quality: 92, created_at: '2026-03-18 05:30:00' }
   ]
+  pagination.total = data.value.length
 }
 
-const handleSearch = () => loadStats()
-const handleReset = () => { form.name = ''; loadStats() }
+const handleReset = () => {
+  Object.assign(form, { dateRange: [], deviceId: '', date: null, sleep_time: null, wake_time: null, deep_sleep: 0, light_sleep: 0, quality: 0 })
+  loadData()
+}
 
 const handleCreate = () => {
   isEdit.value = false
   modalTitle.value = '新建'
-  Object.assign(form, { id: '', date: '', sleep_time: '', wake_time: '', deep_sleep: 0, light_sleep: 0 })
+  Object.assign(form, { id: '', date: null, sleep_time: null, wake_time: null, deep_sleep: 0, light_sleep: 0, quality: 0 })
   modalVisible.value = true
 }
 
 const handleSubmit = () => {
-  const totalHours = (form.deep_sleep + form.light_sleep).toFixed(1) + 'h'
-  if (isEdit.value) {
-    const idx = data.value.findIndex(r => r.id === form.id)
-    if (idx !== -1) data.value[idx] = { ...form, total_hours: totalHours }
-    Message.success('编辑成功')
-  } else {
-    data.value.unshift({
-      id: Date.now(),
-      date: form.date,
-      sleep_time: form.sleep_time,
-      wake_time: form.wake_time,
-      total_hours: totalHours,
-      deep_sleep: form.deep_sleep,
-      light_sleep: form.light_sleep,
-      quality: 0
-    })
-    pagination.total++
-    Message.success('添加成功')
-  }
   modalVisible.value = false
+  Message.success(isEdit.value ? '编辑成功' : '添加成功')
+  loadData()
 }
 
-onMounted(() => { loadStats() })
+const onPageChange = (page) => {
+  pagination.current = page
+  loadData()
+}
+
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
