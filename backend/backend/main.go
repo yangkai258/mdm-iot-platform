@@ -132,6 +132,54 @@ func main() {
 		// Sprint 12: 数据权限表
 		&models.DataPermissionRule{},
 		&models.UserDataPermission{},
+
+		// Sprint 13: 保险模块
+		&models.InsuranceProduct{},
+		&models.InsuranceClaim{},
+		&models.InsuranceClaimDocument{},
+
+		// Sprint 13: 情感模块
+		&models.EmotionRecord{},
+		&models.EmotionReport{},
+		&models.EmotionResponseConfig{},
+
+		// Sprint 13: 健康模块
+		&models.HealthWarning{},
+		&models.VitalRecord{},
+		&models.VitalTrend{},
+		&models.ExerciseGoal{},
+		&models.ExerciseRecord{},
+		&models.ExerciseSummary{},
+		&models.ExerciseTrend{},
+		&models.HealthAlertRule{},
+		&models.HealthMonitorSetting{},
+		&models.HealthAlert{},
+		&models.PetVaccination{},
+		&models.PetDietRecord{},
+		&models.PetHealthRecord{},
+
+		// Sprint 13: 宠物商店模块
+		&models.PetShopProduct{},
+		&models.PetShopOrder{},
+		&models.PetShopOrderItem{},
+		&models.PetShopCart{},
+		&models.PetShopFavorite{},
+
+		// Sprint 13: 寻宠网络模块
+		&models.PetFinderAlert{},
+		&models.PetFinderReport{},
+		&models.PetFinderSighting{},
+		&models.SightingReport{},
+
+		// Sprint 13: BLE Mesh 模块
+		&models.MeshNetwork{},
+		&models.MeshNode{},
+		&models.MeshGroup{},
+		&models.MeshNodeGroup{},
+		&models.MeshTelemetry{},
+
+		// Sprint 13: 国际化模块
+		&models.Translation{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
