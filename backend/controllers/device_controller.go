@@ -35,7 +35,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 	positionTemplateCtrl := &PositionTemplateController{DB: db}
-	storesCtrl := &StoresController{DB: db}
 
 	api := r.Group("/api/v1")
 	{
@@ -252,16 +251,6 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.PUT("/promotions/:id", memberEnhancedCtrl.PromotionUpdateNew)
 		api.DELETE("/promotions/:id", memberEnhancedCtrl.PromotionDeleteNew)
 		api.GET("/promotions/:id", memberEnhancedCtrl.PromotionDetailNew)
-
-		// ============ 门店管理 (新版 - 租户隔离) ============
-		api.GET("/stores", storesCtrl.StoreList)
-		api.POST("/stores", storesCtrl.StoreCreate)
-		api.GET("/stores/:id", storesCtrl.StoreGet)
-		api.PUT("/stores/:id", storesCtrl.StoreUpdate)
-		api.DELETE("/stores/:id", storesCtrl.StoreDelete)
-		api.PUT("/stores/:id/status", storesCtrl.StoreUpdateStatus)
-		api.POST("/stores/batch-delete", storesCtrl.StoreBatchDelete)
-		api.GET("/stores/statistics", storesCtrl.StoreStatistics)
 
 		// ============ 应用管理 ============
 		appCtrl := &AppController{DB: db}

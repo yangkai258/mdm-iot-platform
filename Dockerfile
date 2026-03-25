@@ -12,8 +12,9 @@ ENV GOSUMDB=off
 
 WORKDIR /build
 
-# Install build dependencies
-RUN apk add --no-cache git make
+# Install build dependencies - use Aliyun mirror for China network
+RUN sed -i 's/https:\/\/dl-cdn.alpinelinux.org/https:\/\/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache git make
 
 # Copy go mod files first for dependency caching
 COPY go.mod go.sum ./
