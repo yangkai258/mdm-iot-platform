@@ -139,7 +139,13 @@ func (c *StoresController) StoreUpdate(ctx *gin.Context) {
 	tenantID := middleware.GetTenantID(ctx)
 	id := ctx.Param("id")
 	var store models.Store
-	if err := c.DB.First(&store, id).Error; err != nil {
+	
+	// 应用租户过滤
+	query := c.DB.Model(&models.Store{})
+	if tenantID != "" {
+		query = query.Where("tenant_id = ?", tenantID)
+	}
+	if err := query.First(&store, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "门店不存在"})
 		} else {
@@ -179,7 +185,7 @@ func (c *StoresController) StoreUpdate(ctx *gin.Context) {
 		}
 	}
 
-	// 更新字段
+	// 更新字段 - 只更新非零值和显式提供的字段
 	updateFields := map[string]interface{}{}
 	if updateData.StoreCode != "" {
 		updateFields["store_code"] = updateData.StoreCode
@@ -187,7 +193,9 @@ func (c *StoresController) StoreUpdate(ctx *gin.Context) {
 	if updateData.StoreName != "" {
 		updateFields["store_name"] = updateData.StoreName
 	}
-	updateFields["store_type"] = updateData.StoreType
+	if updateData.StoreType > 0 {
+		updateFields["store_type"] = updateData.StoreType
+	}
 	if updateData.Province != "" {
 		updateFields["province"] = updateData.Province
 	}
@@ -206,7 +214,9 @@ func (c *StoresController) StoreUpdate(ctx *gin.Context) {
 	if updateData.Phone != "" {
 		updateFields["phone"] = updateData.Phone
 	}
-	updateFields["status"] = updateData.Status
+	if updateData.Status > 0 {
+		updateFields["status"] = updateData.Status
+	}
 
 	if err := c.DB.Model(&store).Updates(updateFields).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败"})
