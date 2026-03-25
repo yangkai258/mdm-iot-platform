@@ -65,11 +65,12 @@ func main() {
 	}
 	mqttHandler, err := mqtt.InitMQTT(db, redisClient, alertCallback, complianceCallback, geofenceCallback)
 	if err != nil {
-		log.Fatalf("Failed to initialize MQTT: %v", err)
+		log.Printf("Warning: Failed to initialize MQTT: %v (MQTT features will be disabled)", err)
+	} else {
+		defer mqttHandler.Disconnect(0)
+		// 设置全局 MQTT 客户端供 CommandController 使用
+		mqtt.SetGlobalMQTTClient(mqttHandler)
 	}
-	defer mqttHandler.Disconnect(0)
-	// 设置全局 MQTT 客户端供 CommandController 使用
-	mqtt.SetGlobalMQTTClient(mqttHandler)
 
 	// OTA 后台 Worker：定期检查待下发的 OTA 任务
 	otaWorker := services.NewOTAWorker(db, mqttHandler)

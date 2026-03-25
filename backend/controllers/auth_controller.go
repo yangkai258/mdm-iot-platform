@@ -35,7 +35,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 		Password string `json:"password" binding:"required"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
 		return
 	}
 
@@ -119,9 +119,7 @@ func (ctrl *AuthController) RefreshToken(c *gin.Context) {
 		"data": gin.H{
 			"access_token":  newToken,
 			"refresh_token": newRefreshToken,
-			"expires_in":   3600,
+			"expires_in":    3600,
 		},
 	})
 }
-
-

@@ -1,0 +1,4 @@
+FROM mdm-backend:latest
+
+# Replace with pre-built binary that has AutoMigrate disabled
+COPY backend/mdm-backend-linux /app/mdm-server

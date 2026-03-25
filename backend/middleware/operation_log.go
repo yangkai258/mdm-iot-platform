@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -18,8 +19,15 @@ import (
 // OperationLog 操作日志中间件
 func OperationLog(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// 排除不需要记录操作的路径
+		path := c.Request.URL.Path
+		if strings.HasPrefix(path, "/api/v1/auth/") || path == "/health" {
+			c.Next()
+			return
+		}
+		
 		// 只记录 /api 开头的写入请求
-		if !strings.HasPrefix(c.Request.URL.Path, "/api") ||
+		if !strings.HasPrefix(path, "/api") ||
 			(c.Request.Method != "POST" && c.Request.Method != "PUT" && c.Request.Method != "DELETE") {
 			c.Next()
 			return
@@ -43,11 +51,20 @@ func OperationLog(db *gorm.DB) gin.HandlerFunc {
 
 		var userIDUint uint
 		if userID != nil {
-			userIDUint = uint(userID.(int))
+			switch v := userID.(type) {
+			case int:
+				userIDUint = uint(v)
+			case uint:
+				userIDUint = v
+			case int64:
+				userIDUint = uint(v)
+			case float64:
+				userIDUint = uint(v)
+			}
 		}
 		var usernameStr string
 		if username != nil {
-			usernameStr = username.(string)
+			usernameStr = fmt.Sprintf("%v", username)
 		}
 
 		// 创建操作日志

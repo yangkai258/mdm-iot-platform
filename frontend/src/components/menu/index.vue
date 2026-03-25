@@ -280,11 +280,7 @@ import {
   IconBook,
   IconUser,
   IconStorage,
-  IconTreeList,
   IconLink,
-  IconSubscribe,
-  IconCode,
-  IconReceipt,
 } from '@arco-design/web-vue/es/icon';
 
 const router = useRouter();
