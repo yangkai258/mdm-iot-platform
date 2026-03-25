@@ -5,7 +5,10 @@
 FROM golang:1.23-alpine AS builder
 
 # Enable automatic Go toolchain download for newer Go version
+# Use Chinese Go proxy mirror for network accessibility
 ENV GOTOOLCHAIN=auto
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GOSUMDB=off
 
 WORKDIR /build
 

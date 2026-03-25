@@ -43,8 +43,8 @@ func (ApiPermission) TableName() string { return "api_permissions" }
 // Role 角色表（多租户版本）
 type Role struct {
 	ID          uint      `gorm:"primaryKey" json:"id"`
-	RoleName    string    `gorm:"size:100;not null" json:"role_name"`
-	RoleCode    string    `gorm:"size:100;not null" json:"role_code"`
+	RoleName    string    `gorm:"column:name;size:100;not null" json:"role_name"`
+	RoleCode    string    `gorm:"column:code;size:100;not null" json:"role_code"`
 	Description string    `gorm:"size:500" json:"description"`
 	Status      int       `gorm:"default:1" json:"status"`
 	TenantID    string    `gorm:"size:50;index" json:"tenant_id"`
