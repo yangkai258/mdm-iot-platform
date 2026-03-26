@@ -40,6 +40,13 @@ func main() {
 		log.Printf("SystemConfig table ready")
 	}
 
+	// AI相关表迁移
+	if err := db.AutoMigrate(&models.AIConversation{}, &models.AIMessage{}, &models.AIConfig{}); err != nil {
+		log.Printf("Warning: Failed to migrate AI models: %v", err)
+	} else {
+		log.Printf("AI models table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
@@ -339,6 +346,15 @@ func main() {
 	apiV1.GET("/emotion/recognition/stats", emotionCtrl.GetRecordStats)
 	apiV1.GET("/emotion/responses", emotionCtrl.GetEmotionConfig)
 	apiV1.POST("/emotion/responses", emotionCtrl.UpdateEmotionConfig)
+
+	// AI聊天路由
+	aiCtrl := &controllers.AIController{DB: db}
+	apiV1.POST("/ai/chat", aiCtrl.Chat)
+	apiV1.GET("/ai/conversations", aiCtrl.GetConversations)
+	apiV1.GET("/ai/conversations/:session_id/messages", aiCtrl.GetMessages)
+	apiV1.DELETE("/ai/conversations/:session_id", aiCtrl.DeleteConversation)
+	apiV1.GET("/ai/config", aiCtrl.GetAIConfig)
+	apiV1.PUT("/ai/config", aiCtrl.UpdateAIConfig)
 
 	// Sprint 26 Phase 4: App市场路由
 	marketAppCtrl := &controllers.MarketAppController{DB: db}
