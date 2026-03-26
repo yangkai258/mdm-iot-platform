@@ -15,6 +15,19 @@ type OrgController struct {
 	DB *gorm.DB
 }
 
+// DeptRow 部门查询结果行
+type DeptRow struct {
+	ID        int
+	DeptID    *string
+	ParentID  *int
+	DeptCode  *string
+	DeptName  *string
+	ManagerID *int
+	Status    *string
+	SortOrder *int
+	TenantID  *string
+}
+
 // CompanyList 公司列表
 func (c *OrgController) CompanyList(ctx *gin.Context) {
 	var companies []models.Company
@@ -111,50 +124,81 @@ func (c *OrgController) CompanyDelete(ctx *gin.Context) {
 
 // DepartmentList 部门列表
 func (c *OrgController) DepartmentList(ctx *gin.Context) {
-	var departments []models.Department
-	var total int64
+	var rows []DeptRow
+	result := c.DB.Raw(`
+		SELECT id, dept_id, parent_id, dept_code, dept_name,
+		       manager_id, status, sort_order, tenant_id
+		FROM departments
+		ORDER BY sort_order ASC, id DESC
+		LIMIT 100
+	`).Scan(&rows)
 
-	query := c.DB.Model(&models.Department{})
-
-	// 公司筛选
-	if companyID := ctx.Query("company_id"); companyID != "" {
-		query = query.Where("company_id = ?", companyID)
-	}
-
-	// 上级部门筛选
-	if parentID := ctx.Query("parent_id"); parentID != "" {
-		query = query.Where("parent_id = ?", parentID)
-	} else {
-		// 不加 parent_id 条件，直接查所有（让前端传 parent_id 来筛选）
-		// 避免 GORM IS NULL 查询在不同版本的行为差异
-	}
-
-	query.Count(&total)
-
-	if err := query.Order("sort ASC, id DESC").Find(&departments).Error; err != nil {
+	if result.Error != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
 		return
 	}
 
+	list := make([]map[string]interface{}, 0)
+	for _, r := range rows {
+		list = append(list, map[string]interface{}{
+			"id":         r.ID,
+			"dept_id":    r.DeptID,
+			"parent_id":  r.ParentID,
+			"dept_code":  r.DeptCode,
+			"dept_name":  r.DeptName,
+			"manager_id":  r.ManagerID,
+			"status":     r.Status,
+			"sort_order": r.SortOrder,
+			"tenant_id":  r.TenantID,
+		})
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
-		"code": 0,
+		"code":    0,
 		"message": "success",
 		"data": gin.H{
-			"list":  departments,
-			"total": total,
+			"list":  list,
+			"total": len(list),
 		},
 	})
 }
 
 // DepartmentTree 部门树
 func (c *OrgController) DepartmentTree(ctx *gin.Context) {
-	var departments []models.Department
-	c.DB.Order("sort ASC, id DESC").Find(&departments)
+	var rows []DeptRow
+	c.DB.Raw(`
+		SELECT id, dept_id, parent_id, dept_code, dept_name,
+		       manager_id, status, sort_order, tenant_id
+		FROM departments
+		ORDER BY sort_order ASC, id DESC
+	`).Scan(&rows)
 
 	// 构建树形结构
-	tree := buildDeptTree(departments, 0)
+	tree := buildDeptTreeFromRows(rows, 0)
 
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": tree})
+}
+
+// buildDeptTreeFromRows 从行数据构建树
+func buildDeptTreeFromRows(rows []DeptRow, parentID int) []map[string]interface{} {
+	var tree []map[string]interface{}
+	for _, r := range rows {
+		isRoot := r.ParentID == nil || *r.ParentID == 0
+		if (parentID == 0 && isRoot) || (parentID != 0 && r.ParentID != nil && *r.ParentID == parentID) {
+			node := map[string]interface{}{
+				"id":          r.ID,
+				"dept_id":     r.DeptID,
+				"dept_code":   r.DeptCode,
+				"dept_name":   r.DeptName,
+				"manager_id":   r.ManagerID,
+				"status":      r.Status,
+				"sort_order":  r.SortOrder,
+				"children":    buildDeptTreeFromRows(rows, r.ID),
+			}
+			tree = append(tree, node)
+		}
+	}
+	return tree
 }
 
 func buildDeptTree(depts []models.Department, parentID uint) []models.Department {
@@ -173,35 +217,49 @@ func buildDeptTree(depts []models.Department, parentID uint) []models.Department
 
 // DepartmentCreate 创建部门
 func (c *OrgController) DepartmentCreate(ctx *gin.Context) {
-	var dept models.Department
-	if err := ctx.ShouldBindJSON(&dept); err != nil {
+	var req struct {
+		DeptCode  string  `json:"dept_code" binding:"required"`
+		DeptName  string  `json:"dept_name" binding:"required"`
+		ParentID  *int    `json:"parent_id"`
+		ManagerID *int    `json:"manager_id"`
+		Status    string  `json:"status"`
+		SortOrder *int    `json:"sort_order"`
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
 		return
 	}
 
-	// 生成路径（Level 在插入前计算，Path 在插入后用真实 dept.ID 更新）
-	if dept.ParentID != nil {
-		var parent models.Department
-		if err := c.DB.First(&parent, *dept.ParentID).Error; err == nil {
-			dept.Level = parent.Level + 1
-		}
+	if req.Status == "" {
+		req.Status = "active"
 	}
 
-	if err := c.DB.Create(&dept).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
+	// 使用原始 SQL 插入
+	sql := `INSERT INTO departments (dept_id, dept_code, dept_name, parent_id, manager_id, status, sort_order)
+	        VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6) RETURNING id`
+
+	var newID int
+	err := c.DB.Raw(sql, req.DeptCode, req.DeptName, req.ParentID, req.ManagerID, req.Status, req.SortOrder).Scan(&newID).Error
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败: " + err.Error()})
 		return
 	}
 
-	// 插入后用真实的 dept.ID 更新 path
-	if dept.ParentID != nil {
-		var parent models.Department
-		if err := c.DB.First(&parent, *dept.ParentID).Error; err == nil {
-			newPath := parent.Path + "/" + strconv.Itoa(int(dept.ID))
-			c.DB.Model(&dept).Update("path", newPath)
-		}
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": dept})
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"id":        newID,
+			"dept_code": req.DeptCode,
+			"dept_name": req.DeptName,
+			"parent_id": req.ParentID,
+			"manager_id": req.ManagerID,
+			"status":    req.Status,
+			"sort_order": req.SortOrder,
+		},
+	})
 }
 
 // DepartmentUpdate 更新部门

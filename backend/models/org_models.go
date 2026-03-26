@@ -33,17 +33,17 @@ type Company struct {
 // Department 部门表
 type Department struct {
 	ID           uint           `gorm:"primaryKey" json:"id"`
-	TenantID     string         `gorm:"size:50;index" json:"tenant_id"`         // 租户ID
-	DeptCode     string         `gorm:"size:50;not null" json:"dept_code"`      // 部门编码
-	DeptName     string         `gorm:"size:100;not null" json:"dept_name"`     // 部门名称
-	ParentID     *uint          `gorm:"index" json:"parent_id"`                  // 上级部门
+	TenantID     *string        `gorm:"column:tenant_id;type:uuid;index" json:"tenant_id"`        // 租户ID
+	DeptCode     string         `gorm:"column:dept_code;size:50;not null" json:"dept_code"`      // 部门编码
+	DeptName     string         `gorm:"column:dept_name;size:100;not null" json:"dept_name"`     // 部门名称
+	ParentID     *uint          `gorm:"column:parent_id;index" json:"parent_id"`                  // 上级部门
 	Level        int            `gorm:"default:1" json:"level"`                  // 层级
 	Path         string         `gorm:"size:500" json:"path"`                    // 路径
-	Manager      string         `gorm:"size:50" json:"manager"`                 // 负责人
+	ManagerID    uint           `gorm:"column:manager_id" json:"manager_id"`     // 负责人ID
 	Phone        string         `gorm:"size:20" json:"phone"`                    // 联系电话
 	Email        string         `gorm:"size:100" json:"email"`                   // 邮箱
-	Status       int            `gorm:"default:1" json:"status"`                 // 状态
-	Sort         int            `gorm:"default:0" json:"sort"`                   // 排序
+	Status       string         `gorm:"column:status;default:'active'" json:"status"`                 // 状态
+	SortOrder    int            `gorm:"column:sort_order;default:0" json:"sort_order"`                   // 排序
 	CompanyID    uint           `gorm:"index" json:"company_id"`                 // 所属公司
 	CreatedAt    time.Time      `json:"created_at"`
 	UpdatedAt    time.Time      `json:"updated_at"`

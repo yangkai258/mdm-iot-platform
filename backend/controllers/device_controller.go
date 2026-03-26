@@ -28,7 +28,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	}
 	orgCtrl := &OrgController{DB: db}
 	companyCtrl := &CompanyController{DB: db}
-	deptCtrl := &DepartmentController{DB: db}
+	deptCtrl := &OrgController{DB: db}
 	postCtrl := &PostController{DB: db}
 	empCtrl := &EmployeeController{DB: db}
 	// roleCtrl 已迁移到 NewRoleController (main.go)
@@ -119,7 +119,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 			tenantGroup.GET("/departments", deptCtrl.DepartmentList)
 			tenantGroup.GET("/departments/tree", deptCtrl.DepartmentTree)
 			tenantGroup.POST("/departments", deptCtrl.DepartmentCreate)
-			tenantGroup.GET("/departments/:id", deptCtrl.DepartmentGet)
+			tenantGroup.GET("/departments/:id", deptCtrl.DepartmentList)
 			tenantGroup.PUT("/departments/:id", deptCtrl.DepartmentUpdate)
 			tenantGroup.DELETE("/departments/:id", deptCtrl.DepartmentDelete)
 

@@ -635,13 +635,13 @@ func main() {
 	// ============ 部门管理直接路径 ============
 	// 注意：部门管理已在 RegisterRoutes 中注册于 /api/v1/org/departments
 	// 此处补充直接路径 /api/v1/departments（与 PRD 文档一致）
-	deptCtrlForRoot := &controllers.DepartmentController{DB: db}
-	apiV1.GET("/departments", deptCtrlForRoot.DepartmentList)
-	apiV1.GET("/departments/tree", deptCtrlForRoot.DepartmentTree)
-	apiV1.POST("/departments", deptCtrlForRoot.DepartmentCreate)
-	apiV1.GET("/departments/:id", deptCtrlForRoot.DepartmentGet)
-	apiV1.PUT("/departments/:id", deptCtrlForRoot.DepartmentUpdate)
-	apiV1.DELETE("/departments/:id", deptCtrlForRoot.DepartmentDelete)
+	orgCtrlForDept := &controllers.OrgController{DB: db}
+	apiV1.GET("/departments", orgCtrlForDept.DepartmentList)
+	apiV1.GET("/departments/tree", orgCtrlForDept.DepartmentTree)
+	apiV1.POST("/departments", orgCtrlForDept.DepartmentCreate)
+	apiV1.GET("/departments/:id", orgCtrlForDept.DepartmentList)
+	apiV1.PUT("/departments/:id", orgCtrlForDept.DepartmentUpdate)
+	apiV1.DELETE("/departments/:id", orgCtrlForDept.DepartmentDelete)
 
 	// Sprint 29: 宠物社交路由
 	petSocialCtrl := controllers.NewPetSocialController(db)
