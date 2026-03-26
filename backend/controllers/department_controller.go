@@ -92,19 +92,26 @@ func (c *DepartmentController) DepartmentCreate(ctx *gin.Context) {
 		dept.TenantID = tenantID
 	}
 
-	// 生成路径
+	// 生成路径（需要在插入后用真实的 dept.ID）
 	if dept.ParentID != nil {
 		var parent models.Department
 		if err := c.DB.First(&parent, *dept.ParentID).Error; err == nil {
 			dept.Level = parent.Level + 1
-			dept.Path = fmt.Sprintf("%s/%d", parent.Path, dept.ID)
-		dept.ParentID = &parent.ID
 		}
 	}
 
 	if err := c.DB.Create(&dept).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
 		return
+	}
+
+	// 插入后用真实的 dept.ID 更新 path
+	if dept.ParentID != nil {
+		var parent models.Department
+		if err := c.DB.First(&parent, *dept.ParentID).Error; err == nil {
+			newPath := fmt.Sprintf("%s/%d", parent.Path, dept.ID)
+			c.DB.Model(&dept).Update("path", newPath)
+		}
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": dept})
@@ -145,18 +152,18 @@ func (c *DepartmentController) DepartmentUpdate(ctx *gin.Context) {
 		}
 	}
 
-	// 如果改了父部门，重新计算层级
+	// 如果改了父部门，重新计算层级和路径
 	if parentID, ok := updateData["parent_id"]; ok {
 		if parentID == nil {
-			dept.Level = 1
-			dept.Path = ""
+			updates["level"] = 1
+			updates["path"] = ""
 		} else {
 			var parent models.Department
 			if pid, err := strconv.ParseUint(fmt.Sprintf("%v", parentID), 10, 32); err == nil {
 				if err := c.DB.First(&parent, pid).Error; err == nil {
-					dept.ParentID = &parent.ID
-					dept.Level = parent.Level + 1
-					dept.Path = fmt.Sprintf("%s/%d", parent.Path, dept.ID)
+					updates["parent_id"] = pid
+					updates["level"] = parent.Level + 1
+					updates["path"] = fmt.Sprintf("%s/%d", parent.Path, dept.ID)
 				}
 			}
 		}

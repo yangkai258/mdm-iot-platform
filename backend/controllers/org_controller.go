@@ -125,7 +125,8 @@ func (c *OrgController) DepartmentList(ctx *gin.Context) {
 	if parentID := ctx.Query("parent_id"); parentID != "" {
 		query = query.Where("parent_id = ?", parentID)
 	} else {
-		query = query.Where("parent_id IS NULL")
+		// 不加 parent_id 条件，直接查所有（让前端传 parent_id 来筛选）
+		// 避免 GORM IS NULL 查询在不同版本的行为差异
 	}
 
 	query.Count(&total)
@@ -178,18 +179,26 @@ func (c *OrgController) DepartmentCreate(ctx *gin.Context) {
 		return
 	}
 
-	// 生成路径
+	// 生成路径（Level 在插入前计算，Path 在插入后用真实 dept.ID 更新）
 	if dept.ParentID != nil {
 		var parent models.Department
 		if err := c.DB.First(&parent, *dept.ParentID).Error; err == nil {
 			dept.Level = parent.Level + 1
-			dept.Path = parent.Path + "/" + strconv.Itoa(int(dept.ID))
 		}
 	}
 
 	if err := c.DB.Create(&dept).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
 		return
+	}
+
+	// 插入后用真实的 dept.ID 更新 path
+	if dept.ParentID != nil {
+		var parent models.Department
+		if err := c.DB.First(&parent, *dept.ParentID).Error; err == nil {
+			newPath := parent.Path + "/" + strconv.Itoa(int(dept.ID))
+			c.DB.Model(&dept).Update("path", newPath)
+		}
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": dept})
