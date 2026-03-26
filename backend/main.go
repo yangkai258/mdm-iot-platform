@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"mdm-backend/controllers"
@@ -192,6 +193,30 @@ func main() {
 	adminGroup := sys.Group("/admin")
 	tenantCtrl.RegisterTenantRoutes(adminGroup)
 
+	// Admin 套餐管理路由（/admin/packages）
+	// 注意：套餐同时可通过 /admin/plans（TenantController.ListPlans）访问
+	adminGroup.GET("/packages", func(c *gin.Context) {
+		var packages []models.Package
+		var total int64
+		query := db.Model(&models.Package{})
+		if err := query.Count(&total).Error; err != nil {
+			c.JSON(500, gin.H{"code": "DB_ERROR", "message": "查询套餐列表失败"})
+			return
+		}
+		page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+		pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+		offset := (page - 1) * pageSize
+		if err := query.Offset(offset).Limit(pageSize).Order("id ASC").Find(&packages).Error; err != nil {
+			c.JSON(500, gin.H{"code": "DB_ERROR", "message": "查询套餐列表失败"})
+			return
+		}
+		// 填充兼容字段
+		for i := range packages {
+			packages[i].FillCompatFields()
+		}
+		c.JSON(200, gin.H{"code": 0, "data": gin.H{"list": packages, "total": total, "page": page, "page_size": pageSize}})
+	})
+
 	// 租户申请审批路由（/api/v1/tenant-approvals）
 	tenantApprovalCtrl := &controllers.TenantApprovalController{DB: db}
 	tenantApprovalCtrl.RegisterRoutes(sys)
@@ -244,8 +269,16 @@ func main() {
 
 		sys.GET("/menus/tree", menuCtrl.List) // 复用 List 返回树形
 		sys.GET("/dicts/:type", dictCtrl.GetDictByType)
+		// 数据字典 CRUD（补充 /api/v1/dicts 完整路径）
+		sys.GET("/dicts", dictCtrl.List)
+		sys.POST("/dicts", dictCtrl.Create)
+		sys.PUT("/dicts/:id", dictCtrl.Update)
+		sys.DELETE("/dicts/:id", dictCtrl.Delete)
 		sys.GET("/logs/operations", logCtrl.GetOperationLogs)
 		sys.GET("/logs/login", logCtrl.GetLoginLogs)
+		// 审计日志（基于 AuditLog 模型，区别于 SysOperationLog）
+		auditCtrl := &controllers.AuditController{DB: db}
+		sys.GET("/audit/logs", auditCtrl.GetAuditLogs)
 
 		// 系统设置
 		settingsCtrl := &controllers.SettingsController{DB: db}
@@ -592,6 +625,23 @@ func main() {
 	// ============ Sprint 19: 健康医疗路由 ============
 	healthCtrl := controllers.NewHealthController(db, redisClient)
 	healthCtrl.RegisterRoutes(apiV1)
+
+	// ============ 系统健康检查 API ============
+	// 注意：此 API 不同于 Sprint 19 的宠物健康路由（/health/*）
+	// 返回 DB/Redis/MQTT 连接状态
+	systemHealthCtrl := controllers.NewSystemHealthController(db, redisClient)
+	apiV1.GET("/system/health", systemHealthCtrl.GetHealth)
+
+	// ============ 部门管理直接路径 ============
+	// 注意：部门管理已在 RegisterRoutes 中注册于 /api/v1/org/departments
+	// 此处补充直接路径 /api/v1/departments（与 PRD 文档一致）
+	deptCtrlForRoot := &controllers.DepartmentController{DB: db}
+	apiV1.GET("/departments", deptCtrlForRoot.DepartmentList)
+	apiV1.GET("/departments/tree", deptCtrlForRoot.DepartmentTree)
+	apiV1.POST("/departments", deptCtrlForRoot.DepartmentCreate)
+	apiV1.GET("/departments/:id", deptCtrlForRoot.DepartmentGet)
+	apiV1.PUT("/departments/:id", deptCtrlForRoot.DepartmentUpdate)
+	apiV1.DELETE("/departments/:id", deptCtrlForRoot.DepartmentDelete)
 
 	// Sprint 29: 宠物社交路由
 	petSocialCtrl := controllers.NewPetSocialController(db)

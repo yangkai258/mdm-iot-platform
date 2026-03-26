@@ -83,6 +83,177 @@ func (c *DictController) GetDictByType(ctx *gin.Context) {
 	})
 }
 
+// List 获取字典列表
+// GET /api/v1/dicts
+func (c *DictController) List(ctx *gin.Context) {
+	var dicts []models.SysDictionary
+	var total int64
+
+	query := c.DB.Model(&models.SysDictionary{})
+
+	// 关键字筛选
+	if keyword := ctx.Query("keyword"); keyword != "" {
+		query = query.Where("name LIKE ? OR type LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
+	}
+	// 状态筛选
+	if status := ctx.Query("status"); status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	query.Count(&total)
+
+	page := ctx.DefaultQuery("page", "1")
+	pageSize := ctx.DefaultQuery("page_size", "20")
+	offset := (parseInt(page) - 1) * parseInt(pageSize)
+
+	if err := query.Offset(offset).Limit(parseInt(pageSize)).Order("id DESC").Find(&dicts).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": gin.H{
+			"list":  dicts,
+			"total": total,
+			"page":  parseInt(page),
+			"page_size": parseInt(pageSize),
+		},
+	})
+}
+
+// Create 创建字典
+// POST /api/v1/dicts
+func (c *DictController) Create(ctx *gin.Context) {
+	var req struct {
+		Type   string `json:"type" binding:"required"`
+		Name   string `json:"name" binding:"required"`
+		Label  string `json:"label"`
+		Value  string `json:"value" binding:"required"`
+		Sort   int    `json:"sort"`
+		Status int    `json:"status"`
+		Remark string `json:"remark"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
+		return
+	}
+
+	// 检查类型+值唯一性
+	var exist models.SysDictionary
+	if err := c.DB.Where("type = ? AND value = ?", req.Type, req.Value).First(&exist).Error; err == nil {
+		ctx.JSON(http.StatusConflict, gin.H{"code": 409, "message": "字典类型和值组合已存在"})
+		return
+	}
+
+	dict := models.SysDictionary{
+		Type:   req.Type,
+		Name:   req.Name,
+		Label:  req.Label,
+		Value:  req.Value,
+		Sort:   req.Sort,
+		Status: req.Status,
+		Remark: req.Remark,
+	}
+	if dict.Status == 0 {
+		dict.Status = 1
+	}
+
+	if err := c.DB.Create(&dict).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": dict, "message": "success"})
+}
+
+// Update 更新字典
+// PUT /api/v1/dicts/:id
+func (c *DictController) Update(ctx *gin.Context) {
+	id := parseUint(ctx.Param("id"))
+	var dict models.SysDictionary
+	if err := c.DB.First(&dict, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "字典不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	var req struct {
+		Type   string `json:"type"`
+		Name   string `json:"name"`
+		Label  string `json:"label"`
+		Value  string `json:"value"`
+		Sort   int    `json:"sort"`
+		Status int    `json:"status"`
+		Remark string `json:"remark"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	// 检查类型+值唯一性（排除自身）
+	if req.Type != "" && req.Value != "" {
+		var exist models.SysDictionary
+		if err := c.DB.Where("type = ? AND value = ? AND id != ?", req.Type, req.Value, id).First(&exist).Error; err == nil {
+			ctx.JSON(http.StatusConflict, gin.H{"code": 409, "message": "字典类型和值组合已存在"})
+			return
+		}
+	}
+
+	updates := map[string]interface{}{}
+	if req.Type != "" {
+		updates["type"] = req.Type
+	}
+	if req.Name != "" {
+		updates["name"] = req.Name
+	}
+	if req.Label != "" {
+		updates["label"] = req.Label
+	}
+	if req.Value != "" {
+		updates["value"] = req.Value
+	}
+	if req.Sort != 0 {
+		updates["sort"] = req.Sort
+	}
+	if req.Status != 0 {
+		updates["status"] = req.Status
+	}
+	if req.Remark != "" {
+		updates["remark"] = req.Remark
+	}
+
+	if err := c.DB.Model(&dict).Updates(updates).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
+}
+
+// Delete 删除字典
+// DELETE /api/v1/dicts/:id
+func (c *DictController) Delete(ctx *gin.Context) {
+	id := parseUint(ctx.Param("id"))
+	var dict models.SysDictionary
+	if err := c.DB.First(&dict, id).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "字典不存在"})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	if err := c.DB.Delete(&dict).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "删除失败"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
+}
+
 // LogController 日志控制器
 type LogController struct {
 	DB *gorm.DB
