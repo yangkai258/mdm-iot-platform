@@ -33,6 +33,13 @@ func main() {
 	// 引用 models 包（被其他包间接使用）
 	_ = models.Role{}
 
+	// 仅为 system_configs 表执行自动迁移（不影响其他表）
+	if err := db.AutoMigrate(&models.SystemConfig{}); err != nil {
+		log.Printf("Warning: Failed to migrate SystemConfig: %v", err)
+	} else {
+		log.Printf("SystemConfig table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
@@ -232,6 +239,14 @@ func main() {
 		sys.GET("/dicts/:type", dictCtrl.GetDictByType)
 		sys.GET("/logs/operations", logCtrl.GetOperationLogs)
 		sys.GET("/logs/login", logCtrl.GetLoginLogs)
+
+		// 系统设置
+		settingsCtrl := &controllers.SettingsController{DB: db}
+		sys.GET("/settings", settingsCtrl.GetSettings)
+		sys.GET("/settings/groups", settingsCtrl.ListSettingsByGroup)
+		sys.GET("/settings/:key", settingsCtrl.GetSetting)
+		sys.PUT("/settings/:key", settingsCtrl.UpdateSetting)
+		sys.PUT("/settings", settingsCtrl.BatchUpdateSettings)
 
 		// 告警管理
 		alertCtrl := &controllers.AlertController{DB: db}
