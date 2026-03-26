@@ -215,6 +215,19 @@ func main() {
 		sys.PUT("/permission-groups/:id", permGroupCtrl.Update)
 		sys.DELETE("/permission-groups/:id", permGroupCtrl.Delete)
 
+		// 用户管理路由
+		userCtrl := &controllers.UserController{DB: db}
+		sys.GET("/users", userCtrl.List)
+		sys.GET("/users/me", userCtrl.GetCurrentUser)
+		sys.GET("/users/:id", userCtrl.Get)
+		sys.POST("/users", userCtrl.Create)
+		sys.PUT("/users/:id", userCtrl.Update)
+		sys.DELETE("/users/:id", userCtrl.Delete)
+		sys.PUT("/users/:id/status", userCtrl.UpdateStatus)
+		sys.POST("/users/:id/reset-password", userCtrl.ResetPassword)
+		sys.POST("/users/change-password", userCtrl.ChangePassword)
+		sys.POST("/users/batch-delete", userCtrl.BatchDelete)
+
 		sys.GET("/menus/tree", menuCtrl.List) // 复用 List 返回树形
 		sys.GET("/dicts/:type", dictCtrl.GetDictByType)
 		sys.GET("/logs/operations", logCtrl.GetOperationLogs)
