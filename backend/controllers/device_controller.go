@@ -35,6 +35,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	memberCtrl := &MemberController{DB: db}
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 	positionTemplateCtrl := &PositionTemplateController{DB: db}
+	subscriptionRenewalCtrl := NewSubscriptionRenewalController(db)
 
 	api := r.Group("/api/v1")
 	{
@@ -180,6 +181,14 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/members/cards", memberCtrl.CardCreate)
 		api.PUT("/members/cards/:id", memberCtrl.CardUpdate)
 		api.DELETE("/members/cards/:id", memberCtrl.CardDelete)
+		api.GET("/members/levels", memberCtrl.LevelList)
+		api.POST("/members/levels", memberCtrl.LevelCreate)
+		api.PUT("/members/levels/:id", memberCtrl.LevelUpdate)
+		api.DELETE("/members/levels/:id", memberCtrl.LevelDelete)
+		api.GET("/members/promotions", memberCtrl.PromotionList)
+		api.POST("/members/promotions", memberCtrl.PromotionCreate)
+		api.PUT("/members/promotions/:id", memberCtrl.PromotionUpdate)
+		api.DELETE("/members/promotions/:id", memberCtrl.PromotionDelete)
 		api.PUT("/members/:id", memberCtrl.MemberUpdate)
 		api.DELETE("/members/:id", memberCtrl.MemberDelete)
 		api.GET("/members/:id", memberCtrl.MemberDetail)
@@ -311,6 +320,12 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 违规记录 - 已禁用
 		// api.GET("/compliance/violations", complianceCtrl.ListViolations)
 		// api.PUT("/compliance/violations/:id/resolve", complianceCtrl.ResolveViolation)
+
+		// ============ 订阅续费路由 ============
+		api.POST("/subscriptions/:id/renew", subscriptionRenewalCtrl.ManualRenew)
+		api.POST("/subscriptions/auto-renewal/enable", subscriptionRenewalCtrl.EnableAutoRenewal)
+		api.POST("/subscriptions/auto-renewal/disable", subscriptionRenewalCtrl.DisableAutoRenewal)
+		api.GET("/subscriptions/auto-renewal/status", subscriptionRenewalCtrl.GetAutoRenewalStatus)
 	}
 }
 
