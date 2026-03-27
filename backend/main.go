@@ -48,6 +48,13 @@ func main() {
 		log.Printf("AI models table ready")
 	}
 
+	// 数据脱敏表迁移
+	if err := db.AutoMigrate(&models.DataMaskingRule{}); err != nil {
+		log.Printf("Warning: Failed to migrate DataMaskingRule: %v", err)
+	} else {
+		log.Printf("DataMaskingRule table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
@@ -675,9 +682,11 @@ func main() {
 	voiceEmotionCtrl := controllers.NewVoiceEmotionController(db)
 	voiceEmotionCtrl.RegisterRoutes(apiV1)
 
-	// Sprint 15: API配额路由
-	apiQuotaCtrl := controllers.NewAPIQuotaController()
-	apiQuotaCtrl.RegisterRoutes(apiV1)
+	// Sprint 15: API配额路由 (暂时禁用，等待修复重复注册问题)
+	// apiQuotaCtrl := controllers.NewAPIQuotaController()
+	// apiV1.GET("/quota/status", apiQuotaCtrl.GetQuotaStatus)
+	// apiV1.GET("/quota/usage", apiQuotaCtrl.GetUsageLog)
+	// apiV1.GET("/quota/plans", apiQuotaCtrl.GetQuotaPlans)
 
 	// Sprint 13: 模型分片路由
 	modelShardCtrl := controllers.NewModelShardController(db)
