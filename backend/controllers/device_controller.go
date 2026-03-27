@@ -36,6 +36,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 	memberEnhancedCtrl := NewMemberEnhancedController(db)
 	positionTemplateCtrl := &PositionTemplateController{DB: db}
 	subscriptionRenewalCtrl := NewSubscriptionRenewalController(db)
+	dataMaskingCtrl := &DataMaskingController{DB: db}
+	complianceCtrl := &ComplianceController{DB: db}
+	apiQuotaCtrl := NewAPIQuotaController()
 
 	api := r.Group("/api/v1")
 	{
@@ -326,6 +329,24 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/subscriptions/auto-renewal/enable", subscriptionRenewalCtrl.EnableAutoRenewal)
 		api.POST("/subscriptions/auto-renewal/disable", subscriptionRenewalCtrl.DisableAutoRenewal)
 		api.GET("/subscriptions/auto-renewal/status", subscriptionRenewalCtrl.GetAutoRenewalStatus)
+
+		// ============ 数据脱敏路由 ============
+		api.GET("/data-masking/rules", dataMaskingCtrl.GetMaskingRules)
+		api.POST("/data-masking/rules", dataMaskingCtrl.CreateMaskingRule)
+		api.PUT("/data-masking/rules/:id", dataMaskingCtrl.UpdateMaskingRule)
+		api.DELETE("/data-masking/rules/:id", dataMaskingCtrl.DeleteMaskingRule)
+		api.GET("/data-masking/defaults", dataMaskingCtrl.GetDefaultRules)
+		api.POST("/data-masking/test", dataMaskingCtrl.TestMaskingRule)
+		api.POST("/data-masking/mask", dataMaskingCtrl.MaskData)
+
+		// ============ GDPR/合规路由 ============
+		api.GET("/gdpr/export", complianceCtrl.GetGDPRDataExport)
+		api.DELETE("/gdpr/delete-account", complianceCtrl.DeleteGDPRData)
+		api.GET("/gdpr/info", complianceCtrl.GetGDPRRequests)
+		api.POST("/gdpr/anonymize", complianceCtrl.ProcessGDPRRequest)
+
+		// ============ 配额路由 ============
+		apiQuotaCtrl.RegisterRoutes(api)
 	}
 }
 
