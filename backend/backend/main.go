@@ -190,6 +190,11 @@ func main() {
 		&models.APIKey{},
 		&models.APIKeyUsage{},
 
+		// Phase 2: API配额与计费模块
+		&models.APIQuota{},
+		&models.APIUsageLog{},
+		&models.Invoice{},
+
 		// Phase 2: AI行为分析模块
 		&models.AiBehavior{},
 		&models.AiBehaviorStats{},
@@ -204,6 +209,9 @@ func main() {
 		// Phase 2: 设备配对模块
 		&models.DevicePairing{},
 		&models.DeviceOpenClawBinding{},
+
+		// GDPR合规: 数据脱敏规则表
+		&controllers.MaskingRuleDB{},
 	); err != nil {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
@@ -578,6 +586,22 @@ func main() {
 	apiV1.POST("/developer/apps/:id/keys", devCtrl.CreateKey)
 	apiV1.DELETE("/developer/apps/:id/keys/:keyId", devCtrl.DeleteKey)
 
+	// ============ Phase 2: API配额与计费路由 ============
+	// API配额检查中间件（对所有 apiV1 请求生效）
+	apiV1.Use(middleware.APIQuotaCheck(db))
+	apiV1.Use(middleware.RecordAPIUsage(db))
+
+	quotaCtrl := &controllers.APIQuotaController{DB: db}
+	apiV1.GET("/quotas", quotaCtrl.GetQuota)
+	apiV1.GET("/quotas/usage", quotaCtrl.GetUsage)
+	apiV1.POST("/quotas/upgrade", quotaCtrl.UpgradeQuota)
+
+	billingCtrl := &controllers.BillingController{DB: db}
+	apiV1.GET("/billing/invoices", billingCtrl.ListInvoices)
+	apiV1.GET("/billing/invoices/:id", billingCtrl.GetInvoice)
+	apiV1.POST("/billing/invoices", billingCtrl.CreateInvoice)
+	apiV1.POST("/billing/invoices/:id/pay", billingCtrl.PayInvoice)
+
 	// ============ Phase 2: AI行为分析路由 ============
 	aiBehaviorCtrl := &controllers.AiBehaviorController{DB: db}
 	apiV1.GET("/ai/behaviors", aiBehaviorCtrl.List)
@@ -628,6 +652,27 @@ func main() {
 	apiV1.POST("/device-pairings/:id/approve", pairingCtrl.Approve)
 	apiV1.POST("/device-pairings/:id/reject", pairingCtrl.Reject)
 	apiV1.POST("/device-pairings/:id/unbind", pairingCtrl.Unbind)
+
+	// ============ GDPR合规路由 ============
+	gdprCtrl := &controllers.GDPRController{DB: db}
+	apiV1.GET("/gdpr/export", gdprCtrl.ExportUserData)                      // 导出用户数据
+	apiV1.DELETE("/gdpr/delete-account", gdprCtrl.DeleteAccount)            // 删除账户
+	apiV1.GET("/gdpr/info", gdprCtrl.GetDataProcessingInfo)                 // 数据处理信息
+	apiV1.POST("/gdpr/anonymize", gdprCtrl.AnonymizeData)                   // 匿名化历史数据
+
+	// ============ 数据脱敏路由 ============
+	maskingCtrl := &controllers.DataMaskingController{DB: db}
+	// 从数据库加载现有脱敏规则到内存
+	if err := maskingCtrl.InitMaskingRulesFromDB(); err != nil {
+		log.Printf("Warning: Failed to load masking rules from DB: %v", err)
+	}
+	apiV1.GET("/data-masking/rules", maskingCtrl.GetMaskingRules)           // 获取脱敏规则列表
+	apiV1.POST("/data-masking/rules", maskingCtrl.CreateMaskingRule)         // 创建脱敏规则
+	apiV1.PUT("/data-masking/rules/:id", maskingCtrl.UpdateMaskingRule)      // 更新脱敏规则
+	apiV1.DELETE("/data-masking/rules/:id", maskingCtrl.DeleteMaskingRule)   // 删除脱敏规则
+	apiV1.GET("/data-masking/defaults", maskingCtrl.GetDefaultRules)         // 获取默认规则
+	apiV1.POST("/data-masking/test", maskingCtrl.TestMaskingRule)            // 测试脱敏规则
+	apiV1.POST("/data-masking/mask", maskingCtrl.MaskData)                   // 手动脱敏数据
 
 	// 获取端口
 	port := os.Getenv("PORT")

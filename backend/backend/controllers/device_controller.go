@@ -237,7 +237,9 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		// 会员积分列表（/api/v1/members/points）
 		api.GET("/members/points", memberEnhancedCtrl.ListMemberPoints)
 		api.POST("/members/points/adjust", memberEnhancedCtrl.AdjustMemberPoints)
-		api.GET("/members/:id/coupons", memberEnhancedCtrl.MemberCouponList)
+		// 会员优惠券列表
+		api.GET("/members/coupons", memberEnhancedCtrl.MemberCouponList) // 当前用户优惠券
+		api.GET("/members/:id/coupons", memberEnhancedCtrl.MemberCouponList) // 指定会员优惠券
 
 		// 优惠券（新路径 /api/v1/coupons）
 		api.GET("/coupons", memberEnhancedCtrl.CouponListNew)

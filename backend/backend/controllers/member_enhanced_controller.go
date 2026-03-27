@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"mdm-backend/middleware"
 	"mdm-backend/models"
 	"mdm-backend/services"
 
@@ -195,13 +196,36 @@ func (c *MemberEnhancedController) CouponUse(ctx *gin.Context) {
 }
 
 // MemberCouponList 获取会员优惠券列表
-// GET /api/v1/members/:id/coupons
+// GET /api/v1/members/coupons - 获取当前登录用户的优惠券
+// GET /api/v1/members/:id/coupons - 获取指定会员的优惠券
 func (c *MemberEnhancedController) MemberCouponList(ctx *gin.Context) {
-	id := ctx.Param("id")
-	memberID, err := strconv.ParseUint(id, 10, 64)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "无效的会员ID"})
-		return
+	// 优先从路径参数获取会员ID，否则从当前登录用户获取
+	memberIDStr := ctx.Param("id")
+	var memberID uint
+	var err error
+	
+	if memberIDStr != "" {
+		// 路径有ID，使用路径ID
+		id, err := strconv.ParseUint(memberIDStr, 10, 64)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "无效的会员ID"})
+			return
+		}
+		memberID = uint(id)
+	} else {
+		// 路径无ID，从当前登录用户获取关联的会员ID
+		userID := middleware.GetUserID(ctx)
+		if userID == 0 {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "未登录或无法获取用户信息"})
+			return
+		}
+		// 查找关联的会员
+		var member models.Member
+		if err := c.DB.Where("user_id = ?", userID).First(&member).Error; err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "未找到关联的会员账号"})
+			return
+		}
+		memberID = member.ID
 	}
 
 	status, _ := strconv.Atoi(ctx.DefaultQuery("status", "0"))
@@ -214,7 +238,7 @@ func (c *MemberEnhancedController) MemberCouponList(ctx *gin.Context) {
 		pageSize = 10
 	}
 
-	grants, total, err := c.CouponEngine.GetMemberCoupons(uint(memberID), status)
+	grants, total, err := c.CouponEngine.GetMemberCoupons(memberID, status)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": err.Error()})
 		return

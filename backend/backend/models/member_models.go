@@ -21,6 +21,7 @@ type Member struct {
 	Balance     float64        `gorm:"default:0" json:"balance"`                 // 储值余额
 	CardID      *uint          `gorm:"index" json:"card_id"`                     // 会员卡ID
 	StoreID     *uint          `gorm:"index" json:"store_id"`                   // 所属店铺
+	UserID      *uint          `gorm:"index" json:"user_id"`                   // 关联系统用户ID
 	Status      int            `gorm:"default:1" json:"status"`                 // 状态
 	Source      string         `gorm:"size:50" json:"source"`                   // 会员来源
 	Remark      string         `gorm:"size:500" json:"remark"`                 // 备注

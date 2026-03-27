@@ -101,6 +101,22 @@ func (s *SubscriptionRenewalService) attemptRenewal(sub models.Subscription) (bo
 	return false, fmt.Errorf("支付网关连接超时") // 测试重试逻辑时使用
 }
 
+// ProcessPayment 处理支付（供手动续费调用）
+func (s *SubscriptionRenewalService) ProcessPayment(sub models.Subscription, renewal models.SubscriptionRenewal) (bool, error) {
+	// TODO: 集成真实支付网关（如微信支付、支付宝）
+	// 实际项目中调用 paymentGateway.Charge(sub.UserID, renewal.Amount, renewal.PaymentMethod)
+
+	// 模拟支付延迟
+	time.Sleep(100 * time.Millisecond)
+
+	// 模拟支付结果：90%成功率
+	// 实际项目中根据支付网关返回结果判断
+	if time.Now().Unix()%10 != 0 {
+		return true, nil // 成功
+	}
+	return false, fmt.Errorf("支付失败: 余额不足或支付方式无效")
+}
+
 // handleRenewalSuccess 处理续费成功
 func (s *SubscriptionRenewalService) handleRenewalSuccess(sub models.Subscription) {
 	now := time.Now()
