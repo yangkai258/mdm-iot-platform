@@ -60,7 +60,6 @@
             </template>
           </a-table>
         </a-card>
-</div>
 
     <!-- 上传版本抽屉 -->
     <a-drawer
@@ -174,10 +173,9 @@ const columns = [
 
 const appId = parseInt(route.params.id)
 
-else {
-    selectedKeys.value = [key]
-    router.push('/' + key)
-  }
+const handleMenuClick = ({ key }) => {
+  selectedKeys.value = [key]
+  router.push('/' + key)
 }
 
 const loadAppInfo = async () => {

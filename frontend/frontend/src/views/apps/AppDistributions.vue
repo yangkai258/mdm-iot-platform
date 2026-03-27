@@ -83,7 +83,6 @@
             </template>
           </a-table>
         </a-card>
-</div>
 
     <!-- 创建分发任务抽屉 -->
     <a-drawer
@@ -245,10 +244,9 @@ const columns = [
   { title: '操作', slotName: 'actions', width: 120, fixed: 'right' }
 ]
 
-else {
-    selectedKeys.value = [key]
-    router.push('/' + key)
-  }
+const handleMenuClick = ({ key }) => {
+  selectedKeys.value = [key]
+  router.push('/' + key)
 }
 
 const loadDistributions = async () => {
