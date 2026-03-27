@@ -55,6 +55,20 @@ func main() {
 		log.Printf("DataMaskingRule table ready")
 	}
 
+	// 离线缓存表迁移
+	if err := db.AutoMigrate(&models.OfflineCache{}, &models.OfflineOperation{}, &models.SyncConflict{}); err != nil {
+		log.Printf("Warning: Failed to migrate offline tables: %v", err)
+	} else {
+		log.Printf("Offline tables ready")
+	}
+
+	// Webhook模板表迁移
+	if err := db.AutoMigrate(&models.WebhookTemplate{}); err != nil {
+		log.Printf("Warning: Failed to migrate WebhookTemplate: %v", err)
+	} else {
+		log.Printf("WebhookTemplate table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
