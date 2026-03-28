@@ -161,6 +161,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/HealthTrackingView.vue'),
         meta: { locale: 'menu.pets.health', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'market',
+        name: 'Marketplace',
+        component: () => import('@/views/Marketplace.vue'),
+        meta: { locale: 'menu.pets.market', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
@@ -321,6 +327,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/KnowledgeBase.vue'),
         meta: { locale: 'menu.ai.knowledge', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'model-versions',
+        name: 'ModelVersionManage',
+        component: () => import('@/views/ModelVersionManage.vue'),
+        meta: { locale: 'menu.ai.modelVersions', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
@@ -349,6 +361,18 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'SubscriptionPlans',
         component: () => import('@/views/SubscriptionPlans.vue'),
         meta: { locale: 'menu.subscriptions.plans', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'webhooks',
+        name: 'WebhooksView',
+        component: () => import('@/views/WebhooksView.vue'),
+        meta: { locale: 'menu.subscriptions.webhooks', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'billing',
+        name: 'BillingInvoices',
+        component: () => import('@/views/BillingInvoices.vue'),
+        meta: { locale: 'menu.subscriptions.billing', requiresAuth: true, roles: ['*'] },
       },
     ],
   },
