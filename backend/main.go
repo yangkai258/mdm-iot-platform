@@ -790,6 +790,10 @@ func main() {
 	alertSelfHealingCtrl := controllers.NewAlertSelfHealingController(db)
 	alertSelfHealingCtrl.RegisterRoutes(apiV1)
 
+	// Sprint 3-4: 宠物基础管理路由
+	petCtrl := &controllers.PetController{DB: db}
+	petCtrl.RegisterRoutes(apiV1)
+
 	// Sprint 8: 会员360画像路由
 	memberProfileCtrl := controllers.NewMemberProfileController(db)
 	memberProfileCtrl.RegisterRoutes(apiV1)

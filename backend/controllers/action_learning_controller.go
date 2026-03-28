@@ -23,16 +23,16 @@ func NewActionLearningController(db *gorm.DB) *ActionLearningController {
 
 // RegisterRoutes 注册路由
 func (ctrl *ActionLearningController) RegisterRoutes(rg *gin.RouterGroup) {
-	rg.GET("/pets/:id/action-progress", ctrl.GetProgressList)
-	rg.GET("/pets/:id/action-progress/:action_id", ctrl.GetProgress)
-	rg.POST("/pets/:id/action-progress/:action_id/practice", ctrl.RecordPractice)
-	rg.GET("/pets/:id/action-progress/:action_id/sessions", ctrl.GetSessions)
+	rg.GET("/pets/:device_id/action-progress", ctrl.GetProgressList)
+	rg.GET("/pets/:device_id/action-progress/:action_id", ctrl.GetProgress)
+	rg.POST("/pets/:device_id/action-progress/:action_id/practice", ctrl.RecordPractice)
+	rg.GET("/pets/:device_id/action-progress/:action_id/sessions", ctrl.GetSessions)
 	rg.GET("/members/:id/action-summary", ctrl.GetMemberSummary)
 }
 
 // GetProgressList 获取宠物动作学习进度列表
 func (ctrl *ActionLearningController) GetProgressList(c *gin.Context) {
-	petID := c.Param("id")
+	petID := c.Param("device_id")
 
 	var list []models.ActionLearningProgress
 	ctrl.DB.Where("pet_id = ?", petID).Order("mastery_rate DESC, level DESC").Find(&list)
@@ -60,7 +60,7 @@ func countByStatus(list []models.ActionLearningProgress, status string) int {
 
 // GetProgress 获取单个动作学习进度
 func (ctrl *ActionLearningController) GetProgress(c *gin.Context) {
-	petID := c.Param("id")
+	petID := c.Param("device_id")
 	actionID := c.Param("action_id")
 
 	var progress models.ActionLearningProgress
@@ -87,7 +87,7 @@ func (ctrl *ActionLearningController) GetProgress(c *gin.Context) {
 
 // RecordPractice 记录练习
 func (ctrl *ActionLearningController) RecordPractice(c *gin.Context) {
-	petID := c.Param("id")
+	petID := c.Param("device_id")
 	actionID := c.Param("action_id")
 
 	var req struct {
@@ -209,7 +209,7 @@ func calculateMasteryRate(success, total int) float64 {
 
 // GetSessions 获取练习记录
 func (ctrl *ActionLearningController) GetSessions(c *gin.Context) {
-	petID := c.Param("id")
+	petID := c.Param("device_id")
 	actionID := c.Param("action_id")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
