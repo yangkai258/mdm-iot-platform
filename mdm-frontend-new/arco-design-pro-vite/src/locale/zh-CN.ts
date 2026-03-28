@@ -30,6 +30,8 @@ import localeSettings from './zh-CN/settings';
 
 export default {
   'menu.dashboard': '仪表盘',
+  'menu.dashboard.workplace': '工作台',
+  'menu.dashboard.monitor': '实时监控',
   'menu.dashboard.analysis': '数据分析',
   'menu.server.dashboard': '仪表盘-服务端',
   'menu.server.workplace': '工作台-服务端',
@@ -160,6 +162,7 @@ export default {
   'menu.devices.remote': '远程控制',
   'menu.openplatform.tokens': '令牌管理',
   'menu.openplatform.webhooks': 'Webhook',
+  'menu.openplatform.marketplace': '应用市场',
   'menu.pets.breeding': '配对繁育',
   'menu.pets.gallery': '宠物相册',
   'menu.pets.training': '训练中心',
