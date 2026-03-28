@@ -619,6 +619,55 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/APIRateLimit.vue'),
         meta: { locale: 'menu.system.rateLimit', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'certificates',
+        name: 'Certificates',
+        component: () => import('@/views/Certificates.vue'),
+        meta: { locale: 'menu.system.certificates', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'smart-home',
+        name: 'SmartHome',
+        component: () => import('@/views/SmartHomeDevices.vue'),
+        meta: { locale: 'menu.system.smartHome', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'simulation',
+        name: 'Simulation',
+        component: () => import('@/views/SimulationEnvironment.vue'),
+        meta: { locale: 'menu.system.simulation', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'api-explorer',
+        name: 'APIExplorer',
+        component: () => import('@/views/APIExplorer.vue'),
+        meta: { locale: 'menu.system.apiExplorer', requiresAuth: true, roles: ['*'] },
+      },
+    ],
+  },
+  {
+    path: '/developer',
+    name: 'Developer',
+    component: DEFAULT_LAYOUT,
+    meta: {
+      locale: 'menu.developer',
+      requiresAuth: true,
+      icon: 'icon-code',
+      order: 1,
+    },
+    children: [
+      {
+        path: 'apps',
+        name: 'DevApps',
+        component: () => import('@/views/DeveloperPortal.vue'),
+        meta: { locale: 'menu.developer.apps', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'logs',
+        name: 'DevLogs',
+        component: () => import('@/views/APILogs.vue'),
+        meta: { locale: 'menu.developer.logs', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
 ];
