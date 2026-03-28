@@ -546,6 +546,18 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/BillingInvoices.vue'),
         meta: { locale: 'menu.subscriptions.billing', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'history',
+        name: 'SubscriptionHistory',
+        component: () => import('@/views/SubscriptHistory.vue'),
+        meta: { locale: 'menu.subscriptions.history', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'widget-market',
+        name: 'WidgetMarket',
+        component: () => import('@/views/WidgetMarket.vue'),
+        meta: { locale: 'menu.subscriptions.widgetMarket', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {

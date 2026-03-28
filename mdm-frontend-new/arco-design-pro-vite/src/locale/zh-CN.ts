@@ -113,6 +113,8 @@ export default {
   'menu.subscriptions.plans': '套餐管理',
   'menu.subscriptions.webhooks': 'Webhook',
   'menu.subscriptions.billing': '账单发票',
+  'menu.subscriptions.history': '订阅历史',
+  'menu.subscriptions.widgetMarket': '应用市场',
   'menu.tenants': '租户管理',
   'menu.tenants.list': '租户列表',
   'menu.notifications': '通知管理',
