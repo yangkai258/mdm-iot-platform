@@ -22,7 +22,6 @@ const DASHBOARD: AppRouteRecordRaw = {
         roles: ['*'],
       },
     },
-    /** simple */
     {
       path: 'monitor',
       name: 'Monitor',
@@ -33,7 +32,26 @@ const DASHBOARD: AppRouteRecordRaw = {
         roles: ['admin'],
       },
     },
-    /** simple end */
+    {
+      path: 'members',
+      name: 'DashboardMembers',
+      component: () => import('@/views/members/MemberListView.vue'),
+      meta: {
+        locale: 'menu.members',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
+    {
+      path: 'devices',
+      name: 'DashboardDevices',
+      component: () => import('@/views/DeviceList.vue'),
+      meta: {
+        locale: 'menu.devices',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
   ],
 };
 
