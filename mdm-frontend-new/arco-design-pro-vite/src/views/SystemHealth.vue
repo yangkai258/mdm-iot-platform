@@ -1,106 +1,114 @@
 <template>
-  <div class="system-health-container">
-    <a-row :gutter="16" style="margin-bottom: 16px;">
+  <div class="container">
+    <a-row :gutter="16" style="margin-bottom: 16px">
       <a-col :span="6">
-        <a-card><a-statistic title="系统状态" :value="status" :value-style="{ color: statusColor }" /></a-card>
+        <a-card>
+          <a-statistic title="系统状态">
+            <template #value>
+              <a-tag color="green" size="large">正常</a-tag>
+            </template>
+          </a-statistic>
+        </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card><a-statistic title="在线设备" :value="onlineDevices" /></a-card>
+        <a-card>
+          <a-statistic title="在线设备" :value="stats.onlineDevices" suffix="/ 100" />
+        </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card><a-statistic title="API响应" :value="98" suffix="%" /></a-card>
+        <a-card>
+          <a-statistic title="API响应时间" :value="stats.apiResponse" suffix="ms" />
+        </a-card>
       </a-col>
       <a-col :span="6">
-        <a-card><a-statistic title="内存使用" :value="64" suffix="%" /></a-card>
+        <a-card>
+          <a-statistic title="数据库连接" :value="stats.dbConnections" />
+        </a-card>
       </a-col>
     </a-row>
 
-    <a-card>
-      <template #title>
-        <span>系统健康监控</span>
+    <a-row :gutter="16">
+      <a-col :span="12">
+        <a-card title="服务组件状态">
+          <a-table :columns="columns" :data="services" size="small">
+            <template #status="{ record }">
+              <a-badge :status="getStatus(record.status)" :text="getStatusText(record.status)" />
+            </template>
+            <template #responseTime="{ record }">
+              <a-progress :percent="record.responseTime / 1000" :max="5" :show-text="true" size="small" />
+            </template>
+          </a-table>
+        </a-card>
+      </a-col>
+      <a-col :span="12">
+        <a-card title="响应时间趋势 (5分钟)">
+          <a-chart :option="responseChart" style="height: 250px" />
+        </a-card>
+      </a-col>
+    </a-row>
+
+    <a-card title="操作日志" style="margin-top: 16px">
+      <template #extra>
+        <a-space>
+          <a-input-search v-model="keyword" placeholder="搜索" style="width: 200px" />
+          <a-button @click="handleExport">
+            <template #icon><icon-download /></template>
+            导出
+          </a-button>
+        </a-space>
       </template>
-      
-      <a-tabs>
-        <a-tab-pane key="overview" title="健康概览">
-          <a-row :gutter="16">
-            <a-col :span="12">
-              <a-card title="服务状态">
-                <a-list>
-                  <a-list-item v-for="svc in services" :key="svc.name">
-                    <a-list-item-meta :title="svc.name" :description="svc.desc">
-                      <template #avatar>
-                        <a-badge :status="svc.status === 'running' ? 'success' : 'error'" />
-                      </template>
-                    </a-list-item-meta>
-                  </a-list-item>
-                </a-list>
-              </a-card>
-            </a-col>
-            <a-col :span="12">
-              <a-card title="资源使用">
-                <a-progress :percent="64" label="内存" />
-                <a-progress :percent="45" label="CPU" />
-                <a-progress :percent="51" label="磁盘" />
-                <a-progress :percent="28" label="网络" />
-              </a-card>
-            </a-col>
-          </a-row>
-        </a-tab-pane>
-        
-        <a-tab-pane key="metrics" title="性能指标">
-          <a-table :columns="metricColumns" :data="metrics" :pagination="false" />
-        </a-tab-pane>
-        
-        <a-tab-pane key="alerts" title="告警记录">
-          <a-table :columns="alertColumns" :data="alerts" :pagination="pagination" />
-        </a-tab-pane>
-      </a-tabs>
+      <a-table :columns="logColumns" :data="logs" size="small" :pagination="pagination">
+        <template #level="{ record }">
+          <a-tag :color="getLevelColor(record.level)">{{ record.level }}</a-tag>
+        </template>
+      </a-table>
     </a-card>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+<script setup>
+import { ref, reactive } from 'vue'
 
-const status = computed(() => '运行正常');
-const statusColor = computed(() => '#00b42a');
-const onlineDevices = ref(1256);
-const pagination = reactive({ current: 1, pageSize: 10, total: 5 });
+const stats = reactive({ onlineDevices: 95, apiResponse: 125, dbConnections: 25 })
+const keyword = ref('')
+const pagination = reactive({ current: 1, pageSize: 10, total: 100 })
 
+const columns = [
+  { title: '服务', dataIndex: 'name' },
+  { title: '状态', slotName: 'status' },
+  { title: '响应时间', slotName: 'responseTime' },
+  { title: '最后检查', dataIndex: 'lastCheck' }
+]
 const services = ref([
-  { name: 'API服务', desc: 'http://localhost:8080', status: 'running' },
-  { name: '前端服务', desc: 'http://localhost:3002', status: 'running' },
-  { name: '数据库', desc: 'PostgreSQL:5432', status: 'running' },
-  { name: '缓存服务', desc: 'Redis:6379', status: 'running' },
-  { name: '消息队列', desc: 'EMQX:1883', status: 'running' },
-]);
+  { name: 'API Gateway', status: 'healthy', responseTime: 45, lastCheck: '2026-03-28 10:00:00' },
+  { name: 'MQTT Broker', status: 'healthy', responseTime: 12, lastCheck: '2026-03-28 10:00:00' },
+  { name: 'PostgreSQL', status: 'healthy', responseTime: 28, lastCheck: '2026-03-28 10:00:00' },
+  { name: 'Redis', status: 'healthy', responseTime: 5, lastCheck: '2026-03-28 10:00:00' }
+])
 
-const metrics = ref([
-  { id: 1, name: 'QPS', value: '2,580', avg: '2,500', max: '5,200' },
-  { id: 2, name: '响应时间', value: '45ms', avg: '50ms', max: '120ms' },
-  { id: 3, name: '并发连接', value: '856', avg: '800', max: '1,200' },
-  { id: 4, name: '错误率', value: '0.1%', avg: '0.2%', max: '0.5%' },
-]);
+const logColumns = [
+  { title: '时间', dataIndex: 'time', width: 180 },
+  { title: '级别', slotName: 'level', width: 80 },
+  { title: '服务', dataIndex: 'service' },
+  { title: '消息', dataIndex: 'message' }
+]
+const logs = ref([
+  { time: '2026-03-28 10:00:00', level: 'info', service: 'API', message: 'Health check passed' }
+])
 
-const alerts = ref([
-  { id: 1, level: 'warning', levelText: '警告', message: '内存使用率超过80%', time: '2026-03-28 18:00:00' },
-  { id: 2, level: 'info', levelText: '通知', message: '数据库备份完成', time: '2026-03-28 02:00:00' },
-]);
+const responseChart = reactive({
+  tooltip: { trigger: 'axis' },
+  xAxis: { type: 'category', data: ['09:56', '09:57', '09:58', '09:59', '10:00'] },
+  yAxis: { type: 'value', name: 'ms' },
+  series: [{ type: 'line', smooth: true, data: [120, 135, 128, 140, 125] }]
+})
 
-const metricColumns = [
-  { title: '指标', dataIndex: 'name', width: 150 },
-  { title: '当前值', dataIndex: 'value', width: 120 },
-  { title: '平均值', dataIndex: 'avg', width: 120 },
-  { title: '最大值', dataIndex: 'max', width: 120 },
-];
-
-const alertColumns = [
-  { title: '级别', dataIndex: 'levelText', width: 100 },
-  { title: '消息', dataIndex: 'message' },
-  { title: '时间', dataIndex: 'time', width: 160 },
-];
+const getStatus = (s) => ({ healthy: 'success', degraded: 'warning', down: 'error' }[s] || 'default')
+const getStatusText = (s) => ({ healthy: '正常', degraded: '降级', down: '故障' }[s] || s)
+const getLevelColor = (l) => ({ info: 'blue', warn: 'orange', error: 'red' }[l] || 'gray')
+const handleExport = () => { }
 </script>
 
 <style scoped>
-.system-health-container { padding: 20px; }
+.container { padding: 16px; }
 </style>

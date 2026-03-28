@@ -1,90 +1,92 @@
 <template>
-  <div class="weight-tracking-container">
-    <a-row :gutter="16" style="margin-bottom: 16px;">
-      <a-col :span="8">
-        <a-card><a-statistic title="当前体重" :value="stats.currentWeight" suffix="kg" /></a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card><a-statistic title="目标体重" :value="stats.targetWeight" suffix="kg" /></a-card>
-      </a-col>
-      <a-col :span="8">
-        <a-card><a-statistic title="本周变化" :value="stats.weeklyChange" :precision="1" suffix="kg" /></a-card>
-      </a-col>
-    </a-row>
-
+  <div class="container">
     <a-card>
       <template #title>
-        <span>体重追踪</span>
+        <a-space><icon-scales /> 体重追踪</a-space>
       </template>
-      
-      <a-tabs>
-        <a-tab-pane key="trend" title="体重趋势">
-          <a-chart :option="weightChart" style="height: 300px;" />
-        </a-tab-pane>
-        
-        <a-tab-pane key="records" title="记录">
-          <a-table :columns="columns" :data="records" :pagination="pagination">
-            <template #change="{ record }">
-              <span :style="{ color: record.change > 0 ? '#F53F3F' : record.change < 0 ? '#00B42A' : '#86909c' }">
-                {{ record.change > 0 ? '+' : '' }}{{ record.change }}
-              </span>
+
+      <a-row :gutter="16" style="margin-bottom: 16px">
+        <a-col :span="6">
+          <a-card>
+            <a-statistic title="当前体重" :value="stats.currentWeight" suffix="kg" />
+          </a-card>
+        </a-col>
+        <a-col :span="6">
+          <a-card>
+            <a-statistic title="目标体重" :value="stats.targetWeight" suffix="kg" />
+          </a-card>
+        </a-col>
+        <a-col :span="6">
+          <a-card>
+            <a-statistic title="变化" :value="stats.change" suffix="kg" :value-style="{ color: stats.change < 0 ? '#67C23A' : '#F56C6C' }" />
+          </a-card>
+        </a-col>
+        <a-col :span="6">
+          <a-card>
+            <a-statistic title="BMI" :value="stats.bmi" />
+          </a-card>
+        </a-col>
+      </a-row>
+
+      <a-row :gutter="16">
+        <a-col :span="12">
+          <a-card title="体重趋势">
+            <a-chart :option="weightChart" style="height: 250px" />
+          </a-card>
+        </a-col>
+        <a-col :span="12">
+          <a-card title="体重记录">
+            <template #extra>
+              <a-button type="primary" @click="handleAdd">
+                <template #icon><icon-plus /></template>
+                添加记录
+              </a-button>
             </template>
-          </a-table>
-        </a-tab-pane>
-        
-        <a-tab-pane key="goals" title="目标设定">
-          <a-form layout="vertical" style="max-width: 400px;">
-            <a-form-item label="目标体重">
-              <a-input-number v-model="goal.targetWeight" :min="1" :precision="1" suffix="kg" />
-            </a-form-item>
-            <a-form-item label="目标日期">
-              <a-date-picker v-model="goal.targetDate" style="width: 100%;" />
-            </a-form-item>
-            <a-form-item>
-              <a-button type="primary" @click="handleSaveGoal">保存</a-button>
-            </a-form-item>
-          </a-form>
-        </a-tab-pane>
-      </a-tabs>
+            <a-table :columns="columns" :data="records" size="small" :pagination="false" />
+          </a-card>
+        </a-col>
+      </a-row>
+
+      <a-card title="营养建议" style="margin-top: 16px">
+        <a-list>
+          <a-list-item v-for="suggestion in suggestions" :key="suggestion.id">
+            <a-list-item-meta :title="suggestion.title" :description="suggestion.content" />
+          </a-list-item>
+        </a-list>
+      </a-card>
     </a-card>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, reactive } from 'vue';
+<script setup>
+import { ref, reactive } from 'vue'
 
-const stats = reactive({ currentWeight: 12.5, targetWeight: 12.0, weeklyChange: -0.2 });
-const pagination = reactive({ current: 1, pageSize: 10, total: 7 });
+const stats = reactive({ currentWeight: 12.5, targetWeight: 11.0, change: -0.8, bmi: 22.5 })
 
-const records = ref([
-  { date: '2026-03-28', weight: 12.5, change: -0.1, note: '' },
-  { date: '2026-03-27', weight: 12.6, change: -0.1, note: '' },
-  { date: '2026-03-26', weight: 12.7, change: 0, note: '' },
-  { date: '2026-03-25', weight: 12.7, change: -0.2, note: '' },
-  { date: '2026-03-24', weight: 12.9, change: -0.1, note: '' },
-]);
-
-const goal = reactive({ targetWeight: 12.0, targetDate: null });
-
-const weightChart = {
+const weightChart = reactive({
+  tooltip: { trigger: 'axis' },
   xAxis: { type: 'category', data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'] },
-  yAxis: { type: 'value' },
-  series: [
-    { name: '实际体重', type: 'line', data: [13.1, 13.0, 12.9, 12.7, 12.7, 12.6, 12.5], smooth: true },
-    { name: '目标体重', type: 'line', data: [12.5, 12.4, 12.3, 12.2, 12.1, 12.0, 12.0], smooth: true, lineStyle: { type: 'dashed' } },
-  ],
-};
+  yAxis: { type: 'value', name: 'kg' },
+  series: [{ type: 'line', smooth: true, data: [13.3, 13.2, 13.0, 12.8, 12.6, 12.5, 12.5] }]
+})
 
 const columns = [
-  { title: '日期', dataIndex: 'date', width: 120 },
-  { title: '体重(kg)', dataIndex: 'weight', width: 100 },
-  { title: '变化(kg)', slotName: 'change', width: 100 },
-  { title: '备注', dataIndex: 'note' },
-];
+  { title: '日期', dataIndex: 'date' },
+  { title: '体重', dataIndex: 'weight' },
+  { title: '变化', dataIndex: 'change' }
+]
+const records = ref([
+  { date: '2026-03-28', weight: '12.5kg', change: '-0.1kg' }
+])
 
-const handleSaveGoal = () => {};
+const suggestions = ref([
+  { id: 1, title: '控制食量', content: '建议每日减少50g狗粮摄入' },
+  { id: 2, title: '增加运动', content: '建议每日增加10分钟散步时间' }
+])
+
+const handleAdd = () => { }
 </script>
 
 <style scoped>
-.weight-tracking-container { padding: 20px; }
+.container { padding: 16px; }
 </style>
