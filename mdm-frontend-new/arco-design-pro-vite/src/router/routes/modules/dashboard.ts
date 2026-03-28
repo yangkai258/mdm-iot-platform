@@ -266,6 +266,52 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
     ],
   },
   {
+    path: '/child-mode',
+    name: 'ChildMode',
+    component: DEFAULT_LAYOUT,
+    meta: {
+      locale: 'menu.childMode',
+      requiresAuth: true,
+      icon: 'icon-heart',
+      order: 1,
+    },
+    children: [
+      {
+        path: '',
+        redirect: '/child-mode/settings',
+      },
+      {
+        path: 'settings',
+        name: 'ChildModeSettings',
+        component: () => import('@/views/ChildMode.vue'),
+        meta: { locale: 'menu.childMode', requiresAuth: true, roles: ['*'] },
+      },
+    ],
+  },
+  {
+    path: '/elder-care',
+    name: 'ElderCare',
+    component: DEFAULT_LAYOUT,
+    meta: {
+      locale: 'menu.elderCare',
+      requiresAuth: true,
+      icon: 'icon-heart',
+      order: 1,
+    },
+    children: [
+      {
+        path: '',
+        redirect: '/elder-care/settings',
+      },
+      {
+        path: 'settings',
+        name: 'ElderCareSettings',
+        component: () => import('@/views/ElderCareMode.vue'),
+        meta: { locale: 'menu.elderCare', requiresAuth: true, roles: ['*'] },
+      },
+    ],
+  },
+  {
     path: '/orders',
     name: 'Orders',
     component: DEFAULT_LAYOUT,
@@ -684,6 +730,18 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'DatasetManagement',
         component: () => import('@/views/DatasetManagement.vue'),
         meta: { locale: 'menu.system.dataset', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'cicd',
+        name: 'CICDIntegration',
+        component: () => import('@/views/CICDIntegration.vue'),
+        meta: { locale: 'menu.system.cicd', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'compliance',
+        name: 'DataCompliance',
+        component: () => import('@/views/DataCompliance.vue'),
+        meta: { locale: 'menu.system.compliance', requiresAuth: true, roles: ['*'] },
       },
     ],
   },
