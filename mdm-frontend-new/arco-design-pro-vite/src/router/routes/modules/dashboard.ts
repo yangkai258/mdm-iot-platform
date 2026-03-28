@@ -126,6 +126,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         meta: { locale: 'menu.pets.list', requiresAuth: true, roles: ['*'] },
       },
       {
+        path: 'profile/:id?',
+        name: 'PetProfile',
+        component: () => import('@/views/Pet360Profile.vue'),
+        meta: { locale: 'menu.pets.profile', requiresAuth: true, roles: ['*'], hideInMenu: true },
+      },
+      {
         path: 'config/:id?',
         name: 'PetConfig',
         component: () => import('@/views/PetDetail.vue'),
@@ -297,6 +303,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/AIMonitor.vue'),
         meta: { locale: 'menu.ai.monitor', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'knowledge',
+        name: 'KnowledgeBase',
+        component: () => import('@/views/KnowledgeBase.vue'),
+        meta: { locale: 'menu.ai.knowledge', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
@@ -408,6 +420,18 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'OperationLogs',
         component: () => import('@/views/OperationLogsView.vue'),
         meta: { locale: 'menu.system.logs', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'ldap',
+        name: 'LDAPSettings',
+        component: () => import('@/views/LDAPSettings.vue'),
+        meta: { locale: 'menu.system.ldap', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'remote-wipe',
+        name: 'RemoteWipe',
+        component: () => import('@/views/RemoteWipe.vue'),
+        meta: { locale: 'menu.system.remoteWipe', requiresAuth: true, roles: ['*'] },
       },
     ],
   },
