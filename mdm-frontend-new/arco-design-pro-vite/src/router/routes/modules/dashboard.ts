@@ -87,6 +87,24 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/DeviceList.vue'),
         meta: { locale: 'menu.devices.list', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'detail/:id',
+        name: 'DeviceDetail',
+        component: () => import('@/views/DeviceDetail.vue'),
+        meta: { locale: 'menu.devices.detail', requiresAuth: true, roles: ['*'], hideInMenu: true },
+      },
+      {
+        path: 'pairing',
+        name: 'DevicePairing',
+        component: () => import('@/views/DevicePairing.vue'),
+        meta: { locale: 'menu.devices.pairing', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'groups',
+        name: 'DeviceGroups',
+        component: () => import('@/views/DeviceGroupsView.vue'),
+        meta: { locale: 'menu.devices.groups', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
@@ -331,6 +349,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
+      {
+        path: 'users',
+        name: 'SystemUsers',
+        component: () => import('@/views/UsersView.vue'),
+        meta: { locale: 'menu.system.users', requiresAuth: true, roles: ['*'] },
+      },
       {
         path: 'settings',
         name: 'SystemSettings',
