@@ -132,6 +132,27 @@ func main() {
 		log.Printf("SDKPublishing table ready")
 	}
 
+	// 设备健康评分表迁移
+	if err := db.AutoMigrate(&models.DeviceHealthScore{}); err != nil {
+		log.Printf("Warning: Failed to migrate DeviceHealthScore: %v", err)
+	} else {
+		log.Printf("DeviceHealthScore table ready")
+	}
+
+	// 告警去重规则表迁移
+	if err := db.AutoMigrate(&models.AlertDeduplicationRule{}, &models.AlertDeduplicationRecord{}); err != nil {
+		log.Printf("Warning: Failed to migrate AlertDeduplication: %v", err)
+	} else {
+		log.Printf("AlertDeduplication table ready")
+	}
+
+	// 地图服务集成表迁移
+	if err := db.AutoMigrate(&models.MapIntegrationConfig{}, &models.MapServiceLog{}, &models.PetLocation{}); err != nil {
+		log.Printf("Warning: Failed to migrate MapIntegration: %v", err)
+	} else {
+		log.Printf("MapIntegration table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
@@ -792,6 +813,18 @@ func main() {
 	// Sprint 26: SDK发布管理路由
 	sdkPublishingCtrl := controllers.NewSDKPublishingController(db)
 	sdkPublishingCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 1: 设备健康评分路由
+	deviceHealthScoreCtrl := controllers.NewDeviceHealthScoreController(db)
+	deviceHealthScoreCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 3: 告警去重路由
+	alertDedupCtrl := controllers.NewAlertDedupController(db)
+	alertDedupCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 27: 地图服务集成路由
+	mapIntegrationCtrl := controllers.NewMapIntegrationController(db)
+	mapIntegrationCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 17: 语音情绪识别路由
 	voiceEmotionCtrl := controllers.NewVoiceEmotionController(db)
