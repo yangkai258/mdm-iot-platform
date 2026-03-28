@@ -90,6 +90,27 @@ func main() {
 		log.Printf("SubscriptionGift table ready")
 	}
 
+	// 会员360画像表迁移
+	if err := db.AutoMigrate(&models.Member360Profile{}, &models.MemberPortraitInsight{}); err != nil {
+		log.Printf("Warning: Failed to migrate Member360Profile: %v", err)
+	} else {
+		log.Printf("Member360Profile table ready")
+	}
+
+	// 动作模仿学习进度表迁移
+	if err := db.AutoMigrate(&models.ActionLearningProgress{}, &models.ActionLearningSession{}); err != nil {
+		log.Printf("Warning: Failed to migrate ActionLearning: %v", err)
+	} else {
+		log.Printf("ActionLearning table ready")
+	}
+
+	// 内容版本表迁移
+	if err := db.AutoMigrate(&models.ContentVersion{}, &models.ContentVersionReview{}); err != nil {
+		log.Printf("Warning: Failed to migrate ContentVersion: %v", err)
+	} else {
+		log.Printf("ContentVersion table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
@@ -726,6 +747,18 @@ func main() {
 	// Sprint 3: 告警自愈建议路由
 	alertSelfHealingCtrl := controllers.NewAlertSelfHealingController(db)
 	alertSelfHealingCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 8: 会员360画像路由
+	memberProfileCtrl := controllers.NewMemberProfileController(db)
+	memberProfileCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 22: 动作模仿学习进度路由
+	actionLearningCtrl := controllers.NewActionLearningController(db)
+	actionLearningCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 25: 内容版本管理路由
+	contentVersionCtrl := controllers.NewContentVersionController(db)
+	contentVersionCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 17: 语音情绪识别路由
 	voiceEmotionCtrl := controllers.NewVoiceEmotionController(db)
