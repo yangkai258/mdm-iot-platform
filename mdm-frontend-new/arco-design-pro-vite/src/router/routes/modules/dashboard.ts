@@ -52,6 +52,66 @@ const DASHBOARD: AppRouteRecordRaw = {
         roles: ['*'],
       },
     },
+    {
+      path: 'roles',
+      name: 'DashboardRoles',
+      component: () => import('@/views/RolesView.vue'),
+      meta: {
+        locale: 'menu.roles',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
+    {
+      path: 'permissions',
+      name: 'DashboardPermissions',
+      component: () => import('@/views/PermissionsView.vue'),
+      meta: {
+        locale: 'menu.permissions',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
+    {
+      path: 'alerts',
+      name: 'DashboardAlerts',
+      component: () => import('@/views/AlertsView.vue'),
+      meta: {
+        locale: 'menu.alerts',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
+    {
+      path: 'ota',
+      name: 'DashboardOTA',
+      component: () => import('@/views/OTAView.vue'),
+      meta: {
+        locale: 'menu.ota',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
+    {
+      path: 'tenants',
+      name: 'DashboardTenants',
+      component: () => import('@/views/TenantsView.vue'),
+      meta: {
+        locale: 'menu.tenants',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
+    {
+      path: 'subscriptions',
+      name: 'DashboardSubscriptions',
+      component: () => import('@/views/SubscriptionsView.vue'),
+      meta: {
+        locale: 'menu.subscriptions',
+        requiresAuth: true,
+        roles: ['*'],
+      },
+    },
   ],
 };
 
