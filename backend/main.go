@@ -111,6 +111,27 @@ func main() {
 		log.Printf("ContentVersion table ready")
 	}
 
+	// 设备影子快照表迁移
+	if err := db.AutoMigrate(&models.DeviceShadowSnapshot{}, &models.DeviceShadowSnapshotExport{}); err != nil {
+		log.Printf("Warning: Failed to migrate DeviceShadowSnapshot: %v", err)
+	} else {
+		log.Printf("DeviceShadowSnapshot table ready")
+	}
+
+	// OTA兼容性矩阵表迁移
+	if err := db.AutoMigrate(&models.OTACompatibilityMatrix{}, &models.OTACompatibilityTest{}); err != nil {
+		log.Printf("Warning: Failed to migrate OTACompatibilityMatrix: %v", err)
+	} else {
+		log.Printf("OTACompatibilityMatrix table ready")
+	}
+
+	// SDK发布管理表迁移
+	if err := db.AutoMigrate(&models.SDKPackage{}, &models.SDKVersion{}, &models.SDKDownload{}); err != nil {
+		log.Printf("Warning: Failed to migrate SDKPublishing: %v", err)
+	} else {
+		log.Printf("SDKPublishing table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
@@ -759,6 +780,18 @@ func main() {
 	// Sprint 25: 内容版本管理路由
 	contentVersionCtrl := controllers.NewContentVersionController(db)
 	contentVersionCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 1: 设备影子快照导出路由
+	deviceShadowSnapshotCtrl := controllers.NewDeviceShadowSnapshotController(db)
+	deviceShadowSnapshotCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 1: OTA固件兼容性矩阵路由
+	otaCompatibilityCtrl := controllers.NewOTACompatibilityController(db)
+	otaCompatibilityCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 26: SDK发布管理路由
+	sdkPublishingCtrl := controllers.NewSDKPublishingController(db)
+	sdkPublishingCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 17: 语音情绪识别路由
 	voiceEmotionCtrl := controllers.NewVoiceEmotionController(db)
