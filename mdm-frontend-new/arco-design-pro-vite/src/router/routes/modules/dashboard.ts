@@ -511,6 +511,18 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/AIFairness.vue'),
         meta: { locale: 'menu.ai.fairness', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'security-audit',
+        name: 'SecurityAudit',
+        component: () => import('@/views/SecurityAudit.vue'),
+        meta: { locale: 'menu.ai.securityAudit', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'multi-pet',
+        name: 'MultiPetCollaboration',
+        component: () => import('@/views/MultiPetCollaboration.vue'),
+        meta: { locale: 'menu.ai.multiPet', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {

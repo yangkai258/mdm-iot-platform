@@ -146,6 +146,8 @@ export default {
   'menu.system.cicd': 'CI/CD集成',
   'menu.system.compliance': '合规策略',
   'menu.ai.fairness': 'AI公平性',
+  'menu.ai.securityAudit': '安全审计',
+  'menu.ai.multiPet': '多宠物协作',
   'navbar.docs': '文档中心',
   'navbar.action.locale': '切换为中文',
   ...localeSettings,
