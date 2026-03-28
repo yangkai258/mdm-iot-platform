@@ -245,6 +245,24 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/Marketplace.vue'),
         meta: { locale: 'menu.pets.market', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'medical',
+        name: 'ThirdPartyMedical',
+        component: () => import('@/views/ThirdPartyMedical.vue'),
+        meta: { locale: 'menu.pets.medical', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'actions',
+        name: 'ActionLibrary',
+        component: () => import('@/views/ActionLibrary.vue'),
+        meta: { locale: 'menu.pets.actions', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'voices',
+        name: 'VoiceCustomization',
+        component: () => import('@/views/VoiceCustomization.vue'),
+        meta: { locale: 'menu.pets.voices', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
