@@ -192,6 +192,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         meta: { locale: 'menu.pets.insurance', requiresAuth: true, roles: ['*'] },
       },
       {
+        path: 'digital-twin',
+        name: 'DigitalTwin',
+        component: () => import('@/views/DigitalTwin.vue'),
+        meta: { locale: 'menu.pets.digitalTwin', requiresAuth: true, roles: ['*'] },
+      },
+      {
         path: 'health',
         name: 'PetHealth',
         component: () => import('@/views/HealthTrackingView.vue'),
@@ -208,6 +214,30 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'PetInteractions',
         component: () => import('@/views/PetInteractions.vue'),
         meta: { locale: 'menu.pets.interactions', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'sleep',
+        name: 'SleepAnalysis',
+        component: () => import('@/views/SleepAnalysis.vue'),
+        meta: { locale: 'menu.pets.sleep', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'nutrition',
+        name: 'NutritionRecords',
+        component: () => import('@/views/NutritionRecords.vue'),
+        meta: { locale: 'menu.pets.nutrition', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'weight',
+        name: 'WeightTracking',
+        component: () => import('@/views/WeightTracking.vue'),
+        meta: { locale: 'menu.pets.weight', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'album',
+        name: 'FamilyAlbum',
+        component: () => import('@/views/FamilyAlbum.vue'),
+        meta: { locale: 'menu.pets.album', requiresAuth: true, roles: ['*'] },
       },
       {
         path: 'market',
