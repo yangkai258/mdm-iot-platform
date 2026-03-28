@@ -481,6 +481,10 @@ func main() {
 	subscriptionGiftCtrl := controllers.NewSubscriptionGiftController(db)
 	subscriptionGiftCtrl.RegisterRoutes(apiV1)
 
+	// Sprint 16: 订阅管理路由
+	subscriptionCtrl := controllers.NewSubscriptionController(db)
+	subscriptionCtrl.RegisterRoutes(apiV1)
+
 	// 宠物控制台路由
 	petConsoleCtrl := &controllers.PetConsoleController{}
 	petConsoleCtrl.RegisterRoutes(apiV1)

@@ -33,11 +33,6 @@ func (ctrl *SubscriptionController) RegisterRoutes(rg *gin.RouterGroup) {
 		sub.GET("/:id", ctrl.GetSubscription)
 		sub.PUT("/:id", ctrl.UpdateSubscription)
 		sub.DELETE("/:id", ctrl.CancelSubscription)
-		sub.POST("/:id/renew", ctrl.AutoRenew)
-		sub.GET("/:id/renewal-status", ctrl.GetRenewalStatus)
-		sub.POST("/:id/cancel-renewal", ctrl.CancelAutoRenewal)
-		sub.GET("/:id/renewal-logs", ctrl.GetRenewalLogs)
-		sub.POST("/:id/resume", ctrl.ResumeSubscription)
 		sub.POST("/webhook/payment", ctrl.PaymentWebhook)
 	}
 }
