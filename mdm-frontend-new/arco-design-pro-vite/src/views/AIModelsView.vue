@@ -4,60 +4,124 @@
       <template #title>
         <div class="card-title">
           <span>AI模型管理</span>
-          <a-button type="primary" @click="handleUpload">
-            <template #icon><icon-upload /></template>
+          <a-button type="primary" @click="handleCreate">
+            <template #icon><icon-plus /></template>
             上传模型
           </a-button>
         </div>
       </template>
       
-      <a-tabs default-active-key="models">
-        <a-tab-pane key="models" title="模型列表">
-          <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination">
-            <template #status="{ record }">
-              <a-tag :color="record.status === 'online' ? 'green' : record.status === 'training' ? 'blue' : 'gray'">
-                {{ getStatusText(record.status) }}
-              </a-tag>
-            </template>
-            <template #type="{ record }">
-              <a-tag>{{ record.type }}</a-tag>
-            </template>
-            <template #actions="{ record }">
-              <a-space>
-                <a-link v-if="record.status === 'online'" @click="handleRollback(record)">回滚</a-link>
-                <a-link v-if="record.status !== 'training'" @click="handleDeploy(record)">部署</a-link>
-                <a-link @click="handleView(record)">详情</a-link>
-              </a-space>
-            </template>
-          </a-table>
-        </a-tab-pane>
-        <a-tab-pane key="training" title="训练任务">
-          <a-table :columns="trainColumns" :data="trainingTasks" :pagination="pagination">
-            <template #status="{ record }">
-              <a-tag :color="record.status === 'running' ? 'blue' : record.status === 'completed' ? 'green' : 'orange'">
-                {{ record.status }}
-              </a-tag>
-            </template>
-            <template #progress="{ record }">
-              <a-progress :percent="record.progress" :color="record.status === 'failed' ? 'red' : 'blue'" />
-            </template>
-          </a-table>
-        </a-tab-pane>
-        <a-tab-pane key="ab" title="A/B实验">
-          <a-table :columns="abColumns" :data="experiments" :pagination="pagination">
-            <template #status="{ record }">
-              <a-switch :checked="record.status === 'running'" disabled />
-            </template>
-            <template #actions="{ record }">
-              <a-space>
-                <a-link @click="handleToggle(record)">{{ record.status === 'running' ? '暂停' : '启动' }}</a-link>
-                <a-link @click="handleView(record)">详情</a-link>
-              </a-space>
-            </template>
-          </a-table>
-        </a-tab-pane>
-      </a-tabs>
+      <div class="search-area">
+        <a-row :gutter="16">
+          <a-col :span="6">
+            <a-input v-model="searchForm.keyword" placeholder="搜索模型名称/版本" allow-clear />
+          </a-col>
+          <a-col :span="4">
+            <a-select v-model="searchForm.type" placeholder="模型类型" allow-clear>
+              <a-option value="tts">TTS语音</a-option>
+              <a-option value="asr">ASR语音识别</a-option>
+              <a-option value="nlu">NLU意图识别</a-option>
+              <a-option value="llm">大语言模型</a-option>
+              <a-option value="cv">视觉模型</a-option>
+            </a-select>
+          </a-col>
+          <a-col :span="4">
+            <a-select v-model="searchForm.status" placeholder="状态" allow-clear>
+              <a-option value="active">已上线</a-option>
+              <a-option value="testing">测试中</a-option>
+              <a-option value="deprecated">已下线</a-option>
+            </a-select>
+          </a-col>
+          <a-col :span="2">
+            <a-button type="primary" @click="handleSearch">筛选</a-button>
+          </a-col>
+        </a-row>
+      </div>
+      
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination">
+        <template #type="{ record }">
+          <a-tag :color="getTypeColor(record.type)">{{ record.typeText }}</a-tag>
+        </template>
+        <template #size="{ record }">
+          {{ formatSize(record.size) }}
+        </template>
+        <template #status="{ record }">
+          <a-tag :color="getStatusColor(record.status)">{{ record.statusText }}</a-tag>
+        </template>
+        <template #defaultVersion="{ record }">
+          <a-tag :color="record.isDefault ? 'green' : 'gray'">
+            {{ record.isDefault ? '默认' : '-' }}
+          </a-tag>
+        </template>
+        <template #actions="{ record }">
+          <a-space>
+            <a-link @click="handleView(record)">详情</a-link>
+            <a-link @click="handleEdit(record)">编辑</a-link>
+            <a-link @click="handleSetDefault(record)">设为默认</a-link>
+            <a-link status="danger" @click="handleDelete(record)">删除</a-link>
+          </a-space>
+        </template>
+      </a-table>
     </a-card>
+
+    <!-- 模型详情 -->
+    <a-modal v-model:visible="detailVisible" title="模型详情" :width="700">
+      <a-descriptions :column="2" bordered>
+        <a-descriptions-item label="模型ID">{{ currentModel.id }}</a-descriptions-item>
+        <a-descriptions-item label="模型名称">{{ currentModel.name }}</a-descriptions-item>
+        <a-descriptions-item label="版本">{{ currentModel.version }}</a-descriptions-item>
+        <a-descriptions-item label="类型">
+          <a-tag :color="getTypeColor(currentModel.type)">{{ currentModel.typeText }}</a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="模型大小">{{ formatSize(currentModel.size) }}</a-descriptions-item>
+        <a-descriptions-item label="状态">
+          <a-tag :color="getStatusColor(currentModel.status)">{{ currentModel.statusText }}</a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="上线时间">{{ currentModel.deployedAt }}</a-descriptions-item>
+        <a-descriptions-item label="默认版本">
+          <a-tag :color="currentModel.isDefault ? 'green' : 'gray'">{{ currentModel.isDefault ? '是' : '否' }}</a-tag>
+        </a-descriptions-item>
+        <a-descriptions-item label="描述" :span="2">{{ currentModel.description }}</a-descriptions-item>
+      </a-descriptions>
+      
+      <a-divider>版本历史</a-divider>
+      <a-timeline>
+        <a-timeline-item v-for="v in currentModel.versions" :key="v.version" :color="v.isActive ? 'green' : 'gray'">
+          <b>{{ v.version }}</b> - {{ v.deployedAt }}
+          <a-tag :color="v.isActive ? 'green' : 'gray'" size="small">{{ v.isActive ? '当前' : '历史' }}</a-tag>
+        </a-timeline-item>
+      </a-timeline>
+    </a-modal>
+
+    <!-- 上传/编辑弹窗 -->
+    <a-modal v-model:visible="editVisible" :title="isEdit ? '编辑模型' : '上传模型'" :width="600" @before-ok="handleSubmit">
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="模型名称" required>
+          <a-input v-model="form.name" placeholder="请输入模型名称" />
+        </a-form-item>
+        <a-form-item label="模型类型" required>
+          <a-select v-model="form.type" placeholder="选择模型类型">
+            <a-option value="tts">TTS语音合成</a-option>
+            <a-option value="asr">ASR语音识别</a-option>
+            <a-option value="nlu">NLU意图识别</a-option>
+            <a-option value="llm">大语言模型</a-option>
+            <a-option value="cv">视觉模型</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="版本号">
+          <a-input v-model="form.version" placeholder="如: v1.0.0" />
+        </a-form-item>
+        <a-form-item label="模型文件">
+          <a-upload action="#" :limit="1" />
+        </a-form-item>
+        <a-form-item label="描述">
+          <a-textarea v-model="form.description" placeholder="请输入模型描述" :rows="3" />
+        </a-form-item>
+        <a-form-item label="设为默认版本">
+          <a-switch v-model="form.isDefault" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </div>
 </template>
 
@@ -66,71 +130,78 @@ import { ref, reactive } from 'vue';
 
 const loading = ref(false);
 const data = ref([
-  { id: 'M001', name: 'PetBrain-v2.0', version: '2.0.5', type: '行为决策', status: 'online', accuracy: 96.5, latency: 45, deployedAt: '2026-03-20' },
-  { id: 'M002', name: 'PetBrain-v1.9', version: '1.9.2', type: '行为决策', status: 'offline', accuracy: 94.2, latency: 52, deployedAt: '2026-03-15' },
-  { id: 'M003', name: 'EmotionNet-v1.0', version: '1.0.3', type: '情绪识别', status: 'training', accuracy: 0, latency: 0, deployedAt: '-' },
-  { id: 'M004', name: 'VoiceNet-v2.1', version: '2.1.0', type: '语音合成', status: 'online', accuracy: 98.1, latency: 28, deployedAt: '2026-03-18' },
+  { id: 'M001', name: 'MiniMax-TTS', version: 'v2.1.0', type: 'tts', typeText: 'TTS语音', size: 256000000, status: 'active', statusText: '已上线', deployedAt: '2026-03-15', isDefault: true, description: 'MiniMax高质量语音合成模型，支持中英双语' },
+  { id: 'M002', name: 'MiniMax-ASR', version: 'v1.5.0', type: 'asr', typeText: 'ASR语音识别', size: 180000000, status: 'active', statusText: '已上线', deployedAt: '2026-03-10', isDefault: true, description: '语音识别模型，识别准确率98%' },
+  { id: 'M003', name: 'Pet-NLU', version: 'v3.0.0', type: 'nlu', typeText: 'NLU意图识别', size: 520000000, status: 'testing', statusText: '测试中', deployedAt: '2026-03-20', isDefault: false, description: '宠物意图识别专用NLU模型' },
+  { id: 'M004', name: 'Pet-LLM', version: 'v1.0.0', type: 'llm', typeText: '大语言模型', size: 2048000000, status: 'active', statusText: '已上线', deployedAt: '2026-03-01', isDefault: true, description: '宠物对话专用大语言模型' },
+  { id: 'M005', name: 'Pet-CV', version: 'v2.0.0', type: 'cv', typeText: '视觉模型', size: 1024000000, status: 'deprecated', statusText: '已下线', deployedAt: '2026-02-01', isDefault: false, description: '宠物视觉识别模型，已被v3.0替代' },
 ]);
 
-const trainingTasks = ref([
-  { id: 'T001', name: 'PetBrain-v3.0训练', model: 'PetBrain', status: 'running', progress: 67, eta: '2小时', createdAt: '2026-03-28 08:00:00' },
-  { id: 'T002', name: 'EmotionNet-v2.0训练', model: 'EmotionNet', status: 'completed', progress: 100, eta: '-', createdAt: '2026-03-27 10:00:00' },
-  { id: 'T003', name: 'VoiceNet-v3.0训练', model: 'VoiceNet', status: 'pending', progress: 0, eta: '8小时', createdAt: '2026-03-28 14:00:00' },
-]);
-
-const experiments = ref([
-  { id: 'E001', name: '新推荐算法测试', modelA: 'PetBrain-v2.0', modelB: 'PetBrain-v2.1', status: 'running', traffic: '50%', conversion: 12.5 },
-  { id: 'E002', name: '情绪响应策略B测试', modelA: 'EmotionNet-v1.0', modelB: 'EmotionNet-v1.1', status: 'paused', traffic: '30%', conversion: 8.3 },
-]);
-
-const pagination = reactive({ current: 1, pageSize: 20, total: 4 });
+const searchForm = reactive({ keyword: '', type: '', status: '' });
+const pagination = reactive({ current: 1, pageSize: 20, total: 5 });
 
 const columns = [
-  { title: '模型ID', dataIndex: 'id', width: 80 },
+  { title: '模型ID', dataIndex: 'id', width: 100 },
   { title: '模型名称', dataIndex: 'name', width: 150 },
   { title: '版本', dataIndex: 'version', width: 100 },
-  { title: '类型', slotName: 'type', width: 100 },
+  { title: '类型', slotName: 'type', width: 120 },
+  { title: '大小', slotName: 'size', width: 120 },
   { title: '状态', slotName: 'status', width: 100 },
-  { title: '准确率', dataIndex: 'accuracy', width: 100 },
-  { title: '延迟ms', dataIndex: 'latency', width: 80 },
-  { title: '部署时间', dataIndex: 'deployedAt', width: 120 },
-  { title: '操作', slotName: 'actions', width: 150, fixed: 'right' },
+  { title: '默认', slotName: 'defaultVersion', width: 80 },
+  { title: '上线时间', dataIndex: 'deployedAt', width: 120 },
+  { title: '操作', slotName: 'actions', width: 220, fixed: 'right' },
 ];
 
-const trainColumns = [
-  { title: '任务ID', dataIndex: 'id', width: 80 },
-  { title: '任务名称', dataIndex: 'name', width: 200 },
-  { title: '模型', dataIndex: 'model', width: 120 },
-  { title: '状态', slotName: 'status', width: 100 },
-  { title: '进度', slotName: 'progress', width: 150 },
-  { title: '预计剩余', dataIndex: 'eta', width: 100 },
-  { title: '创建时间', dataIndex: 'createdAt', width: 160 },
-];
+const detailVisible = ref(false);
+const editVisible = ref(false);
+const isEdit = ref(false);
+const currentModel = ref<any>({});
 
-const abColumns = [
-  { title: '实验ID', dataIndex: 'id', width: 80 },
-  { title: '实验名称', dataIndex: 'name', width: 200 },
-  { title: 'A模型', dataIndex: 'modelA', width: 120 },
-  { title: 'B模型', dataIndex: 'modelB', width: 120 },
-  { title: '状态', slotName: 'status', width: 80 },
-  { title: '流量分配', dataIndex: 'traffic', width: 80 },
-  { title: '转化率', dataIndex: 'conversion', width: 80 },
-  { title: '操作', slotName: 'actions', width: 120, fixed: 'right' },
-];
+const form = reactive({
+  name: '',
+  type: '',
+  version: '',
+  description: '',
+  isDefault: false,
+});
 
-const getStatusText = (status: string) => {
-  const map: Record<string, string> = { online: '在线', offline: '离线', training: '训练中' };
-  return map[status] || status;
+const getTypeColor = (type: string) => {
+  const map: Record<string, string> = { tts: 'blue', asr: 'green', nlu: 'purple', llm: 'orange', cv: 'cyan' };
+  return map[type] || 'default';
 };
 
-const handleUpload = () => {};
-const handleDeploy = (record: any) => {};
-const handleRollback = (record: any) => {};
-const handleView = (record: any) => {};
-const handleToggle = (record: any) => {};
+const getStatusColor = (status: string) => {
+  const map: Record<string, string> = { active: 'green', testing: 'blue', deprecated: 'gray' };
+  return map[status] || 'default';
+};
+
+const formatSize = (bytes: number) => {
+  if (bytes >= 1073741824) return (bytes / 1073741824).toFixed(1) + ' GB';
+  if (bytes >= 1048576) return (bytes / 1048576).toFixed(0) + ' MB';
+  return (bytes / 1024).toFixed(0) + ' KB';
+};
+
+const handleSearch = () => {};
+const handleCreate = () => { isEdit.value = false; editVisible.value = true; };
+const handleView = (record: any) => {
+  currentModel.value = {
+    ...record,
+    versions: [
+      { version: 'v2.1.0', deployedAt: '2026-03-15', isActive: true },
+      { version: 'v2.0.0', deployedAt: '2026-02-01', isActive: false },
+      { version: 'v1.0.0', deployedAt: '2026-01-01', isActive: false },
+    ],
+  };
+  detailVisible.value = true;
+};
+const handleEdit = (record: any) => { isEdit.value = true; Object.assign(form, record); editVisible.value = true; };
+const handleSetDefault = (record: any) => {};
+const handleDelete = (record: any) => {};
+const handleSubmit = (done: boolean) => { done(true); editVisible.value = false; };
 </script>
 
 <style scoped>
 .ai-models-container { padding: 20px; }
 .card-title { display: flex; justify-content: space-between; align-items: center; }
+.search-area { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
 </style>

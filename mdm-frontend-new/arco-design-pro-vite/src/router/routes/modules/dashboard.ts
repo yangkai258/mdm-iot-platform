@@ -266,6 +266,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/OTAView.vue'),
         meta: { locale: 'menu.ota.list', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'matrix',
+        name: 'FirmwareMatrix',
+        component: () => import('@/views/FirmwareMatrix.vue'),
+        meta: { locale: 'menu.ota.matrix', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
@@ -284,6 +290,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'AIModels',
         component: () => import('@/views/AIModelsView.vue'),
         meta: { locale: 'menu.ai.models', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'monitor',
+        name: 'AIMonitor',
+        component: () => import('@/views/AIMonitor.vue'),
+        meta: { locale: 'menu.ai.monitor', requiresAuth: true, roles: ['*'] },
       },
     ],
   },
