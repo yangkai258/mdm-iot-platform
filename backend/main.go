@@ -69,6 +69,27 @@ func main() {
 		log.Printf("WebhookTemplate table ready")
 	}
 
+	// 告警自愈建议表迁移
+	if err := db.AutoMigrate(&models.AlertSelfHealing{}, &models.AlertSelfHealingRecord{}); err != nil {
+		log.Printf("Warning: Failed to migrate AlertSelfHealing: %v", err)
+	} else {
+		log.Printf("AlertSelfHealing table ready")
+	}
+
+	// 知识库版本表迁移
+	if err := db.AutoMigrate(&models.KnowledgeVersion{}, &models.KnowledgeVersionReview{}); err != nil {
+		log.Printf("Warning: Failed to migrate KnowledgeVersion: %v", err)
+	} else {
+		log.Printf("KnowledgeVersion table ready")
+	}
+
+	// 订阅赠送表迁移
+	if err := db.AutoMigrate(&models.SubscriptionGift{}, &models.SubscriptionGiftUsage{}); err != nil {
+		log.Printf("Warning: Failed to migrate SubscriptionGift: %v", err)
+	} else {
+		log.Printf("SubscriptionGift table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
@@ -387,6 +408,16 @@ func main() {
 	apiV1 := r.Group("/api/v1")
 	knowledgeCtrl.RegisterRoutesWithDB(apiV1, db)
 
+	// 知识库版本管理路由
+	knowledgeVersionCtrl := controllers.NewKnowledgeVersionController(db)
+	knowledgeVersionCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 16: 订阅续费路由 - 已由 controllers.RegisterRoutes 统一注册
+
+	// Sprint 16: 订阅赠送路由
+	subscriptionGiftCtrl := controllers.NewSubscriptionGiftController(db)
+	subscriptionGiftCtrl.RegisterRoutes(apiV1)
+
 	// 宠物控制台路由
 	petConsoleCtrl := &controllers.PetConsoleController{}
 	petConsoleCtrl.RegisterRoutes(apiV1)
@@ -691,6 +722,10 @@ func main() {
 	// Sprint 19: 离线支持路由
 	offlineCtrl := controllers.NewOfflineController(db)
 	offlineCtrl.RegisterRoutes(apiV1)
+
+	// Sprint 3: 告警自愈建议路由
+	alertSelfHealingCtrl := controllers.NewAlertSelfHealingController(db)
+	alertSelfHealingCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 17: 语音情绪识别路由
 	voiceEmotionCtrl := controllers.NewVoiceEmotionController(db)
