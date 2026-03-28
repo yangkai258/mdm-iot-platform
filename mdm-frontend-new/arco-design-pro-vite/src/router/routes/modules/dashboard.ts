@@ -144,6 +144,18 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         meta: { locale: 'menu.pets.family', requiresAuth: true, roles: ['*'] },
       },
       {
+        path: 'social',
+        name: 'PetSocial',
+        component: () => import('@/views/PetSocial.vue'),
+        meta: { locale: 'menu.pets.social', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'insurance',
+        name: 'PetInsurance',
+        component: () => import('@/views/InsuranceView.vue'),
+        meta: { locale: 'menu.pets.insurance', requiresAuth: true, roles: ['*'] },
+      },
+      {
         path: 'health',
         name: 'PetHealth',
         component: () => import('@/views/HealthTrackingView.vue'),
@@ -332,6 +344,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/SubscriptionsView.vue'),
         meta: { locale: 'menu.subscriptions.list', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'plans',
+        name: 'SubscriptionPlans',
+        component: () => import('@/views/SubscriptionPlans.vue'),
+        meta: { locale: 'menu.subscriptions.plans', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
@@ -377,6 +395,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'NotificationList',
         component: () => import('@/views/NotificationsView.vue'),
         meta: { locale: 'menu.notifications.list', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'channels',
+        name: 'NotificationChannels',
+        component: () => import('@/views/NotificationChannels.vue'),
+        meta: { locale: 'menu.notifications.channels', requiresAuth: true, roles: ['*'] },
       },
     ],
   },
@@ -432,6 +456,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'RemoteWipe',
         component: () => import('@/views/RemoteWipe.vue'),
         meta: { locale: 'menu.system.remoteWipe', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'regions',
+        name: 'RegionsConfig',
+        component: () => import('@/views/RegionsConfig.vue'),
+        meta: { locale: 'menu.system.regions', requiresAuth: true, roles: ['*'] },
       },
     ],
   },
