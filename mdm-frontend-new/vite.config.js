@@ -17,5 +17,6 @@ export default defineConfig({
         changeOrigin: true
       }
     }
-  }
+  },
+  root: 'arco-design-pro-vite'
 })
