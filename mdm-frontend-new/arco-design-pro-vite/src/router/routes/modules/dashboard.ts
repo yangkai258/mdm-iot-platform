@@ -263,6 +263,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/VoiceCustomization.vue'),
         meta: { locale: 'menu.pets.voices', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'social-sharing',
+        name: 'SocialSharing',
+        component: () => import('@/views/SocialSharing.vue'),
+        meta: { locale: 'menu.pets.socialSharing', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
@@ -754,6 +760,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'DataCompliance',
         component: () => import('@/views/DataCompliance.vue'),
         meta: { locale: 'menu.system.compliance', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'offline-sync',
+        name: 'OfflineSync',
+        component: () => import('@/views/OfflineSync.vue'),
+        meta: { locale: 'menu.system.offlineSync', requiresAuth: true, roles: ['*'] },
       },
     ],
   },

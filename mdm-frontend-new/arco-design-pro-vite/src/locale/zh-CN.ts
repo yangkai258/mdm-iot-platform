@@ -83,6 +83,8 @@ export default {
   'menu.pets.medical': '医疗记录',
   'menu.pets.actions': '动作库',
   'menu.pets.voices': '声音定制',
+  'menu.pets.socialSharing': '社交分享',
+  'menu.system.offlineSync': '离线同步',
   'menu.childMode': '儿童模式',
   'menu.elderCare': '老人陪伴',
   'menu.orders': '订单管理',
