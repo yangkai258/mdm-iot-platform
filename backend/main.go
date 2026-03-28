@@ -689,7 +689,7 @@ func main() {
 	billingCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 19: 离线支持路由
-	offlineCtrl := &controllers.OfflineController{DB: db}
+	offlineCtrl := controllers.NewOfflineController(db)
 	offlineCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 17: 语音情绪识别路由
