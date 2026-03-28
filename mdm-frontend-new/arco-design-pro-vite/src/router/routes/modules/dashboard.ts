@@ -453,6 +453,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/AIDecisionLogs.vue'),
         meta: { locale: 'menu.ai.decisionLogs', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'fairness',
+        name: 'AIFairness',
+        component: () => import('@/views/AIFairness.vue'),
+        meta: { locale: 'menu.ai.fairness', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
   {
@@ -660,6 +666,24 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'APIExplorer',
         component: () => import('@/views/APIExplorer.vue'),
         meta: { locale: 'menu.system.apiExplorer', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'pressure-test',
+        name: 'PressureTesting',
+        component: () => import('@/views/PressureTesting.vue'),
+        meta: { locale: 'menu.system.pressureTest', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'ble-debug',
+        name: 'BLEDebugging',
+        component: () => import('@/views/BLEDebugging.vue'),
+        meta: { locale: 'menu.system.bleDebug', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'dataset',
+        name: 'DatasetManagement',
+        component: () => import('@/views/DatasetManagement.vue'),
+        meta: { locale: 'menu.system.dataset', requiresAuth: true, roles: ['*'] },
       },
     ],
   },
