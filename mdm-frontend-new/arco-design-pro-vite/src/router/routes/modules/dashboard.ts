@@ -487,6 +487,36 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         component: () => import('@/views/RegionsConfig.vue'),
         meta: { locale: 'menu.system.regions', requiresAuth: true, roles: ['*'] },
       },
+      {
+        path: 'data-masking',
+        name: 'DataMasking',
+        component: () => import('@/views/DataMasking.vue'),
+        meta: { locale: 'menu.system.dataMasking', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'audit-logs',
+        name: 'AuditLogs',
+        component: () => import('@/views/AuditLogs.vue'),
+        meta: { locale: 'menu.system.auditLogs', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'i18n',
+        name: 'Internationalization',
+        component: () => import('@/views/Internationalization.vue'),
+        meta: { locale: 'menu.system.i18n', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'edge-nodes',
+        name: 'EdgeNodes',
+        component: () => import('@/views/EdgeNodes.vue'),
+        meta: { locale: 'menu.system.edgeNodes', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'rate-limit',
+        name: 'APIRateLimit',
+        component: () => import('@/views/APIRateLimit.vue'),
+        meta: { locale: 'menu.system.rateLimit', requiresAuth: true, roles: ['*'] },
+      },
     ],
   },
 ];
