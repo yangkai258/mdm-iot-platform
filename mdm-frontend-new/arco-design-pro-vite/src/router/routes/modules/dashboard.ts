@@ -126,6 +126,18 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         meta: { locale: 'menu.pets.list', requiresAuth: true, roles: ['*'] },
       },
       {
+        path: 'config/:id?',
+        name: 'PetConfig',
+        component: () => import('@/views/PetDetail.vue'),
+        meta: { locale: 'menu.pets.config', requiresAuth: true, roles: ['*'], hideInMenu: true },
+      },
+      {
+        path: 'family',
+        name: 'PetFamily',
+        component: () => import('@/views/FamilyMembers.vue'),
+        meta: { locale: 'menu.pets.family', requiresAuth: true, roles: ['*'] },
+      },
+      {
         path: 'health',
         name: 'PetHealth',
         component: () => import('@/views/HealthTrackingView.vue'),
@@ -224,6 +236,12 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
         name: 'AlertRules',
         component: () => import('@/views/AlertRulesView.vue'),
         meta: { locale: 'menu.alerts.rules', requiresAuth: true, roles: ['*'] },
+      },
+      {
+        path: 'upgrade',
+        name: 'AlertUpgrade',
+        component: () => import('@/views/AlertUpgrade.vue'),
+        meta: { locale: 'menu.alerts.upgrade', requiresAuth: true, roles: ['*'] },
       },
     ],
   },
