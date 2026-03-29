@@ -56,7 +56,7 @@
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
           <a-statistic :value="summary.active_alerts" title="活跃告警">
-            <template #icon><icon-warning style="font-size: 28px; color: #ff4d4f" /></template>
+            <template #icon><icon-exclamation-circle style="font-size: 28px; color: #ff4d4f" /></template>
           </a-statistic>
         </a-card>
       </a-col>
@@ -323,3 +323,4 @@ onMounted(() => { loadDashboard(); loadMetrics() })
 .online-dot.online { background: #00b42a; }
 .online-dot.offline { background: #8a8a8a; }
 </style>
+

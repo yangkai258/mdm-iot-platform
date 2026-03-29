@@ -14,7 +14,7 @@
         <a-card class="stat-card" hoverable>
           <a-statistic title="异常事件" :value="stats.anomalies" :value-from="0" :animation-duration="600" :colored="stats.anomalies > 0 ? 'red' : undefined">
             <template #suffix>条</template>
-            <template #icon><icon-warning /></template>
+            <template #icon><icon-exclamation-circle /></template>
           </a-statistic>
         </a-card>
       </a-col>
@@ -419,3 +419,4 @@ async function handleGenerateReport(done) {
 .code-block.error { background: rgba(255, 77, 79, 0.1); border: 1px solid var(--color-border); }
 .no-data { color: var(--color-text-3); font-size: 13px; }
 </style>
+

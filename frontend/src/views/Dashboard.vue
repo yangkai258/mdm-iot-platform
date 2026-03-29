@@ -46,7 +46,7 @@
             :value-style="{ color: '#faad14' }"
           >
             <template #prefix>
-              <icon-warning style="font-size: 22px; margin-right: 6px; color: #faad14" />
+              <icon-exclamation-circle style="font-size: 22px; margin-right: 6px; color: #faad14" />
             </template>
           </a-statistic>
         </a-col>
@@ -230,3 +230,4 @@ onMounted(() => {
   color: #86909c;
 }
 </style>
+

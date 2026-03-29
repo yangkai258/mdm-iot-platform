@@ -137,7 +137,7 @@
         <a-col :span="4">
           <a-statistic title="异常次数" :value="stats.abnormal" suffix="次">
             <template #extra>
-              <icon-warning style="color: #f53f3f" />
+              <icon-exclamation-circle style="color: #f53f3f" />
             </template>
           </a-statistic>
         </a-col>
@@ -494,3 +494,4 @@ onMounted(() => {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 </style>
+

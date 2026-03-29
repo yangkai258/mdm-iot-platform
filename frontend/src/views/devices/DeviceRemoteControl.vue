@@ -96,7 +96,7 @@
               远程擦除（数据）
             </a-button>
             <a-button type="primary" status="danger" long :disabled="!selectedDevice.is_online" @click="showFactoryResetModal(selectedDevice)">
-              <template #icon><icon-restart /></template>
+              <template #icon><icon-refresh /></template>
               恢复出厂设置
             </a-button>
           </div>
@@ -399,3 +399,4 @@ onMounted(() => { loadDevices() })
 .online-dot.online { background: #00b42a; }
 .online-dot.offline { background: #8a8a8a; }
 </style>
+

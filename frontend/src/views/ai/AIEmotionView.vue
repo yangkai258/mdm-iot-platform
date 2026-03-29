@@ -12,7 +12,7 @@
       </a-col>
       <a-col :span="6">
         <a-statistic title="负面情绪预警" :value="stats.negative_count" :value-from="0" :animation="true">
-          <template #prefix><icon-warning style="margin-right: 4px" /></template>
+          <template #prefix><icon-exclamation-circle style="margin-right: 4px" /></template>
         </a-statistic>
       </a-col>
       <a-col :span="6">
@@ -365,3 +365,4 @@ onUnmounted(() => {
 .stat-row { margin-bottom: 16px; }
 .chart-panel { background: #fff; border-radius: 4px; padding: 16px; margin-bottom: 16px; }
 </style>
+

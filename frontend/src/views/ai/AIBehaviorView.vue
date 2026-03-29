@@ -19,7 +19,7 @@
       </a-col>
       <a-col :span="6">
         <a-statistic title="异常行为数" :value="stats.anomaly_count" :value-from="0" :animation="true">
-          <template #prefix><icon-warning style="margin-right: 4px" /></template>
+          <template #prefix><icon-exclamation-circle style="margin-right: 4px" /></template>
         </a-statistic>
       </a-col>
       <a-col :span="6">
@@ -332,3 +332,4 @@ onUnmounted(() => {
   border-radius: 8px;
 }
 </style>
+

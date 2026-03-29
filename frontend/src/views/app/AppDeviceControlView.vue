@@ -75,7 +75,7 @@
             <div class="btn-label">休眠</div>
           </div>
           <div class="control-btn secondary" @click="handleCommand('reboot')" :class="{ disabled: !device.is_online || commandLoading === 'reboot' }">
-            <div class="btn-icon"><icon-restart /></div>
+            <div class="btn-icon"><icon-refresh /></div>
             <div class="btn-label">重启</div>
           </div>
           <div class="control-btn danger" @click="handleCommand('factory_reset')" :class="{ disabled: !device.is_online || commandLoading === 'factory_reset' }">
@@ -556,4 +556,5 @@ onMounted(() => {
   background: transparent;
   box-shadow: none;
 }
+
 
