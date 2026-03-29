@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -86,8 +87,19 @@ func (c *MemberController) MemberCreate(ctx *gin.Context) {
 		return
 	}
 
+	// 清除关联字段，避免 GORM 自动处理导致错误
+	member.Card = models.MemberCard{}
+	member.CardID = nil
+
+	// 如果没有提供会员编号，自动生成
+	if member.MemberCode == "" {
+		var maxID int64
+		c.DB.Model(&models.Member{}).Select("COALESCE(MAX(id), 0)").Scan(&maxID)
+		member.MemberCode = fmt.Sprintf("MB%05d", maxID+1)
+	}
+
 	if err := c.DB.Create(&member).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败: " + err.Error()})
 		return
 	}
 
