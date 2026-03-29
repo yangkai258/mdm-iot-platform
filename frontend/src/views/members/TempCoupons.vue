@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.marketing', 'menu.marketing.tempCoupons']" />
     <a-card class="general-card" title="临时优惠券">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

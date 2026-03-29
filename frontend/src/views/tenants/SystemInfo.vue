@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="system-info">
-    <Breadcrumb :items="['menu.tenant', 'menu.tenant.systemInfo']" />
     <a-card class="general-card" title="系统信息">
       <a-descriptions :column="2" bordered size="large">
         <a-descriptions-item label="系统名称">MDM 设备管理平台</a-descriptions-item>

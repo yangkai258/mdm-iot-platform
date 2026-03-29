@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.health', 'menu.health.sleep']" />
     <a-card class="general-card" title="睡眠分析">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>

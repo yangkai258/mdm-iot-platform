@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.market', 'menu.market.contentReview']" />
     <a-card class="general-card" title="内容审核">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

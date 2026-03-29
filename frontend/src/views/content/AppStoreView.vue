@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.content', 'menu.content.appStore']" />
     <a-card class="general-card" title="应用商店">
       <a-tabs>
         <a-tab-pane key="packages" title="应用包">

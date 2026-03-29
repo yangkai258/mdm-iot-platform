@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.org', 'menu.org.employees']" />
     <a-card class="general-card" title="员工管理">
       <template #extra>
         <a-space>

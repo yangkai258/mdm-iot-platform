@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.offline', 'menu.offline.sync']" />
     <a-card class="general-card" title="离线数据同步">
       <template #extra>
         <a-button type="primary" @click="handleSync"><icon-refresh />立即同步</a-button>

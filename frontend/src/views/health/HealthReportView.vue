@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.health', 'menu.health.report']" />
     <a-card class="general-card" title="健康报告">
       <template #extra>
         <a-button type="primary" @click="handleGenerate"><icon-plus />生成报告</a-button>

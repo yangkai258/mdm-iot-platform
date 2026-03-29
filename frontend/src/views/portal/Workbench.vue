@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.portal', 'menu.portal.workbench']" />
     <a-card class="general-card" title="工作台">
       <a-row :gutter="16" style="margin-bottom: 16px">
         <a-col :span="6"><a-statistic title="待办事项" :value="stats.todo" color="blue" /></a-col>

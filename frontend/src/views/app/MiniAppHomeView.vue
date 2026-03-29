@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.app', 'menu.app.miniAppHome']" />
     <a-card class="general-card" title="小程序首页配置">
       <template #extra>
         <a-button type="primary" @click="handleSave"><icon-save />保存</a-button>

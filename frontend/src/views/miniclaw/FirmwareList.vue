@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.miniclaw', 'menu.miniclaw.firmwares']" />
     <a-card class="general-card" title="固件列表">
       <template #extra>
         <a-space :size="12">

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.miniProgramView']" />
     <a-card class="general-card" title="小程序视图">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

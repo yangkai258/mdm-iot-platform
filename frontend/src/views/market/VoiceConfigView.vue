@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.market', 'menu.market.voiceConfig']" />
     <a-card class="general-card" title="语音配置">
       <template #extra>
         <a-button type="primary" @click="handleSave"><icon-save />保存</a-button>

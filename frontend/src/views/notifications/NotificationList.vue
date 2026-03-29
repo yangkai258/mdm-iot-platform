@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="notification-list-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '消息中心' }, { label: '推送列表' }]" />
 
     <a-card class="general-card">
       <template #title><span class="card-title">发送统计</span></template>

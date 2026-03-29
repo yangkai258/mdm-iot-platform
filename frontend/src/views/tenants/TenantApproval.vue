@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.tenant', 'menu.tenant.approval']" />
     <a-card class="general-card" title="租户审批">
       <template #extra>
         <a-button @click="loadApplications"><icon-refresh />刷新</a-button>

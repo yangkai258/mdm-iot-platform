@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container" style="padding: 0 0 80px; min-height: 100vh; background: #f5f6f7;">
-    <Breadcrumb :items="['menu.app', 'menu.app.devices']" />
     <div class="app-device-list">
     <!-- 顶部导航栏 -->
     <div class="app-header">

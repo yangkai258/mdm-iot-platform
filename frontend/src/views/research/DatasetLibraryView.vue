@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.research', 'menu.research.datasetLibrary']" />
     <a-card class="general-card" title="数据集库">
       <template #extra>
         <a-button type="primary" @click="loadData"><icon-refresh />刷新</a-button>

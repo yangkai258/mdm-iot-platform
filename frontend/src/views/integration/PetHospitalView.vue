@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.integration', 'menu.integration.petHospital']" />
     <a-card class="general-card" title="宠物医院">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>

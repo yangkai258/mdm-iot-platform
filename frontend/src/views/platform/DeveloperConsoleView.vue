@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.platform', 'menu.platform.developerConsole']" />
     <a-card class="general-card" title="开发者控制台">
       <a-row :gutter="16" style="margin-bottom: 16px">
         <a-col :span="6">

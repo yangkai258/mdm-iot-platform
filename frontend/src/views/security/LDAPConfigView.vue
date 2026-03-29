@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.security', 'menu.security.ldap']" />
     <!-- Tab 切换 -->
     <a-tabs v-model:active-tab="activeTab" class="ldap-tabs">
       <!-- Tab1: LDAP 配置 -->

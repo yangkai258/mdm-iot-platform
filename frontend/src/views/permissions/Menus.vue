@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.permission', 'menu.permission.menus']" />
     <a-card class="general-card" title="菜单管理">
       <template #extra>
         <a-space :size="12">

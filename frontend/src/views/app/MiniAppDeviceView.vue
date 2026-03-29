@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.app', 'menu.app.miniAppDevice']" />
     <a-card class="general-card" title="小程序设备">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

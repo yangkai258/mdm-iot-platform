@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="member-page-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '会员管理' }]" />
 
     <a-card class="general-card">
       <template #title>

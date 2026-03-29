@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.family', 'menu.family.album']" />
     <a-card class="general-card" title="家庭相册">
       <template #extra>
         <a-space :size="12">

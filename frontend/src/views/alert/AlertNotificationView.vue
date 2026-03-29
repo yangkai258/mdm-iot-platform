@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.alerts', 'menu.alerts.notification']" />
     <a-card class="general-card" title="告警通知">
       <template #extra>
         <a-space :size="12">

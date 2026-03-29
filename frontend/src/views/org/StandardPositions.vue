@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="company-list-page">
-    <Breadcrumb :items="['menu.org', 'menu.org.standardPositions']" />
     <a-card class="general-card" title="基准岗位">
       <template #extra>
         <a-button type="primary" @click="openFormModal(null)"><icon-plus />新建</a-button>

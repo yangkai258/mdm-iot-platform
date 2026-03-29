@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.permission', 'menu.permission.api']" />
     <a-card class="general-card" title="API权限管理">
       <template #extra>
         <a-space :size="12">

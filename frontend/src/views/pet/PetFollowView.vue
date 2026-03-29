@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.pet', 'menu.pet.follow']" />
     <a-card class="general-card" title="宠物关注">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

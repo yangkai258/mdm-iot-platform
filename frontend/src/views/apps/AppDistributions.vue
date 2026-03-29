@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.apps', 'menu.apps.distributions']" />
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stats-row">
       <a-col :span="6">

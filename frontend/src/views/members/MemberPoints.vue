@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.member', 'menu.member.points']" />
     <a-card class="general-card" title="会员积分">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>

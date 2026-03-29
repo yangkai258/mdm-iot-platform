@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.emotion', 'menu.emotion.log']" />
     <a-card class="general-card" title="情绪日志">
       <template #extra>
         <a-button @click="handleExport"><icon-download />导出</a-button>

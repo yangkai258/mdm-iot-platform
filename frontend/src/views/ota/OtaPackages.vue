@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="ota-packages-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: 'OTA管理' }, { label: '固件包列表' }]" />
 
     <a-card class="general-card">
       <template #title><span class="card-title">固件统计</span></template>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.market', 'menu.market.actionMarket']" />
     <a-card class="general-card" title="动作市场">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

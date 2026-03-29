@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.security', 'menu.security.dataExport']" />
     <!-- 统计概览 -->
     <a-row :gutter="12" class="stat-row">
       <a-col :span="6">

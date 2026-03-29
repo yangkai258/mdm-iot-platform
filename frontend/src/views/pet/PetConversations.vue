@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="pet-conversations">
-    <Breadcrumb :items="['menu.pet', 'menu.pet.conversations']" />
     <a-card class="general-card" title="会话列表">
       <template #extra>
         <a-button type="primary" @click="createConversation"><icon-plus />新建会话</a-button>

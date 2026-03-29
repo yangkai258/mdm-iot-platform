@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.market', 'menu.market.rechargeRules']" />
     <a-card class="general-card" title="充值规则">
       <template #extra>
         <a-space>

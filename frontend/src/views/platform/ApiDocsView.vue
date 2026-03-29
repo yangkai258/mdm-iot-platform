@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.platform', 'menu.platform.apiDocs']" />
     <a-card class="general-card" title="API文档">
       <a-tabs>
         <a-tab-pane key="list" title="接口列表">

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="monitor-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '系统监控' }]" />
 
     <a-card class="general-card">
       <template #title><span class="card-title">系统概览</span></template>

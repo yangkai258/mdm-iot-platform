@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.platform', 'menu.platform.agent']" />
     <a-card class="general-card" title="AI Agent 配置">
       <template #extra>
         <a-space>

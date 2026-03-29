@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.channels']" />
     <a-card class="general-card" title="会员渠道统计">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="notification-templates-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '消息中心' }, { label: '通知模板' }]" />
 
     <a-card class="general-card" style="margin-top: 0">
       <template #title><span class="card-title">通知模板</span></template>

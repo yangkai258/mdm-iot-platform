@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.marketing', 'menu.marketing.redpacket']" />
     <a-card class="general-card" title="红包管理">
       <template #extra>
         <a-space>

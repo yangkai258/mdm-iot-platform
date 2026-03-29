@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.digitalTwin', 'menu.digitalTwin.moments']" />
     <!-- 筛选栏 -->
     <div class="search-bar">
       <a-space wrap>

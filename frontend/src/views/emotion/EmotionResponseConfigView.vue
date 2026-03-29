@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.emotion', 'menu.emotion.responseConfig']" />
     <a-card class="general-card" title="情绪响应配置">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新建配置</a-button>

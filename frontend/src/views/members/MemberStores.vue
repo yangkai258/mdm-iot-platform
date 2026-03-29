@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.member', 'menu.member.stores']" />
     <a-card class="general-card" title="门店管理">
       <template #extra>
         <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>

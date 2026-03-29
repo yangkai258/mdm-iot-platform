@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <Breadcrumb :items="['menu.apps', 'menu.apps.list']" />
 
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stats-row">

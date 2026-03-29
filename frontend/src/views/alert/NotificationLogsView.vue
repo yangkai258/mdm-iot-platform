@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.alerts', 'menu.alerts.logs']" />
     <a-card class="general-card" title="通知日志">
       <template #extra>
         <a-button @click="handleSearch"><icon-refresh />刷新</a-button>

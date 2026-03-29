@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.portal', 'menu.portal.personalDesktop']" />
     <a-card class="general-card" title="个人桌面">
       <a-row :gutter="16" style="margin-bottom: 16px">
         <a-col :span="8">

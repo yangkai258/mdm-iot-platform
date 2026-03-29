@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.timezone']" />
     <a-card class="general-card" title="时区设置">
       <template #extra>
         <a-space>

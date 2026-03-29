@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.emotion', 'menu.emotion.recognize']" />
     <a-card class="general-card" title="情绪识别配置">
       <template #extra>
         <a-button type="primary" @click="handleSave"><icon-save />保存配置</a-button>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.policies', 'menu.policies.distribution']" />
     <a-card class="general-card" title="策略分发记录">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

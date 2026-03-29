@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.webhooks', 'menu.webhooks.logs']" />
     <a-card class="general-card" title="Webhook日志">
       <div class="search-form">
         <a-form :model="form" layout="inline">

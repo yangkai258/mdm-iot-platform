@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.settings']" />
     <a-card class="general-card" title="全球化设置">
       <template #extra>
         <a-button type="primary" @click="handleSave"><icon-save />保存</a-button>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.platform', 'menu.platform.aiModel']" />
     <a-card class="general-card" title="AI模型版本">
       <template #extra>
         <a-space>

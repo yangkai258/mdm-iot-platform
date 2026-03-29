@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.research', 'menu.research.experimentRun']" />
     <a-card class="general-card" title="实验运行">
       <template #extra>
         <a-button type="primary" @click="handleRun"><icon-play />运行</a-button>

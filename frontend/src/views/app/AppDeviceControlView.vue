@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container" style="min-height: 100vh; background: #f5f6f7;">
-    <Breadcrumb :items="['menu.apps', 'menu.apps.deviceControl']" />
     <div class="app-device-control">
     <!-- 顶部设备信息栏 -->
     <div class="device-header">

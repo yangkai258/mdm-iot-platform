@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.regionalAiNode']" />
     <a-card class="general-card" title="区域AI节点">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

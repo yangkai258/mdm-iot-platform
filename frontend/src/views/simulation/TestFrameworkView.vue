@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <Breadcrumb :items="['menu.simulation', 'menu.simulation.testFramework']" />
     <!-- 操作栏 -->
     <div class="pro-action-bar">
       <a-space>

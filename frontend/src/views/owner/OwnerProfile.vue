@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="owner-profile-page">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '主人设置' }]" />
 
     <a-row :gutter="16">
       <a-col :span="12">

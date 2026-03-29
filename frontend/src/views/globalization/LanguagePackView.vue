@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.languagePacks']" />
     <a-card class="general-card" title="语言包管理">
       <template #extra>
         <a-space>

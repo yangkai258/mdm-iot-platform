@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.ai', 'menu.ai.fairness', 'menu.ai.fairness.test']" />
     <a-card class="general-card" title="AI 公平性测试">
       <template #extra>
         <a-space :size="12">

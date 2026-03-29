@@ -1,6 +1,5 @@
 ﻿<template>
   <div class="feature-config">
-    <Breadcrumb :items="['menu.advanced', 'menu.advanced.featureConfig']" />
     <a-card class="general-card" title="功能配置管理">
       <p class="subtitle">拖拽调整分组和功能的顺序，支持跨分组拖拽</p>
 

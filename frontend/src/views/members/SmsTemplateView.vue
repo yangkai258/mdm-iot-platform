@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.smsTemplate']" />
     <a-card class="general-card" title="短信模板">
       <template #extra>
         <a-space>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.pet', 'menu.pet.console']" />
     <a-card class="general-card" title="宠物控制台">
       <div class="chat-container">
         <div v-for="msg in messages" :key="msg.id" :class="['message', msg.role]">

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.market', 'menu.market.couponPool']" />
     <a-card class="general-card" title="优惠券池">
       <template #extra>
         <a-space>

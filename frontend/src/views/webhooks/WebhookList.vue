@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.webhooks', 'menu.webhooks.list']" />
     <a-card class="general-card" title="Webhook列表">
       <template #extra>
         <a-space>

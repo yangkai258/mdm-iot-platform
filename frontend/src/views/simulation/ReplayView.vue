@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <Breadcrumb :items="['menu.simulation', 'menu.simulation.replay']" />
     <!-- 筛选栏 -->
     <div class="pro-filter-bar">
       <a-card>

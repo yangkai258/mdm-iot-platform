@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.embodied', 'menu.embodied.perception']" />
     <a-card class="general-card" title="感知日志">
       <template #extra>
         <a-button @click="handleRefresh"><icon-refresh />刷新</a-button>

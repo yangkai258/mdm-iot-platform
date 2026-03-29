@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="logs-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '系统日志' }]" />
 
     <a-card class="general-card">
       <template #title><span class="card-title">操作日志</span></template>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.research', 'menu.research.dataset']" />
     <a-card class="general-card" title="数据集管理">
       <template #extra>
         <a-space>

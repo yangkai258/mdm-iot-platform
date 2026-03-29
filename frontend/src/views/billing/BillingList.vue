@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <Breadcrumb :items="['menu.billing', 'menu.billing.list']" />
     <!-- Tab 切换 -->
     <a-tabs v-model:active-tab="activeTab" class="billing-tabs">
       <!-- Tab1: 账单记录 -->

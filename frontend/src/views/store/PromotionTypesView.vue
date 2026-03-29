@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.store', 'menu.store.promotionTypes']" />
     <a-card class="general-card" title="促销类型">
       <template #extra>
         <a-space>

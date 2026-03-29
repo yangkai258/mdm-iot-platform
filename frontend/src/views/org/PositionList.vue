@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.org', 'menu.org.positionList']" />
     <a-card class="general-card" title="职位列表">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

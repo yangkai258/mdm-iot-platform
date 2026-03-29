@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <Breadcrumb :items="['menu.ai', 'menu.ai.emotion']" />
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stat-row">
       <a-col :span="6">

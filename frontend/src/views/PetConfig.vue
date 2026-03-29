@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="pet-config-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '宠物配置' }]" />
 
     <a-card class="general-card">
       <template #title><span class="card-title">宠物查询</span></template>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.contentDelivery']" />
     <a-card class="general-card" title="内容分发">
       <template #extra>
         <a-space>

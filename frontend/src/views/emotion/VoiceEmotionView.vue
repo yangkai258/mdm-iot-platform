@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.emotion', 'menu.emotion.voice']" />
     <a-card class="general-card" title="语音情绪">
       <template #extra>
         <a-space :size="12">

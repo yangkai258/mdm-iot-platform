@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.tenant', 'menu.tenant.settings']" />
     <a-card class="general-card" title="租户配置">
       <a-tabs default-active-tab="info">
         <!-- 租户信息 -->

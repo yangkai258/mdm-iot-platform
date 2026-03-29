@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.highFreqTag']" />
     <a-card class="general-card" title="高频标签">
       <template #extra>
         <a-space>

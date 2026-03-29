@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.policies', 'menu.policies.compliance']" />
     <a-card class="general-card" title="合规规则">
       <template #extra>
         <a-space>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="company-list-page">
-    <Breadcrumb :items="['menu.org', 'menu.org.departments']" />
     <a-card class="general-card" title="部门管理">
       <template #extra>
         <a-button type="primary" @click="openCreateModal(null)"><icon-plus />新建</a-button>

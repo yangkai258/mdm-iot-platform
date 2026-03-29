@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="knowledge-page">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '知识库' }]" />
 
     <a-card class="general-card">
       <template #title><span class="card-title">知识库查询</span></template>

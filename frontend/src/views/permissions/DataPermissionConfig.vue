@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="company-list-page">
-    <Breadcrumb :items="['menu.permission', 'menu.permission.dataConfig']" />
     <a-card class="general-card" title="数据权限配置">
       <template #extra>
         <a-button type="primary" @click="addRule"><icon-plus />新建</a-button>

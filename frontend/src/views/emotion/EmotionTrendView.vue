@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.emotion', 'menu.emotion.trend']" />
     <a-card class="general-card" title="情绪趋势">
       <template #extra>
         <a-space :size="12">

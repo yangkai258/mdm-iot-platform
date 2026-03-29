@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="company-list-page">
-    <Breadcrumb :items="['menu.permission', 'menu.permission.groups']" />
     <a-card class="general-card" title="权限组管理">
       <template #extra>
         <a-button type="primary" @click="addGroup"><icon-plus />新建</a-button>

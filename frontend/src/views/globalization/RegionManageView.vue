@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.regionManage']" />
     <a-card class="general-card" title="区域管理">
       <template #extra>
         <a-space>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.ai', 'menu.ai.quality']" />
     <a-card class="general-card" title="AI 质量仪表盘">
       <template #extra>
         <a-button @click="handleSearch"><icon-refresh />刷新</a-button>

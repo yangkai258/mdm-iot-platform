@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.vipExclusive']" />
     <a-card class="general-card" title="VIP专属权益">
       <template #extra>
         <a-space>

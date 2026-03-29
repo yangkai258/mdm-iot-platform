@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.market', 'menu.market.campaign']" />
     <a-card class="general-card" title="广告活动">
       <template #extra>
         <a-space>

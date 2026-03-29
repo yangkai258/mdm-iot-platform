@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.settings']" />
     <a-card class="general-card" title="会员设置">
       <template #extra>
         <a-button type="primary" @click="handleSave"><icon-save />保存</a-button>

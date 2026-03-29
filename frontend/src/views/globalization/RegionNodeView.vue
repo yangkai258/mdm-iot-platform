@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.regionNodes']" />
     <a-card class="general-card" title="区域节点">
       <template #extra>
         <a-space>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.smsChannel']" />
     <a-card class="general-card" title="短信通道">
       <template #extra>
         <a-space>

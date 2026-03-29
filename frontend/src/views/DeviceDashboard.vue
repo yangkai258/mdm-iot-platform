@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="device-dashboard-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '设备管理' }, { label: '设备列表' }]" />
 
     <a-card class="general-card">
       <template #title>

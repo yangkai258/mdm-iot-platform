@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <Breadcrumb :items="['menu.subscription', 'menu.subscription.list']" />
 
     <!-- 搜索表单 -->
     <div class="pro-search-bar">

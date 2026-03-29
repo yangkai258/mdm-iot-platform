@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.pet', 'menu.pet.playdate']" />
     <a-card class="general-card" title="宠物约会">
       <template #extra>
         <a-space>

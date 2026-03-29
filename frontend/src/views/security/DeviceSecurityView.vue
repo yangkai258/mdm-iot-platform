@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.security', 'menu.security.deviceSecurity']" />
     <!-- 设备选择栏 -->
     <a-card class="filter-card">
       <div class="filter-row">

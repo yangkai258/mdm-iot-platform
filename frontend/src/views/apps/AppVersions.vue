@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.apps', 'menu.apps.versions']" />
     <!-- 应用信息卡片 -->
     <a-card v-if="appInfo" class="app-info-card">
       <a-row :gutter="16" align="center">

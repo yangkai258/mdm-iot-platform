@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="public-archives">
-    <Breadcrumb :items="['menu.tenant', 'menu.tenant.archives']" />
     <a-card class="general-card" title="公共档案">
       <a-alert type="info">
         公共档案用于管理跨租户共享的基础数据，如设备型号库、协议模板等。

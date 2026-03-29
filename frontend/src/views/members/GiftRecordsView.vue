@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.giftRecords']" />
     <a-card class="general-card" title="礼包记录">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.printerManage']" />
     <a-card class="general-card" title="打印机管理">
       <template #extra>
         <a-space>

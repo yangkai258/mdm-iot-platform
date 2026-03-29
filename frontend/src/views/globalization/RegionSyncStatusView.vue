@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.regionSyncStatus']" />
     <a-card class="general-card" title="区域同步状态">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

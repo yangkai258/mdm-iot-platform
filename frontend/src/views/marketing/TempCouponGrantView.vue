@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.marketing', 'menu.marketing.tempCouponGrant']" />
     <a-card class="general-card" title="临时优惠券发放">
       <template #extra>
         <a-button type="primary" @click="openCreate"><icon-plus />发放</a-button>

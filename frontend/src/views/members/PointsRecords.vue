@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.points', 'menu.members.pointsRecords']" />
     <a-card class="general-card" title="积分流水">
       <template #extra>
         <a-button @click="loadRecords"><icon-refresh />刷新</a-button>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.security', 'menu.security.auditLog']" />
     <!-- 筛选工具栏 -->
     <a-card class="toolbar-card">
       <div class="toolbar-row">

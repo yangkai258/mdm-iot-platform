@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.health', 'menu.health.warning']" />
     <a-card class="general-card" title="健康预警">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新建预警</a-button>

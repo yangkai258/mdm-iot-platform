@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.alerts', 'menu.alerts.channels', 'menu.alerts.channels.email']" />
     <a-card class="general-card" title="邮件渠道配置">
       <template #extra>
         <a-space :size="12">

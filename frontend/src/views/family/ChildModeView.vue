@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.family', 'menu.family.childMode']" />
     <a-card class="general-card" title="儿童模式">
       <template #extra>
         <a-space :size="12">

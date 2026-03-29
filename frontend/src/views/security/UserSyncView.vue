@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.security', 'menu.security.userSync']" />
     <!-- 同步状态卡片 -->
     <a-card class="status-card">
       <div class="status-grid">

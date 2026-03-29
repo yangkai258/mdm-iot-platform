@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.embodied', 'menu.embodied.navigation']" />
     <a-card class="general-card" title="导航记录">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

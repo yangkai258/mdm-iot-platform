@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.developer', 'menu.developer.api']" />
     <a-card class="general-card" title="开发者应用">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />创建应用</a-button>

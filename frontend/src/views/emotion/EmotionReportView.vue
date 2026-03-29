@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.emotion', 'menu.emotion.report']" />
     <a-card class="general-card" title="情绪报告">
       <template #extra>
         <a-space :size="12">

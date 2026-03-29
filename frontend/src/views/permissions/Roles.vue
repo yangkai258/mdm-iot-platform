@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.permission', 'menu.permission.roles']" />
     <!-- 筛选栏 -->
     <a-card class="general-card">
       <div class="filter-row">

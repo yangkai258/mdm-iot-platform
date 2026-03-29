@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.cardGroups']" />
     <a-card class="general-card" title="会员卡分组">
       <template #extra>
         <a-space>

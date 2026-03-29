@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.dataResidency']" />
     <a-card class="general-card" title="数据驻留配置">
       <template #extra>
         <a-space :size="12">

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="alert-rules-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '告警中心' }, { label: '告警规则' }]" />
 
     <a-card class="general-card">
       <template #title><span class="card-title">规则查询</span></template>

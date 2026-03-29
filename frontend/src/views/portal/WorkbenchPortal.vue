@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.portal', 'menu.portal.workbench']" />
     <a-card class="general-card" title="工作台门户">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>

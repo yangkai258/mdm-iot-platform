@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="ota-deployments-container">
-    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: 'OTA管理' }, { label: '部署任务' }]" />
 
     <a-card class="general-card">
       <a-row :gutter="16">

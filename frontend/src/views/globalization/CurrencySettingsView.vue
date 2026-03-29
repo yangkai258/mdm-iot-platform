@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.globalization', 'menu.globalization.currency']" />
     <a-card class="general-card" title="货币设置">
       <template #extra>
         <a-space>

@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.embodied', 'menu.embodied.actionLibrary']" />
     <a-card class="general-card" title="动作库">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>

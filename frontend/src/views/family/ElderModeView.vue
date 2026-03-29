@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.family', 'menu.family.elderMode']" />
     <a-card class="general-card" title="老人陪伴模式">
       <template #extra>
         <a-space :size="12">

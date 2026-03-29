@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.members', 'menu.members.promotions', 'menu.members.amountReduce']" />
     <a-card class="general-card" title="满额减">
       <template #extra>
         <a-space :size="12">

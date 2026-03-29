@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.embodied', 'menu.embodied.decisionLogs']" />
     <a-card class="general-card" title="决策日志">
       <template #extra>
         <a-button @click="handleRefresh"><icon-refresh />刷新</a-button>

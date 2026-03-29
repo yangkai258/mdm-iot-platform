@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.platform', 'menu.platform.webhookMarket']" />
     <a-card class="general-card" title="Webhook市场">
       <template #extra>
         <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>

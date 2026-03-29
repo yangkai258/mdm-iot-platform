@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.policies', 'menu.policies.configs']" />
     <a-card class="general-card" title="策略配置">
       <template #extra>
         <a-button type="primary" @click="handleSave"><icon-save />保存</a-button>

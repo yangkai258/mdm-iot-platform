@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="container">
-    <Breadcrumb :items="['menu.health', 'menu.health.exerciseStats']" />
     <a-card class="general-card" title="运动统计">
       <template #extra>
         <a-space :size="12">

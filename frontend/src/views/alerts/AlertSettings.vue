@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.alert', 'menu.alert.settings']" />
     <a-card class="general-card" title="告警设置">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新增设置</a-button>

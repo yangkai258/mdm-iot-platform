@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.emotion', 'menu.emotion.familyMap']" />
     <a-card class="general-card" title="家庭情绪地图">
       <template #extra>
         <a-button @click="handleRefresh"><icon-refresh />刷新</a-button>

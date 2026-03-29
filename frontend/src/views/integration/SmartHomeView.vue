@@ -1,6 +1,5 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <Breadcrumb :items="['menu.integration', 'menu.integration.smartHome']" />
     <a-card class="general-card" title="智能家居">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
