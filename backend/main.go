@@ -489,6 +489,10 @@ func main() {
 	petConsoleCtrl := &controllers.PetConsoleController{}
 	petConsoleCtrl.RegisterRoutes(apiV1)
 
+	// 功能配置管理路由 (分组/排序/CRUD)
+	featureConfigCtrl := controllers.NewFeatureConfigController(db)
+	featureConfigCtrl.RegisterRoutes(apiV1)
+
 	// Sprint 17: 情感计算路由
 	emotionCtrl := &controllers.EmotionController{DB: db}
 	emotionCtrl.RegisterRoutes(apiV1)
