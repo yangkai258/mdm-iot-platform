@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="test-container">
     <div class="test-header">
       <h1>弹窗/页面风格测试</h1>

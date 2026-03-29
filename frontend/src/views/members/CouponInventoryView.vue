@@ -26,6 +26,7 @@
           <a-button type="text" size="small" @click="showRechargeDrawer(record)">充值</a-button>
         </template>
       </a-table>
+      </a-table>
     </a-card>
     <a-modal v-model:visible="rechargeVisible" title="充值库存">
       <a-form :model="rechargeForm" label-col-flex="100px">

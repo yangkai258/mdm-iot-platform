@@ -26,7 +26,8 @@
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
-    </a-card>
+    </a-table>
+  </a-card>
   </div>
 </template>
 
@@ -65,3 +66,4 @@ const handleExport = () => { Message.info('导出功能开发中') }
 
 onMounted(() => loadData())
 </script>
+

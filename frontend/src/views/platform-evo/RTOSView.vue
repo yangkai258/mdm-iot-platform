@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -69,6 +69,7 @@
             <template #columns>
               <a-table-column title="时间" data-index="ts" :width="160">
                 <template #cell="{ record }">{{ formatTime(record.ts) }}</template>
+      </a-table>
               </a-table-column>
               <a-table-column title="CPU %" data-index="cpu">
                 <template #cell="{ record }">
@@ -87,6 +88,7 @@
             <template #columns>
               <a-table-column title="时间" data-index="ts" :width="160">
                 <template #cell="{ record }">{{ formatTime(record.ts) }}</template>
+      </a-table>
               </a-table-column>
               <a-table-column title="内存 %" data-index="mem">
                 <template #cell="{ record }">
@@ -116,6 +118,7 @@
                 <template #cell="{ record }">
                   <a-tag :color="priorityColor(record.priority)" size="small">{{ record.priority }}</a-tag>
                 </template>
+      </a-table>
               </a-table-column>
               <a-table-column title="状态" data-index="state" :width="80">
                 <template #cell="{ record }">
@@ -179,6 +182,7 @@
         <a-table-column title="策略名称" data-index="name" :width="160" />
         <a-table-column title="调度算法" data-index="algorithm" :width="120">
           <template #cell="{ record }">{{ algorithmText(record.algorithm) }}</template>
+      </a-table>
         </a-table-column>
         <a-table-column title="时间片 (ms)" data-index="time_slice" :width="110" />
         <a-table-column title="优先级继承" data-index="priority_inherit" :width="100">

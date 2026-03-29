@@ -53,6 +53,7 @@
         <template #severity="{ record }">
           <a-tag :color="getSeverityColor(record.severity)">{{ getSeverityText(record.severity) }}</a-tag>
         </template>
+      </a-table>
         <template #actions="{ record }">
           <a-space>
             <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>

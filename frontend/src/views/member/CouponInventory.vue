@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="coupon-inventory-page">
     <!-- 面包屑 -->
     <a-breadcrumb class="breadcrumb">

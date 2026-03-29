@@ -28,6 +28,7 @@
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
     </a-card>
+      </a-table>
     <a-modal v-model:visible="modalVisible" title="分析结果" :width="520">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="情绪类型"><a-input v-model="form.emotion" readonly /></a-form-item>

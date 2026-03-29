@@ -26,8 +26,8 @@
       :pagination="paginationConfig"
       @page-change="onPageChange"
     />
-  </div>
-</template>
+    </a-table>
+  </a-card>`n</div></template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -114,3 +114,5 @@ onMounted(() => { loadData() })
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+
+

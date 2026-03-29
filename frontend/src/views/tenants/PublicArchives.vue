@@ -9,6 +9,7 @@
         <template #type="{ record }">
           <a-tag>{{ record.type }}</a-tag>
         </template>
+      </a-table>
         <template #actions="{ record }">
           <a-space>
             <a-button type="text" size="small" @click="view(record)">查看</a-button>

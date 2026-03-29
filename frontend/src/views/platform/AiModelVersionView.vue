@@ -27,6 +27,7 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
+      </a-table>
     </a-card>
     <a-modal v-model="formVisible" :title="isEdit ? '编辑版本' : '新建版本'">
       <a-form :model="form" layout="vertical">

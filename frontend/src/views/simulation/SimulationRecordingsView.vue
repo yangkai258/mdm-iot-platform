@@ -36,6 +36,7 @@
             {{ record.record_type === 'auto' ? '自动' : '手动' }}
           </a-tag>
         </template>
+      </a-table>
         <template #status="{ record }">
           <a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag>
         </template>
@@ -162,6 +163,7 @@
               {{ record.diff > 0 ? '+' : '' }}{{ record.diff?.toFixed(2) || 0 }}
             </span>
           </template>
+      </a-table>
         </a-table>
       </div>
       <a-empty v-else description="暂无对比数据" />

@@ -35,6 +35,7 @@
         <template #dataType="{ record }">
           <a-tag :color="dataTypeColor(record.data_type)">{{ dataTypeLabel(record.data_type) }}</a-tag>
         </template>
+      </a-table>
         <template #storageRegion="{ record }"><span>{{ record.target_region }}</span></template>
         <template #status="{ record }">
           <a-badge :color="statusColor(record.is_active ? 'active' : 'inactive')" :text="record.is_active ? '生效' : '停用'" />

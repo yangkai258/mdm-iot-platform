@@ -135,6 +135,7 @@
             <template #emotion_type="{ record }">
               <a-tag :color="getEmotionColor(record.emotion)">{{ getEmotionText(record.emotion) }}</a-tag>
             </template>
+      </a-table>
             <template #action="{ record }">
               <a-select v-model="record.action" style="width: 120px">
                 <a-option value="comfort">安慰</a-option>

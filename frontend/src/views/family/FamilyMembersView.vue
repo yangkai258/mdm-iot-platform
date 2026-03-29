@@ -34,6 +34,7 @@
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
     </a-card>
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="480">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item v-if="!editingId" label="手机号码">

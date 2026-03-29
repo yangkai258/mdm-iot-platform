@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="direct-reduce-promo-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -26,6 +26,7 @@
       <a-table :columns="columns" :data="promoList" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
         <template #name="{ record }"><a-tag color="green">{{ record.name }}</a-tag></template>
         <template #reduceAmount="{ record }"><span style="color:#ff4d4f; font-weight:600;">立减 ¥{{ record.reduceAmount }}</span></template>
+      </a-table>
         <template #validPeriod="{ record }">{{ record.startTime?.slice(0,10) }} ~ {{ record.endTime?.slice(0,10) }}</template>
         <template #status="{ record }"><a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag></template>
         <template #actions="{ record }">

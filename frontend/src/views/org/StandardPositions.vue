@@ -12,6 +12,7 @@
           <template #status="{ record }">
             <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
           </template>
+      </a-table>
           <template #actions="{ record }">
             <a-space>
               <a-button type="text" size="small" @click="openFormModal(record)">「编辑」</a-button>

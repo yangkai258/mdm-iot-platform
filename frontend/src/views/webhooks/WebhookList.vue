@@ -40,6 +40,7 @@
           {{ record.status === 'enabled' ? '启用' : '禁用' }}
         </a-tag>
       </template>
+      </a-table>
       <template #event_types="{ record }">
         <a-tag v-for="e in (record.event_types || [])" :key="e" size="small">{{ e }}</a-tag>
       </template>
@@ -82,8 +83,7 @@
     <a-drawer v-model:visible="logsVisible" title="Webhook 日志" :width="800">
       <WebhookLogs :webhook-id="currentWebhookId" />
     </a-drawer>
-  </div>
-</template>
+    </a-card>`n</div></template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
@@ -196,3 +196,4 @@ onMounted(() => { loadData() })
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+

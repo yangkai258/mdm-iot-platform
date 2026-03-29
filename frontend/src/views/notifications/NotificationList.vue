@@ -45,6 +45,7 @@
         <template #notification_type="{ record }">
           <a-tag :color="typeColor(record.notification_type)">{{ typeLabel(record.notification_type) }}</a-tag>
         </template>
+      </a-table>
         <template #target_type="{ record }">
           {{ targetLabel(record.target_type) }}
         </template>

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="vip-exclusive-promo-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -31,6 +31,7 @@
         <template #discount="{ record }">
           <span style="color:#ff4d4f; font-weight:600;">{{ record.discountType === 'reduce' ? '立减 ¥' + record.discountValue : (record.discountValue * 10).toFixed(1) + '折' }}</span>
         </template>
+      </a-table>
         <template #validPeriod="{ record }">{{ record.startTime?.slice(0,10) }} ~ {{ record.endTime?.slice(0,10) }}</template>
         <template #status="{ record }"><a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag></template>
         <template #actions="{ record }">

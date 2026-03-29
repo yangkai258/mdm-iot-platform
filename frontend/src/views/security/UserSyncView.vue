@@ -5,7 +5,7 @@
       <div class="status-grid">
         <div class="status-item">
           <div class="status-icon">
-            <icon-clock />
+            <icon-clock-circle />
           </div>
           <div class="status-info">
             <div class="status-label">上次同步时间</div>
@@ -458,3 +458,4 @@ function formatDate(date) {
   color: var(--color-text-1);
 }
 </style>
+

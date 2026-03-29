@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="member-benefits-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -28,6 +28,7 @@
             {{ record.name }}
           </a-space>
         </template>
+      </a-table>
         <template #type="{ record }"><a-tag>{{ record.type }}</a-tag></template>
         <template #applicableLevels="{ record }">
           <a-space wrap>

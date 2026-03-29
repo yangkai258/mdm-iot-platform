@@ -20,7 +20,8 @@
       </a-row>
       <a-divider style="margin: 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
-    </a-card>
+    </a-table>
+  </a-card>
   </div>
 </template>
 
@@ -54,3 +55,4 @@ const handleSync = () => { Message.success('同步任务已启动'); loadData() 
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>
+

@@ -195,6 +195,7 @@
               <template #cmd_type="{ record }">
                 <a-tag :color="getCmdColor(record.cmd_type)">{{ getCmdText(record.cmd_type) }}</a-tag>
               </template>
+      </a-table>
               <template #status="{ record }">
                 <a-badge :status="record.status === 'success' ? 'success' : record.status === 'failed' ? 'error' : 'processing'" />
                 <span style="margin-left: 4px;">{{ record.status === 'success' ? '成功' : record.status === 'failed' ? '失败' : '处理中' }}</span>

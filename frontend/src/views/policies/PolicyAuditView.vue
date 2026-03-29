@@ -19,7 +19,8 @@
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
-    </a-card>
+    </a-table>
+  </a-card>
   </div>
 </template>
 
@@ -56,3 +57,4 @@ const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())
 </script>
+

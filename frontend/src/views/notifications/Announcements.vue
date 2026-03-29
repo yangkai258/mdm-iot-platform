@@ -27,6 +27,7 @@
         <template #priority="{ record }">
           <a-tag :color="priorityColor(record.priority)">{{ priorityLabel(record.priority) }}</a-tag>
         </template>
+      </a-table>
         <template #status="{ record }">
           <a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag>
         </template>

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -87,6 +87,7 @@
                 {{ record[column.dataIndex] !== null ? record[column.dataIndex] + '%' : '-' }}
               </span>
             </template>
+      </a-table>
           </a-table>
         </a-card>
       </a-col>

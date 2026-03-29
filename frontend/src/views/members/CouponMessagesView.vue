@@ -23,6 +23,7 @@
           <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
         </template>
       </a-table>
+      </a-table>
     </a-card>
   </div>
 </template>

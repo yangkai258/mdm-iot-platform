@@ -50,6 +50,7 @@
         <template #appType="{ record }">
           <a-tag :color="getAppTypeColor(record.app_type)">{{ record.app_type?.toUpperCase() }}</a-tag>
         </template>
+      </a-table>
         <template #status="{ record }">
           <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
         </template>

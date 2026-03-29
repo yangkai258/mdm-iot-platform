@@ -1,64 +1,64 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
+    <!-- 闈㈠寘灞?-->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>AI 功能</a-breadcrumb-item>
-      <a-breadcrumb-item>模型监控</a-breadcrumb-item>
+      <a-breadcrumb-item>棣栭〉</a-breadcrumb-item>
+      <a-breadcrumb-item>AI 鍔熻兘</a-breadcrumb-item>
+      <a-breadcrumb-item>妯″瀷鐩戞帶</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- 指标卡片 -->
+    <!-- 鎸囨爣鍗＄墖 -->
     <a-row :gutter="16" class="stat-row">
       <a-col :span="6">
         <a-card hoverable>
-          <a-statistic title="平均延迟" :value="metrics.avg_latency" suffix="ms" :precision="0" :value-from="0" :animation="true">
-            <template #prefix><icon-clock style="margin-right: 4px" /></template>
+          <a-statistic title="骞冲潎寤惰繜" :value="metrics.avg_latency" suffix="ms" :precision="0" :value-from="0" :animation="true">
+            <template #prefix><icon-clock-circle style="margin-right: 4px" /></template>
           </a-statistic>
           <div class="metric-trend">
-            <span class="trend-label">较昨日</span>
-            <span class="trend-down">↓ 12%</span>
+            <span class="trend-label">杈冩槰鏃?/span>
+            <span class="trend-down">鈫?12%</span>
           </div>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card hoverable>
-          <a-statistic title="模型准确率" :value="metrics.accuracy" suffix="%" :precision="2" :value-from="0" :animation="true">
+          <a-statistic title="妯″瀷鍑嗙‘鐜? :value="metrics.accuracy" suffix="%" :precision="2" :value-from="0" :animation="true">
             <template #prefix><icon-check-circle style="margin-right: 4px" /></template>
           </a-statistic>
           <div class="metric-trend">
-            <span class="trend-label">较上周</span>
-            <span class="trend-up">↑ 2.1%</span>
+            <span class="trend-label">杈冧笂鍛?/span>
+            <span class="trend-up">鈫?2.1%</span>
           </div>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card hoverable>
-          <a-statistic title="吞吐量" :value="metrics.throughput" suffix="req/s" :precision="0" :value-from="0" :animation="true">
+          <a-statistic title="鍚炲悙閲? :value="metrics.throughput" suffix="req/s" :precision="0" :value-from="0" :animation="true">
             <template #prefix><icon-upload style="margin-right: 4px" /></template>
           </a-statistic>
           <div class="metric-trend">
-            <span class="trend-label">峰值</span>
+            <span class="trend-label">宄板€?/span>
             <span>{{ metrics.peak_throughput }} req/s</span>
           </div>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card hoverable>
-          <a-statistic title="活跃模型" :value="metrics.active_models" :value-from="0" :animation="true">
+          <a-statistic title="娲昏穬妯″瀷" :value="metrics.active_models" :value-from="0" :animation="true">
             <template #prefix><icon-robot style="margin-right: 4px" /></template>
           </a-statistic>
           <div class="metric-trend">
-            <span class="trend-label">版本</span>
+            <span class="trend-label">鐗堟湰</span>
             <span>v{{ metrics.current_version }}</span>
           </div>
         </a-card>
       </a-col>
     </a-row>
 
-    <!-- 告警卡片 -->
+    <!-- 鍛婅鍗＄墖 -->
     <a-alert v-if="alerts.length > 0" class="alert-banner" type="warning">
       <template #title>
-        <span>检测到 {{ alerts.length }} 个异常指标</span>
+        <span>妫€娴嬪埌 {{ alerts.length }} 涓紓甯告寚鏍?/span>
       </template>
       <template #content>
         <a-space wrap>
@@ -69,15 +69,15 @@
       </template>
     </a-alert>
 
-    <!-- 图表区 -->
+    <!-- 鍥捐〃鍖?-->
     <a-row :gutter="16" class="chart-row">
       <a-col :span="12">
-        <a-card title="延迟趋势">
+        <a-card title="寤惰繜瓒嬪娍">
           <div ref="latencyChartRef" style="height: 220px"></div>
         </a-card>
       </a-col>
       <a-col :span="12">
-        <a-card title="吞吐量趋势">
+        <a-card title="鍚炲悙閲忚秼鍔?>
           <div ref="throughputChartRef" style="height: 220px"></div>
         </a-card>
       </a-col>
@@ -85,53 +85,53 @@
 
     <a-row :gutter="16" class="chart-row">
       <a-col :span="12">
-        <a-card title="准确率趋势">
+        <a-card title="鍑嗙‘鐜囪秼鍔?>
           <div ref="accuracyChartRef" style="height: 220px"></div>
         </a-card>
       </a-col>
       <a-col :span="12">
-        <a-card title="模型版本分布">
+        <a-card title="妯″瀷鐗堟湰鍒嗗竷">
           <div ref="versionChartRef" style="height: 220px"></div>
         </a-card>
       </a-col>
     </a-row>
 
-    <!-- 搜索表单 -->
+    <!-- 鎼滅储琛ㄥ崟 -->
     <div class="pro-search-bar">
       <a-form :model="searchForm" layout="inline">
-        <a-form-item label="模型名称">
-          <a-input v-model="searchForm.model_name" placeholder="搜索模型名称" allow-clear style="width: 180px" />
+        <a-form-item label="妯″瀷鍚嶇О">
+          <a-input v-model="searchForm.model_name" placeholder="鎼滅储妯″瀷鍚嶇О" allow-clear style="width: 180px" />
         </a-form-item>
-        <a-form-item label="版本">
-          <a-select v-model="searchForm.version" placeholder="选择版本" allow-clear style="width: 140px">
+        <a-form-item label="鐗堟湰">
+          <a-select v-model="searchForm.version" placeholder="閫夋嫨鐗堟湰" allow-clear style="width: 140px">
             <a-option v-for="v in versions" :key="v" :value="v">v{{ v }}</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="状态">
-          <a-select v-model="searchForm.status" placeholder="选择状态" allow-clear style="width: 120px">
-            <a-option value="online">在线</a-option>
-            <a-option value="offline">离线</a-option>
-            <a-option value="deprecated">已废弃</a-option>
+        <a-form-item label="鐘舵€?>
+          <a-select v-model="searchForm.status" placeholder="閫夋嫨鐘舵€? allow-clear style="width: 120px">
+            <a-option value="online">鍦ㄧ嚎</a-option>
+            <a-option value="offline">绂荤嚎</a-option>
+            <a-option value="deprecated">宸插簾寮?/a-option>
           </a-select>
         </a-form-item>
         <a-form-item>
           <a-space>
-            <a-button type="primary" @click="handleSearch">搜索</a-button>
-            <a-button @click="handleReset">重置</a-button>
+            <a-button type="primary" @click="handleSearch">鎼滅储</a-button>
+            <a-button @click="handleReset">閲嶇疆</a-button>
           </a-space>
         </a-form-item>
       </a-form>
     </div>
 
-    <!-- 操作栏 -->
+    <!-- 鎿嶄綔鏍?-->
     <div class="pro-action-bar">
       <a-space>
-        <a-button type="primary" @click="handleRefresh">刷新监控</a-button>
-        <a-button @click="exportReport">导出报告</a-button>
+        <a-button type="primary" @click="handleRefresh">鍒锋柊鐩戞帶</a-button>
+        <a-button @click="exportReport">瀵煎嚭鎶ュ憡</a-button>
       </a-space>
     </div>
 
-    <!-- 模型版本列表 -->
+    <!-- 妯″瀷鐗堟湰鍒楄〃 -->
     <div class="pro-content-area">
       <a-table
         :columns="columns"
@@ -153,22 +153,22 @@
           <span :style="{ color: record.latency_ms > 300 ? '#f53f3f' : 'inherit' }">{{ record.latency_ms }}ms</span>
         </template>
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="viewDetail(record)">详情</a-button>
+          <a-button type="text" size="small" @click="viewDetail(record)">璇︽儏</a-button>
         </template>
       </a-table>
     </div>
 
-    <!-- 详情弹窗 -->
-    <a-modal v-model:visible="detailVisible" title="模型详情" :width="700" footer="null">
+    <!-- 璇︽儏寮圭獥 -->
+    <a-modal v-model:visible="detailVisible" title="妯″瀷璇︽儏" :width="700" footer="null">
       <a-descriptions :column="2" bordered size="large">
-        <a-descriptions-item label="模型ID">{{ currentRecord?.id }}</a-descriptions-item>
-        <a-descriptions-item label="模型名称">{{ currentRecord?.name }}</a-descriptions-item>
-        <a-descriptions-item label="版本">v{{ currentRecord?.version }}</a-descriptions-item>
-        <a-descriptions-item label="状态">{{ getStatusText(currentRecord?.status) }}</a-descriptions-item>
-        <a-descriptions-item label="准确率">{{ currentRecord?.accuracy }}%</a-descriptions-item>
-        <a-descriptions-item label="平均延迟">{{ currentRecord?.latency_ms }}ms</a-descriptions-item>
-        <a-descriptions-item label="调用次数">{{ currentRecord?.call_count }}</a-descriptions-item>
-        <a-descriptions-item label="发布时间">{{ currentRecord?.published_at }}</a-descriptions-item>
+        <a-descriptions-item label="妯″瀷ID">{{ currentRecord?.id }}</a-descriptions-item>
+        <a-descriptions-item label="妯″瀷鍚嶇О">{{ currentRecord?.name }}</a-descriptions-item>
+        <a-descriptions-item label="鐗堟湰">v{{ currentRecord?.version }}</a-descriptions-item>
+        <a-descriptions-item label="鐘舵€?>{{ getStatusText(currentRecord?.status) }}</a-descriptions-item>
+        <a-descriptions-item label="鍑嗙‘鐜?>{{ currentRecord?.accuracy }}%</a-descriptions-item>
+        <a-descriptions-item label="骞冲潎寤惰繜">{{ currentRecord?.latency_ms }}ms</a-descriptions-item>
+        <a-descriptions-item label="璋冪敤娆℃暟">{{ currentRecord?.call_count }}</a-descriptions-item>
+        <a-descriptions-item label="鍙戝竷鏃堕棿">{{ currentRecord?.published_at }}</a-descriptions-item>
       </a-descriptions>
     </a-modal>
   </div>
@@ -207,8 +207,8 @@ const metrics = reactive({
 })
 
 const alerts = ref([
-  { id: 1, level: 'warning', message: '行为模型 v1.9.0 延迟偏高' },
-  { id: 2, level: 'info', message: '情感模型 v2.0.5 准确率下降 0.5%' }
+  { id: 1, level: 'warning', message: '琛屼负妯″瀷 v1.9.0 寤惰繜鍋忛珮' },
+  { id: 2, level: 'info', message: '鎯呮劅妯″瀷 v2.0.5 鍑嗙‘鐜囦笅闄?0.5%' }
 ])
 
 const pagination = reactive({
@@ -218,17 +218,17 @@ const pagination = reactive({
 })
 
 const columns = [
-  { title: '模型名称', dataIndex: 'name', width: 180 },
-  { title: '版本', dataIndex: 'version', width: 100 },
-  { title: '状态', width: 100, slotName: 'status' },
-  { title: '准确率', dataIndex: 'accuracy', width: 160, slotName: 'accuracy' },
-  { title: '平均延迟', dataIndex: 'latency_ms', width: 110, slotName: 'latency_ms' },
-  { title: '调用次数', dataIndex: 'call_count', width: 110 },
-  { title: '发布时间', dataIndex: 'published_at', width: 170 },
-  { title: '操作', width: 80, slotName: 'actions', fixed: 'right' }
+  { title: '妯″瀷鍚嶇О', dataIndex: 'name', width: 180 },
+  { title: '鐗堟湰', dataIndex: 'version', width: 100 },
+  { title: '鐘舵€?, width: 100, slotName: 'status' },
+  { title: '鍑嗙‘鐜?, dataIndex: 'accuracy', width: 160, slotName: 'accuracy' },
+  { title: '骞冲潎寤惰繜', dataIndex: 'latency_ms', width: 110, slotName: 'latency_ms' },
+  { title: '璋冪敤娆℃暟', dataIndex: 'call_count', width: 110 },
+  { title: '鍙戝竷鏃堕棿', dataIndex: 'published_at', width: 170 },
+  { title: '鎿嶄綔', width: 80, slotName: 'actions', fixed: 'right' }
 ]
 
-const getStatusText = (s) => ({ online: '在线', offline: '离线', deprecated: '已废弃' }[s] || s)
+const getStatusText = (s) => ({ online: '鍦ㄧ嚎', offline: '绂荤嚎', deprecated: '宸插簾寮? }[s] || s)
 
 const handleSearch = () => {
   pagination.current = 1
@@ -251,11 +251,11 @@ const handleTableChange = (pag) => {
 
 const handleRefresh = () => {
   loadData()
-  Message.success('监控数据已刷新')
+  Message.success('鐩戞帶鏁版嵁宸插埛鏂?)
 }
 
 const exportReport = () => {
-  Message.success('报告导出中...')
+  Message.success('鎶ュ憡瀵煎嚭涓?..')
 }
 
 const viewDetail = (record) => {
@@ -264,7 +264,7 @@ const viewDetail = (record) => {
 }
 
 const initCharts = () => {
-  // 延迟趋势
+  // 寤惰繜瓒嬪娍
   const latencyChart = echarts.init(latencyChartRef.value)
   latencyChart.setOption({
     tooltip: { trigger: 'axis' },
@@ -274,8 +274,7 @@ const initCharts = () => {
   })
   charts.push(latencyChart)
 
-  // 吞吐量
-  const throughputChart = echarts.init(throughputChartRef.value)
+  // 鍚炲悙閲?  const throughputChart = echarts.init(throughputChartRef.value)
   throughputChart.setOption({
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'] },
@@ -284,8 +283,7 @@ const initCharts = () => {
   })
   charts.push(throughputChart)
 
-  // 准确率
-  const accuracyChart = echarts.init(accuracyChartRef.value)
+  // 鍑嗙‘鐜?  const accuracyChart = echarts.init(accuracyChartRef.value)
   accuracyChart.setOption({
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] },
@@ -294,7 +292,7 @@ const initCharts = () => {
   })
   charts.push(accuracyChart)
 
-  // 版本分布
+  // 鐗堟湰鍒嗗竷
   const versionChart = echarts.init(versionChartRef.value)
   versionChart.setOption({
     tooltip: { trigger: 'item' },
@@ -316,14 +314,14 @@ const loadData = async () => {
   loading.value = true
   try {
     modelList.value = [
-      { id: 'mdl_001', name: '行为识别模型', version: '2.1.0', status: 'online', accuracy: 96.5, latency_ms: 98, call_count: 12480, published_at: '2026-03-20 10:00:00' },
-      { id: 'mdl_002', name: '情感分析模型', version: '2.0.5', status: 'online', accuracy: 94.2, latency_ms: 145, call_count: 9800, published_at: '2026-03-15 14:30:00' },
-      { id: 'mdl_003', name: '语音合成模型', version: '2.0.0', status: 'online', accuracy: 93.8, latency_ms: 110, call_count: 7600, published_at: '2026-03-10 09:00:00' },
-      { id: 'mdl_004', name: '姿态估计模型', version: '1.9.0', status: 'deprecated', accuracy: 89.5, latency_ms: 320, call_count: 3200, published_at: '2026-02-20 11:00:00' }
+      { id: 'mdl_001', name: '琛屼负璇嗗埆妯″瀷', version: '2.1.0', status: 'online', accuracy: 96.5, latency_ms: 98, call_count: 12480, published_at: '2026-03-20 10:00:00' },
+      { id: 'mdl_002', name: '鎯呮劅鍒嗘瀽妯″瀷', version: '2.0.5', status: 'online', accuracy: 94.2, latency_ms: 145, call_count: 9800, published_at: '2026-03-15 14:30:00' },
+      { id: 'mdl_003', name: '璇煶鍚堟垚妯″瀷', version: '2.0.0', status: 'online', accuracy: 93.8, latency_ms: 110, call_count: 7600, published_at: '2026-03-10 09:00:00' },
+      { id: 'mdl_004', name: '濮挎€佷及璁℃ā鍨?, version: '1.9.0', status: 'deprecated', accuracy: 89.5, latency_ms: 320, call_count: 3200, published_at: '2026-02-20 11:00:00' }
     ]
     pagination.total = 4
   } catch (e) {
-    Message.error('加载失败')
+    Message.error('鍔犺浇澶辫触')
   } finally {
     loading.value = false
   }
@@ -353,3 +351,4 @@ onUnmounted(() => {
 }
 .alert-banner { margin-bottom: 16px; }
 </style>
+

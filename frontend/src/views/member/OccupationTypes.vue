@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="occupation-types-page">
     <!-- 面包屑 -->
     <a-breadcrumb class="breadcrumb">

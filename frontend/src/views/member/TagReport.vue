@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="tag-report-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -39,6 +39,7 @@
         <template #tagName="{ record }">
           <a-tag :color="record.tagColor || 'arcoblue'">{{ record.tagName || '标签' + record.tagId }}</a-tag>
         </template>
+      </a-table>
         <template #memberCount="{ record }">
           <span style="color: #165DFF; font-weight: 600;">{{ record.memberCount || 0 }}</span>
         </template>
@@ -64,6 +65,7 @@
         <template #actionType="{ record }">
           <a-tag :color="getActionColor(record.actionType)">{{ getActionName(record.actionType) }}</a-tag>
         </template>
+      </a-table>
         <template #createTime="{ record }">
           {{ formatTime(record.createTime) }}
         </template>

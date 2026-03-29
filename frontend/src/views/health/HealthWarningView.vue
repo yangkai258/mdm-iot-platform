@@ -59,8 +59,7 @@
         <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
     </a-modal>
-  </div>
-</template>
+    </a-card>`n</div></template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -183,3 +182,4 @@ onMounted(() => { loadData() })
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+

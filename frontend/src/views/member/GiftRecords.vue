@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="gift-records-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -39,6 +39,7 @@
             {{ record.memberName || record.memberId }}
           </a-space>
         </template>
+      </a-table>
         <template #grantTime="{ record }">{{ record.grantTime?.slice(0, 19) || '-' }}</template>
         <template #claimTime="{ record }">{{ record.claimTime?.slice(0, 19) || '-' }}</template>
         <template #status="{ record }">

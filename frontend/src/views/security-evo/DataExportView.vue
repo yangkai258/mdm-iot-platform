@@ -65,6 +65,7 @@
           <a-table :columns="taskColumns" :data="tasks" :loading="loading" :pagination="pagination" row-key="id" @change="handleTableChange" :stripe="true" class="mt-3">
             <template #created_at="{ record }"><span>{{ formatDate(record.created_at) }}</span></template>
             <template #status="{ record }"><a-tag :color="taskStatusColor(record.status)">{{ taskStatusLabel(record.status) }}</a-tag></template>
+      </a-table>
             <template #format="{ record }"><span class="format-badge">{{ record.format?.toUpperCase() }}</span></template>
             <template #progress="{ record }">
               <a-progress v-if="record.status === 'processing'" :percent="record.progress || 0" :color="'arcoblue'" size="small" />
@@ -98,6 +99,7 @@
           <a-table :columns="downloadColumns" :data="completedTasks" :loading="downloadLoading" :pagination="downloadPagination" row-key="id" @change="handleDownloadTableChange" :stripe="true" class="mt-3">
             <template #created_at="{ record }"><span>{{ formatDate(record.created_at) }}</span></template>
             <template #file_size="{ record }"><span>{{ formatSize(record.file_size) }}</span></template>
+      </a-table>
             <template #expires_at="{ record }"><span :class="isExpiringSoon(record.expires_at) ? 'expiring' : ''">{{ formatDate(record.expires_at) }}</span></template>
             <template #actions="{ record }">
               <a-space>

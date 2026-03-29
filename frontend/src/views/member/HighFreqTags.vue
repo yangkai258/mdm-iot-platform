@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="high-freq-tags-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -54,6 +54,7 @@
         <template #level="{ record }">
           <a-tag color="blue">{{ record.levelName || '档位' + record.level }}</a-tag>
         </template>
+      </a-table>
         <template #buyCount="{ record }">
           <span style="color: #ff6b00; font-weight: 600;">≥ {{ record.buyCount }} 次</span>
         </template>

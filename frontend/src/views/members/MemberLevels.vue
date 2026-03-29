@@ -19,6 +19,7 @@
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
+    </a-card>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
@@ -170,3 +171,5 @@ onMounted(() => loadLevels())
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+
+

@@ -45,6 +45,7 @@
             {{ getStatusText(record.status) }}
           </a-tag>
         </template>
+      </a-table>
         <template #strategy_type="{ record }">
           <a-tag :color="getStrategyColor(record.strategy_type)">
             {{ getStrategyText(record.strategy_type) }}
@@ -160,6 +161,7 @@
             <template #ota_status="{ record }">
               <a-tag :color="getOtaStatusColor(record.ota_status)">{{ getOtaStatusText(record.ota_status) }}</a-tag>
             </template>
+      </a-table>
             <template #progress_percent="{ record }">
               <a-progress :percent="record.progress_percent" size="small" :show-text="false" style="width: 80px" />
             </template>

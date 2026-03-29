@@ -33,6 +33,7 @@
         <template #version="{ record }">
           <a-tag color="blue">{{ record.version }}</a-tag>
         </template>
+      </a-table>
         <template #file_size="{ record }">
           {{ formatFileSize(record.file_size) }}
         </template>

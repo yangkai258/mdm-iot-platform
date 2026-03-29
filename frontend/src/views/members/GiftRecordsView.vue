@@ -22,6 +22,7 @@
     </a-card>
   </div>
 </template>
+      </a-table>
 
 <script setup>
 import { ref, reactive } from 'vue'
@@ -65,3 +66,4 @@ const onPageChange = (page) => { paginationConfig.current = page; loadData() }
 
 loadData()
 </script>
+</a-card>

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -159,6 +159,7 @@
             <template #version="{ record }">
               <a-tag color="blue">{{ record.version }}</a-tag>
             </template>
+      </a-table>
           </a-table>
         </a-card>
       </a-col>
@@ -168,6 +169,7 @@
             <template #count="{ record }">
               <a-progress :percent="getUptimePercent(record.count)" :stroke-width="8" :show-text="true" size="small" />
             </template>
+      </a-table>
           </a-table>
         </a-card>
       </a-col>

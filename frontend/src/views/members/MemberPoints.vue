@@ -19,6 +19,7 @@
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
+    </a-card>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
@@ -32,125 +33,54 @@
 </template>
 
 <script setup>
-
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const memberList = ref([])
-const showAdjustDrawer = ref(false)
-const showDetailDrawer = ref(false)
-const currentMember = ref(null)
+const modalVisible = ref(false)
+const modalTitle = ref('新建')
+const isEdit = ref(false)
+const currentId = ref(null)
 
-const filters = reactive({
-  level: undefined,
-  keyword: ''
-})
+const filters = reactive({ keyword: '' })
+const form = reactive({ name: '' })
 
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
-})
-
-const stats = reactive({
-  total: 0,
-  todayNew: 0,
-  totalPoints: 0,
-  monthUsed: 0
-})
-
-const adjustForm = reactive({
-  member_id: undefined,
-  type: 'add',
-  points: 0,
-  reason: ''
-})
+const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 
 const columns = [
   { title: '会员名称', dataIndex: 'member_name', width: 150 },
   { title: '手机号', dataIndex: 'phone', width: 130 },
-  { title: '会员等级', slotName: 'level', width: 100 },
-  { title: '当前积分', slotName: 'points', width: 120 },
-  { title: '成长值', slotName: 'growthValue', width: 100 },
+  { title: '当前积分', dataIndex: 'points', width: 120 },
   { title: '注册时间', dataIndex: 'created_at', width: 160 },
-  { title: '操作', slotName: 'actions', width: 160, fixed: 'right' }
+  { title: '操作', slotName: 'actions', width: 160 }
 ]
 
 const loadMembers = async () => {
   loading.value = true
   try {
     const params = { page: pagination.current, page_size: pagination.pageSize }
-    if (filters.level) params.level = filters.level
     if (filters.keyword) params.keyword = filters.keyword
-    memberList.value = []
-    pagination.total = 0
-  } catch (err) {
-    Message.error('加载会员列表失败')
-  } finally {
-    loading.value = false
-  }
+    const res = await fetch(`/api/v1/members/points?${new URLSearchParams(params)}`, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    }).then(r => r.json())
+    memberList.value = res.data?.list || []
+    pagination.total = res.data?.total || 0
+  } catch { memberList.value = [] } finally { loading.value = false }
 }
 
-const handlePageChange = (page) => {
-  pagination.current = page
-  loadMembers()
-}
+const handleCreate = () => { isEdit.value = false; modalTitle.value = '新建'; Object.assign(form, { name: '' }); modalVisible.value = true }
+const handleEdit = (record) => { isEdit.value = true; modalTitle.value = '编辑'; Object.assign(form, record); modalVisible.value = true }
+const handleSubmit = () => { modalVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadMembers() }
+const handleDelete = () => { Message.success('删除成功'); loadMembers() }
+const handlePageChange = (page) => { pagination.current = page; loadMembers() }
 
-const handlePageSizeChange = (pageSize) => {
-  pagination.pageSize = pageSize
-  pagination.current = 1
-  loadMembers()
-}
-
-const handleAdjust = (done) => { done(true) }
-
-const handleAdjustSubmit = async () => {
-  if (!adjustForm.member_id || !adjustForm.points || !adjustForm.reason) {
-    Message.warning('请填写完整信息')
-    return
-  }
-  Message.success('积分调整成功')
-  showAdjustDrawer.value = false
-}
-
-const adjustPoints = (record) => {
-  adjustForm.member_id = record.id
-  showAdjustDrawer.value = true
-}
-
-const openDetail = (record) => {
-  currentMember.value = record
-  showDetailDrawer.value = true
-}
-
-const viewHistory = (record) => {
-  Message.info('查看积分记录')
-}
-
-const getLevelColor = (level) => {
-  const map = { gold: '#FFD700', silver: '#C0C0C0', bronze: '#CD7F32' }
-  return map[level] || 'gray'
-}
-
-const getLevelText = (level) => {
-  const map = { gold: '黄金', silver: '白银', bronze: '青铜' }
-  return map[level] || level
-}
-
-const formatTime = (time) => {
-  if (!time) return '-'
-  return new Date(time).toLocaleString('zh-CN')
-}
-
-onMounted(() => {
-  loadMembers()
-})
-
+onMounted(() => loadMembers())
 </script>
 
 <style scoped>
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+

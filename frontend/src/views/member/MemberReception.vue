@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="member-reception-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -28,6 +28,7 @@
             <span>{{ record.memberName || record.memberId }}</span>
           </a-space>
         </template>
+      </a-table>
         <template #channel="{ record }"><a-tag>{{ record.channel || '-' }}</a-tag></template>
         <template #type="{ record }"><a-tag :color="getTypeColor(record.type)">{{ record.type }}</a-tag></template>
         <template #createTime="{ record }">{{ record.createTime?.slice(0, 19) }}</template>

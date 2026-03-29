@@ -19,7 +19,7 @@
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
           <a-statistic title="待修复" :value="dashboard.pending" :value-from="0" :animation-duration="600" :colored="dashboard.pending > 0 ? 'orange' : undefined">
-            <template #icon><icon-clock /></template>
+            <template #icon><icon-clock-circle /></template>
           </a-statistic>
         </a-card>
       </a-col>
@@ -63,6 +63,7 @@
           <a-table :columns="checkColumns" :data="checks" :loading="loading" :pagination="checkPagination" row-key="id" @change="handleCheckTableChange" :stripe="true" class="mt-3">
             <template #status="{ record }"><a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag></template>
             <template #severity="{ record }"><a-tag :color="severityColor(record.severity)">{{ severityLabel(record.severity) }}</a-tag></template>
+      </a-table>
             <template #regulation="{ record }"><span>{{ record.regulation_name || '-' }}</span></template>
             <template #last_check="{ record }"><span>{{ record.last_check_at ? formatDate(record.last_check_at) : '从未检查' }}</span></template>
             <template #actions="{ record }">
@@ -90,6 +91,7 @@
             <template #compliance_rate="{ record }">
               <a-progress :percent="record.compliance_rate" :color="record.compliance_rate >= 80 ? 'green' : record.compliance_rate >= 60 ? 'orange' : 'red'" />
             </template>
+      </a-table>
             <template #actions="{ record }">
               <a-space>
                 <a-button type="text" size="small" @click="downloadReport(record)"><template #icon><icon-download /></template></a-button>
@@ -113,6 +115,7 @@
           <a-table :columns="regulationColumns" :data="regulations" :loading="regLoading" :pagination="regPagination" row-key="id" @change="handleRegTableChange" :stripe="true" class="mt-3">
             <template #type="{ record }"><a-tag>{{ typeLabel(record.type) }}</a-tag></template>
             <template #effective_date="{ record }"><span>{{ record.effective_date || '-' }}</span></template>
+      </a-table>
             <template #actions="{ record }">
               <a-space>
                 <a-button type="text" size="small" @click="openRegulationModal(record)">编辑</a-button>
@@ -350,3 +353,4 @@ async function handleDeleteRegulation(record) {
 .code-block { background: var(--color-fill-1); border-radius: 4px; padding: 12px; max-height: 200px; overflow: auto; }
 .code-block pre { margin: 0; font-family: 'Courier New', monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
 </style>
+

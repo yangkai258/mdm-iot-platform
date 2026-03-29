@@ -23,6 +23,7 @@
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" />
     </a-card>
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" layout="vertical">
         <a-form-item label="步数"><a-input-number v-model="form.steps" :min="0" style="width: 100%" /></a-form-item>

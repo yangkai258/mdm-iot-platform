@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="page-container pet-console-view">
     <!-- 面包屑 -->
     <a-breadcrumb class="breadcrumb">

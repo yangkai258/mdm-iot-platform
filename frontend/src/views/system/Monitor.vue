@@ -44,6 +44,7 @@
             {{ record.status === 'running' ? '运行中' : '已停止' }}
           </a-tag>
         </template>
+      </a-table>
         <template #uptime="{ record }">{{ record.uptime || '-' }}</template>
       </a-table>
     </a-card>

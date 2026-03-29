@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="redpackets-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -52,6 +52,7 @@
         <template #name="{ record }">
           <a-tag color="red">{{ record.name }}</a-tag>
         </template>
+      </a-table>
         <template #amount="{ record }">
           <span style="color: #ff4d4f; font-weight: 600;">¥{{ record.amount }}</span>
         </template>

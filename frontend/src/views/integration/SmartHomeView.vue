@@ -17,6 +17,7 @@
       <a-button type="primary" @click="handleCreate">新建</a-button>
     </div>
     <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="设备名称"><a-input v-model="form.name" /></a-form-item>
@@ -28,8 +29,7 @@
         <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
     </a-modal>
-  </div>
-</template>
+    </a-card>`n</div></template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
@@ -119,3 +119,4 @@ onMounted(() => loadDevices())
 .search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
 .toolbar { margin-bottom: 16px; }
 </style>
+

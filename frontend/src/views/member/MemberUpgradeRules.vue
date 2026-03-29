@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="member-upgrade-rules-page">
     <!-- 面包屑 -->
     <a-breadcrumb class="breadcrumb">

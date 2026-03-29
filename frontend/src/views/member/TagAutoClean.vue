@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="tag-auto-clean-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -44,6 +44,7 @@
         <template #tagName="{ record }">
           <a-tag :color="record.tagColor || 'arcoblue'">{{ record.tagName || '标签ID:' + record.tagId }}</a-tag>
         </template>
+      </a-table>
         <template #cleanMode="{ record }">
           <a-tag :color="record.cleanMode === 'time' ? 'blue' : 'orange'">
             {{ record.cleanMode === 'time' ? '时间过期' : '条件失效' }}

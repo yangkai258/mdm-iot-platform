@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="wechat-settings-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>

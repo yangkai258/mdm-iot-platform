@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -139,6 +139,7 @@
           <template #cell="{ record }">
             <a-link @click="selectNodeById(record)">{{ record.name }}</a-link>
           </template>
+      </a-table>
         </a-table-column>
         <a-table-column title="MAC 地址" data-index="mac" :width="160" />
         <a-table-column title="类型" data-index="type" :width="100">

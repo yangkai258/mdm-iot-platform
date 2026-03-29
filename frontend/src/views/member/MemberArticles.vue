@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="member-articles-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -28,6 +28,7 @@
             <span style="color: #999; font-size: 12px;">{{ record.summary }}</span>
           </a-space>
         </template>
+      </a-table>
         <template #type="{ record }"><a-tag :color="getTypeColor(record.type)">{{ record.type }}</a-tag></template>
         <template #sendTime="{ record }">{{ record.sendTime?.slice(0, 19) || '待发送' }}</template>
         <template #status="{ record }"><a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag></template>

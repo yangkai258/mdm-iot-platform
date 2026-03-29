@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -59,6 +59,7 @@
           <template #cell="{ record }">
             <a-link @click="viewDetail(record)">{{ record.name }}</a-link>
           </template>
+      </a-table>
         </a-table-column>
         <a-table-column title="版本" data-index="version" :width="100">
           <template #cell="{ record }">
@@ -113,6 +114,7 @@
           <a-table-column title="分片数" data-index="shard_count" :width="80" />
           <a-table-column title="总大小" data-index="total_size_mb" :width="100">
             <template #cell="{ record }">{{ record.total_size_mb }} MB</template>
+      </a-table>
           </a-table-column>
           <a-table-column title="状态" data-index="status" :width="100">
             <template #cell="{ record }">

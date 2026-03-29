@@ -11,7 +11,8 @@
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
-    </a-card>
+    </a-table>
+  </a-card>
   </div>
 </template>
 
@@ -44,3 +45,4 @@ const handleRun = () => Message.success('实验已启动')
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>
+

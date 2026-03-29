@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -228,6 +228,7 @@
               <template #status="{ record }">
                 <a-tag :color="getOtaStatusColor(record.status)">{{ record.status }}</a-tag>
               </template>
+      </a-table>
             </a-table>
           </a-card>
         </a-col>

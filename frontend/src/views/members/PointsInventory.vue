@@ -23,6 +23,7 @@
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
     </a-card>
+      </a-table>
     <a-modal v-model:visible="showRechargeModal" title="充值积分">
       <a-form :model="rechargeForm" label-col-flex="100px">
         <a-form-item label="充值积分"><a-input-number v-model="rechargeForm.amount" :min="1" style="width: 100%" /></a-form-item>
@@ -115,3 +116,4 @@ onMounted(() => loadData())
 .search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
 .toolbar { margin-bottom: 16px; }
 </style>
+</a-card>

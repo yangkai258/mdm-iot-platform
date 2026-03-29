@@ -5,7 +5,8 @@
         <a-button @click="loadData"><icon-refresh />刷新</a-button>
       </template>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
-    </a-card>
+    </a-table>
+  </a-card>
   </div>
 </template>
 
@@ -33,3 +34,4 @@ const loadData = async () => {
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>
+

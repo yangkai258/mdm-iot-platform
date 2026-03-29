@@ -16,6 +16,7 @@
           </a-space>
         </template>
       </a-table>
+      </a-table>
     </a-card>
   </div>
 </template>

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="sms-channels-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -28,6 +28,7 @@
             {{ record.name }}
           </a-space>
         </template>
+      </a-table>
         <template #provider="{ record }"><a-tag>{{ record.provider }}</a-tag></template>
         <template #status="{ record }">
           <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '启用' : '禁用' }}</a-tag>

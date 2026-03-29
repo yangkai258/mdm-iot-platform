@@ -11,6 +11,7 @@
           </a-tag>
         </template>
       </a-table>
+      </a-table>
     </a-card>
   </div>
 </template>

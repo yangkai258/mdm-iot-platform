@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="amount-reduce-promo-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -30,6 +30,7 @@
             </a-tag>
           </a-space>
         </template>
+      </a-table>
         <template #validPeriod="{ record }">{{ record.startTime?.slice(0,10) }} ~ {{ record.endTime?.slice(0,10) }}</template>
         <template #status="{ record }"><a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag></template>
         <template #actions="{ record }">

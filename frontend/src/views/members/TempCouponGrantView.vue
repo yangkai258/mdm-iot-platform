@@ -18,6 +18,7 @@
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
     </a-card>
+      </a-table>
     <a-modal v-model="formVisible" title="发放优惠券" :width="560">
       <a-form :model="form" layout="vertical">
         <a-form-item label="会员ID"><a-input v-model="form.member_id" /></a-form-item>
@@ -61,3 +62,4 @@ const handleSubmit = () => { formVisible.value = false; Message.success('发放�
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>
+</a-card>

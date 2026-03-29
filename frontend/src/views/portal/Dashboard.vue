@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="dashboard-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="breadcrumb">
@@ -151,6 +151,7 @@
             <template #level="{ record }">
               <a-tag :color="record.color">{{ record.level }}</a-tag>
             </template>
+      </a-table>
             <template #percent="{ record }">
               <a-progress :percent="record.percent" :color="record.color" size="small" />
             </template>
@@ -170,6 +171,7 @@
             <template #severity="{ record }">
               <a-tag :color="getSeverityColor(record.severity)">{{ record.severity_text }}</a-tag>
             </template>
+      </a-table>
           </a-table>
         </a-card>
       </a-col>

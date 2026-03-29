@@ -15,6 +15,7 @@
         <template #test_type="{ record }">
           <a-tag :color="getTestTypeColor(record.test_type)">{{ getTestTypeName(record.test_type) }}</a-tag>
         </template>
+      </a-table>
         <template #status="{ record }">
           <a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag>
         </template>

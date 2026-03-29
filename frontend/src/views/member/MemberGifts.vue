@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="member-gifts-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -31,6 +31,7 @@
             <a-tag v-for="(item, i) in (record.items || [])" :key="i" size="small">{{ item.name }}×{{ item.count }}</a-tag>
           </a-space>
         </template>
+      </a-table>
         <template #totalValue="{ record }"><span style="color:#ff4d4f; font-weight:600;">¥{{ record.totalValue || 0 }}</span></template>
         <template #validPeriod="{ record }">{{ record.startTime?.slice(0,10) }} ~ {{ record.endTime?.slice(0,10) }}</template>
         <template #status="{ record }"><a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag></template>

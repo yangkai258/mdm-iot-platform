@@ -21,6 +21,7 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="地图名称" required><a-input v-model="form.map_name" placeholder="请输入地图名称" /></a-form-item>
@@ -39,8 +40,7 @@
         </a-form-item>
       </a-form>
     </a-modal>
-  </div>
-</template>
+    </a-card>`n</div></template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
@@ -129,3 +129,4 @@ onMounted(() => {
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+

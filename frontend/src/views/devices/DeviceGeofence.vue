@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -32,6 +32,7 @@
         <template #status="{ record }">
           <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '启用' : '停用' }}</a-tag>
         </template>
+      </a-table>
         <template #device_count="{ record }">
           <a-badge :count="record.device_count || 0" :max-count="999" />
         </template>
@@ -100,6 +101,7 @@
         <template #alert_type="{ record }">
           <a-tag :color="record.alert_type === 'enter' ? 'green' : 'orange'">{{ record.alert_type === 'enter' ? '进入' : '离开' }}</a-tag>
         </template>
+      </a-table>
       </a-table>
     </a-modal>
   </div>

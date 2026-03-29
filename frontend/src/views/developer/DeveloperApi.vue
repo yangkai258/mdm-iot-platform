@@ -27,6 +27,7 @@
           {{ record.status === 'active' ? '启用' : '禁用' }}
         </a-tag>
       </template>
+      </a-table>
       <template #scopes="{ record }">
         <a-tag v-for="s in (record.scopes || [])" :key="s" size="small">{{ s }}</a-tag>
       </template>
@@ -80,8 +81,7 @@
         </a-form-item>
       </a-form>
     </a-modal>
-  </div>
-</template>
+    </a-card>`n</div></template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
@@ -197,3 +197,4 @@ onMounted(() => { loadData() })
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+

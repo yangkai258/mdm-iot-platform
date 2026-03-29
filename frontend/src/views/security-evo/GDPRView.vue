@@ -12,7 +12,7 @@
       <a-col :span="6">
         <a-card class="stat-card orange" hoverable>
           <a-statistic title="待处理" :value="stats.pending" :value-from="0" :animation-duration="600" :colored="stats.pending > 0 ? 'orange' : undefined">
-            <template #icon><icon-clock /></template>
+            <template #icon><icon-clock-circle /></template>
           </a-statistic>
         </a-card>
       </a-col>
@@ -421,3 +421,4 @@ async function markCompleted(record) {
 .resource-type { background: var(--color-fill-2); border-radius: 4px; padding: 2px 8px; font-size: 12px; }
 .no-data { color: var(--color-text-3); font-size: 13px; }
 </style>
+

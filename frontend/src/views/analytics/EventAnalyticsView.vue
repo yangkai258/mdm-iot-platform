@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -41,6 +41,7 @@
         <template #name="{ record }">
           <a-link @click="openEventDetail(record)">{{ record.name }}</a-link>
         </template>
+      </a-table>
         <template #category="{ record }">
           <a-tag :color="getCategoryColor(record.category)">{{ getCategoryText(record.category) }}</a-tag>
         </template>

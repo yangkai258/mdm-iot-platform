@@ -29,6 +29,7 @@
         <template #status="{ record }">
           <a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag>
         </template>
+      </a-table>
         <template #progress="{ record }">
           <a-progress :percent="record.progress || 0" size="small" :color="getStatusColor(record.status)" />
         </template>
@@ -122,6 +123,7 @@
               {{ record.diff_pct > 0 ? '+' : '' }}{{ record.diff_pct?.toFixed(2) }}%
             </span>
           </template>
+      </a-table>
           <template #winner="{ record }">
             <a-tag :color="record.winner === 'A' ? 'arcoblue' : record.winner === 'B' ? 'green' : 'gray'">
               {{ record.winner === 'A' ? '方案 A 胜出' : record.winner === 'B' ? '方案 B 胜出' : '平局' }}

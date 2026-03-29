@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="interest-tags-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -51,6 +51,7 @@
         <template #categoryName="{ record }">
           <a-tag :color="record.tagColor || 'purple'">{{ record.categoryName }}</a-tag>
         </template>
+      </a-table>
         <template #productTypes="{ record }">
           <a-space wrap>
             <a-tag v-for="(t, i) in (record.productTypes || [])" :key="i" size="small">{{ t }}</a-tag>

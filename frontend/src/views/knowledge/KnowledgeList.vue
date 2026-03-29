@@ -47,6 +47,7 @@
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
     </a-card>
 
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @ok="handleSubmit" :width="560">
       <a-form :model="form" layout="vertical">
         <a-form-item label="分类">

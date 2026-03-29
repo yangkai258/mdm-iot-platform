@@ -23,6 +23,7 @@
           <a-button v-if="record.status === 'pending'" type="text" size="small" status="danger" @click="handleReject(record)">拒绝</a-button>
         </template>
       </a-table>
+      </a-table>
     </a-card>
   </div>
 </template>

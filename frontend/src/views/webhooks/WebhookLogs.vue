@@ -26,6 +26,7 @@
           {{ record.status === 'success' ? '成功' : '失败' }}
         </a-tag>
       </template>
+      </a-table>
       <template #response_time="{ record }">
         {{ record.response_time }}ms
       </template>
@@ -58,8 +59,7 @@
         </a-form-item>
       </a-form>
     </a-modal>
-  </div>
-</template>
+    </a-card>`n</div></template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
@@ -123,3 +123,4 @@ onMounted(() => { loadWebhooks().then(() => loadData()) })
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+

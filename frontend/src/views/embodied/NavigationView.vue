@@ -20,7 +20,8 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-    </a-card>
+    </a-table>
+  </a-card>
   </div>
 </template>
 
@@ -93,3 +94,4 @@ onMounted(() => {
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+

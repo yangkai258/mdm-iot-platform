@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -33,6 +33,7 @@
         <template #status="{ record }">
           <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
         </template>
+      </a-table>
         <template #actions="{ record }">
           <a-space>
             <a-button type="primary" size="small" :disabled="record.status !== 'pending'" @click="approveRequest(record)">批准</a-button>
@@ -48,6 +49,7 @@
         <template #action="{ record }">
           <a-tag :color="record.action === 'approved' ? 'green' : 'red'">{{ record.action === 'approved' ? '批准' : '拒绝' }}</a-tag>
         </template>
+      </a-table>
       </a-table>
     </a-card>
 

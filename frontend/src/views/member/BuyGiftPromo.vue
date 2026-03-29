@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="buy-gift-promo-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -33,6 +33,7 @@
         <template #name="{ record }">
           <a-tag color="blue">{{ record.name }}</a-tag>
         </template>
+      </a-table>
         <template #buyCondition="{ record }">
           购买 {{ record.buyProduct }} ≥ {{ record.buyCount }} 件
         </template>

@@ -16,6 +16,7 @@
         <template #notification_type="{ record }">
           <a-tag :color="typeColor(record.notification_type)">{{ typeLabel(record.notification_type) }}</a-tag>
         </template>
+      </a-table>
         <template #status="{ record }">
           <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
         </template>

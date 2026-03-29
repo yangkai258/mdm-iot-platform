@@ -22,6 +22,7 @@
     </a-card>
   </div>
 </template>
+      </a-table>
 
 <script setup>
 
@@ -90,3 +91,4 @@ onMounted(() => loadRecords())
 .search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
 .toolbar { margin-bottom: 16px; }
 </style>
+</a-card>

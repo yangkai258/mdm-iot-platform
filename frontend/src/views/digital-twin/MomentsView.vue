@@ -106,7 +106,7 @@
             </div>
             <!-- 元信息 -->
             <div class="moment-meta">
-              <span><icon-clock /> {{ moment.captured_at }}</span>
+              <span><icon-clock-circle /> {{ moment.captured_at }}</span>
               <span><icon-thumb-up /> {{ moment.ai_score }}</span>
             </div>
             <template #actions>
@@ -490,3 +490,4 @@ onMounted(() => {
   }
 }
 </style>
+

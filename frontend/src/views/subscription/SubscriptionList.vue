@@ -132,6 +132,7 @@
           <a-tag :color="record.status === 'success' ? 'green' : 'red'">{{ record.status === 'success' ? '成功' : '失败' }}</a-tag>
         </template>
       </a-table>
+      </a-table>
     </a-modal>
   </div>
 </template>

@@ -15,6 +15,7 @@
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="商品名称"><a-input v-model="form.name" /></a-form-item>

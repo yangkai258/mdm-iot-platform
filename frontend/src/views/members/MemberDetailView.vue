@@ -28,6 +28,7 @@
     </a-card>
   </div>
 </template>
+      </a-table>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -72,3 +73,4 @@ const showEdit = () => { Message.info('编辑功能开发中') }
 
 onMounted(() => loadData())
 </script>
+</a-card>

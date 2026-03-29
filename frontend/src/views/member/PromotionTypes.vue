@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="promotion-types-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -37,6 +37,7 @@
             {{ record.name }}
           </a-space>
         </template>
+      </a-table>
         <template #status="{ record }"><a-tag :color="record.enabled ? 'green' : 'gray'">{{ record.enabled ? '已启用' : '已禁用' }}</a-tag></template>
         <template #actions="{ record }">
           <a-button type="text" size="small" @click="goToPromo(record.code)">查看活动</a-button>

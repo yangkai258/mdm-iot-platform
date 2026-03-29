@@ -29,6 +29,7 @@
         <template #version="{ record }">
           <a-tag :color="record.is_latest ? 'blue' : 'gray'">{{ record.version }}<span v-if="record.is_latest"> (最新)</span></a-tag>
         </template>
+      </a-table>
         <template #mandatory="{ record }">
           <a-tag :color="record.is_mandatory ? 'orange' : 'default'">{{ record.is_mandatory ? '强制更新' : '可选更新' }}</a-tag>
         </template>

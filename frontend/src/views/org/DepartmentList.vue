@@ -14,6 +14,7 @@
             <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
             <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
           </template>
+      </a-table>
         </a-table>
       </a-spin>
     </a-card>

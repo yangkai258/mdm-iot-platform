@@ -20,6 +20,7 @@
               {{ record.file_name }}
             </div>
           </template>
+      </a-table>
           <template #file_type="{ record }"><a-tag>{{ record.file_type }}</a-tag></template>
           <template #actions="{ record }">
             <a-button size="small" type="text" @click="download(record)">下载</a-button>

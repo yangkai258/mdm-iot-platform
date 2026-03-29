@@ -21,8 +21,8 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-  </div>
-</template>
+    </a-table>
+  </a-card>`n</div></template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
@@ -87,3 +87,5 @@ onMounted(() => {
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+
+

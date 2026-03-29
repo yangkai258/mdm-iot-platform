@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
@@ -65,6 +65,7 @@
           <template #cell="{ record }">
             <a-link @click="viewDetail(record)">{{ record.name }}</a-link>
           </template>
+      </a-table>
         </a-table-column>
         <a-table-column title="版本" data-index="version" :width="100" />
         <a-table-column title="算法" data-index="algorithm" :width="120" />
@@ -117,6 +118,7 @@
               <template #columns>
                 <a-table-column title="时间" data-index="created_at" :width="180">
                   <template #cell="{ record }">{{ formatTime(record.created_at) }}</template>
+      </a-table>
                 </a-table-column>
                 <a-table-column title="设备" data-index="device_name" :width="140" />
                 <a-table-column title="模型" data-index="model_name" :width="160" />
@@ -154,6 +156,7 @@
                   <template #cell="{ record }">
                     <a-badge :status="record.online ? 'success' : 'default'" :text="record.online ? '在线' : '离线'" />
                   </template>
+      </a-table>
                 </a-table-column>
                 <a-table-column title="运行模型" data-index="running_model" :width="160" />
                 <a-table-column title="推理次数" data-index="inference_count" :width="100" />

@@ -120,6 +120,7 @@
               <a-button type="text" size="small" @click="showUserDetail(record)">查看</a-button>
               <a-button type="text" size="small" status="danger" @click="removeUser(record)">移除</a-button>
             </template>
+      </a-table>
           </a-table>
         </a-card>
       </a-tab-pane>
@@ -138,6 +139,7 @@
             <template #actions="{ record }">
               <a-button type="text" size="small" status="danger" @click="removeMapping(record)">删除</a-button>
             </template>
+      </a-table>
           </a-table>
         </a-card>
       </a-tab-pane>

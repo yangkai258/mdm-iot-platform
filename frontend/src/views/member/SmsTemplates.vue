@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="sms-templates-page">
     <a-breadcrumb class="breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
@@ -18,6 +18,7 @@
       <a-table :columns="columns" :data="templateList" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
         <template #name="{ record }"><a-tag color="arcoblue">{{ record.name }}</a-tag></template>
         <template #type="{ record }"><a-tag>{{ record.type }}</a-tag></template>
+      </a-table>
         <template #content="{ record }">
           <span style="color: #666; font-size: 13px;">{{ record.content?.slice(0, 50) }}{{ record.content?.length > 50 ? '...' : '' }}</span>
         </template>

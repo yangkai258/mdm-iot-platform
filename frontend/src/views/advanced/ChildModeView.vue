@@ -1,46 +1,46 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
+    <!-- 闈㈠寘灞?-->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>高级功能</a-breadcrumb-item>
-      <a-breadcrumb-item>儿童模式</a-breadcrumb-item>
+      <a-breadcrumb-item>棣栭〉</a-breadcrumb-item>
+      <a-breadcrumb-item>楂樼骇鍔熻兘</a-breadcrumb-item>
+      <a-breadcrumb-item>鍎跨妯″紡</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- 页面标题 -->
+    <!-- 椤甸潰鏍囬 -->
     <div class="pro-page-header">
-      <h2 class="pro-page-title">儿童模式</h2>
-      <p class="pro-page-desc">配置安全内容过滤、使用时长限制与使用报告分析</p>
+      <h2 class="pro-page-title">鍎跨妯″紡</h2>
+      <p class="pro-page-desc">閰嶇疆瀹夊叏鍐呭杩囨护銆佷娇鐢ㄦ椂闀块檺鍒朵笌浣跨敤鎶ュ憡鍒嗘瀽</p>
     </div>
 
-    <!-- 搜索筛选区 -->
+    <!-- 鎼滅储绛涢€夊尯 -->
     <div class="pro-search-bar">
       <a-space>
-        <a-select v-model="childFilter" placeholder="选择儿童账号" allow-clear style="width: 200px" @change="loadChildModes">
+        <a-select v-model="childFilter" placeholder="閫夋嫨鍎跨璐﹀彿" allow-clear style="width: 200px" @change="loadChildModes">
           <a-option v-for="c in children" :key="c.id" :value="c.id">{{ c.name }}</a-option>
         </a-select>
-        <a-select v-model="statusFilter" placeholder="模式状态" allow-clear style="width: 140px" @change="loadChildModes">
-          <a-option value="enabled">已启用</a-option>
-          <a-option value="disabled">已禁用</a-option>
+        <a-select v-model="statusFilter" placeholder="妯″紡鐘舵€? allow-clear style="width: 140px" @change="loadChildModes">
+          <a-option value="enabled">宸插惎鐢?/a-option>
+          <a-option value="disabled">宸茬鐢?/a-option>
         </a-select>
       </a-space>
     </div>
 
-    <!-- 操作按钮区 -->
+    <!-- 鎿嶄綔鎸夐挳鍖?-->
     <div class="pro-action-bar">
       <a-space>
         <a-button type="primary" @click="showConfigModal(null)">
           <template #icon><icon-settings /></template>
-          新增配置
+          鏂板閰嶇疆
         </a-button>
         <a-button @click="loadChildModes">
           <template #icon><icon-refresh /></template>
-          刷新
+          鍒锋柊
         </a-button>
       </a-space>
     </div>
 
-    <!-- 数据内容区 -->
+    <!-- 鏁版嵁鍐呭鍖?-->
     <div class="pro-content-area">
       <a-table
         :columns="columns"
@@ -61,51 +61,50 @@
         </template>
         <template #content_filter="{ record }">
           <a-tag :color="record.content_filter_enabled ? 'green' : 'gray'">
-            {{ record.content_filter_enabled ? '已启用' : '已禁用' }}
+            {{ record.content_filter_enabled ? '宸插惎鐢? : '宸茬鐢? }}
           </a-tag>
         </template>
         <template #time_limit="{ record }">
           <span v-if="record.time_limit_enabled">
-            {{ record.daily_time_limit }}分钟/天
-          </span>
-          <a-tag v-else color="gray">未限制</a-tag>
+            {{ record.daily_time_limit }}鍒嗛挓/澶?          </span>
+          <a-tag v-else color="gray">鏈檺鍒?/a-tag>
         </template>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="text" size="small" @click="showConfigModal(record)">配置</a-button>
-            <a-button type="text" size="small" @click="showUsageReport(record)">报告</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+            <a-button type="text" size="small" @click="showConfigModal(record)">閰嶇疆</a-button>
+            <a-button type="text" size="small" @click="showUsageReport(record)">鎶ュ憡</a-button>
+            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">鍒犻櫎</a-button>
           </a-space>
         </template>
       </a-table>
     </div>
 
-    <!-- 使用报告抽屉 -->
-    <a-drawer v-model:visible="reportDrawerVisible" :width="680" :title="`使用报告 - ${reportChildName}`" @close="reportDrawerVisible = false">
+    <!-- 浣跨敤鎶ュ憡鎶藉眽 -->
+    <a-drawer v-model:visible="reportDrawerVisible" :width="680" :title="`浣跨敤鎶ュ憡 - ${reportChildName}`" @close="reportDrawerVisible = false">
       <div class="report-section">
         <div class="report-header">
           <a-radio-group v-model="reportPeriod" type="button" @change="loadUsageReport">
-            <a-radio value="day">今日</a-radio>
-            <a-radio value="week">本周</a-radio>
-            <a-radio value="month">本月</a-radio>
+            <a-radio value="day">浠婃棩</a-radio>
+            <a-radio value="week">鏈懆</a-radio>
+            <a-radio value="month">鏈湀</a-radio>
           </a-radio-group>
         </div>
 
-        <!-- 使用时长统计卡片 -->
+        <!-- 浣跨敤鏃堕暱缁熻鍗＄墖 -->
         <a-row :gutter="12" style="margin-bottom: 16px">
           <a-col :span="8">
             <a-card class="stat-card" hoverable>
-              <a-statistic :value="reportData.total_minutes" :precision="0" suffix="分钟">
-                <template #prefix><icon-clock :size="20" style="color:#1659f5"/></template>
-                <template #title>总使用时长</template>
+              <a-statistic :value="reportData.total_minutes" :precision="0" suffix="鍒嗛挓">
+                <template #prefix><icon-clock-circle :size="20" style="color:#1659f5"/></template>
+                <template #title>鎬讳娇鐢ㄦ椂闀?/template>
               </a-statistic>
             </a-card>
           </a-col>
           <a-col :span="8">
             <a-card class="stat-card" hoverable>
-              <a-statistic :value="reportData.avg_daily_minutes" :precision="0" suffix="分钟">
+              <a-statistic :value="reportData.avg_daily_minutes" :precision="0" suffix="鍒嗛挓">
                 <template #prefix><icon-history :size="20" style="color:#0fc6c2"/></template>
-                <template #title>日均时长</template>
+                <template #title>鏃ュ潎鏃堕暱</template>
               </a-statistic>
             </a-card>
           </a-col>
@@ -113,75 +112,75 @@
             <a-card class="stat-card" hoverable>
               <a-statistic :value="reportData.limit_compliance_rate" :precision="0" suffix="%">
                 <template #prefix><icon-check-circle :size="20" style="color:#00b42a"/></template>
-                <template #title>限时遵守率</template>
+                <template #title>闄愭椂閬靛畧鐜?/template>
               </a-statistic>
             </a-card>
           </a-col>
         </a-row>
 
-        <!-- 使用趋势图 -->
-        <a-card title="每日使用时长趋势" style="margin-bottom: 16px">
+        <!-- 浣跨敤瓒嬪娍鍥?-->
+        <a-card title="姣忔棩浣跨敤鏃堕暱瓒嬪娍" style="margin-bottom: 16px">
           <div ref="usageChartRef" style="height: 200px"></div>
         </a-card>
 
-        <!-- 应用使用分布 -->
-        <a-card title="内容分类使用分布">
+        <!-- 搴旂敤浣跨敤鍒嗗竷 -->
+        <a-card title="鍐呭鍒嗙被浣跨敤鍒嗗竷">
           <div ref="categoryChartRef" style="height: 200px"></div>
         </a-card>
       </div>
     </a-drawer>
 
-    <!-- 配置弹窗 -->
-    <a-modal v-model:visible="configModalVisible" :title="isEdit ? '编辑儿童模式配置' : '新增儿童模式配置'" @ok="handleSave" :width="560" @close="resetForm">
+    <!-- 閰嶇疆寮圭獥 -->
+    <a-modal v-model:visible="configModalVisible" :title="isEdit ? '缂栬緫鍎跨妯″紡閰嶇疆' : '鏂板鍎跨妯″紡閰嶇疆'" @ok="handleSave" :width="560" @close="resetForm">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="儿童账号" required>
-          <a-select v-model="form.child_id" placeholder="请选择儿童账号" :disabled="isEdit">
+        <a-form-item label="鍎跨璐﹀彿" required>
+          <a-select v-model="form.child_id" placeholder="璇烽€夋嫨鍎跨璐﹀彿" :disabled="isEdit">
             <a-option v-for="c in children" :key="c.id" :value="c.id">{{ c.name }} ({{ c.phone }})</a-option>
           </a-select>
         </a-form-item>
 
-        <a-divider>内容过滤</a-divider>
+        <a-divider>鍐呭杩囨护</a-divider>
 
-        <a-form-item label="启用内容过滤">
+        <a-form-item label="鍚敤鍐呭杩囨护">
           <a-switch v-model="form.content_filter_enabled" />
         </a-form-item>
-        <a-form-item label="过滤级别" v-if="form.content_filter_enabled">
+        <a-form-item label="杩囨护绾у埆" v-if="form.content_filter_enabled">
           <a-radio-group v-model="form.filter_level">
-            <a-radio value="strict">严格（适合低龄儿童）</a-radio>
-            <a-radio value="moderate">中等（适合学龄儿童）</a-radio>
-            <a-radio value="light">轻度（适合青少年）</a-radio>
+            <a-radio value="strict">涓ユ牸锛堥€傚悎浣庨緞鍎跨锛?/a-radio>
+            <a-radio value="moderate">涓瓑锛堥€傚悎瀛﹂緞鍎跨锛?/a-radio>
+            <a-radio value="light">杞诲害锛堥€傚悎闈掑皯骞达級</a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item label="禁止访问的分类" v-if="form.content_filter_enabled">
+        <a-form-item label="绂佹璁块棶鐨勫垎绫? v-if="form.content_filter_enabled">
           <a-checkbox-group v-model="form.blocked_categories">
-            <a-checkbox value="violence">暴力内容</a-checkbox>
-            <a-checkbox value="adult">成人内容</a-checkbox>
-            <a-checkbox value="gambling">赌博</a-checkbox>
-            <a-checkbox value="social">社交媒体</a-checkbox>
-            <a-checkbox value="games">游戏</a-checkbox>
+            <a-checkbox value="violence">鏆村姏鍐呭</a-checkbox>
+            <a-checkbox value="adult">鎴愪汉鍐呭</a-checkbox>
+            <a-checkbox value="gambling">璧屽崥</a-checkbox>
+            <a-checkbox value="social">绀句氦濯掍綋</a-checkbox>
+            <a-checkbox value="games">娓告垙</a-checkbox>
           </a-checkbox-group>
         </a-form-item>
 
-        <a-divider>使用时间限制</a-divider>
+        <a-divider>浣跨敤鏃堕棿闄愬埗</a-divider>
 
-        <a-form-item label="启用时间限制">
+        <a-form-item label="鍚敤鏃堕棿闄愬埗">
           <a-switch v-model="form.time_limit_enabled" />
         </a-form-item>
-        <a-form-item label="每日时长限制（分钟）" v-if="form.time_limit_enabled">
+        <a-form-item label="姣忔棩鏃堕暱闄愬埗锛堝垎閽燂級" v-if="form.time_limit_enabled">
           <a-input-number v-model="form.daily_time_limit" :min="15" :max="480" :step="15" style="width: 200px" />
         </a-form-item>
-        <a-form-item label="允许使用的时间段" v-if="form.time_limit_enabled">
+        <a-form-item label="鍏佽浣跨敤鐨勬椂闂存" v-if="form.time_limit_enabled">
           <a-time-picker-range v-model="form.allowed_time_range" format="HH:mm" style="width: 300px" />
         </a-form-item>
-        <a-form-item label="禁用日期" v-if="form.time_limit_enabled">
+        <a-form-item label="绂佺敤鏃ユ湡" v-if="form.time_limit_enabled">
           <a-checkbox-group v-model="form.disabled_days">
-            <a-checkbox :value="1">周一</a-checkbox>
-            <a-checkbox :value="2">周二</a-checkbox>
-            <a-checkbox :value="3">周三</a-checkbox>
-            <a-checkbox :value="4">周四</a-checkbox>
-            <a-checkbox :value="5">周五</a-checkbox>
-            <a-checkbox :value="6">周六</a-checkbox>
-            <a-checkbox :value="0">周日</a-checkbox>
+            <a-checkbox :value="1">鍛ㄤ竴</a-checkbox>
+            <a-checkbox :value="2">鍛ㄤ簩</a-checkbox>
+            <a-checkbox :value="3">鍛ㄤ笁</a-checkbox>
+            <a-checkbox :value="4">鍛ㄥ洓</a-checkbox>
+            <a-checkbox :value="5">鍛ㄤ簲</a-checkbox>
+            <a-checkbox :value="6">鍛ㄥ叚</a-checkbox>
+            <a-checkbox :value="0">鍛ㄦ棩</a-checkbox>
           </a-checkbox-group>
         </a-form-item>
       </a-form>
@@ -225,11 +224,11 @@ const form = reactive({
 })
 
 const columns = [
-  { title: '儿童账号', dataIndex: 'child_name', slotName: 'child_name', width: 200 },
-  { title: '模式开关', dataIndex: 'enabled', slotName: 'enabled', width: 120 },
-  { title: '内容过滤', dataIndex: 'content_filter', slotName: 'content_filter', width: 120 },
-  { title: '时间限制', dataIndex: 'time_limit', slotName: 'time_limit', width: 160 },
-  { title: '操作', slotName: 'actions', width: 220 }
+  { title: '鍎跨璐﹀彿', dataIndex: 'child_name', slotName: 'child_name', width: 200 },
+  { title: '妯″紡寮€鍏?, dataIndex: 'enabled', slotName: 'enabled', width: 120 },
+  { title: '鍐呭杩囨护', dataIndex: 'content_filter', slotName: 'content_filter', width: 120 },
+  { title: '鏃堕棿闄愬埗', dataIndex: 'time_limit', slotName: 'time_limit', width: 160 },
+  { title: '鎿嶄綔', slotName: 'actions', width: 220 }
 ]
 
 const pagination = reactive({
@@ -261,10 +260,10 @@ async function loadChildModes() {
       childModes.value = data.data?.list || data.data || []
       pagination.total = data.data?.total || 0
     } else {
-      Message.error(data.message || '加载失败')
+      Message.error(data.message || '鍔犺浇澶辫触')
     }
   } catch {
-    Message.error('网络错误')
+    Message.error('缃戠粶閿欒')
   } finally {
     loading.value = false
   }
@@ -308,7 +307,7 @@ function resetForm() {
 
 async function handleSave() {
   if (!isEdit.value && !form.child_id) {
-    Message.warning('请选择儿童账号')
+    Message.warning('璇烽€夋嫨鍎跨璐﹀彿')
     return
   }
   try {
@@ -329,14 +328,14 @@ async function handleSave() {
     })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
-      Message.success(isEdit.value ? '配置已更新' : '配置已保存')
+      Message.success(isEdit.value ? '閰嶇疆宸叉洿鏂? : '閰嶇疆宸蹭繚瀛?)
       configModalVisible.value = false
       loadChildModes()
     } else {
-      Message.error(data.message || '保存失败')
+      Message.error(data.message || '淇濆瓨澶辫触')
     }
   } catch {
-    Message.error('网络错误')
+    Message.error('缃戠粶閿欒')
   }
 }
 
@@ -351,14 +350,14 @@ async function toggleMode(record: any) {
     })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
-      Message.success(record.enabled ? '已启用' : '已禁用')
+      Message.success(record.enabled ? '宸插惎鐢? : '宸茬鐢?)
     } else {
       record.enabled = !record.enabled
-      Message.error(data.message || '操作失败')
+      Message.error(data.message || '鎿嶄綔澶辫触')
     }
   } catch {
     record.enabled = !record.enabled
-    Message.error('网络错误')
+    Message.error('缃戠粶閿欒')
   } finally {
     savingId.value = null
   }
@@ -372,13 +371,13 @@ async function handleDelete(record: any) {
     })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
-      Message.success('已删除')
+      Message.success('宸插垹闄?)
       loadChildModes()
     } else {
-      Message.error(data.message || '删除失败')
+      Message.error(data.message || '鍒犻櫎澶辫触')
     }
   } catch {
-    Message.error('网络错误')
+    Message.error('缃戠粶閿欒')
   }
 }
 
@@ -406,3 +405,4 @@ onMounted(() => {
   loadChildModes()
 })
 </script>
+

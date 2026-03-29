@@ -21,6 +21,7 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="区域名称" required><a-input v-model="form.zone_name" placeholder="请输入区域名称" /></a-form-item>

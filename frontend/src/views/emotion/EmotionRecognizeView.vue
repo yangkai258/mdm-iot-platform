@@ -20,6 +20,7 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+      </a-table>
     <a-modal v-model:visible="modalVisible" title="编辑配置" :width="480">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="识别模式">
@@ -41,8 +42,7 @@
         <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
     </a-modal>
-  </div>
-</template>
+    </a-card>`n</div></template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
@@ -124,3 +124,4 @@ onMounted(() => loadData())
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
+

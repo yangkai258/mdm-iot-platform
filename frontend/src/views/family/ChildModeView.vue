@@ -33,6 +33,7 @@
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
     </a-card>
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="560">
       <a-form :model="form" label-col-flex="130px">
         <a-form-item label="儿童账号">

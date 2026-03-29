@@ -11,6 +11,7 @@
         <template #status="{ record }">
           <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '启用' : '禁用' }}</a-tag>
         </template>
+      </a-table>
         <template #actions="{ record }">
           <a-space>
             <a-button type="text" size="small" @click="editGroup(record)">「编辑」</a-button>

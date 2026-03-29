@@ -22,6 +22,7 @@
     </a-card>
   </div>
 </template>
+      </a-table>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -58,3 +59,4 @@ const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())
 </script>
+</a-card>

@@ -17,6 +17,7 @@
         <template #status="{ record }">
           <a-badge :color="record.status === 1 ? 'green' : 'red'" :text="record.status === 1 ? '正常' : '禁用'" />
         </template>
+      </a-table>
         <template #actions="{ record }">
           <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>

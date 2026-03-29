@@ -24,6 +24,7 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">{{ record.status === 1 ? '取消关注' : '删除' }}</a-button>
         </template>
       </a-table>
+      </a-table>
     </a-card>
   </div>
 </template>
