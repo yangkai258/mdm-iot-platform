@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -79,6 +80,13 @@ func (c *OrgController) CompanyCreate(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&company); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
 		return
+	}
+
+	// 自动生成公司编号
+	if company.CompanyCode == "" {
+		var maxID int64
+		c.DB.Model(&models.Company{}).Select("COALESCE(MAX(id), 0)").Scan(&maxID)
+		company.CompanyCode = fmt.Sprintf("CMP%05d", maxID+1)
 	}
 
 	if err := c.DB.Create(&company).Error; err != nil {
@@ -437,6 +445,13 @@ func (c *OrgController) EmployeeCreate(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&employee); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
 		return
+	}
+
+	// 自动生成员工工号
+	if employee.EmpCode == "" {
+		var maxID int64
+		c.DB.Model(&models.Employee{}).Select("COALESCE(MAX(id), 0)").Scan(&maxID)
+		employee.EmpCode = fmt.Sprintf("EMP%05d", maxID+1)
 	}
 
 	if err := c.DB.Create(&employee).Error; err != nil {
