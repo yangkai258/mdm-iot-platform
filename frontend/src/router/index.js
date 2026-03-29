@@ -490,6 +490,13 @@ const routes = [
     component: () => import('../views/digital-twin/MomentsView.vue')
   },
 
+  // ========== 功能配置管理 ==========
+  {
+    path: 'advanced/feature-config',
+    name: 'FeatureConfig',
+    component: () => import('../views/advanced/FeatureConfigView.vue')
+  },
+
   // ========== 具身智能 ==========
   {
     path: 'embodied/perception',
