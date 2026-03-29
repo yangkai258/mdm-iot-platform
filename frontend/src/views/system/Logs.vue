@@ -1,11 +1,48 @@
 <template>
   <div class="logs-container">
-    <a-card>
-      <template #title>
-        <div class="card-title">
-          <span>操作日志</span>
-        </div>
-      </template>
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '系统日志' }]" />
+
+    <a-card class="general-card">
+      <template #title><span class="card-title">操作日志</span></template>
+      <a-row :gutter="16">
+        <a-col :flex="1">
+          <a-form :model="query" layout="vertical" size="small">
+            <a-row :gutter="16">
+              <a-col :span="8">
+                <a-form-item label="用户名">
+                  <a-input v-model="query.username" placeholder="请输入用户名" allow-clear />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item label="模块">
+                  <a-select v-model="query.module" placeholder="选择模块" allow-clear>
+                    <a-option value="devices">设备管理</a-option>
+                    <a-option value="ota">OTA管理</a-option>
+                    <a-option value="auth">认证</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
+        </a-col>
+        <a-divider style="height: 84px" direction="vertical" />
+        <a-col :flex="'86px'" style="text-align: right">
+          <a-space direction="vertical" :size="18">
+            <a-button type="primary" @click="loadLogs">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button @click="loadLogs">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+    </a-card>
+
+    <a-card class="general-card" style="margin-top: 16px">
+      <template #title><span class="card-title">日志列表</span></template>
       
       <a-form :model="query" layout="inline">
         <a-form-item field="username" label="用户名">
@@ -104,12 +141,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.logs-container {
-  padding: 16px;
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: bold;
-}
+.logs-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.general-card { border-radius: 8px; }
+.card-title { font-weight: 600; font-size: 15px; }
 </style>

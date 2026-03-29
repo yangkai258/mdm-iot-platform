@@ -1,5 +1,7 @@
 <template>
-  <div class="app-device-list">
+  <div class="container" style="padding: 0 0 80px; min-height: 100vh; background: #f5f6f7;">
+    <Breadcrumb :items="['menu.app', 'menu.app.devices']" />
+    <div class="app-device-list">
     <!-- 顶部导航栏 -->
     <div class="app-header">
       <div class="header-title">我的设备</div>
@@ -124,6 +126,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getDeviceList, quickAction } from '@/api/app'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const router = useRouter()
 

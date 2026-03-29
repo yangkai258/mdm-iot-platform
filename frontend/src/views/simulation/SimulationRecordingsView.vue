@@ -1,11 +1,6 @@
 <template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>仿真测试</a-breadcrumb-item>
-      <a-breadcrumb-item>回放系统</a-breadcrumb-item>
-    </a-breadcrumb>
+    <Breadcrumb :items="['menu.simulation', 'menu.simulation.recordings']" />
 
     <!-- 筛选区 -->
     <div class="pro-filter-bar">

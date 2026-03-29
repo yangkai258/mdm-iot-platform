@@ -1,10 +1,6 @@
 <template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>应用管理</a-breadcrumb-item>
-    </a-breadcrumb>
+    <Breadcrumb :items="['menu.apps', 'menu.apps.list']" />
 
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stats-row">
@@ -50,7 +46,7 @@
     </div>
 
     <!-- 数据表格 -->
-    <div class="pro-content-area">
+    <div class="pro-content-area general-card">
       <a-table :columns="columns" :data="appList" :loading="loading" :pagination="pagination" row-key="id" @page-change="handlePageChange">
         <template #appType="{ record }">
           <a-tag :color="getAppTypeColor(record.app_type)">{{ record.app_type?.toUpperCase() }}</a-tag>
@@ -181,4 +177,5 @@ onMounted(() => { loadApps() })
   background: #fff; border-radius: 8px; padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
+.general-card { border-radius: 8px; }
 </style>

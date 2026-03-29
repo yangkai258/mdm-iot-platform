@@ -1,5 +1,6 @@
 <template>
   <div class="page-container">
+    <Breadcrumb :items="['menu.apps', 'menu.apps.distributions']" />
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stats-row">
       <a-col :span="6">
@@ -381,8 +382,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
+.page-container { padding: 16px; }
 .stats-row { margin-bottom: 16px; }
-.action-card { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.action-card { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 .distribution-card { background: #fff; }
 </style>

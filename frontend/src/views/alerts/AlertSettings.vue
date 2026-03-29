@@ -1,18 +1,32 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="设置名称"><a-input v-model="form.keyword" placeholder="搜索设置项" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新增设置</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    <Breadcrumb :items="['menu.alert', 'menu.alert.settings']" />
+    <a-card class="general-card" title="告警设置">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新增设置</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="searchForm" layout="inline">
+          <a-row :gutter="16" style="width: 100%">
+            <a-col :span="8">
+              <a-form-item label="设置名称"><a-input v-model="searchForm.keyword" placeholder="搜索设置项" /></a-form-item>
+            </a-col>
+            <a-col :span="8">
+              <a-form-item label="类型">
+                <a-select v-model="searchForm.type" placeholder="请选择" allow-clear>
+                  <a-option value="email">邮件</a-option>
+                  <a-option value="sms">短信</a-option>
+                  <a-option value="webhook">Webhook</a-option>
+                </a-select>
+              </a-form-item>
+            </a-col>
+            <a-col :span="8" style="display: flex; justify-content: flex-end">
+              <a-form-item><a-button type="primary" @click="handleSearch">查询</a-button><a-button style="margin-left: 8px" @click="handleReset">重置</a-button></a-form-item>
+            </a-col>
+          </a-row>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="设置名称"><a-input v-model="form.name" /></a-form-item>
@@ -35,11 +49,17 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const data = ref([])
 const modalVisible = ref(false)
 const modalTitle = ref('新增设置')
+
+const searchForm = reactive({
+  keyword: '',
+  type: ''
+})
 
 const form = reactive({
   name: '',
@@ -59,7 +79,7 @@ const columns = [
   { title: '类型', dataIndex: 'type', width: 120 },
   { title: '配置值', dataIndex: 'config_value', ellipsis: true },
   { title: '描述', dataIndex: 'description', ellipsis: true },
-  { title: '启用', dataIndex: 'enabled', width: 100 }
+  { title: '启用状态', dataIndex: 'enabled', width: 100, render: ({ record }) => record.enabled ? '是' : '否' }
 ]
 
 const handleSearch = () => {
@@ -67,7 +87,8 @@ const handleSearch = () => {
 }
 
 const handleReset = () => {
-  form.keyword = ''
+  searchForm.keyword = ''
+  searchForm.type = ''
   loadData()
 }
 
@@ -115,7 +136,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

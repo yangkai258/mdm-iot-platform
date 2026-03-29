@@ -1,17 +1,11 @@
 <template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>仿真测试</a-breadcrumb-item>
-      <a-breadcrumb-item>虚拟宠物仿真</a-breadcrumb-item>
-    </a-breadcrumb>
-
+    <Breadcrumb :items="['menu.simulation', 'menu.simulation.virtualPet']" />
     <!-- 操作栏 -->
     <div class="pro-action-bar">
       <a-space>
-        <a-button type="primary" @click="openCreateModal">创建虚拟宠物</a-button>
-        <a-button @click="loadPets">刷新</a-button>
+        <a-button type="primary" @click="openCreateModal"><icon-plus />创建虚拟宠物</a-button>
+        <a-button @click="loadPets"><icon-refresh />刷新</a-button>
       </a-space>
     </div>
 
@@ -148,6 +142,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus, IconRefresh } from '@arco-design/web-vue/es/icon'
 import { getSimulationPets, createSimulationPet, updateSimulationPet, interactWithPet } from '@/api/simulation'
 
 const pets = ref([])

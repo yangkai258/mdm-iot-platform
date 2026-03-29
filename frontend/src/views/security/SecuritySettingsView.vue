@@ -1,5 +1,6 @@
 <template>
   <div class="page-container">
+    <Breadcrumb :items="['menu.security', 'menu.security.settings']" />
     <!-- 加密配置 -->
     <a-card class="section-card">
       <template #title>

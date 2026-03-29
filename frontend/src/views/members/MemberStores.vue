@@ -1,23 +1,25 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="stores" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+    <Breadcrumb :items="['menu.member', 'menu.member.stores']" />
+    <a-card class="general-card" title="门店管理">
+      <template #extra>
+        <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>
       </template>
-    </a-table>
+      <div class="search-form">
+        <a-form :model="filters" layout="inline">
+          <a-form-item label="名称"><a-input v-model="filters.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="loadStores">查询</a-button>
+            <a-button @click="filters.keyword = ''; loadStores()">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="stores" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
@@ -34,6 +36,7 @@
 
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const API_BASE = '/api/v1'
 const stores = ref([])
@@ -107,7 +110,6 @@ onMounted(() => loadStores())
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

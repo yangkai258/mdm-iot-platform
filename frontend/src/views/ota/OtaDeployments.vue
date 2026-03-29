@@ -1,6 +1,8 @@
 <template>
   <div class="ota-deployments-container">
-    <a-card class="stats-card">
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: 'OTA管理' }, { label: '部署任务' }]" />
+
+    <a-card class="general-card">
       <a-row :gutter="16">
         <a-col :span="6">
           <a-statistic title="总任务数" :value="stats.total" />
@@ -17,7 +19,7 @@
       </a-row>
     </a-card>
 
-    <a-card class="table-card">
+    <a-card class="general-card" style="margin-top: 16px">
       <template #title>
         <div class="card-title">
           <span>部署任务</span>
@@ -643,23 +645,19 @@ onMounted(() => {
 
 <style scoped>
 .ota-deployments-container {
-  padding: 16px;
+  padding: 20px 24px;
+  min-height: calc(100vh - 64px);
+  background: #f5f7fa;
 }
 
-.stats-card {
-  margin-bottom: 16px;
-}
-
-.table-card {
-  margin-bottom: 16px;
+.general-card {
+  border-radius: 8px;
 }
 
 .card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
+  font-weight: 600;
+  font-size: 15px;
+}
 }
 
 .progress-cell {

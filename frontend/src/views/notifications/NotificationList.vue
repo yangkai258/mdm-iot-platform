@@ -1,7 +1,9 @@
 <template>
   <div class="notification-list-container">
-    <!-- 统计卡片 -->
-    <a-card class="stats-card">
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '消息中心' }, { label: '推送列表' }]" />
+
+    <a-card class="general-card">
+      <template #title><span class="card-title">发送统计</span></template>
       <a-row :gutter="16">
         <a-col :span="6">
           <a-statistic title="今日发送" :value="stats.todaySent" />
@@ -18,26 +20,26 @@
       </a-row>
     </a-card>
 
-    <!-- 操作栏 + 表格 -->
-    <a-card class="table-card">
-      <template #title>
-        <div class="card-title">
-          <span>推送通知</span>
-          <a-space>
-            <a-select v-model="filterType" placeholder="通知类型" allow-clear style="width: 140px" @change="handleFilter">
-              <a-option value="push">推送通知</a-option>
-              <a-option value="announcement">公告</a-option>
-              <a-option value="command_response">命令反馈</a-option>
-            </a-select>
-            <a-select v-model="filterStatus" placeholder="状态" allow-clear style="width: 120px" @change="handleFilter">
-              <a-option value="pending">待发送</a-option>
-              <a-option value="sent">已发送</a-option>
-              <a-option value="failed">失败</a-option>
-              <a-option value="read">已读</a-option>
-            </a-select>
-            <a-button type="primary" @click="showSendDrawer">发送通知</a-button>
-          </a-space>
-        </div>
+    <a-card class="general-card" style="margin-top: 16px">
+      <template #title><span class="card-title">推送通知</span></template>
+      <template #extra>
+        <a-space>
+          <a-select v-model="filterType" placeholder="通知类型" allow-clear style="width: 140px" @change="handleFilter">
+            <a-option value="push">推送通知</a-option>
+            <a-option value="announcement">公告</a-option>
+            <a-option value="command_response">命令反馈</a-option>
+          </a-select>
+          <a-select v-model="filterStatus" placeholder="状态" allow-clear style="width: 120px" @change="handleFilter">
+            <a-option value="pending">待发送</a-option>
+            <a-option value="sent">已发送</a-option>
+            <a-option value="failed">失败</a-option>
+            <a-option value="read">已读</a-option>
+          </a-select>
+          <a-button type="primary" @click="showSendDrawer">
+            <template #icon><icon-send /></template>
+            发送通知
+          </a-button>
+        </a-space>
       </template>
 
       <a-table :columns="columns" :data="notifications" :loading="loading" :pagination="paginationConfig" row-key="id" @page-change="handlePageChange" @page-size-change="handlePageSizeChange">
@@ -343,20 +345,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.notification-list-container {
-  padding: 16px;
-}
-.stats-card {
-  margin-bottom: 16px;
-}
-.table-card {
-  margin-bottom: 16px;
-}
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
+.notification-list-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.general-card { border-radius: 8px; }
+.card-title { font-weight: 600; font-size: 15px; }
 </style>

@@ -1,43 +1,75 @@
 <template>
-  <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>宠物配置</a-breadcrumb-item>
-    </a-breadcrumb>
+  <div class="pet-config-container">
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '宠物配置' }]" />
 
-    <!-- 搜索框 -->
-    <div class="pro-search-bar">
-      <a-input-search
-        v-model="searchKeyword"
-        placeholder="搜索宠物名称"
-        style="width: 280px"
-        @search="loadPets"
-        search-button
-      />
-    </div>
+    <a-card class="general-card">
+      <template #title><span class="card-title">宠物查询</span></template>
+      <a-row :gutter="16">
+        <a-col :flex="1">
+          <a-form :model="searchForm" layout="vertical" size="small">
+            <a-row :gutter="16">
+              <a-col :span="8">
+                <a-form-item label="关键词">
+                  <a-input v-model="searchForm.keyword" placeholder="宠物名称" allow-clear />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item label="宠物性格">
+                  <a-select v-model="searchForm.personality" placeholder="全部" allow-clear>
+                    <a-option :value="1">活泼好动</a-option>
+                    <a-option :value="2">温顺安静</a-option>
+                    <a-option :value="3">好奇宝宝</a-option>
+                    <a-option :value="4">独立自主</a-option>
+                    <a-option :value="5">粘人依赖</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
+        </a-col>
+        <a-divider style="height: 84px" direction="vertical" />
+        <a-col :flex="'86px'" style="text-align: right">
+          <a-space direction="vertical" :size="18">
+            <a-button type="primary" @click="handleSearch">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button @click="handleReset">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+    </a-card>
 
-    <!-- 操作按钮组 -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button type="primary" @click="showAddModal">添加宠物</a-button>
-        <a-button @click="loadPets">刷新</a-button>
-      </a-space>
-    </div>
+    <a-card class="general-card" style="margin-top: 16px">
+      <template #title><span class="card-title">宠物列表</span></template>
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="showAddModal">
+            <template #icon><icon-plus /></template>
+            添加宠物
+          </a-button>
+          <a-button @click="loadPets">
+            <template #icon><icon-refresh /></template>
+            刷新
+          </a-button>
+        </a-space>
+      </template>
 
-    <!-- 宠物列表 -->
-    <div class="pro-content-area">
       <a-table
         :columns="columns"
-        :data="pets"
+        :data="filteredPets"
         :loading="loading"
-        :pagination="pagination"
-        @change="handleTableChange"
+        :pagination="paginationConfig"
+        @page-change="onPageChange"
+        @page-size-change="onPageSizeChange"
         row-key="pet_id"
       >
         <template #avatar="{ record }">
           <a-avatar :size="40" :style="{ backgroundColor: record.avatar_color }">
-            {{ record.pet_name.charAt(0) }}
+            {{ record.pet_name?.charAt(0) || '?' }}
           </a-avatar>
         </template>
         <template #personality="{ record }">
@@ -57,7 +89,7 @@
           </a-space>
         </template>
       </a-table>
-    </div>
+    </a-card>
 
     <!-- 添加/编辑宠物弹窗 -->
     <a-modal
@@ -91,11 +123,12 @@
         <a-form-item label="启用免打扰">
           <a-switch v-model="petForm.dnd_enabled" />
         </a-form-item>
-        <a-form-item label="免打扰开始时间" v-if="petForm.dnd_enabled">
-          <a-time-picker v-model="petForm.dnd_start_time" format="HH:mm" placeholder="选择开始时间" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="免打扰结束时间" v-if="petForm.dnd_enabled">
-          <a-time-picker v-model="petForm.dnd_end_time" format="HH:mm" placeholder="选择结束时间" style="width: 100%" />
+        <a-form-item v-if="petForm.dnd_enabled" label="免打扰时间">
+          <a-space>
+            <a-time-picker v-model="petForm.dnd_start_time" format="HH:mm" placeholder="开始时间" style="width: 140px" />
+            <span>至</span>
+            <a-time-picker v-model="petForm.dnd_end_time" format="HH:mm" placeholder="结束时间" style="width: 140px" />
+          </a-space>
         </a-form-item>
         <a-divider>提醒设置</a-divider>
         <a-form-item label="运动提醒">
@@ -116,21 +149,28 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import axios from 'axios'
 import dayjs from 'dayjs'
 
 const loading = ref(false)
 const saving = ref(false)
 const modalVisible = ref(false)
 const isEdit = ref(false)
-const searchKeyword = ref('')
 
+const searchForm = reactive({ keyword: '', personality: undefined })
 const pets = ref([])
 const devices = ref([])
 
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+
+const paginationConfig = computed(() => ({
+  current: pagination.current,
+  pageSize: pagination.pageSize,
+  total: pagination.total,
+  showTotal: true,
+  showSizeChanger: true
+}))
 
 const petForm = reactive({
   pet_id: '', pet_name: '', personality: 1, device_id: '',
@@ -145,40 +185,56 @@ const columns = [
   { title: '宠物性格', slotName: 'personality', width: 120 },
   { title: '绑定设备', dataIndex: 'device_id', ellipsis: true },
   { title: '免打扰', slotName: 'dndEnabled', width: 100 },
-  { title: '创建时间', dataIndex: 'create_time', width: 180 },
-  { title: '操作', slotName: 'actions', width: 150 }
+  { title: '创建时间', dataIndex: 'create_time', width: 170 },
+  { title: '操作', slotName: 'actions', width: 150, fixed: 'right' }
 ]
 
 const API_BASE = '/api/v1'
 
+const filteredPets = computed(() => {
+  let result = pets.value
+  if (searchForm.keyword) {
+    result = result.filter(p => p.pet_name.includes(searchForm.keyword))
+  }
+  if (searchForm.personality !== undefined) {
+    result = result.filter(p => p.personality === searchForm.personality)
+  }
+  return result
+})
+
 const loadPets = async () => {
   loading.value = true
   try {
-    const res = await axios.get(`${API_BASE}/pets`, {
-      params: { page: pagination.current, page_size: pagination.pageSize }
+    const token = localStorage.getItem('token')
+    const res = await fetch(`${API_BASE}/pets?page=${pagination.current}&page_size=${pagination.pageSize}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
     })
-    if (res.data.code === 0) {
-      pets.value = res.data.data.list
-      pagination.total = res.data.data.pagination.total
+    const data = await res.json()
+    if (data.code === 0) {
+      pets.value = data.data.list || []
+      pagination.total = data.data.pagination?.total || 0
     }
-  } catch (err) {
-    pets.value = [
-      { pet_id: 'PET001', pet_name: '小橘', personality: 1, device_id: 'DEV001', dnd_enabled: true, dnd_start_time: '22:00', dnd_end_time: '07:00', avatar_color: '#f6ad55', create_time: '2026-03-15 10:00:00', settings: { exercise_reminder: true, feeding_reminder: true, health_monitoring: true }, remark: '' },
-      { pet_id: 'PET002', pet_name: '布丁', personality: 2, device_id: 'DEV002', dnd_enabled: false, dnd_start_time: '', dnd_end_time: '', avatar_color: '#fc8181', create_time: '2026-03-10 14:30:00', settings: { exercise_reminder: true, feeding_reminder: false, health_monitoring: true }, remark: '需要特别关注健康' },
-      { pet_id: 'PET003', pet_name: '豆豆', personality: 3, device_id: 'DEV003', dnd_enabled: true, dnd_start_time: '12:00', dnd_end_time: '14:00', avatar_color: '#68d391', create_time: '2026-03-05 09:15:00', settings: { exercise_reminder: false, feeding_reminder: true, health_monitoring: false }, remark: '' }
-    ]
+  } catch (e) {
+    pets.value = getMockPets()
     pagination.total = pets.value.length
-    Message.warning('使用模拟数据')
-  } finally {
-    loading.value = false
-  }
+  } finally { loading.value = false }
 }
+
+const getMockPets = () => [
+  { pet_id: 'PET001', pet_name: '小橘', personality: 1, device_id: 'DEV001', dnd_enabled: true, dnd_start_time: '22:00', dnd_end_time: '07:00', avatar_color: '#f6ad55', create_time: '2026-03-15 10:00:00', settings: { exercise_reminder: true, feeding_reminder: true, health_monitoring: true }, remark: '' },
+  { pet_id: 'PET002', pet_name: '布丁', personality: 2, device_id: 'DEV002', dnd_enabled: false, dnd_start_time: '', dnd_end_time: '', avatar_color: '#fc8181', create_time: '2026-03-10 14:30:00', settings: { exercise_reminder: true, feeding_reminder: false, health_monitoring: true }, remark: '需要特别关注' },
+  { pet_id: 'PET003', pet_name: '豆豆', personality: 3, device_id: 'DEV003', dnd_enabled: true, dnd_start_time: '12:00', dnd_end_time: '14:00', avatar_color: '#68d391', create_time: '2026-03-05 09:15:00', settings: { exercise_reminder: false, feeding_reminder: true, health_monitoring: false }, remark: '' }
+]
 
 const loadDevices = async () => {
   try {
-    const res = await axios.get(`${API_BASE}/devices`, { params: { page_size: 100 } })
-    if (res.data.code === 0) devices.value = res.data.data.list
-  } catch (err) {
+    const token = localStorage.getItem('token')
+    const res = await fetch(`${API_BASE}/devices?page_size=100`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+    const data = await res.json()
+    if (data.code === 0) devices.value = data.data.list || []
+  } catch (e) {
     devices.value = [
       { device_id: 'DEV001', hardware_model: 'MDM-Pro-200' },
       { device_id: 'DEV002', hardware_model: 'MDM-Mini-100' },
@@ -187,7 +243,10 @@ const loadDevices = async () => {
   }
 }
 
-const handleTableChange = (pag) => { pagination.current = pag.current; loadPets() }
+const handleSearch = () => { pagination.current = 1; loadPets() }
+const handleReset = () => { searchForm.keyword = ''; searchForm.personality = undefined; pagination.current = 1; loadPets() }
+const onPageChange = (page) => { pagination.current = page; loadPets() }
+const onPageSizeChange = (size) => { pagination.pageSize = size; pagination.current = 1; loadPets() }
 
 const showAddModal = () => {
   isEdit.value = false
@@ -198,11 +257,10 @@ const showAddModal = () => {
 const editPet = (record) => {
   isEdit.value = true
   Object.assign(petForm, {
-    pet_id: record.pet_id, pet_name: record.pet_name, personality: record.personality,
-    device_id: record.device_id, dnd_enabled: record.dnd_enabled,
+    ...record,
     dnd_start_time: record.dnd_start_time ? dayjs(record.dnd_start_time, 'HH:mm') : null,
     dnd_end_time: record.dnd_end_time ? dayjs(record.dnd_end_time, 'HH:mm') : null,
-    settings: { ...record.settings }, remark: record.remark || ''
+    settings: { ...record.settings }
   })
   modalVisible.value = true
 }
@@ -211,47 +269,36 @@ const handleSave = async () => {
   if (!petForm.pet_name) { Message.warning('请输入宠物名称'); return }
   saving.value = true
   try {
+    const token = localStorage.getItem('token')
     const submitData = {
       ...petForm,
-      dnd_start_time: petForm.dnd_start_time ? petForm.dnd_start_time.format('HH:mm') : '',
-      dnd_end_time: petForm.dnd_end_time ? petForm.dnd_end_time.format('HH:mm') : ''
+      dnd_start_time: petForm.dnd_start_time?.format?.('HH:mm') || '',
+      dnd_end_time: petForm.dnd_end_time?.format?.('HH:mm') || ''
     }
-    if (isEdit.value) {
-      await axios.put(`${API_BASE}/pets/${petForm.pet_id}`, submitData)
-      Message.success('宠物配置已更新')
-    } else {
-      await axios.post(`${API_BASE}/pets`, submitData)
-      Message.success('宠物添加成功')
-    }
-    modalVisible.value = false
-    loadPets()
-  } catch (err) {
-    setTimeout(() => {
-      if (isEdit.value) {
-        const idx = pets.value.findIndex(p => p.pet_id === petForm.pet_id)
-        if (idx !== -1) pets.value[idx] = { ...pets.value[idx], ...petForm }
-        Message.success('宠物配置已更新')
-      } else {
-        pets.value.unshift({
-          pet_id: `PET${Date.now()}`, ...petForm,
-          dnd_start_time: petForm.dnd_start_time?.format?.('HH:mm') || '',
-          dnd_end_time: petForm.dnd_end_time?.format?.('HH:mm') || '',
-          create_time: new Date().toLocaleString(),
-          avatar_color: ['#f6ad55', '#fc8181', '#68d391', '#63b3ed', '#f687b3'][Math.floor(Math.random() * 5)]
-        })
-        Message.success('宠物添加成功')
-      }
-      modalVisible.value = false
-    }, 500)
-  } finally {
-    saving.value = false
+    const method = isEdit.value ? 'PUT' : 'POST'
+    const url = isEdit.value ? `${API_BASE}/pets/${petForm.pet_id}` : `${API_BASE}/pets`
+    const res = await fetch(url, {
+      method,
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(submitData)
+    })
+    const data = await res.json()
+    if (data.code === 0) { Message.success(isEdit.value ? '更新成功' : '添加成功'); modalVisible.value = false; loadPets(); return }
+  } catch (e) {}
+  // mock
+  if (isEdit.value) {
+    const idx = pets.value.findIndex(p => p.pet_id === petForm.pet_id)
+    if (idx !== -1) pets.value[idx] = { ...pets.value[idx], ...petForm, dnd_start_time: petForm.dnd_start_time?.format?.('HH:mm'), dnd_end_time: petForm.dnd_end_time?.format?.('HH:mm') }
+    Message.success('宠物配置已更新（模拟）')
+  } else {
+    pets.value.unshift({ pet_id: `PET${Date.now()}`, ...petForm, dnd_start_time: petForm.dnd_start_time?.format?.('HH:mm'), dnd_end_time: petForm.dnd_end_time?.format?.('HH:mm'), create_time: new Date().toLocaleString(), avatar_color: ['#f6ad55', '#fc8181', '#68d391', '#63b3ed', '#f687b3'][Math.floor(Math.random() * 5)] })
+    Message.success('宠物添加成功（模拟）')
   }
+  modalVisible.value = false
+  saving.value = false
 }
 
-const deletePet = (record) => {
-  pets.value = pets.value.filter(p => p.pet_id !== record.pet_id)
-  Message.success('宠物已删除')
-}
+const deletePet = (record) => { pets.value = pets.value.filter(p => p.pet_id !== record.pet_id); Message.success('宠物已删除') }
 
 const resetForm = () => {
   Object.assign(petForm, {
@@ -268,12 +315,7 @@ onMounted(() => { loadPets(); loadDevices() })
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.pro-breadcrumb { margin-bottom: 16px; }
-.pro-search-bar { margin-bottom: 12px; }
-.pro-action-bar { margin-bottom: 16px; }
-.pro-content-area {
-  background: #fff; border-radius: 8px; padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
+.pet-config-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.general-card { border-radius: 8px; }
+.card-title { font-weight: 600; font-size: 15px; }
 </style>

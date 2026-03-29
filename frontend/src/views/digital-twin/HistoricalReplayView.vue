@@ -1,12 +1,6 @@
 <template>
   <div class="page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>宠物数字孪生</a-breadcrumb-item>
-      <a-breadcrumb-item>历史回放</a-breadcrumb-item>
-    </a-breadcrumb>
-
+    <Breadcrumb :items="['menu.digitalTwin', 'menu.digitalTwin.history']" />
     <!-- 搜索筛选区 -->
     <div class="search-bar">
       <a-space wrap>
@@ -419,13 +413,7 @@ onMounted(() => {
 
 <style scoped>
 .page-container {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
-}
-
-.breadcrumb {
-  margin-bottom: 16px;
+  padding: 16px;
 }
 
 .search-bar {

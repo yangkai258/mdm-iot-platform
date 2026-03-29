@@ -1,14 +1,28 @@
 <template>
-  <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>设备管理</a-breadcrumb-item>
-      <a-breadcrumb-item>
-        <a @click="goBack">设备列表</a>
-      </a-breadcrumb-item>
-      <a-breadcrumb-item>设备详情</a-breadcrumb-item>
-    </a-breadcrumb>
+  <div class="device-detail-container">
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '设备管理', href: '/devices' }, { label: '设备详情' }]" />
+
+    <a-card class="general-card" style="margin-bottom: 16px">
+      <a-row :gutter="16">
+        <a-col :span="6">
+          <a-statistic title="设备ID" :value="deviceInfo.device_id || '-'" />
+        </a-col>
+        <a-col :span="6">
+          <a-statistic title="在线状态">
+            <template #prefix><a-badge :status="shadow.is_online ? 'success' : 'default'" /></template>
+            <span :style="{ color: shadow.is_online ? '#52c41a' : '#999', fontWeight: 600 }">
+              {{ shadow.is_online ? '在线' : '离线' }}
+            </span>
+          </a-statistic>
+        </a-col>
+        <a-col :span="6">
+          <a-statistic title="电量" :value="shadow.battery_level || 0" :suffix="'%'" />
+        </a-col>
+        <a-col :span="6">
+          <a-statistic title="固件版本" :value="deviceInfo.firmware_version || '-'" />
+        </a-col>
+      </a-row>
+    </a-card>
 
     <a-spin :spinning="loading">
       <a-tabs v-model:active-key="activeTab" class="device-tabs">
@@ -373,7 +387,9 @@ onUnmounted(() => { if (shadowPollingTimer) clearInterval(shadowPollingTimer) })
 </script>
 
 <style scoped>
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.device-detail-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.general-card { border-radius: 8px; }
+.device-tabs { background: #fff; padding: 16px; border-radius: 8px; }
 .pro-breadcrumb { margin-bottom: 16px; }
 .device-tabs { background: #fff; padding: 16px; border-radius: 8px; }
 .detail-card { margin-bottom: 16px; border-radius: 8px; }

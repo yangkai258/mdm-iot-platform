@@ -1,24 +1,13 @@
 <template>
   <div class="company-list-page">
-    <div class="breadcrumb-wrapper">
-      <a-breadcrumb>
-        <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-        <a-breadcrumb-item>组织管理</a-breadcrumb-item>
-        <a-breadcrumb-item>部门管理</a-breadcrumb-item>
-      </a-breadcrumb>
-    </div>
-
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <a-input-search v-model="searchKey" placeholder="搜索部门..." style="width: 260px" @search="loadDepartments" />
+    <Breadcrumb :items="['menu.org', 'menu.org.departments']" />
+    <a-card class="general-card" title="部门管理">
+      <template #extra>
+        <a-button type="primary" @click="openCreateModal(null)"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-bar">
+        <a-input-search v-model="searchKey" placeholder="搜索部门..." style="width: 260px" @search="loadDepartments" allow-clear />
       </div>
-      <div class="toolbar-right">
-        <a-button type="primary" @click="openCreateModal(null)">「新建」</a-button>
-        <a-button @click="loadDepartments">「刷新」</a-button>
-      </div>
-    </div>
-
-    <a-card :bordered="false" class="table-card">
       <a-spin :loading="loading">
         <a-tree :data="treeData" :block-node="true" :show-line="true" row-key="id" @expand="onExpand">
           <template #title="node">
@@ -52,6 +41,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const searchKey = ref('')
@@ -96,11 +86,8 @@ onMounted(() => loadDepartments())
 </script>
 
 <style scoped>
-.company-list-page { padding: 24px; min-height: 100%; background: #f2f3f5; }
-.breadcrumb-wrapper { margin-bottom: 16px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: #fff; padding: 16px; border-radius: 4px; }
-.toolbar-left, .toolbar-right { display: flex; gap: 8px; }
-.table-card { background: #fff; border-radius: 4px; }
+.company-list-page { padding: 16px; }
+.search-bar { margin-bottom: 16px; }
 .tree-node-content { display: flex; align-items: center; gap: 8px; }
 .node-code { color: #999; font-size: 12px; }
 .node-actions { margin-left: auto; }

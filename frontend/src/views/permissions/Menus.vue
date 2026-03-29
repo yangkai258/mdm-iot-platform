@@ -1,37 +1,23 @@
 <template>
   <div class="page-container">
-    <!-- 面包屑 + 搜索栏 -->
-    <div class="page-header">
-      <div class="header-left">
-        <a-breadcrumb>
-          <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-          <a-breadcrumb-item>系统管理</a-breadcrumb-item>
-          <a-breadcrumb-item>菜单管理</a-breadcrumb-item>
-        </a-breadcrumb>
+    <Breadcrumb :items="['menu.permission', 'menu.permission.menus']" />
+    <a-card class="general-card" title="菜单管理">
+      <template #extra>
+        <a-space :size="12">
+          <a-button type="primary" @click="openCreateModal(null)"><icon-plus />新建</a-button>
+          <a-button @click="loadMenus"><icon-refresh />刷新</a-button>
+        </a-space>
+      </template>
+      <div class="search-bar">
+        <a-input-search
+          v-model="searchForm.keyword"
+          placeholder="菜单名称"
+          style="width: 280px"
+          @search="doSearch"
+          allow-clear
+        />
       </div>
-    </div>
-
-    <!-- 搜索框（左侧） -->
-    <div class="search-bar">
-      <a-input-search
-        v-model="searchForm.keyword"
-        placeholder="菜单名称"
-        style="width: 280px"
-        @search="doSearch"
-        allow-clear
-      />
-    </div>
-
-    <!-- 操作按钮栏（左侧） -->
-    <div class="action-bar">
-      <a-space :size="12">
-        <a-button type="primary" @click="openCreateModal(null)">「新建」</a-button>
-        <a-button @click="loadMenus">「刷新」</a-button>
-      </a-space>
-    </div>
-
-    <!-- 卡片容器 -->
-    <a-card :bordered="false" class="table-card">
+      <!-- 卡片容器 -->
       <!-- 树形表格 -->
       <a-table
         :columns="columns"
@@ -130,6 +116,7 @@
 <script setup>
 import { ref, reactive, onMounted, computed } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
+import { IconPlus, IconRefresh } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const formVisible = ref(false)
@@ -378,34 +365,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-  background-color: #f2f3f5;
-  min-height: 100vh;
-}
-.page-header {
-  margin-bottom: 16px;
-}
-.header-left {
-  display: flex;
-  align-items: center;
-}
-.search-bar {
-  margin-bottom: 12px;
-}
-.action-bar {
-  margin-bottom: 12px;
-}
-.table-card {
-  border-radius: 4px;
-}
-.menu-name-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.menu-icon {
-  font-size: 16px;
-  color: var(--color-text-2);
-}
+.page-container { padding: 16px; }
+.search-bar { margin-bottom: 16px; }
+.menu-name-cell { display: flex; align-items: center; gap: 8px; }
+.menu-icon { font-size: 16px; color: var(--color-text-2); }
 </style>

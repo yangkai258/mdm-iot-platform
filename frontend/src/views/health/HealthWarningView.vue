@@ -1,32 +1,34 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="严重程度">
-          <a-select v-model="form.level" placeholder="全部" style="width: 120px" allow-clear>
-            <a-option value="critical">危急</a-option>
-            <a-option value="high">高</a-option>
-            <a-option value="medium">中</a-option>
-            <a-option value="low">低</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="处理状态">
-          <a-select v-model="form.status" placeholder="全部" style="width: 120px" allow-clear>
-            <a-option value="pending">待处理</a-option>
-            <a-option value="confirmed">已确认</a-option>
-            <a-option value="ignored">已忽略</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="loadData">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建预警</a-button>
-    </div>
-    <a-table
+    <Breadcrumb :items="['menu.health', 'menu.health.warning']" />
+    <a-card class="general-card" title="健康预警">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建预警</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="严重程度">
+            <a-select v-model="form.level" placeholder="全部" style="width: 120px" allow-clear>
+              <a-option value="critical">危急</a-option>
+              <a-option value="high">高</a-option>
+              <a-option value="medium">中</a-option>
+              <a-option value="low">低</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="处理状态">
+            <a-select v-model="form.status" placeholder="全部" style="width: 120px" allow-clear>
+              <a-option value="pending">待处理</a-option>
+              <a-option value="confirmed">已确认</a-option>
+              <a-option value="ignored">已忽略</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table
       :columns="columns"
       :data="data"
       :loading="loading"
@@ -65,6 +67,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const modalVisible = ref(false)
@@ -178,7 +181,6 @@ onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

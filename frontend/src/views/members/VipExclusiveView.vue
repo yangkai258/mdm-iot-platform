@@ -1,29 +1,40 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+  <div class="container">
+    <Breadcrumb :items="['menu.members', 'menu.members.vipExclusive']" />
+    <a-card class="general-card" title="VIP专属权益">
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
       </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+    </a-card>
+    <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'" :width="560">
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="权益名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="VIP等级"><a-input v-model="form.vip_level" /></a-form-item>
+        <a-form-item label="描述"><a-textarea v-model="form.description" :rows="3" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button @click="formVisible = false">取消</a-button>
         <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
     </a-modal>
@@ -31,114 +42,35 @@
 </template>
 
 <script setup>
-
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import * as api from '@/api/member'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
-const dataList = ref([])
-const levelOptions = ref([])
-const productOptions = ref([])
 const loading = ref(false)
-const formLoading = ref(false)
 const formVisible = ref(false)
 const isEdit = ref(false)
-
-const filters = reactive({ keyword: '' })
+const form = reactive({ keyword: '', name: '', vip_level: '', description: '' })
+const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-
-const paginationConfig = computed(() => ({
-  current: pagination.current, pageSize: pagination.pageSize, total: pagination.total,
-  showTotal: true, showPageSize: true, pageSizeOptions: [10, 20, 50, 100]
-}))
-
-const form = reactive({
-  name: '', levelId: undefined, discountType: 'percent',
-  discountValue: 1, productIds: [], description: ''
-})
-
 const columns = [
-  { title: '活动名称', dataIndex: 'name', width: 200 },
-  { title: '适用等级', slotName: 'level', width: 140 },
-  { title: '优惠内容', slotName: 'discount', width: 140 },
-  { title: '适用商品', dataIndex: 'productName', width: 180, ellipsis: true },
-  { title: '操作', slotName: 'actions', width: 150 }
+  { title: '权益名称', dataIndex: 'name', width: 200 },
+  { title: 'VIP等级', dataIndex: 'vip_level', width: 120 },
+  { title: '描述', dataIndex: 'description', ellipsis: true },
+  { title: '操作', slotName: 'actions', width: 120 }
 ]
 
 const loadData = async () => {
   loading.value = true
   try {
-    const d = {
-      list: [
-        { id: 1, name: 'VIP专属折扣', levelName: '黄金会员', discountType: 'percent', discountValue: 0.85, productName: '全场商品' },
-        { id: 2, name: '钻石立减', levelName: '钻石会员', discountType: 'amount', discountValue: 50, productName: '指定商品' }
-      ],
-      total: 2
-    }
-    dataList.value = d.list
-    pagination.total = d.total
-  } catch (err) {
-    dataList.value = []
-  } finally {
-    loading.value = false
-  }
+    const res = await fetch('/api/v1/members/vip-exclusive', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    data.value = res.data?.list || []
+    pagination.total = data.value.length
+  } catch { data.value = [] } finally { loading.value = false }
 }
-
-const loadLevelOptions = async () => {
-  try {
-    const res = await api.getLevelList()
-    levelOptions.value = res.data || []
-  } catch (err) { /* ignore */ }
-}
-
-const showCreateDrawer = () => {
-  isEdit.value = false
-  loadLevelOptions()
-  Object.assign(form, { name: '', levelId: undefined, discountType: 'percent', discountValue: 1, productIds: [], description: '' })
-  formVisible.value = true
-}
-
-const showEdit = (record) => {
-  isEdit.value = true
-  loadLevelOptions()
-  Object.assign(form, { name: record.name, levelId: record.levelId, discountType: record.discountType, discountValue: record.discountValue, productIds: [], description: record.description || '' })
-  formVisible.value = true
-}
-
-const handleFormSubmit = async () => {
-  if (!form.name || !form.levelId) { Message.warning('请填写名称和选择等级'); return }
-  formLoading.value = true
-  try {
-    await new Promise(r => setTimeout(r, 500))
-    Message.success(isEdit.value ? '更新成功' : '创建成功')
-    formVisible.value = false
-    loadData()
-  } catch (err) {
-    Message.error(err.message || '操作失败')
-  } finally {
-    formLoading.value = false
-  }
-}
-
-const handleDelete = async (record) => {
-  try {
-    await new Promise(r => setTimeout(r, 300))
-    Message.success('删除成功')
-    loadData()
-  } catch (err) {
-    Message.error(err.message || '删除失败')
-  }
-}
-
+const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', vip_level: '', description: '' }); formVisible.value = true }
+const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
+const handleDelete = () => { Message.success('删除成功'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
-const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadData() }
-
 onMounted(() => loadData())
-
 </script>
-
-<style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
-</style>

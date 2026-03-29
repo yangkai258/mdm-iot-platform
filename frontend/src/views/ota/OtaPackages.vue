@@ -1,6 +1,9 @@
 <template>
   <div class="ota-packages-container">
-    <a-card class="stats-card">
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: 'OTA管理' }, { label: '固件包列表' }]" />
+
+    <a-card class="general-card">
+      <template #title><span class="card-title">固件统计</span></template>
       <a-row :gutter="16">
         <a-col :span="8">
           <a-statistic title="固件包总数" :value="stats.total" />
@@ -14,24 +17,19 @@
       </a-row>
     </a-card>
 
-    <a-card class="table-card">
-      <template #title>
-        <div class="card-title">
-          <span>固件包管理</span>
-          <a-space>
-            <a-select v-model="filterHardwareModel" placeholder="硬件型号" allow-clear style="width: 160px" @change="handleFilter">
-              <a-option v-for="model in hardwareModels" :key="model" :value="model">{{ model }}</a-option>
-            </a-select>
-            <a-input-search v-model="filterVersion" placeholder="版本号搜索" style="width: 160px" @search="handleFilter" />
-            <a-select v-model="filterStatus" placeholder="状态" allow-clear style="width: 120px" @change="handleFilter">
-              <a-option :value="true">激活</a-option>
-              <a-option :value="false">停用</a-option>
-            </a-select>
-            <a-button type="primary" @click="showAddDrawer">上传固件包</a-button>
-          </a-space>
-        </div>
+    <a-card class="general-card" style="margin-top: 16px">
+      <template #title><span class="card-title">固件包管理</span></template>
+      <template #extra>
+        <a-space>
+          <a-select v-model="filterHardwareModel" placeholder="硬件型号" allow-clear style="width: 160px" @change="handleFilter">
+            <a-option v-for="model in hardwareModels" :key="model" :value="model">{{ model }}</a-option>
+          </a-select>
+          <a-button type="primary" @click="showAddDrawer">
+            <template #icon><icon-plus /></template>
+            上传固件包
+          </a-button>
+        </a-space>
       </template>
-
       <a-table :columns="columns" :data="packages" :loading="loading" :pagination="paginationConfig" row-key="id" @page-change="handlePageChange" @page-size-change="handlePageSizeChange">
         <template #version="{ record }">
           <a-tag color="blue">{{ record.version }}</a-tag>
@@ -337,23 +335,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.ota-packages-container {
-  padding: 16px;
-}
-
-.stats-card {
-  margin-bottom: 16px;
-}
-
-.table-card {
-  margin-bottom: 16px;
-}
-
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
+.ota-packages-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.general-card { border-radius: 8px; }
+.card-title { font-weight: 600; font-size: 15px; }
 </style>

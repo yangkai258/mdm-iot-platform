@@ -26,7 +26,7 @@
     </div>
 
     <!-- 筛选面板 -->
-    <a-card v-if="showFilter" :bordered="false" style="margin-bottom: 12px">
+    <a-card v-if="showFilter" :bordered="false" class="general-card" style="margin-bottom: 12px">
       <a-space wrap>
         <a-select v-model="filterStatus" placeholder="状态" style="width: 120px" allow-clear>
           <a-option value="active">正常</a-option>
@@ -46,7 +46,7 @@
     </a-card>
 
     <!-- 租户列表 -->
-    <a-card :bordered="false">
+    <a-card :bordered="false" class="general-card">
       <a-table
         :columns="columns"
         :data="filteredData"
@@ -619,16 +619,22 @@ onMounted(() => {
 
 <style scoped>
 .page-container {
-  padding: 20px;
+  padding: 20px 24px;
+  min-height: calc(100vh - 64px);
+  background: #f5f7fa;
 }
+
 .breadcrumb {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 .search-bar {
   margin-bottom: 12px;
 }
 .action-bar {
   margin-bottom: 16px;
+}
+.general-card {
+  border-radius: 8px;
 }
 .text-danger {
   color: #f53f3f;

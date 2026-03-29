@@ -1,18 +1,29 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="行为ID"><a-input v-model="form.id" placeholder="请输入行为ID" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+  <div class="container">
+    <Breadcrumb :items="['menu.ai', 'menu.ai.behavior']" />
+    <a-card class="general-card" title="AI 行为详情">
+      <template #extra>
+        <a-space :size="12">
+          <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+          <a-button @click="handleSearch"><icon-refresh />刷新</a-button>
+        </a-space>
+      </template>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="行为ID">
+            <a-input v-model="form.id" placeholder="请输入行为ID" @pressEnter="handleSearch" />
+          </a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" row-key="id" />
+    </a-card>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
@@ -27,13 +38,11 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { Message } from '@arco-design/web-vue'
-import { getAiMonitorEventById } from '@/api/ai'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const route = useRoute()
-const router = useRouter()
-
 const loading = ref(false)
 const data = ref([])
 const modalVisible = ref(false)
@@ -55,38 +64,24 @@ const columns = [
   { title: '用户', dataIndex: 'user_id', width: 100 },
   { title: '模型', dataIndex: 'model_version', width: 160 },
   { title: '事件类型', dataIndex: 'behavior_type', width: 120 },
-  { title: '延迟', dataIndex: 'latency_ms', width: 90 },
+  { title: '延迟(ms)', dataIndex: 'latency_ms', width: 90 },
   { title: '置信度', dataIndex: 'confidence', width: 90 },
   { title: '状态', dataIndex: 'status', width: 90 }
 ]
 
-const handleSearch = () => {
-  loadData()
-}
-
-const handleReset = () => {
-  form.id = ''
-  loadData()
-}
-
-const handleCreate = () => {
-  modalTitle.value = '新建'
-  modalVisible.value = true
-}
-
-const handleSubmit = () => {
-  modalVisible.value = false
-  Message.success('保存成功')
-}
+const handleSearch = () => { loadData() }
+const handleReset = () => { form.id = ''; loadData() }
+const handleCreate = () => { modalTitle.value = '新建'; modalVisible.value = true }
+const handleSubmit = () => { modalVisible.value = false; Message.success('保存成功') }
 
 const loadData = async () => {
   loading.value = true
   try {
     if (route.params.id) {
-      const res = await getAiMonitorEventById(route.params.id)
-      if (res.code === 0) {
-        data.value = res.data ? [res.data] : []
-      }
+      const res = await fetch(`/api/v1/ai/monitor/events/${route.params.id}`, {
+        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+      }).then(r => r.json())
+      if (res.code === 0) data.value = res.data ? [res.data] : []
     } else {
       data.value = []
     }
@@ -97,13 +92,5 @@ const loadData = async () => {
   }
 }
 
-onMounted(() => {
-  loadData()
-})
+onMounted(() => { loadData() })
 </script>
-
-<style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
-</style>

@@ -1,29 +1,19 @@
 <template>
   <div class="page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-      <a-breadcrumb-item>租户管理</a-breadcrumb-item>
-      <a-breadcrumb-item>租户审批</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 搜索框（左上角） -->
-    <div class="search-bar">
-      <a-input-search
-        v-model="searchKey"
-        placeholder="搜索租户名称/联系人"
-        style="width: 280px"
-        @search="loadApplications"
-      />
-    </div>
-
-    <!-- 操作按钮组（靠左） -->
-    <div class="action-bar">
-      <a-button @click="loadApplications">「刷新」</a-button>
-    </div>
-
-    <!-- 待审核列表 -->
-    <a-card :bordered="false">
+    <Breadcrumb :items="['menu.tenant', 'menu.tenant.approval']" />
+    <a-card class="general-card" title="租户审批">
+      <template #extra>
+        <a-button @click="loadApplications"><icon-refresh />刷新</a-button>
+      </template>
+      <div class="search-bar">
+        <a-input-search
+          v-model="searchKey"
+          placeholder="搜索租户名称/联系人"
+          style="width: 280px"
+          @search="loadApplications"
+        />
+      </div>
+      <!-- 待审核列表 -->
       <a-table
         :columns="columns"
         :data="filteredData"
@@ -146,6 +136,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconRefresh } from '@arco-design/web-vue/es/icon'
 import axios from 'axios'
 
 const loading = ref(false)
@@ -324,20 +315,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-}
-.breadcrumb {
-  margin-bottom: 16px;
-}
-.search-bar {
-  margin-bottom: 16px;
-}
-.action-bar {
-  margin-bottom: 16px;
-}
-.text-gray {
-  color: #999;
-  font-size: 12px;
-}
+.page-container { padding: 16px; }
+.search-bar { margin-bottom: 16px; }
+.text-gray { color: #999; font-size: 12px; }
 </style>

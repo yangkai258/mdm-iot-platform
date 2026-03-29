@@ -1,5 +1,7 @@
 <template>
-  <div class="app-device-control">
+  <div class="container" style="min-height: 100vh; background: #f5f6f7;">
+    <Breadcrumb :items="['menu.apps', 'menu.apps.deviceControl']" />
+    <div class="app-device-control">
     <!-- 顶部设备信息栏 -->
     <div class="device-header">
       <div class="header-top">
@@ -168,11 +170,15 @@
       </a-descriptions>
     </a-drawer>
   </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { Message } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 import { getDevice, getDeviceStatus, sendDeviceCommand } from '@/api/app'
 
 const router = useRouter()
@@ -551,4 +557,4 @@ onMounted(() => {
   background: transparent;
   box-shadow: none;
 }
-</style>
+

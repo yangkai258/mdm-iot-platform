@@ -1,12 +1,6 @@
 <template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>仿真测试</a-breadcrumb-item>
-      <a-breadcrumb-item>自动化测试框架</a-breadcrumb-item>
-    </a-breadcrumb>
-
+    <Breadcrumb :items="['menu.simulation', 'menu.simulation.testFramework']" />
     <!-- 操作栏 -->
     <div class="pro-action-bar">
       <a-space>

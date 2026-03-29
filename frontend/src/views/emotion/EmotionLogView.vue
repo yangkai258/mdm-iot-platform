@@ -1,26 +1,28 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="情绪类型">
-          <a-select v-model="form.emotion" placeholder="请选择" allow-clear style="width: 140px">
-            <a-option value="happy">开心</a-option>
-            <a-option value="sad">难过</a-option>
-            <a-option value="angry">生气</a-option>
-            <a-option value="fear">害怕</a-option>
-            <a-option value="neutral">平静</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleExport">导出</a-button>
-    </div>
-    <a-table
+    <Breadcrumb :items="['menu.emotion', 'menu.emotion.log']" />
+    <a-card class="general-card" title="情绪日志">
+      <template #extra>
+        <a-button @click="handleExport"><icon-download />导出</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="情绪类型">
+            <a-select v-model="form.emotion" placeholder="请选择" allow-clear style="width: 140px">
+              <a-option value="happy">开心</a-option>
+              <a-option value="sad">难过</a-option>
+              <a-option value="angry">生气</a-option>
+              <a-option value="fear">害怕</a-option>
+              <a-option value="neutral">平静</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table
       :columns="columns"
       :data="data"
       :loading="loading"
@@ -33,6 +35,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconDownload } from '@arco-design/web-vue/es/icon'
 import { getEmotionLogs } from '@/api/emotion'
 
 const loading = ref(false)
@@ -95,7 +98,6 @@ onMounted(() => loadData())
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

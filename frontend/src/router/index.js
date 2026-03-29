@@ -58,6 +58,31 @@ const routes = [
     name: 'Members',
     component: () => import('../views/Member.vue')
   },
+  {
+    path: 'members/cards',
+    name: 'MemberCards',
+    component: () => import('../views/members/MemberCardTypesView.vue')
+  },
+  {
+    path: 'members/levels',
+    name: 'MemberLevels',
+    component: () => import('../views/members/MemberLevels.vue')
+  },
+  {
+    path: 'members/tags',
+    name: 'MemberTags',
+    component: () => import('../views/members/TagView.vue')
+  },
+  {
+    path: 'ai/behavior',
+    name: 'AiBehavior',
+    component: () => import('../views/ai/AIBehaviorView.vue')
+  },
+  {
+    path: 'ai/emotion',
+    name: 'AiEmotion',
+    component: () => import('../views/ai/AIEmotionView.vue')
+  },
       {
     path: 'pet',
     name: 'Pet',

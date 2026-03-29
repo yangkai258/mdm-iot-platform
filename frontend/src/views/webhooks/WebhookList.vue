@@ -1,37 +1,41 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="端点URL">
-          <a-input v-model="form.url" placeholder="请输入URL" />
-        </a-form-item>
-        <a-form-item label="事件类型">
-          <a-select v-model="form.event_type" placeholder="请选择" allow-clear style="width: 160px">
-            <a-option value="device.online">设备上线</a-option>
-            <a-option value="device.offline">设备离线</a-option>
-            <a-option value="device.data">设备数据</a-option>
-            <a-option value="alert.created">告警创建</a-option>
-            <a-option value="ota.started">OTA开始</a-option>
-            <a-option value="ota.completed">OTA完成</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-select v-model="form.status" placeholder="请选择" allow-clear style="width: 120px">
-            <a-option value="enabled">启用</a-option>
-            <a-option value="disabled">禁用</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="loadData">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建Webhook</a-button>
-      <a-button @click="handleViewLogs">查看日志</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+    <Breadcrumb :items="['menu.webhooks', 'menu.webhooks.list']" />
+    <a-card class="general-card" title="Webhook列表">
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+          <a-button @click="handleViewLogs">日志</a-button>
+        </a-space>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="端点URL">
+            <a-input v-model="form.url" placeholder="请输入URL" />
+          </a-form-item>
+          <a-form-item label="事件类型">
+            <a-select v-model="form.event_type" placeholder="请选择" allow-clear style="width: 160px">
+              <a-option value="device.online">设备上线</a-option>
+              <a-option value="device.offline">设备离线</a-option>
+              <a-option value="device.data">设备数据</a-option>
+              <a-option value="alert.created">告警创建</a-option>
+              <a-option value="ota.started">OTA开始</a-option>
+              <a-option value="ota.completed">OTA完成</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="状态">
+            <a-select v-model="form.status" placeholder="请选择" allow-clear style="width: 120px">
+              <a-option value="enabled">启用</a-option>
+              <a-option value="disabled">禁用</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
       <template #status="{ record }">
         <a-tag :color="record.status === 'enabled' ? 'green' : 'gray'">
           {{ record.status === 'enabled' ? '启用' : '禁用' }}
@@ -86,6 +90,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Message, Modal } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 import WebhookLogs from './WebhookLogs.vue'
 
 const router = useRouter()
@@ -189,7 +194,6 @@ onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

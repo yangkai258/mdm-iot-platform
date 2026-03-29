@@ -1,24 +1,26 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="报告周期">
-          <a-select v-model="form.period" placeholder="请选择" style="width: 140px" allow-clear>
-            <a-option value="week">周报</a-option>
-            <a-option value="month">月报</a-option>
-            <a-option value="quarter">季报</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="loadData">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleGenerate">生成报告</a-button>
-    </div>
-    <a-table
+    <Breadcrumb :items="['menu.health', 'menu.health.report']" />
+    <a-card class="general-card" title="健康报告">
+      <template #extra>
+        <a-button type="primary" @click="handleGenerate"><icon-plus />生成报告</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="报告周期">
+            <a-select v-model="form.period" placeholder="请选择" style="width: 140px" allow-clear>
+              <a-option value="week">周报</a-option>
+              <a-option value="month">月报</a-option>
+              <a-option value="quarter">季报</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table
       :columns="columns"
       :data="data"
       :loading="loading"
@@ -32,6 +34,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 
@@ -109,7 +112,6 @@ onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

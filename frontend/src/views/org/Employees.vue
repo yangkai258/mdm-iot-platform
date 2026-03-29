@@ -1,48 +1,22 @@
 <template>
   <div class="page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-      <a-breadcrumb-item>组织管理</a-breadcrumb-item>
-      <a-breadcrumb-item>员工管理</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 搜索框（左上角） -->
-    <div class="search-bar">
-      <a-input-search
-        v-model="searchKey"
-        placeholder="搜索..."
-        style="width: 280px"
-        @search="loadEmployees"
-      />
-    </div>
-
-    <!-- 操作按钮组（靠左） -->
-    <div class="action-bar">
-      <a-space :size="12">
-        <a-button type="primary" @click="openOnboardModal">「新建」</a-button>
-        <a-button @click="showFilter = !showFilter">「筛选」</a-button>
-        <a-button @click="loadEmployees">「刷新」</a-button>
-      </a-space>
-    </div>
-
-    <!-- 筛选面板 -->
-    <a-card v-if="showFilter" :bordered="false" style="margin-bottom: 12px">
-      <a-space wrap>
-        <a-select v-model="filterCompany" placeholder="所属公司" style="width: 160px" allow-clear>
-          <a-option v-for="c in companies" :key="c.id" :value="c.id">{{ c.company_name }}</a-option>
-        </a-select>
-        <a-select v-model="filterStatus" placeholder="员工状态" style="width: 120px" allow-clear>
-          <a-option :value="1">在职</a-option>
-          <a-option :value="2">离职</a-option>
-        </a-select>
-        <a-button type="primary" @click="loadEmployees">查询</a-button>
-        <a-button @click="resetFilter">重置</a-button>
-      </a-space>
-    </a-card>
-
-    <!-- 员工列表 -->
-    <a-card :bordered="false">
+    <Breadcrumb :items="['menu.org', 'menu.org.employees']" />
+    <a-card class="general-card" title="员工管理">
+      <template #extra>
+        <a-space :size="12">
+          <a-button type="primary" @click="openOnboardModal"><icon-plus />新建</a-button>
+          <a-button @click="loadEmployees"><icon-refresh />刷新</a-button>
+        </a-space>
+      </template>
+      <div class="search-bar">
+        <a-input-search
+          v-model="searchKey"
+          placeholder="搜索..."
+          style="width: 280px"
+          @search="loadEmployees"
+          allow-clear
+        />
+      </div>
       <a-table
         :columns="columns"
         :data="filteredData"
@@ -273,6 +247,7 @@ ptions-item>
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus, IconRefresh } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const searchKey = ref('')
@@ -571,16 +546,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  padding: 20px;
-}
-.breadcrumb {
-  margin-bottom: 12px;
-}
-.search-bar {
-  margin-bottom: 12px;
-}
-.action-bar {
-  margin-bottom: 16px;
-}
+.page-container { padding: 16px; }
+.search-bar { margin-bottom: 16px; }
 </style>

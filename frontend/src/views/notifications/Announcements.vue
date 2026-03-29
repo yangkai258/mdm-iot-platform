@@ -1,24 +1,27 @@
 <template>
   <div class="announcements-container">
-    <a-card class="table-card">
-      <template #title>
-        <div class="card-title">
-          <span>公告管理</span>
-          <a-space>
-            <a-select v-model="filterPriority" placeholder="优先级" allow-clear style="width: 120px" @change="handleFilter">
-              <a-option value="normal">普通</a-option>
-              <a-option value="important">重要</a-option>
-              <a-option value="urgent">紧急</a-option>
-            </a-select>
-            <a-select v-model="filterStatus" placeholder="状态" allow-clear style="width: 120px" @change="handleFilter">
-              <a-option value="draft">草稿</a-option>
-              <a-option value="published">已发布</a-option>
-              <a-option value="expired">已过期</a-option>
-              <a-option value="withdrawn">已撤回</a-option>
-            </a-select>
-            <a-button type="primary" @click="showAddDrawer">新建公告</a-button>
-          </a-space>
-        </div>
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '消息中心' }, { label: '公告管理' }]" />
+
+    <a-card class="general-card" style="margin-top: 0">
+      <template #title><span class="card-title">公告管理</span></template>
+      <template #extra>
+        <a-space>
+          <a-select v-model="filterPriority" placeholder="优先级" allow-clear style="width: 120px" @change="handleFilter">
+            <a-option value="normal">普通</a-option>
+            <a-option value="important">重要</a-option>
+            <a-option value="urgent">紧急</a-option>
+          </a-select>
+          <a-select v-model="filterStatus" placeholder="状态" allow-clear style="width: 120px" @change="handleFilter">
+            <a-option value="draft">草稿</a-option>
+            <a-option value="published">已发布</a-option>
+            <a-option value="expired">已过期</a-option>
+            <a-option value="withdrawn">已撤回</a-option>
+          </a-select>
+          <a-button type="primary" @click="showAddDrawer">
+            <template #icon><icon-plus /></template>
+            新建公告
+          </a-button>
+        </a-space>
       </template>
 
       <a-table :columns="columns" :data="announcements" :loading="loading" :pagination="paginationConfig" row-key="id" @page-change="handlePageChange" @page-size-change="handlePageSizeChange">
@@ -325,17 +328,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.announcements-container {
-  padding: 16px;
-}
-.table-card {
-  margin-bottom: 16px;
-}
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
+.announcements-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.general-card { border-radius: 8px; }
+.card-title { font-weight: 600; font-size: 15px; }
 </style>

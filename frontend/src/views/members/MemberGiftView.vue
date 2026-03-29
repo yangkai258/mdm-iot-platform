@@ -1,29 +1,40 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+  <div class="container">
+    <Breadcrumb :items="['menu.members', 'menu.members.gift']" />
+    <a-card class="general-card" title="会员礼品">
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
       </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+    </a-card>
+    <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'" :width="560">
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="礼品名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="所需积分"><a-input-number v-model="form.points" :min="0" style="width:100%" /></a-form-item>
+        <a-form-item label="库存"><a-input-number v-model="form.stock" :min="0" style="width:100%" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button @click="formVisible = false">取消</a-button>
         <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
     </a-modal>
@@ -31,67 +42,36 @@
 </template>
 
 <script setup>
-
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const loading = ref(false)
 const formVisible = ref(false)
 const isEdit = ref(false)
-const dataList = ref([])
-const stats = ref({ total: 0, issued: 0, claimed: 0, totalValue: 0 })
-const filters = reactive({ keyword: '', status: '' })
-const paginationConfig = reactive({ current: 1, pageSize: 10, total: 0 })
-const form = reactive({ id: null, name: '', content: '', value: 0, validDays: 30, status: '1' })
-
+const form = reactive({ keyword: '', name: '', points: 0, stock: 0 })
+const data = ref([])
+const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: '礼包名称', dataIndex: 'name', width: 200 },
-  { title: '包含内容', dataIndex: 'content', ellipsis: true },
-  { title: '价值（元）', dataIndex: 'value', width: 120 },
-  { title: '已发放数', dataIndex: 'issuedCount', width: 120 },
-  { title: '已领取数', dataIndex: 'claimedCount', width: 120 },
-  { title: '状态', slotName: 'status', width: 100 },
-  { title: '操作', slotName: 'actions', width: 200, fixed: 'right' }
+  { title: '礼品名称', dataIndex: 'name', width: 200 },
+  { title: '所需积分', dataIndex: 'points', width: 120 },
+  { title: '库存', dataIndex: 'stock', width: 100 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '操作', slotName: 'actions', width: 120 }
 ]
 
-const mockData = () => [
-  { id: 1, name: '新会员礼包', content: '新人优惠券满100减20、100积分', value: 50, issuedCount: 234, claimedCount: 210, status: 1 },
-  { id: 2, name: '生日专属礼包', content: '生日优惠券满200减50、双倍积分卡', value: 100, issuedCount: 567, claimedCount: 520, status: 1 },
-  { id: 3, name: '节日礼包', content: '节日专属优惠券包', value: 80, issuedCount: 1234, claimedCount: 1100, status: 1 }
-]
-
-const loadData = () => {
+const loadData = async () => {
   loading.value = true
-  setTimeout(() => {
-    dataList.value = mockData()
-    const total = mockData()
-    stats.value = {
-      total: total.length,
-      issued: total.reduce((s, d) => s + d.issuedCount, 0),
-      claimed: total.reduce((s, d) => s + d.claimedCount, 0),
-      totalValue: total.reduce((s, d) => s + d.value * d.issuedCount, 0)
-    }
-    paginationConfig.total = dataList.value.length
-    loading.value = false
-  }, 400)
+  try {
+    const res = await fetch('/api/v1/members/gifts', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    data.value = res.data?.list || []
+    pagination.total = data.value.length
+  } catch { data.value = [] } finally { loading.value = false }
 }
-
-const onPageChange = (page) => { paginationConfig.current = page; loadData() }
-const showCreate = () => { isEdit.value = false; Object.assign(form, { id: null, name: '', content: '', value: 0, validDays: 30, status: '1' }); formVisible.value = true }
-const showEdit = (record) => { isEdit.value = true; Object.assign(form, { ...record, status: String(record.status) }); formVisible.value = true }
-const handleSubmit = (done) => {
-  if (!form.name) { Message.error('请填写必填项'); done(false); return }
-  setTimeout(() => { Message.success(isEdit.value ? '更新成功' : '创建成功'); formVisible.value = false; loadData(); done(true) }, 400)
-}
-const handleGrant = (record) => { Message.success(`已向符合条件的会员发放「${record.name}」`) }
+const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', points: 0, stock: 0 }); formVisible.value = true }
+const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
 const handleDelete = () => { Message.success('删除成功'); loadData() }
-
-loadData()
-
+const onPageChange = (page) => { pagination.current = page; loadData() }
+onMounted(() => loadData())
 </script>
-
-<style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
-</style>

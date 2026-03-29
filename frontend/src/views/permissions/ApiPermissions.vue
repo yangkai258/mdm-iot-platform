@@ -1,36 +1,25 @@
 <template>
   <div class="page-container">
-    <!-- 面包屑 + 搜索栏 -->
-    <div class="page-header">
-      <div class="header-left">
-        <a-breadcrumb>
-          <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-          <a-breadcrumb-item>系统管理</a-breadcrumb-item>
-          <a-breadcrumb-item>API权限管理</a-breadcrumb-item>
-        </a-breadcrumb>
-      </div>
-      <div class="header-right">
+    <Breadcrumb :items="['menu.permission', 'menu.permission.api']" />
+    <a-card class="general-card" title="API权限管理">
+      <template #extra>
+        <a-space :size="12">
+          <a-button type="primary" @click="openCreateModal"><icon-plus />新建</a-button>
+          <a-button @click="handleBatchImport"><icon-upload />批量导入</a-button>
+          <a-button @click="handleBatchExport"><icon-download />批量导出</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
+      </template>
+      <div class="search-bar">
         <a-input-search
           v-model="searchForm.keyword"
           placeholder="API路径/名称"
           style="width: 280px"
           @search="doSearch"
+          allow-clear
         />
       </div>
-    </div>
-
-    <!-- 操作按钮栏（靠左） -->
-    <div class="action-bar">
-      <a-space :size="12">
-        <a-button type="primary" @click="openCreateModal">「新建」</a-button>
-        <a-button @click="handleBatchImport">「批量导入」</a-button>
-        <a-button @click="handleBatchExport">「批量导出」</a-button>
-        <a-button @click="loadData">「刷新」</a-button>
-      </a-space>
-    </div>
-
-    <!-- 数据表格 -->
-    <a-card :bordered="false" style="border-radius: 4px">
+      <!-- 数据表格 -->
       <a-table
         :columns="columns"
         :data="tableData"
@@ -129,6 +118,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus, IconRefresh, IconUpload, IconDownload } from '@arco-design/web-vue/es/icon'
 
 // 搜索表单
 const searchForm = reactive({
@@ -377,36 +367,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
-  background-color: #f2f3f5;
-  min-height: 100vh;
-  padding: 16px;
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.header-left {
-  flex: 1;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.action-bar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-:deep(.arco-card) {
-  background: #ffffff;
-  border-radius: 4px;
-}
+.page-container { padding: 16px; }
+.search-bar { margin-bottom: 16px; }
 </style>

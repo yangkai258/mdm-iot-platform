@@ -1,24 +1,13 @@
 <template>
   <div class="company-list-page">
-    <div class="breadcrumb-wrapper">
-      <a-breadcrumb>
-        <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-        <a-breadcrumb-item>权限管理</a-breadcrumb-item>
-        <a-breadcrumb-item>权限组管理</a-breadcrumb-item>
-      </a-breadcrumb>
-    </div>
-
-    <div class="toolbar">
-      <div class="toolbar-left">
+    <Breadcrumb :items="['menu.permission', 'menu.permission.groups']" />
+    <a-card class="general-card" title="权限组管理">
+      <template #extra>
+        <a-button type="primary" @click="addGroup"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-bar">
         <a-input-search v-model="searchKey" placeholder="搜索..." style="width: 260px" @search="loadGroups" />
       </div>
-      <div class="toolbar-right">
-        <a-button type="primary" @click="addGroup">「新建」</a-button>
-        <a-button @click="loadGroups">「刷新」</a-button>
-      </div>
-    </div>
-
-    <a-card :bordered="false" class="table-card">
       <a-table :columns="columns" :data="groups" :loading="loading" :pagination="{ pageSize: 10 }" row-key="id">
         <template #status="{ record }">
           <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '启用' : '禁用' }}</a-tag>
@@ -48,6 +37,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const searchKey = ref('')
 const loading = ref(false)
@@ -99,9 +89,6 @@ onMounted(() => loadGroups())
 </script>
 
 <style scoped>
-.company-list-page { padding: 24px; min-height: 100%; background: #f2f3f5; }
-.breadcrumb-wrapper { margin-bottom: 16px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: #fff; padding: 16px; border-radius: 4px; }
-.toolbar-left, .toolbar-right { display: flex; gap: 8px; }
-.table-card { background: #fff; border-radius: 4px; }
+.company-list-page { padding: 16px; }
+.search-bar { margin-bottom: 16px; }
 </style>

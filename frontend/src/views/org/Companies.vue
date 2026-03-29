@@ -1,48 +1,19 @@
 <template>
   <div class="company-list-page">
-    <!-- 面包屑 -->
-    <div class="breadcrumb-wrapper">
-      <a-breadcrumb>
-        <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-        <a-breadcrumb-item>组织管理</a-breadcrumb-item>
-        <a-breadcrumb-item>公司管理</a-breadcrumb-item>
-      </a-breadcrumb>
-    </div>
-
-    <!-- 操作区 -->
-    <div class="toolbar">
-      <div class="toolbar-left">
+    <Breadcrumb :items="['menu.org', 'menu.org.companies']" />
+    <a-card class="general-card" title="公司管理">
+      <template #extra>
+        <a-button type="primary" @click="openCreateModal(null)"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-bar">
         <a-input-search 
           v-model="searchKey" 
           placeholder="搜索公司名称/编码" 
           style="width: 260px" 
           @search="loadCompanies"
+          allow-clear
         />
       </div>
-      <div class="toolbar-right">
-        <a-button type="primary" @click="openCreateModal(null)">「新建」</a-button>
-        <a-button @click="showFilter = !showFilter">「筛选」</a-button>
-        <a-button @click="loadCompanies">「刷新」</a-button>
-      </div>
-    </div>
-
-    <!-- 筛选面板 -->
-    <div v-if="showFilter" class="filter-panel">
-      <a-card :bordered="false" size="small">
-        <div class="filter-row">
-          <span>状态：</span>
-          <a-select v-model="filterStatus" placeholder="请选择" style="width: 120px" allow-clear>
-            <a-option :value="1">正常</a-option>
-            <a-option :value="0">禁用</a-option>
-          </a-select>
-          <a-button type="primary" size="small" @click="loadCompanies">查询</a-button>
-          <a-button size="small" @click="resetFilter">重置</a-button>
-        </div>
-      </a-card>
-    </div>
-
-    <!-- 数据表格 -->
-    <a-card :bordered="false" class="table-card">
       <a-table
         :columns="columns"
         :data="filteredData"
@@ -150,6 +121,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const searchKey = ref('')
 const showFilter = ref(false)
@@ -280,60 +252,7 @@ const goDepartments = (record: any) => {
 onMounted(() => loadCompanies())
 </script>
 
-<style>
-/* 页面容器 */
-.company-list-page {
-  padding: 24px;
-  min-height: 100%;
-  background: #f2f3f5;
-}
-
-/* 面包屑 */
-.breadcrumb-wrapper {
-  margin-bottom: 16px;
-}
-
-/* 工具栏 */
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  background: #fff;
-  padding: 16px;
-  border-radius: 4px;
-}
-
-.toolbar-left {
-  display: flex;
-  align-items: center;
-}
-
-.toolbar-right {
-  display: flex;
-  gap: 8px;
-}
-
-/* 筛选面板 */
-.filter-panel {
-  margin-bottom: 16px;
-}
-
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* 表格卡片 */
-.table-card {
-  background: #fff;
-  border-radius: 4px;
-}
-
-/* 覆盖ArcoDesign默认样式 */
-.arco-btn-primary {
-  background-color: #165dff !important;
-  border-color: #165dff !important;
-}
+<style scoped>
+.company-list-page { padding: 16px; }
+.search-bar { margin-bottom: 16px; }
 </style>

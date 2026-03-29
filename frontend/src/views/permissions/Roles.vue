@@ -1,7 +1,8 @@
 <template>
   <div class="page-container">
+    <Breadcrumb :items="['menu.permission', 'menu.permission.roles']" />
     <!-- 筛选栏 -->
-    <a-card class="filter-card">
+    <a-card class="general-card">
       <div class="filter-row">
         <a-input-search
           v-model="filter.keyword"
@@ -20,16 +21,13 @@
           <a-option :value="1">正常</a-option>
           <a-option :value="0">禁用</a-option>
         </a-select>
-        <a-button type="primary" @click="handleSearch">
-          <template #icon><icon-search /></template>
-          查询
-        </a-button>
+        <a-button type="primary" @click="handleSearch">查询</a-button>
         <a-button @click="handleReset">重置</a-button>
       </div>
     </a-card>
 
     <!-- 角色列表 -->
-    <a-card class="table-card">
+    <a-card class="general-card">
       <template #title>
         <div class="table-title">
           <span>角色列表</span>
@@ -377,7 +375,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { display: flex; flex-direction: column; gap: 16px; }
+.page-container { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
 .filter-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .table-title { display: flex; justify-content: space-between; align-items: center; }
 .perm-tree-wrapper { max-height: 500px; overflow-y: auto; padding: 8px 0; }

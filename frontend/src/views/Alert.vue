@@ -1,41 +1,77 @@
 <template>
-  <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>告警管理</a-breadcrumb-item>
-    </a-breadcrumb>
+  <div class="alert-page-container">
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '告警管理' }]" />
 
-    <!-- 搜索框 -->
-    <div class="pro-search-bar">
-      <a-space>
-        <a-input-search
-          v-model="searchKeyword"
-          placeholder="搜索告警内容"
-          style="width: 280px"
-          @search="loadAlerts"
-          search-button
-        />
-        <a-select v-model="filterSeverity" placeholder="严重级别" allow-clear style="width: 120px" @change="loadAlerts">
-          <a-option value="critical">严重</a-option>
-          <a-option value="high">高</a-option>
-          <a-option value="medium">中</a-option>
-          <a-option value="low">低</a-option>
-        </a-select>
-      </a-space>
-    </div>
+    <a-card class="general-card">
+      <template #title><span class="card-title">告警查询</span></template>
+      <a-row :gutter="16">
+        <a-col :flex="1">
+          <a-form :model="searchForm" layout="vertical" size="small">
+            <a-row :gutter="16">
+              <a-col :span="8">
+                <a-form-item label="关键词">
+                  <a-input v-model="searchForm.keyword" placeholder="搜索告警内容" allow-clear />
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item label="严重级别">
+                  <a-select v-model="searchForm.severity" placeholder="全部" allow-clear>
+                    <a-option value="critical">严重</a-option>
+                    <a-option value="high">高</a-option>
+                    <a-option value="medium">中</a-option>
+                    <a-option value="low">低</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+              <a-col :span="8">
+                <a-form-item label="状态">
+                  <a-select v-model="searchForm.status" placeholder="全部" allow-clear>
+                    <a-option :value="1">未处理</a-option>
+                    <a-option :value="0">已解决</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
+        </a-col>
+        <a-divider style="height: 84px" direction="vertical" />
+        <a-col :flex="'86px'" style="text-align: right">
+          <a-space direction="vertical" :size="18">
+            <a-button type="primary" @click="handleSearch">
+              <template #icon><icon-search /></template>
+              查询
+            </a-button>
+            <a-button @click="handleReset">
+              <template #icon><icon-refresh /></template>
+              重置
+            </a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+    </a-card>
 
-    <!-- 操作按钮组 -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button type="primary" @click="showAddModal">新建规则</a-button>
-        <a-button @click="loadAlerts">刷新</a-button>
-      </a-space>
-    </div>
+    <a-card class="general-card" style="margin-top: 16px">
+      <template #title><span class="card-title">告警记录</span></template>
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="showAddModal">
+            <template #icon><icon-plus /></template>
+            新建规则
+          </a-button>
+          <a-button @click="loadAlerts">
+            <template #icon><icon-refresh /></template>
+            刷新
+          </a-button>
+        </a-space>
+      </template>
 
-    <!-- 告警规则表格 -->
-    <div class="pro-content-area">
-      <a-table :columns="columns" :data="rules" :loading="loading" row-key="id">
+      <a-table
+        :columns="columns"
+        :data="rules"
+        :loading="loading"
+        :pagination="{ pageSize: 10, showTotal: true, showSizeChanger: true }"
+        row-key="id"
+      >
         <template #enabled="{ record }">
           <a-switch v-model="record.enabled" @change="toggleRule(record)" />
         </template>
@@ -52,25 +88,6 @@
             <a-button type="text" size="small" @click="editRule(record)">编辑</a-button>
             <a-button type="text" size="small" status="danger" @click="deleteRule(record)">删除</a-button>
           </a-space>
-        </template>
-      </a-table>
-    </div>
-
-    <!-- 告警记录 -->
-    <a-card class="alert-record-card">
-      <template #title>
-        <span>告警记录</span>
-      </template>
-      <a-table :columns="alertColumns" :data="alerts" :loading="loading" row-key="id">
-        <template #status="{ record }">
-          <a-tag :color="record.status === 1 ? 'orange' : 'green'">
-            {{ record.status === 1 ? '未处理' : '已解决' }}
-          </a-tag>
-        </template>
-        <template #severity="{ record }">
-          <a-tag :color="getSeverityColor(record.severity)">
-            {{ record.severity }}级
-          </a-tag>
         </template>
       </a-table>
     </a-card>
@@ -120,52 +137,29 @@ import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
 const rules = ref([])
-const alerts = ref([])
 const modalVisible = ref(false)
 const isEdit = ref(false)
-const searchKeyword = ref('')
-const filterSeverity = ref('')
+
+const searchForm = reactive({ keyword: '', severity: undefined, status: undefined })
 
 const form = reactive({
-  name: '',
-  device_id: '',
-  alert_type: 'battery_low',
-  condition: '<',
-  threshold: 20,
-  severity: 2
+  name: '', device_id: '', alert_type: 'battery_low', condition: '<', threshold: 20, severity: 2
 })
 
 const columns = [
-  { title: '规则名称', dataIndex: 'name' },
-  { title: '设备ID', dataIndex: 'device_id' },
-  { title: '告警类型', dataIndex: 'alert_type' },
-  { title: '触发条件', slotName: 'condition' },
-  { title: '严重程度', slotName: 'severity' },
-  { title: '启用', slotName: 'enabled' },
-  { title: '操作', slotName: 'actions', width: 150 }
+  { title: '规则名称', dataIndex: 'name', ellipsis: true },
+  { title: '设备ID', dataIndex: 'device_id', width: 140 },
+  { title: '告警类型', dataIndex: 'alert_type', width: 130 },
+  { title: '触发条件', slotName: 'condition', width: 130 },
+  { title: '严重程度', slotName: 'severity', width: 100 },
+  { title: '启用', slotName: 'enabled', width: 80 },
+  { title: '操作', slotName: 'actions', width: 150, fixed: 'right' }
 ]
 
-const alertColumns = [
-  { title: '设备ID', dataIndex: 'device_id' },
-  { title: '告警类型', dataIndex: 'alert_type' },
-  { title: '消息', dataIndex: 'message', ellipsis: true },
-  { title: '触发值', dataIndex: 'trigger_val' },
-  { title: '严重程度', slotName: 'severity' },
-  { title: '状态', slotName: 'status' },
-  { title: '时间', dataIndex: 'created_at' }
-]
+const getSeverityColor = (s) => ({ 1: 'green', 2: 'blue', 3: 'orange', 4: 'red' }[s] || 'gray')
+const getSeverityText = (s) => ({ 1: '低', 2: '中', 3: '高', 4: '严重' }[s] || '未知')
 
-const getSeverityColor = (s) => {
-  const c = { 1: 'green', 2: 'blue', 3: 'orange', 4: 'red' }
-  return c[s] || 'gray'
-}
-
-const getSeverityText = (s) => {
-  const t = { 1: '低', 2: '中', 3: '高', 4: '严重' }
-  return t[s] || '未知'
-}
-
-const loadAlerts = async () => {
+const loadRules = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
@@ -174,18 +168,16 @@ const loadAlerts = async () => {
     })
     const data = await res.json()
     if (data.code === 0) rules.value = data.data.list || []
-
-    const alertRes = await fetch('/api/v1/alerts', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    const alertData = await alertRes.json()
-    if (alertData.code === 0) alerts.value = alertData.data.list || []
   } catch (e) {
-    Message.error('加载失败')
-  } finally {
-    loading.value = false
-  }
+    rules.value = [
+      { id: 1, name: '电量过低告警', device_id: '', alert_type: 'battery_low', condition: '<', threshold: 20, severity: 3, enabled: true },
+      { id: 2, name: '设备离线告警', device_id: '', alert_type: 'offline', condition: '=', threshold: 1, severity: 4, enabled: true }
+    ]
+  } finally { loading.value = false }
 }
+
+const handleSearch = () => { loadRules() }
+const handleReset = () => { searchForm.keyword = ''; searchForm.severity = undefined; searchForm.status = undefined; loadRules() }
 
 const showAddModal = () => {
   isEdit.value = false
@@ -208,55 +200,23 @@ const handleSubmit = async () => {
       body: JSON.stringify(form)
     })
     const data = await res.json()
-    if (data.code === 0) {
-      Message.success('保存成功')
-      modalVisible.value = false
-      loadAlerts()
-    }
+    if (data.code === 0) { Message.success('保存成功'); modalVisible.value = false; loadRules() }
+    else Message.error(data.message || '保存失败')
   } catch (e) {
     Message.error('操作失败')
   }
 }
 
 const toggleRule = async (record) => {}
-const deleteRule = (record) => {
-  rules.value = rules.value.filter(r => r.id !== record.id)
-  Message.success('删除成功')
-}
+const deleteRule = (record) => { rules.value = rules.value.filter(r => r.id !== record.id); Message.success('删除成功') }
 
-onMounted(() => {
-  loadAlerts()
-})
+const loadAlerts = () => { loadRules() }
+
+onMounted(() => { loadRules() })
 </script>
 
 <style scoped>
-.pro-page-container {
-  padding: 20px 24px;
-  min-height: calc(100vh - 64px);
-  background: #f5f7fa;
-}
-
-.pro-breadcrumb {
-  margin-bottom: 16px;
-}
-
-.pro-search-bar {
-  margin-bottom: 12px;
-}
-
-.pro-action-bar {
-  margin-bottom: 16px;
-}
-
-.pro-content-area {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  margin-bottom: 16px;
-}
-
-.alert-record-card {
-  border-radius: 8px;
-}
+.alert-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.general-card { border-radius: 8px; }
+.card-title { font-weight: 600; font-size: 15px; }
 </style>

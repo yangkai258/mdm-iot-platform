@@ -1,12 +1,6 @@
 <template>
   <div class="page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>宠物数字孪生</a-breadcrumb-item>
-      <a-breadcrumb-item>精彩瞬间</a-breadcrumb-item>
-    </a-breadcrumb>
-
+    <Breadcrumb :items="['menu.digitalTwin', 'menu.digitalTwin.moments']" />
     <!-- 筛选栏 -->
     <div class="search-bar">
       <a-space wrap>
@@ -381,9 +375,6 @@ onMounted(() => {
 <style scoped lang="less">
 .page-container {
   padding: 16px;
-}
-.breadcrumb {
-  margin-bottom: 12px;
 }
 .search-bar {
   margin-bottom: 12px;

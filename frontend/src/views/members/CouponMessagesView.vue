@@ -1,35 +1,30 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #status="{ record }">
-        <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
+  <div class="container">
+    <Breadcrumb :items="['menu.members', 'menu.members.coupons', 'menu.members.couponMessages']" />
+    <a-card class="general-card" title="优惠券消息">
+      <template #extra>
+        <a-button @click="loadData"><icon-refresh />刷新</a-button>
       </template>
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
-      </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="关键词">
+            <a-input v-model="filters.memberName" placeholder="会员名称" @pressEnter="loadData" />
+          </a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+        <template #status="{ record }">
+          <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
+        </template>
+      </a-table>
+    </a-card>
   </div>
 </template>
 
@@ -37,6 +32,7 @@
 
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 import * as api from '@/api/member'
 
 const dataList = ref([])

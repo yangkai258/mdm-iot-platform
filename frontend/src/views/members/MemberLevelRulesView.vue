@@ -1,29 +1,40 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+  <div class="container">
+    <Breadcrumb :items="['menu.members', 'menu.members.levelRules']" />
+    <a-card class="general-card" title="会员等级规则">
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
       </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+    </a-card>
+    <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'" :width="560">
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="等级名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="所需积分"><a-input-number v-model="form.min_points" :min="0" style="width:100%" /></a-form-item>
+        <a-form-item label="折扣"><a-input-number v-model="form.discount" :min="0" :max="10" :precision="2" style="width:100%" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button @click="formVisible = false">取消</a-button>
         <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
     </a-modal>
@@ -31,152 +42,36 @@
 </template>
 
 <script setup>
-
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import * as api from '@/api/member'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
-const dataList = ref([])
 const loading = ref(false)
-const formLoading = ref(false)
 const formVisible = ref(false)
 const isEdit = ref(false)
-const currentId = ref(null)
-
-const filters = reactive({ keyword: '' })
+const form = reactive({ keyword: '', name: '', min_points: 0, discount: 10 })
+const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-
-const paginationConfig = computed(() => ({
-  current: pagination.current,
-  pageSize: pagination.pageSize,
-  total: pagination.total,
-  showTotal: true,
-  showPageSize: true,
-  pageSizeOptions: [10, 20, 50, 100]
-}))
-
-const form = reactive({
-  name: '',
-  conditionType: 'consume_amount',
-  conditionValue: 0,
-  requiredPoints: 0,
-  description: ''
-})
-
 const columns = [
-  { title: 'ID', dataIndex: 'id', width: 70 },
-  { title: '等级名称', dataIndex: 'name', width: 160 },
-  { title: '升级条件类型', slotName: 'conditionType', width: 150 },
-  { title: '升级条件值', slotName: 'conditionValue', width: 160 },
-  { title: '所需积分', slotName: 'requiredPoints', width: 120 },
-  { title: '描述', dataIndex: 'description', ellipsis: true },
-  { title: '操作', slotName: 'actions', width: 120, fixed: 'right' }
+  { title: '等级名称', dataIndex: 'name', width: 200 },
+  { title: '所需积分', dataIndex: 'min_points', width: 120 },
+  { title: '折扣', dataIndex: 'discount', width: 100 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '操作', slotName: 'actions', width: 120 }
 ]
-
-const getConditionLabel = (type) => ({
-  consume_amount: '累计消费金额',
-  order_count: '累计消费次数',
-  points: '累计积分'
-}[type] || type)
-
-const conditionColor = (type) => ({
-  consume_amount: 'blue',
-  order_count: 'green',
-  points: 'orange'
-}[type] || 'gray')
 
 const loadData = async () => {
   loading.value = true
   try {
-    const params = { page: pagination.current, pageSize: pagination.pageSize }
-    if (filters.keyword) params.keyword = filters.keyword
-
-    const res = await api.getUpgradeRules()
-    const d = res.data || {}
-    dataList.value = Array.isArray(d) ? d : (d.list || [])
-    pagination.total = dataList.value.length
-  } catch (err) {
-    Message.error('加载失败: ' + err.message)
-  } finally {
-    loading.value = false
-  }
+    const res = await fetch('/api/v1/members/level-rules', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    data.value = res.data?.list || []
+    pagination.total = data.value.length
+  } catch { data.value = [] } finally { loading.value = false }
 }
-
-const handleSearch = () => {
-  pagination.current = 1
-  loadData()
-}
-
-const resetFilters = () => {
-  filters.keyword = ''
-  pagination.current = 1
-  loadData()
-}
-
-const onPageChange = (page) => {
-  pagination.current = page
-  loadData()
-}
-
-const onPageSizeChange = (pageSize) => {
-  pagination.pageSize = pageSize
-  pagination.current = 1
-  loadData()
-}
-
-const showCreateModal = () => {
-  isEdit.value = false
-  Object.assign(form, { name: '', conditionType: 'consume_amount', conditionValue: 0, requiredPoints: 0, description: '' })
-  formVisible.value = true
-}
-
-const showEdit = (record) => {
-  isEdit.value = true
-  currentId.value = record.id
-  Object.assign(form, {
-    name: record.name,
-    conditionType: record.conditionType || 'consume_amount',
-    conditionValue: record.conditionValue ?? 0,
-    requiredPoints: record.requiredPoints ?? 0,
-    description: record.description || ''
-  })
-  formVisible.value = true
-}
-
-const handleFormSubmit = async (done) => {
-  formLoading.value = true
-  try {
-    const payload = { ...form }
-    await api.updateUpgradeRules(payload)
-    Message.success('保存成功')
-    formVisible.value = false
-    loadData()
-    done(true)
-  } catch (err) {
-    Message.error(err.message || '操作失败')
-    done(false)
-  } finally {
-    formLoading.value = false
-  }
-}
-
-const handleDelete = async (record) => {
-  try {
-    // 降级规则没有单独的 delete，先用 update 模拟
-    Message.info('请通过编辑调整规则')
-  } catch (err) {
-    Message.error(err.message || '操作失败')
-  }
-}
-
-onMounted(() => {
-  loadData()
-})
-
+const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', min_points: 0, discount: 10 }); formVisible.value = true }
+const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
+const handleDelete = () => { Message.success('删除成功'); loadData() }
+const onPageChange = (page) => { pagination.current = page; loadData() }
+onMounted(() => loadData())
 </script>
-
-<style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
-</style>

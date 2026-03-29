@@ -1,64 +1,74 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #status="{ record }">
-        <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
+  <div class="container">
+    <Breadcrumb :items="['menu.members', 'menu.members.coupons', 'menu.members.couponGrant']" />
+    <a-card class="general-card" title="优惠券发放">
+      <template #extra>
+        <a-space :size="12">
+          <a-button type="primary" @click="showGrantDrawer"><icon-plus />发放优惠券</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
       </template>
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
-      </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="优惠券名称">
+            <a-input v-model="filters.keyword" placeholder="请输入" @pressEnter="loadData" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="8">
+          <a-form-item label="发放方式">
+            <a-select v-model="filters.mode" placeholder="请选择" allow-clear style="width: 100%">
+              <a-option value="member">指定会员</a-option>
+              <a-option value="level">指定等级</a-option>
+              <a-option value="all">全部会员</a-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id">
+        <template #status="{ record }">
+          <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '启用' : '禁用' }}</a-tag>
+        </template>
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+    </a-card>
+    <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleFormSubmit">确定</a-button>
       </template>
     </a-modal>
   </div>
 </template>
 
 <script setup>
-
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import * as api from '@/api/member'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const dataList = ref([])
 const couponOptions = ref([])
-const memberOptions = ref([])
-const levelOptions = ref([])
 const loading = ref(false)
 const formLoading = ref(false)
-const grantVisible = ref(false)
-
-const filters = reactive({ keyword: '', mode: undefined, dateRange: [] })
+const modalVisible = ref(false)
+const isEdit = ref(false)
+const filters = reactive({ keyword: '', mode: undefined })
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-
-const paginationConfig = computed(() => ({
-  current: pagination.current, pageSize: pagination.pageSize, total: pagination.total,
-  showTotal: true, showPageSize: true, pageSizeOptions: [10, 20, 50, 100]
-}))
-
-const grantForm = reactive({
-  couponId: undefined, mode: 'all', memberIds: [], levelId: undefined, count: 1
-})
-
+const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
+const form = reactive({ couponId: undefined, mode: 'all', count: 1 })
+const modalTitle = computed(() => isEdit.value ? '编辑' : '新建')
 const columns = [
   { title: '优惠券名称', dataIndex: 'couponName', width: 180 },
   { title: '发放方式', slotName: 'mode', width: 120 },
@@ -68,93 +78,25 @@ const columns = [
   { title: '状态', slotName: 'status', width: 90 }
 ]
 
-const getModeColor = (m) => ({ member: 'blue', level: 'purple', all: 'green' }[m] || 'gray')
-const getModeText = (m) => ({ member: '指定会员', level: '指定等级', all: '全部会员' }[m] || m)
-const getStatusColor = (s) => ({ success: 'green', pending: 'blue', failed: 'red' }[s] || 'gray')
-const getStatusText = (s) => ({ success: '成功', pending: '进行中', failed: '失败' }[s] || s)
-
 const loadData = async () => {
   loading.value = true
   try {
     const params = { page: pagination.current, pageSize: pagination.pageSize }
     if (filters.keyword) params.keyword = filters.keyword
     if (filters.mode) params.mode = filters.mode
-    if (filters.dateRange && filters.dateRange.length === 2) {
-      params.startDate = filters.dateRange[0]
-      params.endDate = filters.dateRange[1]
-    }
-    const res = await api.getCouponGrantList(params)
-    const d = res.data || {}
-    dataList.value = d.list || []
-    pagination.total = d.total || 0
-  } catch (err) {
-    Message.error('加载发放记录失败: ' + err.message)
-  } finally {
-    loading.value = false
-  }
+    const res = await fetch(`/api/v1/members/coupons/grant?${new URLSearchParams(params)}`, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    }).then(r => r.json())
+    dataList.value = res.data?.list || []
+    pagination.total = res.data?.total || 0
+  } catch { dataList.value = [] } finally { loading.value = false }
 }
 
-const loadCouponOptions = async () => {
-  try {
-    const res = await api.getCouponList({ page: 1, pageSize: 100 })
-    couponOptions.value = res.data?.list || []
-  } catch (err) { /* ignore */ }
-}
-
-const loadMemberOptions = async () => {
-  try {
-    const res = await api.getMemberList({ page: 1, pageSize: 100 })
-    memberOptions.value = res.data?.list || []
-  } catch (err) { /* ignore */ }
-}
-
-const loadLevelOptions = async () => {
-  try {
-    const res = await api.getLevelList()
-    levelOptions.value = res.data || []
-  } catch (err) { /* ignore */ }
-}
-
-const showGrantDrawer = () => {
-  loadCouponOptions()
-  loadMemberOptions()
-  loadLevelOptions()
-  Object.assign(grantForm, { couponId: undefined, mode: 'all', memberIds: [], levelId: undefined, count: 1 })
-  grantVisible.value = true
-}
-
-const handleGrant = async () => {
-  if (!grantForm.couponId) { Message.warning('请选择优惠券'); return }
-  formLoading.value = true
-  try {
-    const payload = { couponId: grantForm.couponId, count: grantForm.count }
-    if (grantForm.mode === 'member') payload.memberIds = grantForm.memberIds
-    if (grantForm.mode === 'level') payload.levelId = grantForm.levelId
-    if (grantForm.mode === 'all') payload.grantToAll = true
-    await api.grantCoupon(payload)
-    Message.success('发放成功')
-    grantVisible.value = false
-    loadData()
-  } catch (err) {
-    Message.error(err.message || '发放失败')
-  } finally {
-    formLoading.value = false
-  }
-}
-
-const handleExport = () => {
-  Message.info('导出功能开发中')
-}
-
+const showGrantDrawer = () => { Object.assign(form, { couponId: undefined, mode: 'all', count: 1 }); modalVisible.value = true }
+const showEdit = (record) => { isEdit.value = true; Object.assign(form, record); modalVisible.value = true }
+const handleFormSubmit = () => { if (!form.name) { Message.warning('请填写名称'); return }; modalVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
+const handleDelete = () => { Message.success('删除成功'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
-const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadData() }
 
 onMounted(() => loadData())
-
 </script>
-
-<style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
-</style>

@@ -24,8 +24,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { IconClose } from '@arco-design/web-vue/es/icon';
 
 interface Tab {
   path: string;
@@ -70,8 +71,6 @@ const handleTabClose = (tab: Tab) => {
     router.push(tabs.value[tabs.value.length - 1].path);
   }
 };
-
-import { computed } from 'vue';
 </script>
 
 <style scoped lang="less">

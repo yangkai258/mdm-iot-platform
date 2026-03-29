@@ -1,25 +1,27 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="区域名称"><a-input v-model="form.zone_name" placeholder="请输入区域名称" /></a-form-item>
-        <a-form-item label="区域类型">
-          <a-select v-model="form.zone_type" placeholder="选择类型" allow-clear style="width: 120px">
-            <a-option value="forbidden">禁区</a-option>
-            <a-option value="caution">警戒区</a-option>
-            <a-option value="safe">安全区</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    <Breadcrumb :items="['menu.embodied', 'menu.embodied.safetyZones']" />
+    <a-card class="general-card" title="安全区域">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="区域名称"><a-input v-model="form.zone_name" placeholder="请输入区域名称" /></a-form-item>
+          <a-form-item label="区域类型">
+            <a-select v-model="form.zone_type" placeholder="选择类型" allow-clear style="width: 120px">
+              <a-option value="forbidden">禁区</a-option>
+              <a-option value="caution">警戒区</a-option>
+              <a-option value="safe">安全区</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="区域名称" required><a-input v-model="form.zone_name" placeholder="请输入区域名称" /></a-form-item>
@@ -41,6 +43,7 @@
         </a-form-item>
       </a-form>
     </a-modal>
+    </a-card>
   </div>
 </template>
 
@@ -49,6 +52,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getSafetyZones, createSafetyZone, updateSafetyZone, deleteSafetyZone } from '@/api/embodied'
 import { Message, Modal } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const route = useRoute()
 const deviceId = ref(route.params.device_id as string || '')
@@ -125,7 +129,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

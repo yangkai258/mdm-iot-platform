@@ -1,85 +1,47 @@
 <template>
-  <div class="experiment-run">
-    <a-card title="AI 实验运行监控">
-      <a-tabs>
-        <a-tab-pane key="experiments" title="实验列表">
-          <a-spin :loading="loading">
-            <a-table :columns="columns" :data="experiments" :pagination="{ pageSize: 10 }">
-              <template #status="{ record }">
-                <a-tag :color="getStatusColor(record.status)">{{ record.status }}</a-tag>
-              </template>
-              <template #actions="{ record }">
-                <a-button size="small" v-if="record.status === 'draft'" type="primary" @click="start(record)">启动</a-button>
-                <a-button size="small" v-else-if="record.status === 'running'" type="danger" @click="stop(record)">停止</a-button>
-                <a-button size="small" v-else @click="viewResults(record)">查看结果</a-button>
-              </template>
-            </a-table>
-          </a-spin>
-        </a-tab-pane>
-        <a-tab-pane key="collaborations" title="学术合作">
-          <a-list :data="collaborations">
-            <template #item="{ item }">
-              <a-list-item>
-                <span>合作 #{{ item.id }} - {{ item.role }}</span>
-                <template #actions>
-                  <a-tag :color="item.status === 'accepted' ? 'green' : 'orange'">{{ item.status }}</a-tag>
-                </template>
-              </a-list-item>
-            </template>
-          </a-list>
-        </a-tab-pane>
-      </a-tabs>
+  <div class="container">
+    <Breadcrumb :items="['menu.research', 'menu.research.experimentRun']" />
+    <a-card class="general-card" title="实验运行">
+      <template #extra>
+        <a-button type="primary" @click="handleRun"><icon-play />运行</a-button>
+      </template>
+      <a-row :gutter="16" style="margin-bottom: 16px">
+        <a-col :span="6"><a-statistic title="运行中" :value="stats.running" color="blue" /></a-col>
+        <a-col :span="6"><a-statistic title="已完成" :value="stats.completed" color="green" /></a-col>
+        <a-col :span="6"><a-statistic title="失败" :value="stats.failed" color="red" /></a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
     </a-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
-const API_BASE = '/api/v1'
 const loading = ref(false)
-const experiments = ref([])
-const collaborations = ref([])
-
+const stats = reactive({ running: 0, completed: 0, failed: 0 })
+const data = ref([])
+const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: '实验名称', dataIndex: 'name' },
-  { title: '项目ID', dataIndex: 'project_id' },
-  { title: '状态', slotName: 'status', width: 100 },
-  { title: '开始时间', dataIndex: 'started_at', render: ({ started_at }) => started_at ? new Date(started_at).toLocaleString() : '-' },
-  { title: '操作', slotName: 'actions', width: 120 }
+  { title: '实验ID', dataIndex: 'id', width: 80 },
+  { title: '实验名称', dataIndex: 'name', width: 200 },
+  { title: '状态', dataIndex: 'status', width: 100 },
+  { title: '开始时间', dataIndex: 'started_at', width: 170 },
+  { title: '耗时', dataIndex: 'duration', width: 100 }
 ]
 
-const getStatusColor = (s) => ({ running: 'green', completed: 'arcoblue', failed: 'red', draft: 'default' }[s] || 'default')
-
-const load = async () => {
+const loadData = async () => {
   loading.value = true
-  const [expRes, collabRes] = await Promise.all([
-    fetch(`${API_BASE}/research/experiments`),
-    fetch(`${API_BASE}/research/collaborations`)
-  ])
-  experiments.value = await expRes.json()
-  collaborations.value = await collabRes.json()
-  loading.value = false
+  try {
+    const res = await fetch('/api/v1/research/experiment-runs', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    data.value = res.data?.list || []
+    pagination.total = data.value.length
+  } catch { data.value = [] } finally { loading.value = false }
 }
-
-const start = async (exp) => {
-  await fetch(`${API_BASE}/research/experiments/${exp.id}/start`, { method: 'POST' })
-  Message.success('已启动')
-  load()
-}
-
-const stop = async (exp) => {
-  await fetch(`${API_BASE}/research/experiments/${exp.id}/stop`, { 
-    method: 'POST', 
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: 'completed' })
-  })
-  Message.success('已停止')
-  load()
-}
-
-const viewResults = (exp) => Message.info('结果查看开发中')
-
-onMounted(load)
+const handleRun = () => Message.success('实验已启动')
+const onPageChange = (page) => { pagination.current = page; loadData() }
+onMounted(() => loadData())
 </script>

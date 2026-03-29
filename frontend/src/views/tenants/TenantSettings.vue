@@ -1,29 +1,7 @@
 <template>
   <div class="page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-      <a-breadcrumb-item>租户管理</a-breadcrumb-item>
-      <a-breadcrumb-item>租户设置</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- 搜索框（左上角） -->
-    <div class="search-bar">
-      <a-input-search
-        v-model="searchKeyword"
-        placeholder="搜索..."
-        style="width: 280px"
-        @search="handleSearch"
-      />
-    </div>
-
-    <!-- 操作按钮组（靠左） -->
-    <div class="action-bar">
-      <a-button @click="loadSettings">「刷新」</a-button>
-    </div>
-
-    <!-- 租户信息配置 -->
-    <a-card title="租户配置" :bordered="false">
+    <Breadcrumb :items="['menu.tenant', 'menu.tenant.settings']" />
+    <a-card class="general-card" title="租户配置">
       <a-tabs default-active-tab="info">
         <!-- 租户信息 -->
         <a-tab-pane key="info" title="基本信息">
@@ -425,16 +403,7 @@ onMounted(() => {
 
 <style scoped>
 .page-container {
-  padding: 20px;
-}
-.breadcrumb {
-  margin-bottom: 16px;
-}
-.search-bar {
-  margin-bottom: 16px;
-}
-.action-bar {
-  margin-bottom: 16px;
+  padding: 16px;
 }
 .form-actions {
   display: flex;

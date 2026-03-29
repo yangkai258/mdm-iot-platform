@@ -1,6 +1,7 @@
 <template>
   <div class="public-archives">
-    <a-card title="公共档案" :bordered="false">
+    <Breadcrumb :items="['menu.tenant', 'menu.tenant.archives']" />
+    <a-card class="general-card" title="公共档案">
       <a-alert type="info">
         公共档案用于管理跨租户共享的基础数据，如设备型号库、协议模板等。
       </a-alert>
@@ -22,7 +23,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
+
+const getToken = () => localStorage.getItem('token')
 
 const loading = ref(false)
 const columns = [
@@ -38,12 +42,26 @@ const data = ref([
   { id: 'ARCH-003', name: 'OTA升级包命名规范', type: '规范文档', created_at: '2026-02-10' },
 ])
 
+const loadData = async () => {
+  try {
+    const res = await axios.get('/api/v1/public-archives', { headers: { Authorization: `Bearer ${getToken()}` } })
+    if (res.data.code === 0) {
+      data.value = res.data.data?.list || []
+    }
+  } catch { /* use mock */ }
+}
+
 const view = (record) => { Message.info(`查看 ${record.name}`) }
-const edit = (record) => { Message.info(`编辑 ${record.name}`) }
+const edit = async (record) => {
+  try {
+    const res = await axios.get(`/api/v1/public-archives/${record.id}`, { headers: { Authorization: `Bearer ${getToken()}` } })
+    if (res.data.code === 0) {
+      Message.success('已加载详情')
+    }
+  } catch { Message.info(`编辑 ${record.name}`) }
+}
 </script>
 
 <style scoped>
-.public-archives {
-  padding: 16px;
-}
+.public-archives { padding: 16px; }
 </style>

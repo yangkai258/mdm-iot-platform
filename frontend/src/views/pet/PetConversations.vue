@@ -1,28 +1,25 @@
 <template>
   <div class="pet-conversations">
-    <div class="page-content">
-      <a-card>
-        <template #title>
-          <a-space>
-            <span>会话列表</span>
-            <a-button type="primary" @click="createConversation">新建会话</a-button>
-          </a-space>
+    <Breadcrumb :items="['menu.pet', 'menu.pet.conversations']" />
+    <a-card class="general-card" title="会话列表">
+      <template #extra>
+        <a-button type="primary" @click="createConversation"><icon-plus />新建会话</a-button>
+      </template>
+      <a-table :columns="columns" :data="conversations" row-key="id">
+        <template #status="{ record }">
+          <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
+            {{ record.status === 'active' ? '进行中' : '已结束' }}
+          </a-tag>
         </template>
-        <a-table :columns="columns" :data="conversations" row-key="id">
-          <template #status="{ record }">
-            <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
-              {{ record.status === 'active' ? '进行中' : '已结束' }}
-            </a-tag>
-          </template>
-        </a-table>
-      </a-card>
-    </div>
+      </a-table>
+    </a-card>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const columns = [
   { title: 'ID', dataIndex: 'id' },

@@ -79,7 +79,11 @@ const handleLogin = async () => {
     
     if (data.code === 0) {
       localStorage.setItem('token', data.data.token)
-      localStorage.setItem('user', JSON.stringify(data.data.user))
+      const userData = {
+        id: data.data.user_id,
+        username: data.data.username,
+      }
+      localStorage.setItem('user', JSON.stringify(userData))
       Message.success('登录成功')
       router.push('/dashboard')
     } else {

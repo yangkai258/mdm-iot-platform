@@ -1,14 +1,16 @@
 <template>
   <div class="notification-templates-container">
-    <a-card class="table-card">
-      <template #title>
-        <div class="card-title">
-          <span>通知模板</span>
-          <a-space>
-            <a-input-search v-model="filterName" placeholder="模板名称搜索" style="width: 180px" @search="handleFilter" />
-            <a-button type="primary" @click="showAddDrawer">新建模板</a-button>
-          </a-space>
-        </div>
+    <Breadcrumb :items="[{ label: '首页', href: '/' }, { label: '消息中心' }, { label: '通知模板' }]" />
+
+    <a-card class="general-card" style="margin-top: 0">
+      <template #title><span class="card-title">通知模板</span></template>
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="showAddDrawer">
+            <template #icon><icon-plus /></template>
+            新建模板
+          </a-button>
+        </a-space>
       </template>
 
       <a-table :columns="columns" :data="templates" :loading="loading" :pagination="paginationConfig" row-key="id" @page-change="handlePageChange" @page-size-change="handlePageSizeChange">
@@ -381,20 +383,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.notification-templates-container {
-  padding: 16px;
-}
-.table-card {
-  margin-bottom: 16px;
-}
-.info-card {
-  margin-bottom: 16px;
-}
-.card-title {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-}
+.notification-templates-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
+.general-card { border-radius: 8px; }
+.card-title { font-weight: 600; font-size: 15px; }
 </style>

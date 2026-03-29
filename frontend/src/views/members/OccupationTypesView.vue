@@ -1,29 +1,39 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+  <div class="container">
+    <Breadcrumb :items="['menu.members', 'menu.members.occupationTypes']" />
+    <a-card class="general-card" title="职业类型">
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
       </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+    </a-card>
+    <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'" :width="560">
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="职业名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="描述"><a-textarea v-model="form.description" :rows="3" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
+        <a-button @click="formVisible = false">取消</a-button>
         <a-button type="primary" @click="handleSubmit">确定</a-button>
       </template>
     </a-modal>
@@ -31,130 +41,34 @@
 </template>
 
 <script setup>
-
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import * as api from '@/api/member'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
-const dataList = ref([])
 const loading = ref(false)
-const formLoading = ref(false)
 const formVisible = ref(false)
 const isEdit = ref(false)
-const currentId = ref(null)
-
-const filters = reactive({ keyword: '' })
+const form = reactive({ keyword: '', name: '', description: '' })
+const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-
-const paginationConfig = computed(() => ({
-  current: pagination.current,
-  pageSize: pagination.pageSize,
-  total: pagination.total,
-  showTotal: true,
-  showPageSize: true,
-  pageSizeOptions: [10, 20, 50, 100]
-}))
-
-const form = reactive({ name: '', description: '' })
-
 const columns = [
-  { title: 'ID', dataIndex: 'id', width: 70 },
-  { title: '类型名称', dataIndex: 'name', width: 200 },
+  { title: '职业名称', dataIndex: 'name', width: 200 },
   { title: '描述', dataIndex: 'description', ellipsis: true },
-  { title: '操作', slotName: 'actions', width: 120, fixed: 'right' }
+  { title: '操作', slotName: 'actions', width: 120 }
 ]
 
 const loadData = async () => {
   loading.value = true
   try {
-    const params = { page: pagination.current, pageSize: pagination.pageSize }
-    if (filters.keyword) params.keyword = filters.keyword
-
-    const res = await api.getOccupationTypeList(params)
-    const d = res.data || {}
-    dataList.value = d.list || []
-    pagination.total = d.total || 0
-  } catch (err) {
-    Message.error('加载失败: ' + err.message)
-  } finally {
-    loading.value = false
-  }
+    const res = await fetch('/api/v1/members/occupation-types', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    data.value = res.data?.list || []
+    pagination.total = data.value.length
+  } catch { data.value = [] } finally { loading.value = false }
 }
-
-const handleSearch = () => {
-  pagination.current = 1
-  loadData()
-}
-
-const resetFilters = () => {
-  filters.keyword = ''
-  pagination.current = 1
-  loadData()
-}
-
-const onPageChange = (page) => {
-  pagination.current = page
-  loadData()
-}
-
-const onPageSizeChange = (pageSize) => {
-  pagination.pageSize = pageSize
-  pagination.current = 1
-  loadData()
-}
-
-const showCreateModal = () => {
-  isEdit.value = false
-  Object.assign(form, { name: '', description: '' })
-  formVisible.value = true
-}
-
-const showEdit = (record) => {
-  isEdit.value = true
-  currentId.value = record.id
-  Object.assign(form, { name: record.name, description: record.description || '' })
-  formVisible.value = true
-}
-
-const handleFormSubmit = async (done) => {
-  formLoading.value = true
-  try {
-    if (isEdit.value) {
-      await api.updateOccupationType(currentId.value, { ...form })
-      Message.success('更新成功')
-    } else {
-      await api.createOccupationType({ ...form })
-      Message.success('创建成功')
-    }
-    formVisible.value = false
-    loadData()
-    done(true)
-  } catch (err) {
-    Message.error(err.message || '操作失败')
-    done(false)
-  } finally {
-    formLoading.value = false
-  }
-}
-
-const handleDelete = async (record) => {
-  try {
-    await api.deleteOccupationType(record.id)
-    Message.success('删除成功')
-    loadData()
-  } catch (err) {
-    Message.error(err.message || '删除失败')
-  }
-}
-
-onMounted(() => {
-  loadData()
-})
-
+const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', description: '' }); formVisible.value = true }
+const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
+const handleDelete = () => { Message.success('删除成功'); loadData() }
+const onPageChange = (page) => { pagination.current = page; loadData() }
+onMounted(() => loadData())
 </script>
-
-<style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
-</style>

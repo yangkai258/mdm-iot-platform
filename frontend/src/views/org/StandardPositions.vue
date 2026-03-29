@@ -1,24 +1,13 @@
 <template>
   <div class="company-list-page">
-    <div class="breadcrumb-wrapper">
-      <a-breadcrumb>
-        <a-breadcrumb-item><a href="#/dashboard">首页</a></a-breadcrumb-item>
-        <a-breadcrumb-item>组织管理</a-breadcrumb-item>
-        <a-breadcrumb-item>基准岗位</a-breadcrumb-item>
-      </a-breadcrumb>
-    </div>
-
-    <div class="toolbar">
-      <div class="toolbar-left">
-        <a-input-search v-model="searchKey" placeholder="搜索编码或名称..." style="width: 280px" @search="loadData" />
+    <Breadcrumb :items="['menu.org', 'menu.org.standardPositions']" />
+    <a-card class="general-card" title="基准岗位">
+      <template #extra>
+        <a-button type="primary" @click="openFormModal(null)"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-bar">
+        <a-input-search v-model="searchKey" placeholder="搜索编码或名称..." style="width: 280px" @search="loadData" allow-clear />
       </div>
-      <div class="toolbar-right">
-        <a-button type="primary" @click="openFormModal(null)">「新建」</a-button>
-        <a-button @click="loadData">「刷新」</a-button>
-      </div>
-    </div>
-
-    <a-card :bordered="false" class="table-card">
       <a-spin :loading="loading">
         <a-table :columns="columns" :data="filteredData" :pagination="{ pageSize: 10 }" row-key="id">
           <template #status="{ record }">
@@ -102,6 +91,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const searchKey = ref('')
@@ -224,9 +214,6 @@ onMounted(() => loadData())
 </script>
 
 <style scoped>
-.company-list-page { padding: 24px; min-height: 100%; background: #f2f3f5; }
-.breadcrumb-wrapper { margin-bottom: 16px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; background: #fff; padding: 16px; border-radius: 4px; }
-.toolbar-left, .toolbar-right { display: flex; gap: 8px; }
-.table-card { background: #fff; border-radius: 4px; }
+.company-list-page { padding: 16px; }
+.search-bar { margin-bottom: 16px; }
 </style>

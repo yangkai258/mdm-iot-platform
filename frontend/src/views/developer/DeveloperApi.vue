@@ -1,26 +1,28 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="应用名称">
-          <a-input v-model="form.app_name" placeholder="请输入应用名称" />
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-select v-model="form.status" placeholder="请选择" allow-clear style="width: 120px">
-            <a-option value="active">启用</a-option>
-            <a-option value="disabled">禁用</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="loadData">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">创建应用</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+    <Breadcrumb :items="['menu.developer', 'menu.developer.api']" />
+    <a-card class="general-card" title="开发者应用">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />创建应用</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="应用名称">
+            <a-input v-model="form.app_name" placeholder="请输入应用名称" />
+          </a-form-item>
+          <a-form-item label="状态">
+            <a-select v-model="form.status" placeholder="请选择" allow-clear style="width: 120px">
+              <a-option value="active">启用</a-option>
+              <a-option value="disabled">禁用</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
       <template #status="{ record }">
         <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
           {{ record.status === 'active' ? '启用' : '禁用' }}
@@ -85,6 +87,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const data = ref([])
@@ -192,7 +195,6 @@ onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

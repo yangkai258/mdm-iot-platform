@@ -1,14 +1,13 @@
 <template>
-  <div class="app-store">
-    <a-card title="应用商店">
+  <div class="container">
+    <Breadcrumb :items="['menu.content', 'menu.content.appStore']" />
+    <a-card class="general-card" title="应用商店">
       <a-tabs>
         <a-tab-pane key="packages" title="应用包">
           <a-spin :loading="loading">
             <div class="app-grid">
               <a-card v-for="pkg in packages" :key="pkg.id" class="app-card" hoverable>
-                <div class="app-icon">
-                  <icon-app :size="40" />
-                </div>
+                <div class="app-icon"><icon-app :size="40" /></div>
                 <div class="app-name">{{ pkg.name }}</div>
                 <div class="app-version">v{{ pkg.version }}</div>
                 <a-tag :color="getStatusColor(pkg.status)">{{ pkg.status }}</a-tag>
@@ -40,8 +39,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
-const API_BASE = '/api/v1'
 const loading = ref(false)
 const packages = ref([])
 const installs = ref([])
@@ -50,18 +49,22 @@ const getStatusColor = (s) => ({ approved: 'green', pending_review: 'orange', re
 
 const loadPackages = async () => {
   loading.value = true
-  const res = await fetch(`${API_BASE}/apps/packages`)
+  const res = await fetch('/api/v1/apps/packages', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  })
   packages.value = await res.json()
   loading.value = false
 }
 
 const loadInstalls = async () => {
-  const res = await fetch(`${API_BASE}/apps/installs`)
+  const res = await fetch('/api/v1/apps/installs', {
+    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+  })
   installs.value = await res.json()
 }
 
 const submitReview = async (pkg) => {
-  await fetch(`${API_BASE}/apps/packages/${pkg.id}/submit-review`, { method: 'POST' })
+  await fetch(`/api/v1/apps/packages/${pkg.id}/submit-review`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
   Message.success('已提交审核')
   loadPackages()
 }

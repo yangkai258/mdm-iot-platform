@@ -1,25 +1,27 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="Webhook">
-          <a-select v-model="form.webhook_id" placeholder="请选择" allow-clear style="width: 200px" @change="loadData">
-            <a-option v-for="wh in webhooks" :key="wh.id" :value="wh.id">{{ wh.url }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-select v-model="form.status" placeholder="请选择" allow-clear style="width: 120px" @change="loadData">
-            <a-option value="success">成功</a-option>
-            <a-option value="failed">失败</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="loadData">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+    <Breadcrumb :items="['menu.webhooks', 'menu.webhooks.logs']" />
+    <a-card class="general-card" title="Webhook日志">
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="Webhook">
+            <a-select v-model="form.webhook_id" placeholder="请选择" allow-clear style="width: 200px" @change="loadData">
+              <a-option v-for="wh in webhooks" :key="wh.id" :value="wh.id">{{ wh.url }}</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="状态">
+            <a-select v-model="form.status" placeholder="请选择" allow-clear style="width: 120px" @change="loadData">
+              <a-option value="success">成功</a-option>
+              <a-option value="failed">失败</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
       <template #status="{ record }">
         <a-tag :color="record.status === 'success' ? 'green' : 'red'">
           {{ record.status === 'success' ? '成功' : '失败' }}
@@ -119,6 +121,6 @@ onMounted(() => { loadWebhooks().then(() => loadData()) })
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

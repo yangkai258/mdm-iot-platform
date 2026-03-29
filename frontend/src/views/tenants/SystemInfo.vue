@@ -1,6 +1,7 @@
 <template>
   <div class="system-info">
-    <a-card title="系统信息" :bordered="false">
+    <Breadcrumb :items="['menu.tenant', 'menu.tenant.systemInfo']" />
+    <a-card class="general-card" title="系统信息">
       <a-descriptions :column="2" bordered size="large">
         <a-descriptions-item label="系统名称">MDM 设备管理平台</a-descriptions-item>
         <a-descriptions-item label="系统版本">v2.4.1</a-descriptions-item>
@@ -57,7 +58,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.system-info {
-  padding: 16px;
-}
+.system-info { padding: 16px; }
 </style>

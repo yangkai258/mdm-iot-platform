@@ -70,7 +70,7 @@
     </div>
 
     <!-- 数据表格 -->
-    <div class="pro-content-area">
+    <div class="pro-content-area general-card">
       <a-table
         :columns="columns"
         :data="filteredDevices"
@@ -326,6 +326,10 @@ onMounted(() => {
 
 .stats-row {
   margin-bottom: 16px;
+}
+
+.general-card {
+  border-radius: 8px;
 }
 
 .stats-row .arco-card {

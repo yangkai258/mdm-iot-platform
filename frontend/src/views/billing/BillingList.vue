@@ -1,11 +1,6 @@
 <template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>账单管理</a-breadcrumb-item>
-    </a-breadcrumb>
-
+    <Breadcrumb :items="['menu.billing', 'menu.billing.list']" />
     <!-- Tab 切换 -->
     <a-tabs v-model:active-tab="activeTab" class="billing-tabs">
       <!-- Tab1: 账单记录 -->

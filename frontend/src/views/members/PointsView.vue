@@ -1,162 +1,61 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="memberList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+  <div class="container">
+    <Breadcrumb :items="['menu.members', 'menu.members.points']" />
+    <a-card class="general-card" title="积分管理">
+      <template #extra>
+        <a-button @click="loadData"><icon-refresh />刷新</a-button>
       </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="关键词">
+            <a-input v-model="filters.keyword" placeholder="姓名/手机号" @pressEnter="loadData" />
+          </a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="filters.keyword = ''; loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="memberColumns" :data="memberList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" />
+    </a-card>
   </div>
 </template>
 
 <script setup>
-
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import * as api from '@/api/member'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
-const activeTab = ref('members')
 const memberList = ref([])
-const flowList = ref([])
-const memberOptions = ref([])
-const levelList = ref([])
 const loading = ref(false)
-const flowLoading = ref(false)
-const formLoading = ref(false)
-const showAdjustDrawer = ref(false)
-const currentMember = ref(null)
-
 const filters = reactive({ keyword: '', levelId: undefined })
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-const flowPagination = reactive({ current: 1, pageSize: 20, total: 0 })
-const stats = reactive({ total: 0, todayNew: 0, totalPoints: 0, monthUsed: 0 })
-const adjustForm = reactive({ memberId: undefined, type: 'add', points: 0, reason: '' })
-const rulesForm = reactive({ consumeRate: 1, loginPoints: 5, sharePoints: 10, exchangeRate: 100, expireType: 'never' })
-
-const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true, showPageSize: true, pageSizeOptions: [10, 20, 50, 100] }))
-const flowPaginationConfig = computed(() => ({ current: flowPagination.current, pageSize: flowPagination.pageSize, total: flowPagination.total, showTotal: true, showPageSize: true }))
-
+const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
 const memberColumns = [
   { title: '会员名称', dataIndex: 'name', width: 150 },
   { title: '手机号', dataIndex: 'mobile', width: 130 },
-  { title: '会员等级', slotName: 'level', width: 100 },
   { title: '当前积分', slotName: 'points', width: 120 },
   { title: '成长值', slotName: 'growthValue', width: 100 },
-  { title: '注册时间', dataIndex: 'createdAt', width: 160 },
-  { title: '操作', slotName: 'actions', width: 160, fixed: 'right' }
+  { title: '注册时间', dataIndex: 'createdAt', width: 160 }
 ]
 
-const flowColumns = [
-  { title: '类型', slotName: 'type', width: 90 },
-  { title: '积分', slotName: 'points', width: 100 },
-  { title: '会员', dataIndex: 'memberName', width: 120 },
-  { title: '来源/原因', dataIndex: 'reason', ellipsis: true },
-  { title: '时间', dataIndex: 'createdAt', width: 170 }
-]
-
-const getLevelColor = (id) => ({ 1: '#95de64', 2: '#1890ff', 3: '#faad14', 4: '#ff4d4f' }[id] || 'gray')
-
-const loadMembers = async () => {
+const loadData = async () => {
   loading.value = true
   try {
     const params = { page: pagination.current, pageSize: pagination.pageSize }
     if (filters.keyword) params.keyword = filters.keyword
-    if (filters.levelId) params.levelId = filters.levelId
-    const res = await api.getMemberList(params)
-    const d = res.data || {}
-    memberList.value = d.list || []
-    pagination.total = d.total || 0
-    stats.total = d.total || 0
-  } catch (err) { Message.error('加载会员列表失败') }
-  finally { loading.value = false }
+    const res = await fetch(`/api/v1/members/points?${new URLSearchParams(params)}`, {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    }).then(r => r.json())
+    memberList.value = res.data?.list || []
+    pagination.total = res.data?.total || 0
+  } catch { memberList.value = [] } finally { loading.value = false }
 }
 
-const loadFlow = async () => {
-  flowLoading.value = true
-  try {
-    const res = await api.getPointsFlow({ page: flowPagination.current, pageSize: flowPagination.pageSize })
-    const d = res.data || {}
-    flowList.value = d.list || []
-    flowPagination.total = d.total || 0
-  } catch (err) { /* ignore */ }
-  finally { flowLoading.value = false }
-}
+const onPageChange = (page) => { pagination.current = page; loadData() }
 
-const loadLevels = async () => {
-  try { const res = await api.getLevelList(); levelList.value = res.data || [] } catch (err) { /* ignore */ }
-}
-
-const loadMemberOptions = async () => {
-  try { const res = await api.getMemberList({ page: 1, pageSize: 100 }); memberOptions.value = res.data?.list || [] } catch (err) { /* ignore */ }
-}
-
-const loadRules = async () => {
-  try {
-    const res = await api.getPointsRules()
-    if (res.data) Object.assign(rulesForm, res.data)
-  } catch (err) { /* ignore */ }
-}
-
-const adjustPoints = (record) => {
-  currentMember.value = record
-  adjustForm.memberId = record.id
-  showAdjustDrawer.value = true
-}
-
-const handleAdjust = async () => {
-  if (!adjustForm.memberId || !adjustForm.points || !adjustForm.reason) { Message.warning('请填写完整信息'); return }
-  formLoading.value = true
-  try {
-    await api.adjustPoints({ ...adjustForm })
-    Message.success('积分调整成功')
-    showAdjustDrawer.value = false
-    loadMembers()
-  } catch (err) { Message.error(err.message || '调整失败') }
-  finally { formLoading.value = false }
-}
-
-const handleSaveRules = async () => {
-  try { await api.updatePointsRules(rulesForm); Message.success('规则保存成功') }
-  catch (err) { Message.error(err.message || '保存失败') }
-}
-
-const viewHistory = (record) => {
-  activeTab.value = 'flow'
-  flowPagination.current = 1
-  loadFlow()
-}
-
-const onPageChange = (page) => { pagination.current = page; loadMembers() }
-const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadMembers() }
-const onFlowPageChange = (page) => { flowPagination.current = page; loadFlow() }
-
-onMounted(() => { loadMembers(); loadLevels(); loadRules() })
-
+onMounted(() => loadData())
 </script>
-
-<style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
-</style>

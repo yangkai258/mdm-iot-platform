@@ -1,36 +1,40 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="成员姓名">
-          <a-input v-model="form.keyword" placeholder="请输入" style="width: 160px" />
-        </a-form-item>
-        <a-form-item label="成员角色">
-          <a-select v-model="form.role" placeholder="请选择" allow-clear style="width: 140px">
-            <a-option value="owner">户主</a-option>
-            <a-option value="adult">成人</a-option>
-            <a-option value="child">儿童</a-option>
-            <a-option value="elder">老人</a-option>
-            <a-option value="guest">访客</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-select v-model="form.status" placeholder="请选择" allow-clear style="width: 120px">
-            <a-option value="active">正常</a-option>
-            <a-option value="pending">待激活</a-option>
-            <a-option value="disabled">已禁用</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleInvite">邀请成员</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
+  <div class="container">
+    <Breadcrumb :items="['menu.family', 'menu.family.members']" />
+    <a-card class="general-card" title="家庭成员">
+      <template #extra>
+        <a-space :size="12">
+          <a-button type="primary" @click="handleInvite"><icon-plus />邀请成员</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
+      </template>
+      <a-row :gutter="16">
+        <a-col :span="6">
+          <a-form-item label="成员姓名">
+            <a-input v-model="form.keyword" placeholder="请输入" @pressEnter="handleSearch" style="width: 100%" />
+          </a-form-item>
+        </a-col>
+        <a-col :span="6">
+          <a-form-item label="成员角色">
+            <a-select v-model="form.role" placeholder="请选择" allow-clear style="width: 100%">
+              <a-option value="owner">户主</a-option>
+              <a-option value="adult">成人</a-option>
+              <a-option value="child">儿童</a-option>
+              <a-option value="elder">老人</a-option>
+              <a-option value="guest">访客</a-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
+    </a-card>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="480">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item v-if="!editingId" label="手机号码">
@@ -59,6 +63,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const loading = ref(false)
 const data = ref<any[]>([])

@@ -1,92 +1,50 @@
 <template>
-  <div class="dataset-library">
-    <a-card title="AI 数据集开放平台">
+  <div class="container">
+    <Breadcrumb :items="['menu.research', 'menu.research.datasetLibrary']" />
+    <a-card class="general-card" title="数据集库">
       <template #extra>
-        <a-button type="primary">申请数据集</a-button>
+        <a-button type="primary" @click="loadData"><icon-refresh />刷新</a-button>
       </template>
-      
-      <a-spin :loading="loading">
-        <a-table :columns="columns" :data="datasets" :pagination="{ pageSize: 10 }">
-          <template #name="{ record }">
-            <div>
-              <div style="font-weight: 600">{{ record.name }}</div>
-              <div style="font-size: 12px; color: var(--color-text-3)">{{ record.description }}</div>
-            </div>
-          </template>
-          <template #category="{ record }">
-            <a-tag>{{ record.category }}</a-tag>
-          </template>
-          <template #actions="{ record }">
-            <a-button size="small" @click="download(record)">下载</a-button>
-            <a-button size="small" type="text" @click="cite(record)">引用</a-button>
-          </template>
-        </a-table>
-      </a-spin>
-    </a-card>
-    
-    <a-card title="研究项目" style="margin-top: 16px">
-      <a-list :data="projects" :loading="loading2">
-        <template #item="{ item }">
-          <a-list-item>
-            <div style="flex: 1">
-              <div style="font-weight: 600">{{ item.name }}</div>
-              <div style="font-size: 12px; color: var(--color-text-3)">{{ item.description }}</div>
-            </div>
-            <template #actions>
-              <a-tag :color="item.status === 'active' ? 'green' : 'default'">{{ item.status }}</a-tag>
-              <a-button size="small" type="text">查看实验</a-button>
-            </template>
-          </a-list-item>
-        </template>
-      </a-list>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
     </a-card>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { Message } from '@arco-design/web-vue'
+import { ref, reactive, onMounted } from 'vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
-const API_BASE = '/api/v1'
 const loading = ref(false)
-const loading2 = ref(false)
-const datasets = ref([])
-const projects = ref([])
-
+const form = reactive({ keyword: '' })
+const data = ref([])
+const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: '数据集', slotName: 'name', width: 300 },
-  { title: '分类', slotName: 'category' },
-  { title: '样本数', dataIndex: 'record_count' },
-  { title: '格式', dataIndex: 'data_format' },
-  { title: '下载量', dataIndex: 'download_count' },
-  { title: '操作', slotName: 'actions', width: 150 }
+  { title: '数据集', dataIndex: 'name', width: 200 },
+  { title: '类型', dataIndex: 'type', width: 120 },
+  { title: '样本数', dataIndex: 'count', width: 100 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadDatasets = async () => {
+const loadData = async () => {
   loading.value = true
-  const res = await fetch(`${API_BASE}/research/datasets`)
-  const data = await res.json()
-  datasets.value = data.datasets || []
-  loading.value = false
+  try {
+    const res = await fetch('/api/v1/research/dataset-library', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    data.value = res.data?.list || []
+    pagination.total = data.value.length
+  } catch { data.value = [] } finally { loading.value = false }
 }
-
-const loadProjects = async () => {
-  loading2.value = true
-  const res = await fetch(`${API_BASE}/research/projects`)
-  projects.value = await res.json()
-  loading2.value = false
-}
-
-const download = async (record) => {
-  const res = await fetch(`${API_BASE}/research/datasets/${record.id}/download`)
-  const data = await res.json()
-  window.open(data.download_url, '_blank')
-}
-
-const cite = async (record) => {
-  await fetch(`${API_BASE}/research/datasets/${record.id}/cite`, { method: 'POST' })
-  Message.success('引用成功')
-}
-
-onMounted(() => { loadDatasets(); loadProjects() })
+const onPageChange = (page) => { pagination.current = page; loadData() }
+onMounted(() => loadData())
 </script>

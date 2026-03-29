@@ -1,29 +1,31 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="filters" layout="inline">
-        <a-form-item label="关键词"><a-input v-model="filters.keyword" placeholder="请输入关键词" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="promotionList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #type="{ record }">
-        <a-tag :color="getTypeColor(record.type)">{{ getTypeText(record.type) }}</a-tag>
+    <Breadcrumb :items="['menu.member', 'menu.member.promotions']" />
+    <a-card class="general-card" title="营销活动">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <template #status="{ record }">
-        <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
-      </template>
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
-      </template>
-    </a-table>
+      <div class="search-form">
+        <a-form :model="filters" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="filters.keyword" placeholder="请输入关键词" /></a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="promotionList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+        <template #type="{ record }">
+          <a-tag :color="getTypeColor(record.type)">{{ getTypeText(record.type) }}</a-tag>
+        </template>
+        <template #status="{ record }">
+          <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
+        </template>
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="活动名称"><a-input v-model="form.name" placeholder="请输入活动名称" /></a-form-item>
@@ -47,6 +49,7 @@
 
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const promotionList = ref([])
@@ -108,7 +111,6 @@ onMounted(() => loadPromotions())
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

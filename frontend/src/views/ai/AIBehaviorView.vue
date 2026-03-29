@@ -89,7 +89,7 @@
     </div>
 
     <!-- 数据表格 -->
-    <div class="pro-content-area">
+    <div class="pro-content-area general-card">
       <a-table
         :columns="columns"
         :data="dataList"
@@ -326,5 +326,9 @@ onUnmounted(() => {
   border-radius: 4px;
   padding: 16px;
   margin-bottom: 16px;
+}
+
+.general-card {
+  border-radius: 8px;
 }
 </style>

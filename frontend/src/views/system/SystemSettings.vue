@@ -308,18 +308,19 @@ onMounted(() => {
 
 <style scoped>
 .settings-container {
-  padding: 16px 20px;
+  padding: 20px 24px;
   min-height: calc(100vh - 64px);
   background: #f5f7fa;
 }
 
-.pro-breadcrumb {
-  margin-bottom: 16px;
-}
-
-.category-card {
+.category-card, .params-card {
   border-radius: 8px;
   min-height: 400px;
+}
+
+.card-title {
+  font-weight: 600;
+  font-size: 15px;
 }
 
 .category-card :deep(.arco-card-header) {

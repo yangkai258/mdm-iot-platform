@@ -1,60 +1,62 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">编辑</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+  <div class="container">
+    <Breadcrumb :items="['menu.members', 'menu.members.promotions', 'menu.members.directReduce']" />
+    <a-card class="general-card" title="直接减免">
+      <template #extra>
+        <a-space :size="12">
+          <a-button type="primary" @click="showCreateDrawer"><icon-plus />新建</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
       </template>
-    </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" @cancel="modalVisible = false">
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="关键词">
+            <a-input v-model="filters.keyword" placeholder="请输入" @pressEnter="loadData" />
+          </a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id">
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+    </a-card>
+    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑活动' : '新建活动'">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
+        <a-form-item label="活动名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="减免金额"><a-input-number v-model="form.reduceAmount" :min="0" style="width: 100%" /></a-form-item>
+        <a-form-item label="最低消费"><a-input-number v-model="form.minConsume" :min="0" style="width: 100%" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button @click="formVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleFormSubmit">确定</a-button>
       </template>
     </a-modal>
   </div>
 </template>
 
 <script setup>
-
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const dataList = ref([])
-const productOptions = ref([])
 const loading = ref(false)
 const formLoading = ref(false)
 const formVisible = ref(false)
 const isEdit = ref(false)
-
 const filters = reactive({ keyword: '', status: undefined })
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-
-const paginationConfig = computed(() => ({
-  current: pagination.current, pageSize: pagination.pageSize, total: pagination.total,
-  showTotal: true, showPageSize: true, pageSizeOptions: [10, 20, 50, 100]
-}))
-
-const form = reactive({
-  name: '', reduceAmount: 0, minConsume: 0, perLimit: 0,
-  productIds: [], dateRange: [], description: ''
-})
-
+const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
+const form = reactive({ name: '', reduceAmount: 0, minConsume: 0, perLimit: 0, productIds: [], dateRange: [], description: '' })
 const columns = [
   { title: '活动名称', dataIndex: 'name', width: 200 },
   { title: '减免金额', slotName: 'reduceAmount', width: 120 },
@@ -65,73 +67,17 @@ const columns = [
   { title: '操作', slotName: 'actions', width: 150 }
 ]
 
-const getStatusColor = (s) => ({ active: 'green', pending: 'blue', ended: 'gray' }[s] || 'gray')
-const getStatusText = (s) => ({ active: '进行中', pending: '未开始', ended: '已结束' }[s] || s)
-
 const loadData = async () => {
   loading.value = true
-  try {
-    const d = {
-      list: [
-        { id: 1, name: '新品直降', reduceAmount: 30, minConsume: 100, productName: '新品专区', dateRange: '2026-03-01 至 2026-04-30', status: 'active' }
-      ],
-      total: 1
-    }
-    dataList.value = d.list
-    pagination.total = d.total
-  } catch (err) {
-    dataList.value = []
-  } finally {
-    loading.value = false
-  }
+  try { dataList.value = [{ id: 1, name: '新品直降', reduceAmount: 30, minConsume: 100, productName: '新品专区', dateRange: '2026-03-01 至 2026-04-30', status: 'active' }]; pagination.total = 1 }
+  catch { dataList.value = [] } finally { loading.value = false }
 }
 
-const showCreateDrawer = () => {
-  isEdit.value = false
-  Object.assign(form, { name: '', reduceAmount: 0, minConsume: 0, perLimit: 0, productIds: [], dateRange: [], description: '' })
-  formVisible.value = true
-}
-
-const showEdit = (record) => {
-  isEdit.value = true
-  Object.assign(form, { name: record.name, reduceAmount: record.reduceAmount, minConsume: record.minConsume, perLimit: record.perLimit || 0, productIds: [], dateRange: [], description: record.description || '' })
-  formVisible.value = true
-}
-
-const handleFormSubmit = async () => {
-  if (!form.name) { Message.warning('请填写活动名称'); return }
-  formLoading.value = true
-  try {
-    await new Promise(r => setTimeout(r, 500))
-    Message.success(isEdit.value ? '更新成功' : '创建成功')
-    formVisible.value = false
-    loadData()
-  } catch (err) {
-    Message.error(err.message || '操作失败')
-  } finally {
-    formLoading.value = false
-  }
-}
-
-const handleDelete = async (record) => {
-  try {
-    await new Promise(r => setTimeout(r, 300))
-    Message.success('删除成功')
-    loadData()
-  } catch (err) {
-    Message.error(err.message || '删除失败')
-  }
-}
-
+const showCreateDrawer = () => { isEdit.value = false; Object.assign(form, { name: '', reduceAmount: 0, minConsume: 0 }); formVisible.value = true }
+const showEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
+const handleFormSubmit = () => { if (!form.name) { Message.warning('请填写活动名称'); return }; formLoading.value = true; formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
+const handleDelete = () => { Message.success('删除成功'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
-const onPageSizeChange = (pageSize) => { pagination.pageSize = pageSize; pagination.current = 1; loadData() }
 
 onMounted(() => loadData())
-
 </script>
-
-<style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
-</style>

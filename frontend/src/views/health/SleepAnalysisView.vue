@@ -1,23 +1,25 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="日期范围">
-          <a-range-picker v-model="form.dateRange" style="width: 240px" />
-        </a-form-item>
-        <a-form-item label="设备ID">
-          <a-input v-model="form.deviceId" placeholder="请输入设备ID" style="width: 160px" />
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="loadData">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">新建</a-button>
-    </div>
-    <a-table
+    <Breadcrumb :items="['menu.health', 'menu.health.sleep']" />
+    <a-card class="general-card" title="睡眠分析">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="日期范围">
+            <a-range-picker v-model="form.dateRange" style="width: 240px" />
+          </a-form-item>
+          <a-form-item label="设备ID">
+            <a-input v-model="form.deviceId" placeholder="请输入设备ID" style="width: 160px" />
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table
       :columns="columns"
       :data="data"
       :loading="loading"
@@ -49,6 +51,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import axios from 'axios'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const modalVisible = ref(false)
@@ -158,7 +161,6 @@ onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

@@ -63,6 +63,7 @@ import NavBar from '@/components/navbar/index.vue';
 import Menu from '@/components/menu/index.vue';
 import Footer from '@/components/footer/index.vue';
 import TabBar from '@/components/tab-bar/index.vue';
+import { IconClose } from '@arco-design/web-vue/es/icon';
 
 const appStore = useAppStore();
 

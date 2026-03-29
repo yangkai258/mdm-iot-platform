@@ -1,5 +1,6 @@
 <template>
   <div class="page-container">
+    <Breadcrumb :items="['menu.security', 'menu.security.auditLog']" />
     <!-- 统计卡片 -->
     <a-row :gutter="12" class="stat-row">
       <a-col :span="6">

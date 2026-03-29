@@ -1,26 +1,29 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="家庭ID">
-          <a-input v-model="form.family_id" placeholder="请输入" style="width: 160px" />
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleRefresh">刷新</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
+    <Breadcrumb :items="['menu.emotion', 'menu.emotion.familyMap']" />
+    <a-card class="general-card" title="家庭情绪地图">
+      <template #extra>
+        <a-button @click="handleRefresh"><icon-refresh />刷新</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="家庭ID">
+            <a-input v-model="form.family_id" placeholder="请输入" style="width: 160px" />
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconRefresh } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const data = ref<any[]>([])
@@ -86,18 +89,6 @@ onMounted(() => loadData())
 </script>
 
 <style scoped>
-.page-container {
-  background: #fff;
-  border-radius: 4px;
-  padding: 20px;
-}
-.search-form {
-  margin-bottom: 16px;
-  padding: 16px;
-  background: #f7f8fa;
-  border-radius: 4px;
-}
-.toolbar {
-  margin-bottom: 16px;
-}
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

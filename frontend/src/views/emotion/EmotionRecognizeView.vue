@@ -1,24 +1,26 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="识别模式">
-          <a-select v-model="form.mode" placeholder="请选择" style="width: 140px">
-            <a-option value="audio">语音情绪识别</a-option>
-            <a-option value="visual">视觉情绪识别</a-option>
-            <a-option value="both">综合识别</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleSave">保存配置</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    <Breadcrumb :items="['menu.emotion', 'menu.emotion.recognize']" />
+    <a-card class="general-card" title="情绪识别配置">
+      <template #extra>
+        <a-button type="primary" @click="handleSave"><icon-save />保存配置</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="识别模式">
+            <a-select v-model="form.mode" placeholder="请选择" style="width: 140px">
+              <a-option value="audio">语音情绪识别</a-option>
+              <a-option value="visual">视觉情绪识别</a-option>
+              <a-option value="both">综合识别</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     <a-modal v-model:visible="modalVisible" title="编辑配置" :width="480">
       <a-form :model="form" label-col-flex="100px">
         <a-form-item label="识别模式">
@@ -46,6 +48,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconSave } from '@arco-design/web-vue/es/icon'
 import { getEmotionRecognizeConfig, updateEmotionRecognizeConfig } from '@/api/emotion'
 
 const loading = ref(false)
@@ -119,7 +122,6 @@ onMounted(() => loadData())
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

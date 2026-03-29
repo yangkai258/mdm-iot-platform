@@ -1,50 +1,55 @@
 <template>
-  <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="数据类型">
-          <a-select v-model="filters.dataType" placeholder="请选择" allow-clear style="width: 140px">
-            <a-option v-for="t in dataTypes" :key="t.value" :value="t.value">{{ t.label }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="状态">
-          <a-select v-model="filters.status" placeholder="请选择" allow-clear style="width: 120px">
-            <a-option value="active">生效</a-option>
-            <a-option value="inactive">停用</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleFilterChange">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="openAddModal">添加规则</a-button>
-    </div>
-    <a-table :columns="columns" :data="filteredRules" :loading="loading" :pagination="pagination" row-key="id">
-      <template #dataType="{ record }">
-        <a-tag :color="dataTypeColor(record.data_type)">{{ dataTypeLabel(record.data_type) }}</a-tag>
+  <div class="container">
+    <Breadcrumb :items="['menu.globalization', 'menu.globalization.dataResidency']" />
+    <a-card class="general-card" title="数据驻留配置">
+      <template #extra>
+        <a-space :size="12">
+          <a-button type="primary" @click="openAddModal"><icon-plus />添加规则</a-button>
+          <a-button @click="() => {}"><icon-refresh />刷新</a-button>
+        </a-space>
       </template>
-      <template #storageRegion="{ record }">
-        <span>{{ record.target_region }}</span>
-      </template>
-      <template #status="{ record }">
-        <a-badge :color="statusColor(record.is_active ? 'active' : 'inactive')" :text="record.is_active ? '生效' : '停用'" />
-      </template>
-      <template #description="{ record }">
-        <span class="desc-text">{{ record.description || '-' }}</span>
-      </template>
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
-        <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-      </template>
-    </a-table>
-    <a-modal v-model:visible="formVisible" :title="editingRule ? '编辑规则' : '添加规则'" :width="520" @before-ok="handleSubmit">
+      <a-row :gutter="16">
+        <a-col :span="6">
+          <a-form-item label="数据类型">
+            <a-select v-model="filters.dataType" placeholder="请选择" allow-clear style="width: 100%">
+              <a-option v-for="t in dataTypes" :key="t.value" :value="t.value">{{ t.label }}</a-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :span="6">
+          <a-form-item label="状态">
+            <a-select v-model="filters.status" placeholder="请选择" allow-clear style="width: 100%">
+              <a-option value="active">生效</a-option>
+              <a-option value="inactive">停用</a-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="handleFilterChange">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="filteredRules" :loading="loading" :pagination="pagination" row-key="id">
+        <template #dataType="{ record }">
+          <a-tag :color="dataTypeColor(record.data_type)">{{ dataTypeLabel(record.data_type) }}</a-tag>
+        </template>
+        <template #storageRegion="{ record }"><span>{{ record.target_region }}</span></template>
+        <template #status="{ record }">
+          <a-badge :color="statusColor(record.is_active ? 'active' : 'inactive')" :text="record.is_active ? '生效' : '停用'" />
+        </template>
+        <template #description="{ record }"><span class="desc-text">{{ record.description || '-' }}</span></template>
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+    </a-card>
+    <a-modal v-model:visible="formVisible" :title="editingRule ? '编辑规则' : '添加规则'" :width="520">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="规则名称" required>
-          <a-input v-model="form.rule_name" placeholder="如：用户数据-中国东部" />
-        </a-form-item>
+        <a-form-item label="规则名称" required><a-input v-model="form.rule_name" placeholder="如：用户数据-中国东部" /></a-form-item>
         <a-form-item label="数据类型" required>
           <a-select v-model="form.data_type" placeholder="选择数据类型">
             <a-option v-for="t in dataTypes" :key="t.value" :value="t.value">{{ t.label }}</a-option>
@@ -55,18 +60,10 @@
             <a-option v-for="r in regions" :key="r.region_code" :value="r.region_code">{{ r.region_name }}</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="存储 Schema">
-          <a-input v-model="form.storage_schema" placeholder="如：public_cn_east" />
-        </a-form-item>
-        <a-form-item label="保留天数">
-          <a-input-number v-model="form.retention_days" placeholder="如：365" :min="1" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="描述">
-          <a-textarea v-model="form.description" placeholder="请输入描述" :rows="3" />
-        </a-form-item>
-        <a-form-item label="启用状态">
-          <a-switch v-model="form.is_active" />
-        </a-form-item>
+        <a-form-item label="存储 Schema"><a-input v-model="form.storage_schema" placeholder="如：public_cn_east" /></a-form-item>
+        <a-form-item label="保留天数"><a-input-number v-model="form.retention_days" :min="1" style="width: 100%" /></a-form-item>
+        <a-form-item label="描述"><a-textarea v-model="form.description" :rows="3" /></a-form-item>
+        <a-form-item label="启用状态"><a-switch v-model="form.is_active" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
@@ -79,6 +76,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
 import { getDataResidencyRules, createDataResidencyRule, updateDataResidencyRule, deleteDataResidencyRule, getRegions } from '@/api/globalization'
 import { DATA_TYPES } from '@/composables/useGlobalization'
 

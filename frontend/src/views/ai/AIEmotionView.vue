@@ -1,12 +1,6 @@
 <template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>AI 功能</a-breadcrumb-item>
-      <a-breadcrumb-item>情感识别</a-breadcrumb-item>
-    </a-breadcrumb>
-
+    <Breadcrumb :items="['menu.ai', 'menu.ai.emotion']" />
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stat-row">
       <a-col :span="6">

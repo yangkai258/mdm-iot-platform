@@ -1,16 +1,11 @@
-<template>
+﻿<template>
   <div class="feature-config">
-    <div class="page-header">
-      <a-breadcrumb>
-        <a-breadcrumb-item>系统管理</a-breadcrumb-item>
-        <a-breadcrumb-item>功能配置</a-breadcrumb-item>
-      </a-breadcrumb>
-      <h2>功能配置管理</h2>
+    <Breadcrumb :items="['menu.advanced', 'menu.advanced.featureConfig']" />
+    <a-card class="general-card" title="功能配置管理">
       <p class="subtitle">拖拽调整分组和功能的顺序，支持跨分组拖拽</p>
-    </div>
 
     <div class="content-wrapper">
-      <!-- 操作栏 -->
+      <!-- 操作�?-->
       <div class="toolbar">
         <a-space>
           <a-button type="primary" @click="showGroupModal()">
@@ -61,8 +56,8 @@
                   <div class="group-info">
                     <div class="group-name">{{ element.group_name }}</div>
                     <div class="group-meta">
-                      <Tag v-if="element.status === 0" color="default">已禁用</Tag>
-                      <span class="feature-count">{{ element.features?.length || 0 }} 个功能</span>
+                      <Tag v-if="element.status === 0" color="default">已禁�?/Tag>
+                      <span class="feature-count">{{ element.features?.length || 0 }} 个功�?/span>
                     </div>
                   </div>
                   <div class="group-actions" @click.stop>
@@ -71,7 +66,7 @@
                         <EditOutlined />
                       </a-button>
                       <a-popconfirm
-                        title="删除分组将同时删除组内所有功能，确定删除？"
+                        title="删除分组将同时删除组内所有功能，确定删除�?
                         @confirm="deleteGroup(element.id)"
                       >
                         <a-button type="text" danger size="small">
@@ -98,8 +93,7 @@
 
             <div v-if="!selectedGroup" class="empty-hint">
               <InfoCircleOutlined />
-              请从左侧选择一个分组，或直接拖拽功能到分组卡片上
-            </div>
+              请从左侧选择一个分组，或直接拖拽功能到分组卡片�?            </div>
 
             <draggable
               v-else
@@ -127,7 +121,7 @@
                       <Tag v-if="element.status === 0" color="default" size="small">禁用</Tag>
                     </div>
                     <div class="feature-meta">
-                      <span class="route">{{ element.route_path || '无路由' }}</span>
+                      <span class="route">{{ element.route_path || '无路�? }}</span>
                       <span v-if="element.permission" class="permission">{{ element.permission }}</span>
                     </div>
                   </div>
@@ -158,11 +152,10 @@
               </template>
             </draggable>
 
-            <!-- 未分组功能 -->
+            <!-- 未分组功�?-->
             <div v-if="ungroupedFeatures.length > 0" class="ungrouped-section">
               <div class="section-title">
-                <UnorderedListOutlined /> 未分组功能
-                <span class="count">({{ ungroupedFeatures.length }})</span>
+                <UnorderedListOutlined /> 未分组功�?                <span class="count">({{ ungroupedFeatures.length }})</span>
               </div>
               <draggable
                 v-model="ungroupedFeatures"
@@ -185,7 +178,7 @@
                         <a-tag v-if="element.badge" color="processing" size="small">{{ element.badge }}</a-tag>
                       </div>
                       <div class="feature-meta">
-                        <span class="route">{{ element.route_path || '无路由' }}</span>
+                        <span class="route">{{ element.route_path || '无路�? }}</span>
                       </div>
                     </div>
                     <div class="feature-actions" @click.stop>
@@ -222,10 +215,10 @@
     >
       <a-form :model="groupForm" layout="vertical">
         <a-form-item label="分组名称" required>
-          <a-input v-model:value="groupForm.group_name" placeholder="请输入分组名称" />
+          <a-input v-model:value="groupForm.group_name" placeholder="请输入分组名�? />
         </a-form-item>
         <a-form-item label="分组编码">
-          <a-input v-model:value="groupForm.group_code" placeholder="唯一编码，不填自动生成" />
+          <a-input v-model:value="groupForm.group_code" placeholder="唯一编码，不填自动生�? />
         </a-form-item>
         <a-form-item label="图标">
           <a-select v-model:value="groupForm.icon" placeholder="选择图标" allow-clear>
@@ -249,7 +242,7 @@
         <a-form-item label="描述">
           <a-textarea v-model:value="groupForm.description" :rows="2" />
         </a-form-item>
-        <a-form-item label="状态">
+        <a-form-item label="状�?>
           <a-radio-group v-model:value="groupForm.status">
             <a-radio :value="1">启用</a-radio>
             <a-radio :value="0">禁用</a-radio>
@@ -266,7 +259,7 @@
       width="600px"
     >
       <a-form :model="featureForm" layout="vertical">
-        <a-form-item label="所属分组">
+        <a-form-item label="所属分�?>
           <a-select v-model:value="featureForm.group_id" placeholder="选择分组">
             <a-select-option :value="undefined">无（未分组）</a-select-option>
             <a-select-option v-for="g in groups" :key="g.id" :value="g.id">
@@ -275,7 +268,7 @@
           </a-select>
         </a-form-item>
         <a-form-item label="功能名称" required>
-          <a-input v-model:value="featureForm.feature_name" placeholder="请输入功能名称" />
+          <a-input v-model:value="featureForm.feature_name" placeholder="请输入功能名�? />
         </a-form-item>
         <a-form-item label="功能编码">
           <a-input v-model:value="featureForm.feature_code" placeholder="唯一编码" />
@@ -322,7 +315,7 @@
         </a-form-item>
         <a-row :gutter="8">
           <a-col :span="8">
-            <a-form-item label="状态">
+            <a-form-item label="状�?>
               <a-radio-group v-model:value="featureForm.status">
                 <a-radio :value="1">启用</a-radio>
                 <a-radio :value="0">禁用</a-radio>
@@ -337,6 +330,7 @@
         </a-row>
       </a-form>
     </a-modal>
+    </a-card>
   </div>
 </template>
 
@@ -511,7 +505,7 @@ const showGroupModal = (group = null) => {
 
 const saveGroup = async () => {
   if (!groupForm.group_name) {
-    message.warning('请输入分组名称')
+    message.warning('请输入分组名�?)
     return
   }
 
@@ -602,7 +596,7 @@ const showFeatureModal = (feature = null) => {
 
 const saveFeature = async () => {
   if (!featureForm.feature_name) {
-    message.warning('请输入功能名称')
+    message.warning('请输入功能名�?)
     return
   }
 
@@ -670,11 +664,11 @@ const toggleFeatureStatus = async (feature, checked) => {
     })
     const data = await res.json()
     if (data.code !== 0) {
-      message.error('更新状态失败')
+      message.error('更新状态失�?)
       feature.status = checked ? 0 : 1
     }
   } catch (err) {
-    message.error('更新状态失败: ' + err.message)
+    message.error('更新状态失�? ' + err.message)
     feature.status = checked ? 0 : 1
   }
 }
@@ -743,31 +737,16 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.feature-config {
-  padding: 24px;
-}
+.feature-config { padding: 16px; }
 
-.page-header {
-  margin-bottom: 24px;
-}
 
-.page-header h2 {
-  margin: 8px 0 4px;
-  font-size: 20px;
-  font-weight: 600;
-}
 
-.subtitle {
-  color: #8c8c8c;
-  font-size: 14px;
-  margin: 0;
-}
 
-.content-wrapper {
-  background: #fff;
-  border-radius: 8px;
-  padding: 20px;
-}
+
+
+
+
+
 
 .toolbar {
   display: flex;

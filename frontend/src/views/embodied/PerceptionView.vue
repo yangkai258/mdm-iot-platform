@@ -1,26 +1,28 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="事件类型">
-          <a-select v-model="form.event_type" placeholder="选择类型" allow-clear style="width: 160px">
-            <a-option value="object_detected">物体检测</a-option>
-            <a-option value="scene_changed">场景变化</a-option>
-            <a-option value="human_detected">人体检测</a-option>
-            <a-option value="obstacle_detected">障碍物检测</a-option>
-            <a-option value="touch_detected">触摸检测</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">搜索</a-button>
-          <a-button @click="handleReset">重置</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleRefresh">刷新</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    <Breadcrumb :items="['menu.embodied', 'menu.embodied.perception']" />
+    <a-card class="general-card" title="感知日志">
+      <template #extra>
+        <a-button @click="handleRefresh"><icon-refresh />刷新</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="事件类型">
+            <a-select v-model="form.event_type" placeholder="选择类型" allow-clear style="width: 160px">
+              <a-option value="object_detected">物体检测</a-option>
+              <a-option value="scene_changed">场景变化</a-option>
+              <a-option value="human_detected">人体检测</a-option>
+              <a-option value="obstacle_detected">障碍物检测</a-option>
+              <a-option value="touch_detected">触摸检测</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item>
+            <a-button type="primary" @click="handleSearch">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
+          </a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
   </div>
 </template>
 
@@ -29,6 +31,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getPerception } from '@/api/embodied'
 import { Message } from '@arco-design/web-vue'
+import { IconRefresh } from '@arco-design/web-vue/es/icon'
 
 const route = useRoute()
 const deviceId = ref(route.params.device_id as string || '')
@@ -80,7 +83,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

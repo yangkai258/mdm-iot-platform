@@ -1,6 +1,11 @@
 <template>
   <div class="page-container">
-    <div class="search-form">
+    <Breadcrumb :items="['menu.integration', 'menu.integration.smartHome']" />
+    <a-card class="general-card" title="智能家居">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
       <a-form :model="form" layout="inline">
         <a-form-item label="名称"><a-input v-model="form.name" placeholder="请输入" /></a-form-item>
         <a-form-item>

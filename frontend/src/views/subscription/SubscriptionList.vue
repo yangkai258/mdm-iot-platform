@@ -1,10 +1,6 @@
 <template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>订阅管理</a-breadcrumb-item>
-    </a-breadcrumb>
+    <Breadcrumb :items="['menu.subscription', 'menu.subscription.list']" />
 
     <!-- 搜索表单 -->
     <div class="pro-search-bar">
