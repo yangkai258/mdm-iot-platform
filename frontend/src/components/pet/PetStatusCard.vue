@@ -1,15 +1,15 @@
-<template>
+﻿<template>
   <a-card class="pet-status-card" :bordered="false">
     <div class="pet-header">
       <div class="pet-avatar">
         <span class="pet-icon">{{ petIcon }}</span>
       </div>
       <div class="pet-info">
-        <div class="pet-name">{{ petStatus.name || '未知宠物' }}</div>
+        <div class="pet-name">{{ petStatus.name || '鏈煡瀹犵墿' }}</div>
         <div class="pet-status">
           <a-badge
             :status="petStatus.is_online ? 'success' : 'default'"
-            :text="petStatus.is_online ? '在线' : '离线'"
+            :text="petStatus.is_online ? '鍦ㄧ嚎' : '绂荤嚎'"
           />
         </div>
       </div>
@@ -18,11 +18,11 @@
     <a-divider />
 
     <div class="status-list">
-      <!-- 心情 -->
+      <!-- 蹇冩儏 -->
       <div class="status-item">
         <div class="status-label">
-          <span class="status-icon">😊</span>
-          <span>心情</span>
+          <span class="status-icon">馃槉</span>
+          <span>蹇冩儏</span>
         </div>
         <div class="status-value">
           <a-progress
@@ -36,11 +36,11 @@
         </div>
       </div>
 
-      <!-- 能量 -->
+      <!-- 鑳介噺 -->
       <div class="status-item">
         <div class="status-label">
-          <span class="status-icon">⚡</span>
-          <span>能量</span>
+          <span class="status-icon">鈿?/span>
+          <span>鑳介噺</span>
         </div>
         <div class="status-value">
           <a-progress
@@ -54,11 +54,11 @@
         </div>
       </div>
 
-      <!-- 饥饿 -->
+      <!-- 楗ラタ -->
       <div class="status-item">
         <div class="status-label">
-          <span class="status-icon">🍖</span>
-          <span>饱食度</span>
+          <span class="status-icon">馃崠</span>
+          <span>楗遍搴?/span>
         </div>
         <div class="status-value">
           <a-progress
@@ -76,8 +76,8 @@
     <a-divider />
 
     <div class="last-seen" v-if="petStatus.last_seen">
-      <icon-clock />
-      <span>最后在线: {{ formatLastSeen(petStatus.last_seen) }}</span>
+      <icon-clock-circle />
+      <span>鏈€鍚庡湪绾? {{ formatLastSeen(petStatus.last_seen) }}</span>
     </div>
 
     <a-spin v-if="loading" class="loading-overlay" />
@@ -91,7 +91,7 @@ const props = defineProps({
   petStatus: {
     type: Object,
     default: () => ({
-      name: '未知宠物',
+      name: '鏈煡瀹犵墿',
       type: 'cat',
       mood: 0,
       energy: 0,
@@ -109,14 +109,14 @@ const props = defineProps({
 const petIcon = computed(() => {
   const type = props.petStatus.type || 'cat'
   const icons = {
-    cat: '🐱',
-    dog: '🐶',
-    bird: '🐦',
-    rabbit: '🐰',
-    hamster: '🐹',
-    fish: '🐟',
-    turtle: '🐢',
-    default: '🐾'
+    cat: '馃惐',
+    dog: '馃惗',
+    bird: '馃惁',
+    rabbit: '馃惏',
+    hamster: '馃惞',
+    fish: '馃悷',
+    turtle: '馃悽',
+    default: '馃惥'
   }
   return icons[type] || icons.default
 })
@@ -128,14 +128,14 @@ function getMoodColor(mood) {
 }
 
 function formatLastSeen(timestamp) {
-  if (!timestamp) return '未知'
+  if (!timestamp) return '鏈煡'
   const date = new Date(timestamp)
   const now = new Date()
   const diff = now.getTime() - date.getTime()
   
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`
-  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 小时前`
+  if (diff < 60000) return '鍒氬垰'
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} 鍒嗛挓鍓峘
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)} 灏忔椂鍓峘
   return date.toLocaleDateString('zh-CN')
 }
 </script>
@@ -237,3 +237,4 @@ function formatLastSeen(timestamp) {
   transform: translate(-50%, -50%);
 }
 </style>
+
