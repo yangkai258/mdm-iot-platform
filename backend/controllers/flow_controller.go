@@ -1,298 +1,133 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
+	"mdm-backend/middleware"
 	"mdm-backend/models"
-	"mdm-backend/services"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-// FlowController 流程管理控制器
-type FlowController struct {
-	DB    *gorm.DB
-	Engine *services.FlowEngine
+// FlowProcessController BPMN流程控制器
+type FlowProcessController struct {
+	DB *gorm.DB
 }
 
-// NewFlowController 创建流程控制器
-func NewFlowController(db *gorm.DB) *FlowController {
-	return &FlowController{
-		DB:     db,
-		Engine: services.NewFlowEngine(db),
+func NewFlowProcessController(db *gorm.DB) *FlowProcessController {
+	return &FlowProcessController{DB: db}
+}
+
+// RegisterRoutes 注册流程路由
+func (ctrl *FlowProcessController) RegisterRoutes(rg *gin.RouterGroup) {
+	processes := rg.Group("/flow/processes")
+	{
+		processes.GET("", ctrl.List)
+		processes.POST("", ctrl.Create)
+		processes.GET("/:id", ctrl.GetByID)
 	}
 }
 
-// CreateDefinitionRequest 创建流程定义请求
-type CreateDefinitionRequest struct {
-	Name        string               `json:"name" binding:"required"`
-	Description string               `json:"description"`
-	Nodes       []models.FlowNode    `json:"nodes" binding:"required,min=3"`
-}
+// List 获取流程列表
+// GET /api/v1/flow/processes
+func (ctrl *FlowProcessController) List(c *gin.Context) {
+	tenantID := middleware.GetTenantID(c)
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "10"))
 
-// CreateInstanceRequest 发起流程实例请求
-type CreateInstanceRequest struct {
-	FlowDefinitionID uint                  `json:"flow_definition_id" binding:"required"`
-	BusinessKey      string                `json:"business_key"`
-	BusinessType    string                `json:"business_type"`
-	FormData        map[string]interface{} `json:"form_data"`
-}
+	query := ctrl.DB.Model(&models.FlowProcess{}).Where("tenant_id = ?", tenantID)
 
-// ApproveTaskRequest 审批通过请求
-type ApproveTaskRequest struct {
-	Remark string `json:"remark"`
-}
-
-// RejectTaskRequest 审批拒绝请求
-type RejectTaskRequest struct {
-	Remark string `json:"remark" binding:"required"`
-}
-
-// CreateDefinition 创建流程定义
-// POST /api/v1/flow/definitions
-func (fc *FlowController) CreateDefinition(c *gin.Context) {
-	var req CreateDefinitionRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
-		return
-	}
-
-	tenantID := getTenantIDFromContext(c)
-	def, err := fc.Engine.CreateFlowDefinition(req.Name, req.Description, req.Nodes, tenantID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "创建失败: " + err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"code": 0, "message": "success", "data": def})
-}
-
-// ListDefinitions 获取流程定义列表
-// GET /api/v1/flow/definitions
-func (fc *FlowController) ListDefinitions(c *gin.Context) {
-	tenantID := getTenantIDFromContext(c)
-	defs, err := fc.Engine.GetFlowDefinitions(tenantID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": defs})
-}
-
-// StartInstance 发起流程实例
-// POST /api/v1/flow/instances
-func (fc *FlowController) StartInstance(c *gin.Context) {
-	var req CreateInstanceRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误: " + err.Error()})
-		return
-	}
-
-	userID := getUserIDFromContext(c)
-	tenantID := getTenantIDFromContext(c)
-
-	var formData json.RawMessage
-	if req.FormData != nil {
-		b, _ := json.Marshal(req.FormData)
-		formData = b
-	}
-
-	instance, err := fc.Engine.StartInstance(req.FlowDefinitionID, userID, tenantID, req.BusinessKey, req.BusinessType, formData)
-	if err != nil {
-		if err == services.ErrFlowNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "流程定义不存在"})
-			return
-		}
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "发起失败: " + err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"code": 0, "message": "success", "data": instance})
-}
-
-// ListInstances 查询流程实例列表
-// GET /api/v1/flow/instances
-func (fc *FlowController) ListInstances(c *gin.Context) {
-	userID := getUserIDFromContext(c)
-	tenantID := getTenantIDFromContext(c)
-
-	status := c.Query("status")
-	
-	query := fc.DB.Where("initiator_id = ? AND tenant_id = ?", userID, tenantID)
-	if status != "" {
+	if status := c.Query("status"); status != "" {
 		query = query.Where("status = ?", status)
 	}
-
-	var instances []models.FlowInstance
-	if err := query.Order("created_at DESC").Find(&instances).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
-		return
+	if category := c.Query("category"); category != "" {
+		query = query.Where("category = ?", category)
+	}
+	if keyword := c.Query("keyword"); keyword != "" {
+		query = query.Where("process_name LIKE ? OR process_key LIKE ?", "%"+keyword+"%", "%"+keyword+"%")
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": instances})
+	var total int64
+	query.Count(&total)
+
+	var processes []models.FlowProcess
+	offset := (page - 1) * pageSize
+	query.Offset(offset).Limit(pageSize).Order("id DESC").Find(&processes)
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data": gin.H{
+			"list":      processes,
+			"total":     total,
+			"page":      page,
+			"page_size": pageSize,
+		},
+	})
 }
 
-// GetInstance 获取流程实例详情
-// GET /api/v1/flow/instances/:id
-func (fc *FlowController) GetInstance(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "无效的实例ID"})
+// Create 创建流程
+// POST /api/v1/flow/processes
+func (ctrl *FlowProcessController) Create(c *gin.Context) {
+	tenantID := middleware.GetTenantID(c)
+
+	var req struct {
+		ProcessName string `json:"process_name" binding:"required"`
+		ProcessKey  string `json:"process_key" binding:"required"`
+		BpmnXML     string `json:"bpmn_xml"`
+		Status      int    `json:"status"`
+		Description string `json:"description"`
+		Category    string `json:"category"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
 		return
 	}
 
-	var instance models.FlowInstance
-	if err := fc.DB.First(&instance, id).Error; err != nil {
+	// 检查 process_key 是否已存在
+	var existing models.FlowProcess
+	if err := ctrl.DB.Where("process_key = ? AND tenant_id = ?", req.ProcessKey, tenantID).First(&existing).Error; err == nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "流程标识已存在"})
+		return
+	}
+
+	process := models.FlowProcess{
+		ProcessName: req.ProcessName,
+		ProcessKey:  req.ProcessKey,
+		BpmnXML:     req.BpmnXML,
+		TenantID:    tenantID,
+		Status:      req.Status,
+		Description: req.Description,
+		Category:    req.Category,
+		Version:     1,
+	}
+
+	if err := ctrl.DB.Create(&process).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": process})
+}
+
+// GetByID 获取流程详情
+// GET /api/v1/flow/processes/:id
+func (ctrl *FlowProcessController) GetByID(c *gin.Context) {
+	id := c.Param("id")
+	tenantID := middleware.GetTenantID(c)
+
+	var process models.FlowProcess
+	if err := ctrl.DB.Where("id = ? AND tenant_id = ?", id, tenantID).First(&process).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "实例不存在"})
+			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "流程不存在"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
 		return
 	}
 
-	// 获取实例的任务列表
-	tasks, _ := fc.Engine.GetInstanceTasks(instance.ID)
-
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": gin.H{
-		"instance": instance,
-		"tasks":    tasks,
-	}})
-}
-
-// ListPendingTasks 获取待审批任务列表
-// GET /api/v1/flow/tasks/pending
-func (fc *FlowController) ListPendingTasks(c *gin.Context) {
-	userID := getUserIDFromContext(c)
-	tenantID := getTenantIDFromContext(c)
-
-	tasks, err := fc.Engine.GetPendingTasks(userID, tenantID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": tasks})
-}
-
-// ApproveTask 审批通过任务
-// POST /api/v1/flow/tasks/:id/approve
-func (fc *FlowController) ApproveTask(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "无效的任务ID"})
-		return
-	}
-
-	var req ApproveTaskRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		// remark is optional for approval
-		req.Remark = ""
-	}
-
-	userID := getUserIDFromContext(c)
-
-	instance, err := fc.Engine.ApproveTask(uint(id), userID, req.Remark)
-	if err != nil {
-		switch err {
-		case services.ErrTaskNotFound:
-			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "任务不存在"})
-		case services.ErrNotCurrentApprover:
-			c.JSON(http.StatusForbidden, gin.H{"code": 403, "message": "您不是当前审批人"})
-		default:
-			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": err.Error()})
-		}
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "审批成功", "data": instance})
-}
-
-// RejectTask 审批拒绝任务
-// POST /api/v1/flow/tasks/:id/reject
-func (fc *FlowController) RejectTask(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "无效的任务ID"})
-		return
-	}
-
-	var req RejectTaskRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "请提供审批意见"})
-		return
-	}
-
-	userID := getUserIDFromContext(c)
-
-	instance, err := fc.Engine.RejectTask(uint(id), userID, req.Remark)
-	if err != nil {
-		switch err {
-		case services.ErrTaskNotFound:
-			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "任务不存在"})
-		case services.ErrNotCurrentApprover:
-			c.JSON(http.StatusForbidden, gin.H{"code": 403, "message": "您不是当前审批人"})
-		default:
-			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": err.Error()})
-		}
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "已拒绝", "data": instance})
-}
-
-// CancelInstance 取消流程实例
-// POST /api/v1/flow/instances/:id/cancel
-func (fc *FlowController) CancelInstance(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "无效的实例ID"})
-		return
-	}
-
-	userID := getUserIDFromContext(c)
-
-	if err := fc.Engine.CancelInstance(uint(id), userID); err != nil {
-		switch err {
-		case services.ErrInstanceNotFound:
-			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "实例不存在"})
-		default:
-			c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": err.Error()})
-		}
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "已取消"})
-}
-
-// RegisterFlowRoutes 注册流程相关路由
-func (fc *FlowController) RegisterRoutes(r *gin.RouterGroup) {
-	definitions := r.Group("/flow/definitions")
-	{
-		definitions.POST("", fc.CreateDefinition)
-		definitions.GET("", fc.ListDefinitions)
-	}
-
-	instances := r.Group("/flow/instances")
-	{
-		instances.POST("", fc.StartInstance)
-		instances.GET("", fc.ListInstances)
-		instances.GET("/:id", fc.GetInstance)
-		instances.POST("/:id/cancel", fc.CancelInstance)
-	}
-
-	tasks := r.Group("/flow/tasks")
-	{
-		tasks.GET("/pending", fc.ListPendingTasks)
-		tasks.POST("/:id/approve", fc.ApproveTask)
-		tasks.POST("/:id/reject", fc.RejectTask)
-	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": process})
 }

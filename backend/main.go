@@ -160,6 +160,55 @@ func main() {
 		log.Printf("MapIntegration table ready")
 	}
 
+	// P1/P2会员卡管理表迁移
+	if err := db.AutoMigrate(&models.MemberCardRecord{}); err != nil {
+		log.Printf("Warning: Failed to migrate MemberCardRecord: %v", err)
+	} else {
+		log.Printf("MemberCardRecord table ready")
+	}
+
+	// P1/P2会员标签表迁移
+	if err := db.AutoMigrate(&models.MemberTagDef{}, &models.MemberTagRelation{}); err != nil {
+		log.Printf("Warning: Failed to migrate MemberTagDef: %v", err)
+	} else {
+		log.Printf("MemberTagDef table ready")
+	}
+
+	// P1/P2会员订单表迁移
+	if err := db.AutoMigrate(&models.Order{}); err != nil {
+		log.Printf("Warning: Failed to migrate Order: %v", err)
+	} else {
+		log.Printf("Order table ready")
+	}
+
+	// P1/P2临时会员表迁移
+	if err := db.AutoMigrate(&models.TempMemberRecord{}); err != nil {
+		log.Printf("Warning: Failed to migrate TempMemberRecord: %v", err)
+	} else {
+		log.Printf("TempMemberRecord table ready")
+	}
+
+	// P1/P2会员服务表迁移
+	if err := db.AutoMigrate(&models.MemberService{}); err != nil {
+		log.Printf("Warning: Failed to migrate MemberService: %v", err)
+	} else {
+		log.Printf("MemberService table ready")
+	}
+
+	// P1/P2设备日志表迁移
+	if err := db.AutoMigrate(&models.DeviceLog{}); err != nil {
+		log.Printf("Warning: Failed to migrate DeviceLog: %v", err)
+	} else {
+		log.Printf("DeviceLog table ready")
+	}
+
+	// P1/P2BPMN流程表迁移
+	if err := db.AutoMigrate(&models.FlowProcess{}); err != nil {
+		log.Printf("Warning: Failed to migrate FlowProcess: %v", err)
+	} else {
+		log.Printf("FlowProcess table ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
@@ -869,6 +918,34 @@ func main() {
 	modelShardCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 31: 数据集开放平台路由 (research platform controller already registered above)
+
+	// P1/P2: 会员卡管理路由
+	memberCardCtrl := controllers.NewMemberCardController(db)
+	memberCardCtrl.RegisterRoutes(apiV1)
+
+	// P1/P2: 会员标签管理路由
+	memberTagCtrl := controllers.NewMemberTagController(db)
+	memberTagCtrl.RegisterRoutes(apiV1)
+
+	// P1/P2: 会员订单路由
+	orderCtrl := controllers.NewOrderController(db)
+	orderCtrl.RegisterRoutes(apiV1)
+
+	// P1/P2: 临时会员路由
+	tempMemberCtrl := controllers.NewTempMemberController(db)
+	tempMemberCtrl.RegisterRoutes(apiV1)
+
+	// P1/P2: 会员服务路由
+	memberServiceCtrl := controllers.NewMemberServiceController(db)
+	memberServiceCtrl.RegisterRoutes(apiV1)
+
+	// P1/P2: 设备日志路由
+	deviceLogCtrl := controllers.NewDeviceLogController(db)
+	deviceLogCtrl.RegisterRoutes(apiV1)
+
+	// P1/P2: BPMN流程路由
+	flowProcessCtrl := controllers.NewFlowProcessController(db)
+	flowProcessCtrl.RegisterRoutes(apiV1)
 
 	// 获取端口
 	port := os.Getenv("PORT")

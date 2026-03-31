@@ -11,3 +11,10 @@ dist-ssr/
 *.njsproj
 *.sln
 *.sw?
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+mdm-server*.exe
