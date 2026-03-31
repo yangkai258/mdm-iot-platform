@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"mdm-backend/models"
+	"mdm-backend/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -301,6 +302,142 @@ func GetDesiredState(db *gorm.DB) gin.HandlerFunc {
 				"desired_brightness":  shadow.DesiredBrightness,
 				"desired_power_save":  shadow.DesiredPowerSave,
 				"desired_version":     shadow.DesiredVersion,
+			},
+		})
+	}
+}
+
+// GetReportedState 获取设备影子报告状态
+// GET /api/v1/devices/:device_id/reported-state
+func GetReportedState(db *gorm.DB, redisClient *utils.RedisClient) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		deviceID := ctx.Param("device_id")
+
+		// 从 Redis 获取设备影子
+		shadow, err := redisClient.GetDeviceShadow(deviceID)
+		if err != nil || shadow == nil {
+			ctx.JSON(http.StatusOK, gin.H{
+				"code": 0,
+				"message": "success",
+				"data": gin.H{
+					"device_id":      deviceID,
+					"is_online":      false,
+					"battery_level":  0,
+					"current_mode":   "",
+					"last_heartbeat": nil,
+					"last_ip":        "",
+					"is_jailbroken": false,
+					"root_status":   "",
+					"latitude":       0,
+					"longitude":      0,
+				},
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "success",
+			"data": gin.H{
+				"device_id":      shadow.DeviceID,
+				"is_online":      shadow.IsOnline,
+				"battery_level":  shadow.BatteryLevel,
+				"current_mode":   shadow.CurrentMode,
+				"last_heartbeat": shadow.LastHeartbeat,
+				"last_ip":        shadow.LastIP,
+				"is_jailbroken":  shadow.IsJailbroken,
+				"root_status":    shadow.RootStatus,
+				"latitude":       shadow.Latitude,
+				"longitude":      shadow.Longitude,
+			},
+		})
+	}
+}
+
+// GetStateDiff 获取设备影子状态差异
+// GET /api/v1/devices/:device_id/state-diff
+func GetStateDiff(db *gorm.DB, redisClient *utils.RedisClient) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		deviceID := ctx.Param("device_id")
+
+		// 获取 desired state from DB
+		var dbShadow models.DeviceShadow
+		dbResult := db.Where("device_id = ?", deviceID).First(&dbShadow)
+
+		// 获取 reported state from Redis
+		redisShadow, _ := redisClient.GetDeviceShadow(deviceID)
+
+		// 构建 diff
+		diffs := []map[string]interface{}{}
+
+		// NRD 差异
+		if dbShadow.DesiredNRDEnabled && redisShadow != nil {
+			// NRD 已启用，设备应处于勿扰模式
+			if !redisShadow.IsOnline {
+				diffs = append(diffs, map[string]interface{}{
+					"field":    "nrd",
+					"expected": "enabled (NRD mode)",
+					"actual":   "offline",
+					"status":   "mismatch",
+				})
+			}
+		}
+
+		// 如果设备不在线，所有配置都认为不同步
+		if redisShadow == nil || !redisShadow.IsOnline {
+			if dbResult.Error == nil {
+				if dbShadow.DesiredNRDEnabled {
+					diffs = append(diffs, map[string]interface{}{
+						"field":    "nrd_enabled",
+						"expected": true,
+						"actual":   "offline",
+						"status":   "offline",
+					})
+				}
+				if dbShadow.DesiredDNDEnabled {
+					diffs = append(diffs, map[string]interface{}{
+						"field":    "dnd_enabled",
+						"expected": true,
+						"actual":   "offline",
+						"status":   "offline",
+					})
+				}
+				if dbShadow.DesiredVolume != nil {
+					diffs = append(diffs, map[string]interface{}{
+						"field":    "volume",
+						"expected": *dbShadow.DesiredVolume,
+						"actual":   "offline",
+						"status":   "offline",
+					})
+				}
+				if dbShadow.DesiredBrightness != nil {
+					diffs = append(diffs, map[string]interface{}{
+						"field":    "brightness",
+						"expected": *dbShadow.DesiredBrightness,
+						"actual":   "offline",
+						"status":   "offline",
+					})
+				}
+				if dbShadow.DesiredPowerSave {
+					diffs = append(diffs, map[string]interface{}{
+						"field":    "power_save",
+						"expected": true,
+						"actual":   "offline",
+						"status":   "offline",
+					})
+				}
+			}
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"code":    0,
+			"message": "success",
+			"data": gin.H{
+				"device_id":    deviceID,
+				"is_online":    redisShadow != nil && redisShadow.IsOnline,
+				"has_diff":     len(diffs) > 0,
+				"diff_count":   len(diffs),
+				"diffs":        diffs,
 			},
 		})
 	}

@@ -60,6 +60,8 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, redisClient *utils.RedisClient) 
 		api.POST("/devices/:device_id/commands", cmdCtrl.SendCommand)
 		api.GET("/devices/:device_id/desired-state", GetDesiredState(db))
 		api.PUT("/devices/:device_id/desired-state", SetDesiredState(db, mqtt.GlobalMQTTClient))
+		api.GET("/devices/:device_id/reported-state", GetReportedState(db, redisClient))
+		api.GET("/devices/:device_id/state-diff", GetStateDiff(db, redisClient))
 		api.GET("/devices/:device_id/commands", cmdCtrl.GetCommandHistory)
 		
 		// ============ OTA 路由 ============

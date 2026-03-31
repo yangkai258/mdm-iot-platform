@@ -272,6 +272,59 @@ func (c *AIController) UpdateAIConfig(ctx *gin.Context) {
 	})
 }
 
+// GetModels 获取可用模型列表
+// GET /api/v1/ai/models
+func (c *AIController) GetModels(ctx *gin.Context) {
+	models := []map[string]interface{}{
+		{
+			"model":      "simulated-v1",
+			"provider":   "simulated",
+			"name":       "模拟模型",
+			"description": "默认模拟AI模型，用于测试和演示",
+			"max_tokens": 4096,
+			"supported":  true,
+		},
+		{
+			"model":      "gpt-4o",
+			"provider":   "openai",
+			"name":       "GPT-4o",
+			"description": "OpenAI 最新多模态大模型",
+			"max_tokens": 128000,
+			"supported":  true,
+		},
+		{
+			"model":      "gpt-4o-mini",
+			"provider":   "openai",
+			"name":       "GPT-4o Mini",
+			"description": "OpenAI 高性价比小模型",
+			"max_tokens": 128000,
+			"supported":  true,
+		},
+		{
+			"model":      "claude-3-5-sonnet",
+			"provider":   "anthropic",
+			"name":       "Claude 3.5 Sonnet",
+			"description": "Anthropic 高智能模型",
+			"max_tokens": 200000,
+			"supported":  true,
+		},
+		{
+			"model":      "claude-3-5-haiku",
+			"provider":   "anthropic",
+			"name":       "Claude 3.5 Haiku",
+			"description": "Anthropic 快速响应模型",
+			"max_tokens": 200000,
+			"supported":  true,
+		},
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data":    models,
+	})
+}
+
 // InitDefaultAIConfig 初始化默认AI配置
 func (c *AIController) InitDefaultAIConfig(tenantID string) {
 	var count int64

@@ -511,6 +511,7 @@ func main() {
 	apiV1.DELETE("/ai/conversations/:session_id", aiCtrl.DeleteConversation)
 	apiV1.GET("/ai/config", aiCtrl.GetAIConfig)
 	apiV1.PUT("/ai/config", aiCtrl.UpdateAIConfig)
+	apiV1.GET("/ai/models", aiCtrl.GetModels)
 
 	// Sprint 26 Phase 4: App市场路由
 	marketAppCtrl := &controllers.MarketAppController{DB: db}
@@ -694,6 +695,10 @@ func main() {
 
 	// ============ 设备监控路由 ============
 	controllers.RegisterDeviceMonitorRoutes(apiV1, db, redisClient)
+
+	// ============ 行为引擎路由 ============
+	behaviorCtrl := &controllers.BehaviorController{DB: db}
+	behaviorCtrl.RegisterRoutes(apiV1)
 	apiV1.POST("/data-permissions/rules", dataPermCtrl.CreateDataPermissionRule)
 	apiV1.PUT("/data-permissions/rules/:id", dataPermCtrl.UpdateDataPermissionRule)
 	apiV1.DELETE("/data-permissions/rules/:id", dataPermCtrl.DeleteDataPermissionRule)
