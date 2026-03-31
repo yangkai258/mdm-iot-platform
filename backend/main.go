@@ -799,7 +799,7 @@ func main() {
 	alertSelfHealingCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 3-4: 宠物基础管理路由
-	petCtrl := &controllers.PetController{DB: db}
+	petCtrl := &controllers.PetController{DB: db, Redis: redisClient}
 	petCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 8: 会员360画像路由
