@@ -98,7 +98,7 @@ func main() {
 	}
 
 	// 动作模仿学习进度表迁移
-	if err := db.AutoMigrate(&models.ActionLearningProgress{}, &models.ActionLearningSession{}); err != nil {
+	if err := db.AutoMigrate(&models.ActionLearningProgress{}, &models.ActionLearningSession{}, &models.PetBehaviorAction{}); err != nil {
 		log.Printf("Warning: Failed to migrate ActionLearning: %v", err)
 	} else {
 		log.Printf("ActionLearning table ready")
@@ -137,6 +137,13 @@ func main() {
 		log.Printf("Warning: Failed to migrate DeviceHealthScore: %v", err)
 	} else {
 		log.Printf("DeviceHealthScore table ready")
+	}
+
+	// 设备配对表迁移
+	if err := db.AutoMigrate(&models.PairingRecord{}, &models.DeviceOpenClawBinding{}); err != nil {
+		log.Printf("Warning: Failed to migrate PairingRecord: %v", err)
+	} else {
+		log.Printf("PairingRecord table ready")
 	}
 
 	// 告警去重规则表迁移
@@ -512,6 +519,10 @@ func main() {
 	apiV1.GET("/ai/config", aiCtrl.GetAIConfig)
 	apiV1.PUT("/ai/config", aiCtrl.UpdateAIConfig)
 	apiV1.GET("/ai/models", aiCtrl.GetModels)
+
+	// 设备配对路由
+	devicePairingCtrl := controllers.NewDevicePairingController(db)
+	devicePairingCtrl.RegisterRoutes(apiV1)
 
 	// Sprint 26 Phase 4: App市场路由
 	marketAppCtrl := &controllers.MarketAppController{DB: db}
