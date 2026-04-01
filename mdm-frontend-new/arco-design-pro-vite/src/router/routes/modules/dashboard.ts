@@ -48,7 +48,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      { path: '', redirect: '/members/list' },
+      { path: '', redirect: '/members/list', meta: { hideInMenu: true }},
       {
         path: 'list',
         name: 'MemberList',
@@ -122,7 +122,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      { path: '', redirect: '/devices/list' },
+      { path: '', redirect: '/devices/list', meta: { hideInMenu: true }},
       {
         path: 'list',
         name: 'DeviceList',
@@ -208,7 +208,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      { path: '', redirect: '/pets/list' },
+      { path: '', redirect: '/pets/list', meta: { hideInMenu: true }},
       {
         path: 'list',
         name: 'PetList',
@@ -360,9 +360,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/child-mode/settings',
+        meta: { hideInMenu: true },
       },
       {
         path: 'settings',
@@ -383,9 +383,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/elder-care/settings',
+        meta: { hideInMenu: true },
       },
       {
         path: 'settings',
@@ -425,9 +425,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/roles/list',
+        meta: { hideInMenu: true },
       },
       {
         path: 'list',
@@ -448,9 +448,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/permissions/list',
+        meta: { hideInMenu: true },
       },
       {
         path: 'list',
@@ -471,9 +471,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/alerts/list',
+        meta: { hideInMenu: true },
       },
       {
         path: 'list',
@@ -512,9 +512,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/ota/list',
+        meta: { hideInMenu: true },
       },
       {
         path: 'list',
@@ -626,9 +626,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/subscriptions/list',
+        meta: { hideInMenu: true },
       },
       {
         path: 'list',
@@ -679,9 +679,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/tenants/list',
+        meta: { hideInMenu: true },
       },
       {
         path: 'list',
@@ -702,9 +702,9 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       order: 1,
     },
     children: [
-      {
-        path: '',
+      { path: '',
         redirect: '/notifications/list',
+        meta: { hideInMenu: true },
       },
       {
         path: 'list',

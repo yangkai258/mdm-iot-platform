@@ -97,13 +97,18 @@
               const icon = element?.meta?.icon
                 ? () => h(compile(`<${element?.meta?.icon}/>`))
                 : null;
+              const getLocaleTitle = (el: RouteRecordRaw) => {
+                const key = el?.meta?.locale as string;
+                const translated = key ? t(key) : '';
+                return translated || (el.name as string) || el.path;
+              };
               const node =
                 element?.children && element?.children.length !== 0 ? (
                   <a-sub-menu
                     key={element?.name}
                     v-slots={{
                       icon,
-                      title: () => h(compile(t(element?.meta?.locale || ''))),
+                      title: () => h(compile(getLocaleTitle(element))),
                     }}
                   >
                     {travel(element?.children)}
@@ -114,7 +119,7 @@
                     v-slots={{ icon }}
                     onClick={() => goto(element)}
                   >
-                    {t(element?.meta?.locale || '')}
+                    {getLocaleTitle(element)}
                   </a-menu-item>
                 );
               nodes.push(node as never);
