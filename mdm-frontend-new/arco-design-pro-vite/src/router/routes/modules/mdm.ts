@@ -19,6 +19,7 @@ const MDMMenu: AppRouteRecordRaw = {
       component: () => import('@/views/members/MemberListView.vue'),
       meta: {
         locale: 'menu.members',
+        title: '会员管理',
         requiresAuth: true,
         roles: ['*'],
       },
@@ -29,6 +30,7 @@ const MDMMenu: AppRouteRecordRaw = {
       component: () => import('@/views/DeviceList.vue'),
       meta: {
         locale: 'menu.devices',
+        title: '设备列表',
         requiresAuth: true,
         roles: ['*'],
       },

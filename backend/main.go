@@ -310,6 +310,13 @@ func main() {
 	authCtrl := controllers.NewAuthController(db)
 	r.POST("/api/v1/auth/login", authCtrl.Login)
 	r.POST("/api/v1/auth/refresh", authCtrl.RefreshToken)
+	r.POST("/api/v1/auth/logout", authCtrl.Logout)
+
+	// 需要 JWT 认证
+	authGroup := r.Group("/api/v1/auth")
+	authGroup.Use(middleware.JWTAuth())
+	authGroup.GET("/me", authCtrl.Me)
+	authGroup.GET("/menu", authCtrl.Menu)
 
 	// JWT 中间件
 	r.Use(middleware.JWTAuth())
