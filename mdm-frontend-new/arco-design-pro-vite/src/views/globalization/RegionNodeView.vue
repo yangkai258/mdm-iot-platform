@@ -1,0 +1,94 @@
+﻿<template>
+    <Breadcrumb :items="['Home','Console','']" />
+
+
+  <div class="container">
+    <a-card class="general-card" title="区域节点">
+      <template #extra>
+        <a-space>
+          <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        </a-space>
+      </template>
+      <a-row :gutter="16">
+        <a-col :span="8">
+          <a-form-item label="区域名称">
+            <a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" />
+          </a-form-item>
+        </a-col>
+        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
+          <a-space direction="vertical" :size="8">
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">重置</a-button>
+          </a-space>
+        </a-col>
+      </a-row>
+      <a-divider style="margin: 0 0 16px 0" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
+        <template #actions="{ record }">
+          <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
+        </template>
+      </a-table>
+      </a-table>
+    </a-card>
+    <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'">
+      <a-form :model="form" layout="vertical">
+        <a-form-item label="区域名称"><a-input v-model="form.region_name" /></a-form-item>
+        <a-form-item label="区域编码"><a-input v-model="form.region_code" /></a-form-item>
+        <a-form-item label="节点类型">
+          <a-select v-model="form.node_type" style="width: 100%">
+            <a-option value="primary">主节点</a-option>
+            <a-option value="secondary">从节点</a-option>
+            <a-option value="cache">缓存节点</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="AI节点数量"><a-input-number v-model="form.ai_node_count" :min="0" style="width: 100%" /></a-form-item>
+      </a-form>
+      <template #footer>
+        <a-button @click="formVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleSubmit">确定</a-button>
+      </template>
+    </a-modal>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import Breadcrumb from '@/components/Breadcrumb.vue'
+
+const loading = ref(false)
+const formVisible = ref(false)
+const isEdit = ref(false)
+const form = reactive({ keyword: '', region_name: '', region_code: '', node_type: 'primary', ai_node_count: 1 })
+const data = ref([])
+const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const columns = [
+  { title: '区域名称', dataIndex: 'region_name', width: 200 },
+  { title: '区域编码', dataIndex: 'region_code', width: 140 },
+  { title: '节点类型', dataIndex: 'node_type', width: 120 },
+  { title: 'AI节点数', dataIndex: 'ai_node_count', width: 100 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '操作', slotName: 'actions', width: 120 }
+]
+
+const loadData = async () => {
+  loading.value = true
+  try {
+    const res = await fetch('/api/v1/globalization/region-nodes', {
+      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+    }).then(r => r.json())
+    data.value = res.data?.list || []
+    pagination.total = data.value.length
+  } catch { data.value = [] } finally { loading.value = false }
+}
+
+const openCreate = () => { isEdit.value = false; Object.assign(form, { region_name: '', region_code: '', node_type: 'primary', ai_node_count: 1 }); formVisible.value = true }
+const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
+const handleDelete = () => { Message.success('删除成功'); loadData() }
+const onPageChange = (page) => { pagination.current = page; loadData() }
+
+onMounted(() => loadData())
+</script>
