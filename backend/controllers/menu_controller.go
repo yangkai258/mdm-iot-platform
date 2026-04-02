@@ -246,6 +246,37 @@ func (c *TenantMenuController) Get(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": menu})
 }
 
+// BatchSort 批量更新菜单排序
+// PUT /api/v1/menus/batch-sort
+func (c *TenantMenuController) BatchSort(ctx *gin.Context) {
+	tenantID := middleware.GetTenantID(ctx)
+
+	var req struct {
+		Items []struct {
+			ID   uint `json:"id"`
+			Sort int  `json:"sort"`
+		} `json:"items"`
+	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	tx := c.DB.Begin()
+	for _, item := range req.Items {
+		if err := tx.Model(&models.Menu{}).
+			Where("id = ? AND tenant_id = ?", item.ID, tenantID).
+			Update("sort", item.Sort).Error; err != nil {
+			tx.Rollback()
+			ctx.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "批量更新失败"})
+			return
+		}
+	}
+	tx.Commit()
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "message": "success"})
+}
+
 // parseUint 解析uint
 func parseUint(s string) uint {
 	v, _ := strconv.ParseUint(s, 10, 32)

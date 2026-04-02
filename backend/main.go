@@ -400,6 +400,7 @@ func main() {
 		sys.GET("/menus/:id", menuCtrl.Get)
 		sys.POST("/menus", menuCtrl.Create)
 		sys.PUT("/menus/:id", menuCtrl.Update)
+		sys.PUT("/menus/batch-sort", menuCtrl.BatchSort)
 		sys.DELETE("/menus/:id", menuCtrl.Delete)
 
 		sys.GET("/api-permissions", apiPermCtrl.List)
