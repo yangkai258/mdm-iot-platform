@@ -191,7 +191,7 @@ const columns = [
 const fetchData = async () => {
   loading.value = true;
   try {
-    const response = await fetch('/api/v1/members', {
+    const response = await fetch('/api/members', {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
       }

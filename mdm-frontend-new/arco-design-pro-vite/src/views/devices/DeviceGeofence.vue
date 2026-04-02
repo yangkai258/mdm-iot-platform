@@ -323,7 +323,7 @@ const loadGeofences = async () => {
 
     if (filterStatus.value) params.append('status', filterStatus.value)
 
-    const res = await fetch(`/api/v1/device/geofences?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch(`/api/device/geofences?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
 
     const data = await res.json()
 
@@ -349,7 +349,7 @@ const loadDevices = async () => {
 
     const token = localStorage.getItem('token')
 
-    const res = await fetch('/api/v1/devices?page_size=200', { headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch('/api/devices?page_size=200', { headers: { 'Authorization': `Bearer ${token}` } })
 
     const data = await res.json()
 
@@ -371,7 +371,7 @@ const loadAlerts = async (geofenceId) => {
 
     const params = new URLSearchParams({ geofence_id: geofenceId, page: alertPagination.current, page_size: alertPagination.pageSize })
 
-    const res = await fetch(`/api/v1/device/geofences/alerts?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch(`/api/device/geofences/alerts?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
 
     const data = await res.json()
 
@@ -425,7 +425,7 @@ const handleSubmit = async () => {
 
     const token = localStorage.getItem('token')
 
-    const url = isEdit.value ? `/api/v1/device/geofences/${form.id}` : '/api/v1/device/geofences'
+    const url = isEdit.value ? `/api/device/geofences/${form.id}` : '/api/device/geofences'
 
     const res = await fetch(url, {
 
@@ -465,7 +465,7 @@ const showBindModal = async (geofence) => {
 
     const token = localStorage.getItem('token')
 
-    const res = await fetch(`/api/v1/device/geofences/${geofence.id}/devices`, { headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch(`/api/device/geofences/${geofence.id}/devices`, { headers: { 'Authorization': `Bearer ${token}` } })
 
     const data = await res.json()
 
@@ -487,7 +487,7 @@ const handleBind = async () => {
 
     const token = localStorage.getItem('token')
 
-    const res = await fetch(`/api/v1/device/geofences/${selectedGeofence.value.id}/devices`, {
+    const res = await fetch(`/api/device/geofences/${selectedGeofence.value.id}/devices`, {
 
       method: 'PUT',
 
@@ -537,7 +537,7 @@ const deleteGeofence = async (record) => {
 
     const token = localStorage.getItem('token')
 
-    const res = await fetch(`/api/v1/device/geofences/${record.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch(`/api/device/geofences/${record.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } })
 
     const data = await res.json()
 

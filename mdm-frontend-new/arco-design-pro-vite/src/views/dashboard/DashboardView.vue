@@ -154,7 +154,7 @@ const getSeverityText = (severity: number) => {
 const loadStats = async () => {
   try {
     const token = localStorage.getItem('token');
-    const res = await fetch('/api/v1/dashboard/stats', {
+    const res = await fetch('/api/dashboard/stats', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();
@@ -170,7 +170,7 @@ const loadAlerts = async () => {
   alertsLoading.value = true;
   try {
     const token = localStorage.getItem('token');
-    const res = await fetch('/api/v1/alerts?page=1&page_size=10', {
+    const res = await fetch('/api/alerts?page=1&page_size=10', {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const data = await res.json();

@@ -312,8 +312,8 @@ const getStatusText = (status: string) => {
 
 const loadSettings = async () => {
   try {
-    // API: GET /api/v1/admin/tenants/{id}/settings
-    // const res = await axios.get(`/api/v1/admin/tenants/${infoForm.value.id}/settings`)
+    // API: GET /api/admin/tenants/{id}/settings
+    // const res = await axios.get(`/api/admin/tenants/${infoForm.value.id}/settings`)
     // infoForm.value = { ...infoForm.value, ...res.data.data }
     // featureForm: sync from infoForm
     featureForm.value.enable_ota = infoForm.value.plan_features?.ota ?? true
@@ -334,8 +334,8 @@ const handleSearch = (value: string) => {
 const submitInfo = async () => {
   try {
     await infoFormRef.value?.validate()
-    // API: PUT /api/v1/admin/tenants/{id}/settings
-    // await axios.put(`/api/v1/admin/tenants/${infoForm.value.id}/settings`, infoForm.value)
+    // API: PUT /api/admin/tenants/{id}/settings
+    // await axios.put(`/api/admin/tenants/${infoForm.value.id}/settings`, infoForm.value)
     Message.success('配置已保存')
   } catch {
     // validation failed
@@ -355,8 +355,8 @@ const openPlanChange = (plan: any) => {
 const submitPlanChange = async (done: (val: boolean) => void) => {
   if (!targetPlan.value) { done(false); return }
   try {
-    // API: POST /api/v1/admin/tenants/{id}/change-plan
-    // await axios.post(`/api/v1/admin/tenants/${infoForm.value.id}/change-plan`, {
+    // API: POST /api/admin/tenants/{id}/change-plan
+    // await axios.post(`/api/admin/tenants/${infoForm.value.id}/change-plan`, {
     //   plan_id: targetPlan.value.id,
     //   effective_type: 'immediate'
     // })
@@ -373,8 +373,8 @@ const submitPlanChange = async (done: (val: boolean) => void) => {
 
 const submitRenew = async () => {
   try {
-    // API: PUT /api/v1/admin/tenants/{id}/extend
-    // await axios.put(`/api/v1/admin/tenants/${infoForm.value.id}/extend`, {
+    // API: PUT /api/admin/tenants/{id}/extend
+    // await axios.put(`/api/admin/tenants/${infoForm.value.id}/extend`, {
     //   extend_days: renewForm.value.duration * 365
     // })
     Message.success(`已提交续费 ${renewForm.value.duration} 年的申请`)
@@ -385,8 +385,8 @@ const submitRenew = async () => {
 
 const submitFeatures = async () => {
   try {
-    // API: PUT /api/v1/admin/tenants/{id}/settings/features
-    // await axios.put(`/api/v1/admin/tenants/${infoForm.value.id}/settings/features`, featureForm.value)
+    // API: PUT /api/admin/tenants/{id}/settings/features
+    // await axios.put(`/api/admin/tenants/${infoForm.value.id}/settings/features`, featureForm.value)
     Message.success('功能开关已保存')
   } catch {
     Message.error('保存失败')

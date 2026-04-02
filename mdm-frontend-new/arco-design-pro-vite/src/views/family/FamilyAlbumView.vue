@@ -68,7 +68,7 @@ const columns = [
 
 async function loadMembers() {
   try {
-    const res = await fetch('/api/v1/family/members', {
+    const res = await fetch('/api/family/members', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     members.value = res.data?.list || []
@@ -83,7 +83,7 @@ async function loadData() {
     if (form.uploader_id) params.append('uploader_id', String(form.uploader_id))
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
-    const res = await fetch(`/api/v1/family/album?${params}`, {
+    const res = await fetch(`/api/family/album?${params}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.data?.list || []

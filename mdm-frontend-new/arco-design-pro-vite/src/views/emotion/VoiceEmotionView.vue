@@ -71,7 +71,7 @@ const loadData = async () => {
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
     if (form.emotion) params.append('emotion', form.emotion)
-    const res = await fetch(`/api/v1/voice-emotion/records?${params}`, {
+    const res = await fetch(`/api/voice-emotion/records?${params}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.data?.list || []

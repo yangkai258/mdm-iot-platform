@@ -41,7 +41,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const API_BASE = '/api/v1'
+const API_BASE = '/api'
 const stores = ref([])
 const loading = ref(false)
 const modalVisible = ref(false)

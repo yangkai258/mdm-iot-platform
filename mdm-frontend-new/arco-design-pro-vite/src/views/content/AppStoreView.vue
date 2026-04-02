@@ -51,7 +51,7 @@ const getStatusColor = (s) => ({ approved: 'green', pending_review: 'orange', re
 
 const loadPackages = async () => {
   loading.value = true
-  const res = await fetch('/api/v1/apps/packages', {
+  const res = await fetch('/api/apps/packages', {
     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
   })
   packages.value = await res.json()
@@ -59,14 +59,14 @@ const loadPackages = async () => {
 }
 
 const loadInstalls = async () => {
-  const res = await fetch('/api/v1/apps/installs', {
+  const res = await fetch('/api/apps/installs', {
     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
   })
   installs.value = await res.json()
 }
 
 const submitReview = async (pkg) => {
-  await fetch(`/api/v1/apps/packages/${pkg.id}/submit-review`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
+  await fetch(`/api/apps/packages/${pkg.id}/submit-review`, { method: 'POST', headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
   Message.success('已提交审核')
   loadPackages()
 }

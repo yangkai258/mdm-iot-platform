@@ -54,7 +54,7 @@ const columns = [
 
 const load = async () => {
   loading.value = true
-  const url = filter.value.category ? `/api/v1/content/files?category=${filter.value.category}` : '/api/v1/content/files'
+  const url = filter.value.category ? `/api/content/files?category=${filter.value.category}` : '/api/content/files'
   const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
   const data = await res.json()
   files.value = data.files || []
@@ -62,7 +62,7 @@ const load = async () => {
 }
 
 const download = async (record) => {
-  const res = await fetch(`/api/v1/content/files/${record.id}/download`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
+  const res = await fetch(`/api/content/files/${record.id}/download`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
   const data = await res.json()
   if (data.download_url) window.open(data.download_url, '_blank')
 }

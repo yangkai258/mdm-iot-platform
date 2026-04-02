@@ -141,7 +141,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { Message, Modal } from '@arco-design/web-vue'
 import axios from 'axios'
 
-const API_BASE = '/api/v1'
+const API_BASE = '/api'
 
 const loading = ref(false)
 const sendDrawerVisible = ref(false)

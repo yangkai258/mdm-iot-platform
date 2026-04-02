@@ -242,7 +242,7 @@ const pagination = reactive({
 
 async function loadChildren() {
   try {
-    const res = await fetch('/api/v1/family/members?role=child', { credentials: 'include' })
+    const res = await fetch('/api/family/members?role=child', { credentials: 'include' })
     const data = await res.json()
     children.value = data.data?.list || data.data?.members || []
   } catch { /* ignore */ }
@@ -257,7 +257,7 @@ async function loadChildModes() {
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
 
-    const res = await fetch(`/api/v1/advanced/child-mode?${params}`, { credentials: 'include' })
+    const res = await fetch(`/api/advanced/child-mode?${params}`, { credentials: 'include' })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
       childModes.value = data.data?.list || data.data || []
@@ -321,7 +321,7 @@ async function handleSave() {
     }
     delete payload.allowed_time_range
 
-    const url = isEdit.value ? `/api/v1/advanced/child-mode/${form.id}` : '/api/v1/advanced/child-mode'
+    const url = isEdit.value ? `/api/advanced/child-mode/${form.id}` : '/api/advanced/child-mode'
     const method = isEdit.value ? 'PUT' : 'POST'
     const res = await fetch(url, {
       method,
@@ -345,7 +345,7 @@ async function handleSave() {
 async function toggleMode(record: any) {
   savingId.value = record.id
   try {
-    const res = await fetch(`/api/v1/advanced/child-mode/${record.id}`, {
+    const res = await fetch(`/api/advanced/child-mode/${record.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -368,7 +368,7 @@ async function toggleMode(record: any) {
 
 async function handleDelete(record: any) {
   try {
-    const res = await fetch(`/api/v1/advanced/child-mode/${record.id}`, {
+    const res = await fetch(`/api/advanced/child-mode/${record.id}`, {
       method: 'DELETE',
       credentials: 'include'
     })
@@ -395,7 +395,7 @@ async function loadUsageReport(childId?: number) {
     const id = childId || childFilter.value
     const params = new URLSearchParams({ period: reportPeriod.value })
     if (id) params.append('child_id', String(id))
-    const res = await fetch(`/api/v1/advanced/child-mode/usage-report?${params}`, { credentials: 'include' })
+    const res = await fetch(`/api/advanced/child-mode/usage-report?${params}`, { credentials: 'include' })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
       Object.assign(reportData, data.data || {})

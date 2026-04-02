@@ -52,7 +52,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/pet-social/follows', {
+    const res = await fetch('/api/pet-social/follows', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.data?.list || []

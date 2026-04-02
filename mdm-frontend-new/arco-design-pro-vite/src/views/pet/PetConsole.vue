@@ -28,7 +28,7 @@ const sendMessage = async () => {
   const text = inputText.value
   inputText.value = ''
   try {
-    const res = await fetch('/api/v1/pet/conversations', {
+    const res = await fetch('/api/pet/conversations', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text })

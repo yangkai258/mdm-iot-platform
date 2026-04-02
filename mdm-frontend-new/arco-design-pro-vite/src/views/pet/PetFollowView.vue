@@ -42,7 +42,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/pets/follows', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    const res = await fetch('/api/pets/follows', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
     data.value = res.data?.list || []
     pagination.total = data.value.length
   } catch { data.value = [] } finally { loading.value = false }

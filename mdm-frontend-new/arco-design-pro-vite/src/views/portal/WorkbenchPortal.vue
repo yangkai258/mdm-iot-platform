@@ -59,7 +59,7 @@ const recentActivities = ref(['暂无最近活动'])
 
 const loadData = async () => {
   try {
-    const res = await fetch('/api/v1/dashboard/stats', {
+    const res = await fetch('/api/dashboard/stats', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     Object.assign(stats, res.data || {})

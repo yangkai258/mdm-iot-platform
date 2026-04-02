@@ -115,7 +115,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/developer/apps?page=${pagination.current}&page_size=${pagination.pageSize}`)
+    const res = await fetch(`/api/developer/apps?page=${pagination.current}&page_size=${pagination.pageSize}`)
     const json = await res.json()
     data.value = json.data?.list || json.data || []
     pagination.total = json.data?.total || 0
@@ -142,7 +142,7 @@ const handleEdit = (record) => {
 
 const handleSubmit = async () => {
   const method = editingId.value ? 'PUT' : 'POST'
-  const url = editingId.value ? `/api/v1/developer/apps/${editingId.value}` : '/api/v1/developer/apps'
+  const url = editingId.value ? `/api/developer/apps/${editingId.value}` : '/api/developer/apps'
   const res = await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
@@ -170,7 +170,7 @@ const handleCopy = () => {
 
 const handleToggle = async (record) => {
   const newStatus = record.status === 'active' ? 'disabled' : 'active'
-  await fetch(`/api/v1/developer/apps/${record.id}`, {
+  await fetch(`/api/developer/apps/${record.id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: newStatus })
@@ -184,7 +184,7 @@ const handleDelete = (record) => {
     title: '确认删除',
     content: '删除后无法恢复，确定要删除吗？',
     onOk: async () => {
-      await fetch(`/api/v1/developer/apps/${record.id}`, { method: 'DELETE' })
+      await fetch(`/api/developer/apps/${record.id}`, { method: 'DELETE' })
       Message.success('删除成功')
       loadData()
     }

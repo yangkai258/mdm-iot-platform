@@ -430,8 +430,8 @@ const formatDate = (dateStr: string | null) => {
 const loadEmployees = async () => {
   loading.value = true
   try {
-    // API: GET /api/v1/tenants/:tenant_id/employees
-    // const res = await axios.get('/api/v1/tenants/1/employees', { params: { keyword: searchKey.value } })
+    // API: GET /api/tenants/:tenant_id/employees
+    // const res = await axios.get('/api/tenants/1/employees', { params: { keyword: searchKey.value } })
   } catch {
     // use mock
   } finally {
@@ -476,8 +476,8 @@ const openOnboardModal = () => {
 
 const submitOnboard = async (done: (val: boolean) => void) => {
   try {
-    // API: POST /api/v1/tenants/:tenant_id/employees/onboard
-    // const res = await axios.post('/api/v1/tenants/1/employees/onboard', onboardForm.value)
+    // API: POST /api/tenants/:tenant_id/employees/onboard
+    // const res = await axios.post('/api/tenants/1/employees/onboard', onboardForm.value)
     const newRecord = {
       ...onboardForm.value,
       id: Date.now(),
@@ -504,8 +504,8 @@ const handleLeave = (record: any) => {
 
 const submitLeave = async (done: (val: boolean) => void) => {
   try {
-    // API: PUT /api/v1/tenants/:tenant_id/employees/:id/leave
-    // await axios.put(`/api/v1/tenants/1/employees/${currentLeaveRecord.value.id}/leave`, leaveForm.value)
+    // API: PUT /api/tenants/:tenant_id/employees/:id/leave
+    // await axios.put(`/api/tenants/1/employees/${currentLeaveRecord.value.id}/leave`, leaveForm.value)
     currentLeaveRecord.value.emp_status = 2
     currentLeaveRecord.value.status = 0
     Message.success('离职办理成功')
@@ -530,8 +530,8 @@ const submitLinkUser = async (done: (val: boolean) => void) => {
     return
   }
   try {
-    // API: POST /api/v1/tenants/:tenant_id/employees/:id/link-user
-    // await axios.post(`/api/v1/tenants/1/employees/${currentRecord.value.id}/link-user`, linkUserForm.value)
+    // API: POST /api/tenants/:tenant_id/employees/:id/link-user
+    // await axios.post(`/api/tenants/1/employees/${currentRecord.value.id}/link-user`, linkUserForm.value)
     const user = systemUsers.value.find(u => u.id === linkUserForm.value.user_id)
     Message.success(`已关联用户 ${user?.username}`)
     linkUserVisible.value = false

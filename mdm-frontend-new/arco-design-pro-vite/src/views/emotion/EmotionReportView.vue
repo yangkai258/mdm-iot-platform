@@ -54,7 +54,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/emotion/reports?period=${form.period}`, {
+    const res = await fetch(`/api/emotion/reports?period=${form.period}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.data || []

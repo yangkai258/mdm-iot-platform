@@ -120,7 +120,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/webhooks?page=${pagination.current}&page_size=${pagination.pageSize}`)
+    const res = await fetch(`/api/webhooks?page=${pagination.current}&page_size=${pagination.pageSize}`)
     const json = await res.json()
     data.value = json.data?.list || json.data || []
     pagination.total = json.data?.total || 0
@@ -147,7 +147,7 @@ const handleEdit = (record) => {
 
 const handleSubmit = async () => {
   const method = editingId.value ? 'PUT' : 'POST'
-  const url = editingId.value ? `/api/v1/webhooks/${editingId.value}` : '/api/v1/webhooks'
+  const url = editingId.value ? `/api/webhooks/${editingId.value}` : '/api/webhooks'
   await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
@@ -160,7 +160,7 @@ const handleSubmit = async () => {
 
 const handleToggle = async (record) => {
   const newStatus = record.status === 'enabled' ? 'disabled' : 'enabled'
-  await fetch(`/api/v1/webhooks/${record.id}`, {
+  await fetch(`/api/webhooks/${record.id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: newStatus })
@@ -170,7 +170,7 @@ const handleToggle = async (record) => {
 }
 
 const handleTest = async (record) => {
-  await fetch(`/api/v1/webhooks/${record.id}/test`, { method: 'POST' })
+  await fetch(`/api/webhooks/${record.id}/test`, { method: 'POST' })
   Message.success('测试请求已发送')
 }
 
@@ -179,7 +179,7 @@ const handleDelete = (record) => {
     title: '确认删除',
     content: '删除后无法恢复，确定要删除吗？',
     onOk: async () => {
-      await fetch(`/api/v1/webhooks/${record.id}`, { method: 'DELETE' })
+      await fetch(`/api/webhooks/${record.id}`, { method: 'DELETE' })
       Message.success('删除成功')
       loadData()
     }

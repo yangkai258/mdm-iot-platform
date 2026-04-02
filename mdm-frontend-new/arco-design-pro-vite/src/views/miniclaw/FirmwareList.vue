@@ -43,7 +43,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/miniclaw/firmwares', {
+    const res = await fetch('/api/miniclaw/firmwares', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     firmwares.value = res.data?.list || []

@@ -90,7 +90,7 @@ const columns = [
 async function loadData() {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/emotion/response-config')
+    const res = await fetch('/api/emotion/response-config')
     const json = await res.json()
     data.value = json.data || []
     pagination.total = data.value.length
@@ -133,7 +133,7 @@ function handleEdit(record: any) {
 async function handleSubmit() {
   try {
     const method = editingId.value ? 'PUT' : 'POST'
-    const url = editingId.value ? `/api/v1/emotion/response-config/${editingId.value}` : '/api/v1/emotion/response-config'
+    const url = editingId.value ? `/api/emotion/response-config/${editingId.value}` : '/api/emotion/response-config'
     await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json' },

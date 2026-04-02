@@ -201,7 +201,7 @@ function connectWebSocket() {
   // 根据当前域名动态构建 WebSocket URL
   const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
   const host = window.location.host
-  wsUrl.value = `${protocol}//${host}/api/v1/ws/pets/${selectedDeviceId.value}`
+  wsUrl.value = `${protocol}//${host}/api/ws/pets/${selectedDeviceId.value}`
   
   connectWs(wsUrl.value, {
     onMessage: handleWsMessage,

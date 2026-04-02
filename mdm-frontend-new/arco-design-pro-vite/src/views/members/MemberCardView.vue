@@ -57,7 +57,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/members/cards/types?page=${pagination.current}&page_size=${pagination.pageSize}`, {
+    const res = await fetch(`/api/members/cards/types?page=${pagination.current}&page_size=${pagination.pageSize}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     cardTypeList.value = res.data?.list || []

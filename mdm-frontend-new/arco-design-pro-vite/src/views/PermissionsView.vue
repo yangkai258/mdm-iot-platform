@@ -42,12 +42,12 @@ import { ref, reactive } from 'vue';
 
 const loading = ref(false);
 const data = ref([
-  { id: 'P001', code: 'member:view', name: '查看会员', type: 'button', path: '/api/v1/members', status: 'active', description: '查看会员列表和详情' },
-  { id: 'P002', code: 'member:edit', name: '编辑会员', type: 'button', path: '/api/v1/members/*', status: 'active', description: '创建和编辑会员信息' },
-  { id: 'P003', code: 'device:view', name: '查看设备', type: 'button', path: '/api/v1/devices', status: 'active', description: '查看设备列表和状态' },
-  { id: 'P004', code: 'device:command', name: '设备指令', type: 'button', path: '/api/v1/devices/*/command', status: 'active', description: '发送设备控制指令' },
+  { id: 'P001', code: 'member:view', name: '查看会员', type: 'button', path: '/api/members', status: 'active', description: '查看会员列表和详情' },
+  { id: 'P002', code: 'member:edit', name: '编辑会员', type: 'button', path: '/api/members/*', status: 'active', description: '创建和编辑会员信息' },
+  { id: 'P003', code: 'device:view', name: '查看设备', type: 'button', path: '/api/devices', status: 'active', description: '查看设备列表和状态' },
+  { id: 'P004', code: 'device:command', name: '设备指令', type: 'button', path: '/api/devices/*/command', status: 'active', description: '发送设备控制指令' },
   { id: 'P005', code: 'role:manage', name: '角色管理', type: 'menu', path: '/dashboard/roles', status: 'active', description: '管理系统角色' },
-  { id: 'P006', code: 'ota:upgrade', name: 'OTA升级', type: 'button', path: '/api/v1/ota/*', status: 'active', description: '执行OTA固件升级' },
+  { id: 'P006', code: 'ota:upgrade', name: 'OTA升级', type: 'button', path: '/api/ota/*', status: 'active', description: '执行OTA固件升级' },
 ]);
 
 const pagination = reactive({ current: 1, pageSize: 20, total: 6 });

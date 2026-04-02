@@ -54,7 +54,7 @@ const logColumns = [
 ]
 
 onMounted(() => {
-  logs.value = [{ id: 1, time: '2026-03-29 10:00:00', path: '/api/v1/devices', method: 'GET', status: 200, duration: '45ms' }]
+  logs.value = [{ id: 1, time: '2026-03-29 10:00:00', path: '/api/devices', method: 'GET', status: 200, duration: '45ms' }]
   pagination.total = 1
 })
 </script>

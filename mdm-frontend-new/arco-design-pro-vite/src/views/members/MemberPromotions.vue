@@ -58,7 +58,7 @@ const getTypeText = (t) => ({ points_double: '双倍积分', discount: '折扣',
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/members/promotions', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    const res = await fetch('/api/members/promotions', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
     list.value = res.data?.list || []
     pagination.total = list.value.length
   } catch { list.value = [] } finally { loading.value = false }

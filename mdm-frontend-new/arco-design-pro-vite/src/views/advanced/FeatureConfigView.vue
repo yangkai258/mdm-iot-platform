@@ -465,7 +465,7 @@ const ungroupedFeatures = computed(() => {
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/feature-config/groups', {
+    const res = await fetch('/api/feature-config/groups', {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
     const data = await res.json()
@@ -521,8 +521,8 @@ const saveGroup = async () => {
   try {
     const method = editingGroup.value ? 'PUT' : 'POST'
     const url = editingGroup.value
-      ? `/api/v1/feature-config/groups/${editingGroup.value.id}`
-      : '/api/v1/feature-config/groups'
+      ? `/api/feature-config/groups/${editingGroup.value.id}`
+      : '/api/feature-config/groups'
 
     const res = await fetch(url, {
       method,
@@ -548,7 +548,7 @@ const saveGroup = async () => {
 
 const deleteGroup = async (id) => {
   try {
-    const res = await fetch(`/api/v1/feature-config/groups/${id}`, {
+    const res = await fetch(`/api/feature-config/groups/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
@@ -612,8 +612,8 @@ const saveFeature = async () => {
   try {
     const method = editingFeature.value ? 'PUT' : 'POST'
     const url = editingFeature.value
-      ? `/api/v1/feature-config/features/${editingFeature.value.id}`
-      : '/api/v1/feature-config/features'
+      ? `/api/feature-config/features/${editingFeature.value.id}`
+      : '/api/feature-config/features'
 
     const payload = {
       ...featureForm,
@@ -644,7 +644,7 @@ const saveFeature = async () => {
 
 const deleteFeature = async (id) => {
   try {
-    const res = await fetch(`/api/v1/feature-config/features/${id}`, {
+    const res = await fetch(`/api/feature-config/features/${id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
     })
@@ -663,7 +663,7 @@ const deleteFeature = async (id) => {
 const toggleFeatureStatus = async (feature, checked) => {
   feature.status = checked ? 1 : 0
   try {
-    const res = await fetch(`/api/v1/feature-config/features/${feature.id}`, {
+    const res = await fetch(`/api/feature-config/features/${feature.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -697,7 +697,7 @@ const onGroupReorder = async () => {
   // Save new order
   const items = groups.value.map((g, idx) => ({ id: g.id, sort: idx }))
   try {
-    await fetch('/api/v1/feature-config/sort', {
+    await fetch('/api/feature-config/sort', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -726,7 +726,7 @@ const onFeatureReorder = async () => {
   })
 
   try {
-    await fetch('/api/v1/feature-config/sort', {
+    await fetch('/api/feature-config/sort', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

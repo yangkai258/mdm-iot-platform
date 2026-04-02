@@ -68,7 +68,7 @@ const handleCreate = () => { modalTitle.value = '新建'; modalVisible.value = t
 const handleSubmit = async () => {
   modalVisible.value = false
   try {
-    await fetch('/api/v1/alerts/channels', {
+    await fetch('/api/alerts/channels', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
       body: JSON.stringify({ channel_type: 'email', channel_name: form.channel_name, config: { smtp_host: form.smtp_host, smtp_port: form.smtp_port, smtp_user: form.smtp_user, smtp_password: form.smtp_password, smtp_from: form.smtp_from } })
@@ -81,7 +81,7 @@ const handleSubmit = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/alerts/channels?channel_type=email', {
+    const res = await fetch('/api/alerts/channels?channel_type=email', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }

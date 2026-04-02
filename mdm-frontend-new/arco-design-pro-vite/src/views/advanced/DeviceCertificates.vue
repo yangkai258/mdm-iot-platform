@@ -250,7 +250,7 @@ const loadCertificates = async () => {
     if (filterType.value) params.cert_type = filterType.value
     if (filterStatus.value) params.status = filterStatus.value
 
-    const res = await fetch(`/api/v1/certificates?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/certificates?${new URLSearchParams(params)}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const json = await res.json()
@@ -270,7 +270,7 @@ const loadCertificates = async () => {
 const loadStats = async () => {
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('/api/v1/certificates/stats', { headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch('/api/certificates/stats', { headers: { 'Authorization': `Bearer ${token}` } })
     const json = await res.json()
     if (json.code === 0) Object.assign(stats, json.data)
   } catch (e) { /* silent */ }
@@ -313,7 +313,7 @@ const handleCreate = async (done) => {
     formData.append('key_file_data', await readFileBase64(keyFile.value))
     formData.append('description', createForm.description)
 
-    const res = await fetch('/api/v1/certificates', {
+    const res = await fetch('/api/certificates', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}` },
       body: formData
@@ -348,7 +348,7 @@ const readFileBase64 = (file) => {
 const showDetailModal = async (record) => {
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch(`/api/v1/certificates/${record.id}`, {
+    const res = await fetch(`/api/certificates/${record.id}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const json = await res.json()
@@ -362,7 +362,7 @@ const showDetailModal = async (record) => {
 const downloadCert = async (record) => {
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch(`/api/v1/certificates/${record.id}/download`, {
+    const res = await fetch(`/api/certificates/${record.id}/download`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const blob = await res.blob()

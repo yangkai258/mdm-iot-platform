@@ -48,7 +48,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/offline/sync-records', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
+    const res = await fetch('/api/offline/sync-records', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
     data.value = res.data?.list || []
     pagination.total = data.value.length
     if (res.data?.stats) Object.assign(stats, res.data.stats)

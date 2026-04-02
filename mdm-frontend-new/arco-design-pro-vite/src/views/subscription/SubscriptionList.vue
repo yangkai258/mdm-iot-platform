@@ -192,7 +192,7 @@ const loadData = async () => {
     if (form.status) params.status = form.status
     if (form.plan_name) params.plan_name = form.plan_name
 
-    const res = await fetch(`/api/v1/subscriptions?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/subscriptions?${new URLSearchParams(params)}`, {
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
     const json = await res.json()
@@ -209,7 +209,7 @@ const loadData = async () => {
 
 const loadRenewalLogs = async (subId) => {
   try {
-    const res = await fetch(`/api/v1/subscriptions/${subId}/renewal-logs?page=1&page_size=5`, {
+    const res = await fetch(`/api/subscriptions/${subId}/renewal-logs?page=1&page_size=5`, {
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
     const json = await res.json()
@@ -234,7 +234,7 @@ const handleCreate = async (done) => {
   }
   submitting.value = true
   try {
-    const res = await fetch('/api/v1/subscriptions', {
+    const res = await fetch('/api/subscriptions', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(createForm)
@@ -272,7 +272,7 @@ const handleRenew = (record) => {
 const handleRenewSubmit = async (done) => {
   submitting.value = true
   try {
-    const res = await fetch(`/api/v1/subscriptions/${selectedSub.value.id}/renew`, {
+    const res = await fetch(`/api/subscriptions/${selectedSub.value.id}/renew`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ duration: renewForm.duration })
@@ -297,7 +297,7 @@ const handleRenewSubmit = async (done) => {
 
 const handleCancelRenewal = async (record) => {
   try {
-    const res = await fetch(`/api/v1/subscriptions/${record.id}/cancel-renewal`, {
+    const res = await fetch(`/api/subscriptions/${record.id}/cancel-renewal`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
@@ -315,7 +315,7 @@ const handleCancelRenewal = async (record) => {
 
 const handleResume = async (record) => {
   try {
-    const res = await fetch(`/api/v1/subscriptions/${record.id}/resume`, {
+    const res = await fetch(`/api/subscriptions/${record.id}/resume`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
@@ -338,7 +338,7 @@ const handleCancel = async (record) => {
     okText: '确认取消',
     onOk: async () => {
       try {
-        const res = await fetch(`/api/v1/subscriptions/${record.id}`, {
+        const res = await fetch(`/api/subscriptions/${record.id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${getToken()}` }
         })

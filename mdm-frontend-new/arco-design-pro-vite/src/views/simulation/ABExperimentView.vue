@@ -252,7 +252,7 @@ async function handleSave() {
       test_name: expForm.name,
       test_type: 'performance',
       config: {
-        target: { endpoint: '/api/v1/experiment/simulate', method: 'POST' },
+        target: { endpoint: '/api/experiment/simulate', method: 'POST' },
         load_pattern: { type: 'ramp', initial_vus: Math.round(expForm.traffic_allocation.a / 10), max_vus: Math.round(expForm.traffic_allocation.b / 10) }
       }
     }

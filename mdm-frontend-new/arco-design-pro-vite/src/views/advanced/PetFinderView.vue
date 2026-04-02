@@ -325,7 +325,7 @@ async function loadReports() {
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
 
-    const res = await fetch(`/api/v1/advanced/pet-finder/reports?${params}`, { credentials: 'include' })
+    const res = await fetch(`/api/advanced/pet-finder/reports?${params}`, { credentials: 'include' })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
       reports.value = data.data?.list || data.data || []
@@ -415,8 +415,8 @@ async function handleSave() {
     delete payload.pet_photo
 
     const url = isEdit.value
-      ? `/api/v1/advanced/pet-finder/reports/${form.id}`
-      : '/api/v1/advanced/pet-finder/reports'
+      ? `/api/advanced/pet-finder/reports/${form.id}`
+      : '/api/advanced/pet-finder/reports'
     const method = isEdit.value ? 'PUT' : 'POST'
 
     const res = await fetch(url, {
@@ -440,7 +440,7 @@ async function handleSave() {
 
 async function markAsFound(report: any) {
   try {
-    const res = await fetch(`/api/v1/advanced/pet-finder/reports/${report.id}`, {
+    const res = await fetch(`/api/advanced/pet-finder/reports/${report.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -467,7 +467,7 @@ function shareReport(report: any) {
 
 async function generateShareUrl(report: any) {
   try {
-    const res = await fetch('/api/v1/advanced/pet-finder/reports/share', {
+    const res = await fetch('/api/advanced/pet-finder/reports/share', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

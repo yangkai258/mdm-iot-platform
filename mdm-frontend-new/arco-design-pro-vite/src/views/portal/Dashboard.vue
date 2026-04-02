@@ -234,7 +234,7 @@ const loadData = async () => {
   try {
     const token = localStorage.getItem('token')
     // 尝试从后端加载真实数据
-    const res = await fetch('/api/v1/dashboard/stats', {
+    const res = await fetch('/api/dashboard/stats', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     if (res.ok) {

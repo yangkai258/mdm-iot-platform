@@ -259,7 +259,7 @@ const loadDeviceCompliance = async () => {
     if (filters.platform) params.platform = filters.platform
     if (filters.keyword) params.keyword = filters.keyword
 
-    const res = await axios.get('/api/v1/devices/compliance', { params })
+    const res = await axios.get('/api/devices/compliance', { params })
     const data = res.data
     if (data.code === 0) {
       deviceList.value = data.data?.list || []
@@ -280,7 +280,7 @@ const loadDeviceCompliance = async () => {
 
 const loadFromViolations = async () => {
   try {
-    const res = await axios.get('/api/v1/compliance-violations', {
+    const res = await axios.get('/api/compliance-violations', {
       params: { page: 1, page_size: 1000 }
     })
     if (res.data.code === 0) {
@@ -311,7 +311,7 @@ const loadFromViolations = async () => {
 
 const loadDevicesAndCheck = async () => {
   try {
-    const res = await axios.get('/api/v1/devices/list', {
+    const res = await axios.get('/api/devices/list', {
       params: { page: 1, page_size: 1000 }
     })
     if (res.data.code === 0) {
@@ -356,7 +356,7 @@ const openDetail = async (record) => {
   currentDevice.value = record
   // Load violations for this device
   try {
-    const res = await axios.get('/api/v1/compliance-violations', {
+    const res = await axios.get('/api/compliance-violations', {
       params: { device_id: record.device_id }
     })
     if (res.data.code === 0) {
@@ -371,7 +371,7 @@ const openDetail = async (record) => {
 
 const checkCompliance = async (record) => {
   try {
-    const res = await axios.post(`/api/v1/devices/${record.device_id}/compliance-check`)
+    const res = await axios.post(`/api/devices/${record.device_id}/compliance-check`)
     if (res.data.code === 0) {
       Message.success('合规检查已触发')
       loadDeviceCompliance()
@@ -385,7 +385,7 @@ const checkCompliance = async (record) => {
 
 const viewViolations = async (record) => {
   try {
-    const res = await axios.get('/api/v1/compliance-violations', {
+    const res = await axios.get('/api/compliance-violations', {
       params: { device_id: record.device_id }
     })
     if (res.data.code === 0) {
@@ -400,7 +400,7 @@ const viewViolations = async (record) => {
 
 const resolveViolation = async (violation) => {
   try {
-    const res = await axios.post(`/api/v1/compliance-violations/${violation.id}/resolve`, {
+    const res = await axios.post(`/api/compliance-violations/${violation.id}/resolve`, {
       status: '3' // 3: 已解决
     })
     if (res.data.code === 0) {
@@ -426,7 +426,7 @@ const handleBatchCheck = async (done) => {
   }
 
   try {
-    const res = await axios.post('/api/v1/devices/batch-compliance-check', {
+    const res = await axios.post('/api/devices/batch-compliance-check', {
       device_ids: batchCheckForm.deviceIds,
       group_ids: batchCheckForm.groupIds,
       check_types: batchCheckForm.checkTypes
@@ -451,7 +451,7 @@ const handleBatchCheck = async (done) => {
 
 const loadAvailableDevices = async () => {
   try {
-    const res = await axios.get('/api/v1/devices/list', {
+    const res = await axios.get('/api/devices/list', {
       params: { page: 1, page_size: 500 }
     })
     if (res.data.code === 0) {
@@ -464,7 +464,7 @@ const loadAvailableDevices = async () => {
 
 const loadAvailableGroups = async () => {
   try {
-    const res = await axios.get('/api/v1/groups', {
+    const res = await axios.get('/api/groups', {
       params: { page: 1, page_size: 100 }
     })
     if (res.data.code === 0) {

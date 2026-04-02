@@ -280,7 +280,7 @@ function getFontLabel(size: string) {
 
 async function loadElders() {
   try {
-    const res = await fetch('/api/v1/family/members?role=elder', { credentials: 'include' })
+    const res = await fetch('/api/family/members?role=elder', { credentials: 'include' })
     const data = await res.json()
     elders.value = data.data?.list || data.data?.members || []
   } catch { /* ignore */ }
@@ -295,7 +295,7 @@ async function loadElderModes() {
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
 
-    const res = await fetch(`/api/v1/advanced/elder-mode?${params}`, { credentials: 'include' })
+    const res = await fetch(`/api/advanced/elder-mode?${params}`, { credentials: 'include' })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
       elderModes.value = data.data?.list || data.data || []
@@ -365,7 +365,7 @@ async function handleSave() {
     }
     delete payload.greeting_time_range
 
-    const url = isEdit.value ? `/api/v1/advanced/elder-mode/${form.id}` : '/api/v1/advanced/elder-mode'
+    const url = isEdit.value ? `/api/advanced/elder-mode/${form.id}` : '/api/advanced/elder-mode'
     const method = isEdit.value ? 'PUT' : 'POST'
     const res = await fetch(url, {
       method,
@@ -389,7 +389,7 @@ async function handleSave() {
 async function toggleMode(record: any) {
   savingId.value = record.id
   try {
-    const res = await fetch(`/api/v1/advanced/elder-mode/${record.id}`, {
+    const res = await fetch(`/api/advanced/elder-mode/${record.id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -412,7 +412,7 @@ async function toggleMode(record: any) {
 
 async function handleDelete(record: any) {
   try {
-    const res = await fetch(`/api/v1/advanced/elder-mode/${record.id}`, {
+    const res = await fetch(`/api/advanced/elder-mode/${record.id}`, {
       method: 'DELETE',
       credentials: 'include'
     })
@@ -433,7 +433,7 @@ async function showHealthData(record: any) {
   healthDrawerVisible.value = true
   try {
     const params = new URLSearchParams({ elder_id: String(record.elder_id || record.id) })
-    const res = await fetch(`/api/v1/advanced/elder-mode/health-data?${params}`, { credentials: 'include' })
+    const res = await fetch(`/api/advanced/elder-mode/health-data?${params}`, { credentials: 'include' })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
       Object.assign(healthData, data.data || {})

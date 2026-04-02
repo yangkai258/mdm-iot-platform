@@ -71,7 +71,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/members/promotions/amount-discount?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${filters.keyword}`, {
+    const res = await fetch(`/api/members/promotions/amount-discount?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${filters.keyword}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     dataList.value = res.data?.list || [{ id: 1, name: '满200打8折', threshold: 200, discountRate: 0.8, productName: '全场商品', dateRange: '2026-01-01 至 2026-12-31', status: 'active' }]

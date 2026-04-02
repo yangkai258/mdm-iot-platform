@@ -191,7 +191,7 @@ const columns = [
   { title: '操作', slotName: 'actions', width: 150, fixed: 'right' }
 ]
 
-const API_BASE = '/api/v1'
+const API_BASE = '/api'
 
 const filteredPets = computed(() => {
   let result = pets.value

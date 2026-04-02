@@ -174,7 +174,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
-const API_BASE = '/api/v1'
+const API_BASE = '/api'
 const loading = ref(false)
 const taskLoading = ref(false)
 const uploading = ref(false)

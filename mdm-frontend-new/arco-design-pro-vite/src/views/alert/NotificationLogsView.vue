@@ -69,7 +69,7 @@ const loadData = async () => {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     if (form.channel_type) params.channel_type = form.channel_type
     if (form.status) params.status = form.status
-    const res = await fetch('/api/v1/alerts/notification-logs?' + new URLSearchParams(params), {
+    const res = await fetch('/api/alerts/notification-logs?' + new URLSearchParams(params), {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }

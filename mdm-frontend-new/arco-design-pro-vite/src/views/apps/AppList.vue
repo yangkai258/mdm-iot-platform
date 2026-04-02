@@ -143,7 +143,7 @@ const loadApps = async () => {
     if (filters.appType) params.app_type = filters.appType
     if (filters.status) params.status = filters.status
     if (filters.keyword) params.keyword = filters.keyword
-    const res = await axios.get('/api/v1/apps', { params })
+    const res = await axios.get('/api/apps', { params })
     if (res.data.code === 0) {
       appList.value = res.data.data.list || []
       pagination.total = res.data.data.pagination?.total || 0

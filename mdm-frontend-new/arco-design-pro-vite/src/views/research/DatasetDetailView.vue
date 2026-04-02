@@ -234,7 +234,7 @@ onMounted(() => {
 const loadDataset = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/research/datasets/${route.params.id}`)
+    const res = await fetch(`/api/research/datasets/${route.params.id}`)
     const data = await res.json()
     if (data.status === 'success') {
       dataset.value = data.data
@@ -249,7 +249,7 @@ const loadDataset = async () => {
 const loadVersions = async () => {
   versionLoading.value = true
   try {
-    const res = await fetch(`/api/v1/research/datasets/${route.params.id}/versions`)
+    const res = await fetch(`/api/research/datasets/${route.params.id}/versions`)
     const data = await res.json()
     if (data.status === 'success') {
       versions.value = data.data
@@ -267,7 +267,7 @@ const goBack = () => {
 
 const handleDownload = async () => {
   try {
-    const res = await fetch(`/api/v1/research/datasets/${route.params.id}/download`, { method: 'POST' })
+    const res = await fetch(`/api/research/datasets/${route.params.id}/download`, { method: 'POST' })
     const data = await res.json()
     if (data.status === 'success' && data.download_url) {
       window.open(data.download_url, '_blank')
@@ -280,7 +280,7 @@ const handleDownload = async () => {
 
 const handleCite = async () => {
   try {
-    const res = await fetch(`/api/v1/research/datasets/${route.params.id}/cite`, { method: 'POST' })
+    const res = await fetch(`/api/research/datasets/${route.params.id}/cite`, { method: 'POST' })
     const data = await res.json()
     if (data.status === 'success') {
       citeInfo.value = data.citation
@@ -298,7 +298,7 @@ const copyCitation = () => {
 
 const handleCreateVersion = async () => {
   try {
-    const res = await fetch(`/api/v1/research/datasets/${route.params.id}/versions`, {
+    const res = await fetch(`/api/research/datasets/${route.params.id}/versions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(versionForm),
@@ -331,7 +331,7 @@ const handleDelete = async () => {
       // 确认对话框
       resolve()
     })
-    const res = await fetch(`/api/v1/research/datasets/${route.params.id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/research/datasets/${route.params.id}`, { method: 'DELETE' })
     const data = await res.json()
     if (data.status === 'success') {
       Message.success('删除成功')

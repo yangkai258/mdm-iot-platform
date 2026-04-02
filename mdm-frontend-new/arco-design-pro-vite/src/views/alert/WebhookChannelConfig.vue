@@ -70,7 +70,7 @@ const handleCreate = () => { modalTitle.value = '新建'; modalVisible.value = t
 const handleSubmit = async () => {
   modalVisible.value = false
   try {
-    await fetch('/api/v1/alerts/channels', {
+    await fetch('/api/alerts/channels', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
       body: JSON.stringify({ channel_type: 'webhook', channel_name: form.channel_name, config: { webhook_url: form.webhook_url, webhook_method: form.webhook_method, webhook_secret: form.webhook_secret } })
@@ -83,7 +83,7 @@ const handleSubmit = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/alerts/channels?channel_type=webhook', {
+    const res = await fetch('/api/alerts/channels?channel_type=webhook', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }

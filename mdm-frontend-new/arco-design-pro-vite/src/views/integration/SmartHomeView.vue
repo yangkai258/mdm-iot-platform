@@ -64,7 +64,7 @@ const loadDevices = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('/api/v1/integration/devices', {
+    const res = await fetch('/api/integration/devices', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const resData = await res.json()

@@ -286,7 +286,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
-const API_BASE = '/api/v1'
+const API_BASE = '/api'
 
 function getToken() {
   return localStorage.getItem('token') || ''

@@ -102,7 +102,7 @@ const loadData = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch(`${'/api/v1'}/alerts?page=${pagination.current}&page_size=${pagination.pageSize}`, {
+    const res = await fetch(`${'/api'}/alerts?page=${pagination.current}&page_size=${pagination.pageSize}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const resData = await res.json()
@@ -119,7 +119,7 @@ const handleSubmit = async () => {
   try {
     const token = localStorage.getItem('token')
     const method = isEdit.value ? 'PUT' : 'POST'
-    const url = isEdit.value ? `${'/api/v1'}/alerts/${form.id}` : `${'/api/v1'}/alerts`
+    const url = isEdit.value ? `${'/api'}/alerts/${form.id}` : `${'/api'}/alerts`
     await fetch(url, { method, headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
     Message.success('保存成功'); modalVisible.value = false; loadData()
   } catch (e) { Message.error('操作失败') }

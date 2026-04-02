@@ -60,7 +60,7 @@ const loadProducts = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('/api/v1/integration/products', {
+    const res = await fetch('/api/integration/products', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const resData = await res.json()

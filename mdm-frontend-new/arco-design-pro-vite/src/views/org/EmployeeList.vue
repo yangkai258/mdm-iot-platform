@@ -79,7 +79,7 @@ const loadData = async () => {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     if (filter.keyword) params.keyword = filter.keyword
     if (filter.department_id) params.department_id = filter.department_id
-    const res = await fetch(`/api/v1/org/employees?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/org/employees?${new URLSearchParams(params)}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.data?.list || []
@@ -88,14 +88,14 @@ const loadData = async () => {
 }
 
 const loadDepts = async () => {
-  const res = await fetch('/api/v1/org/departments', {
+  const res = await fetch('/api/org/departments', {
     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
   }).then(r => r.json())
   deptOptions.value = (res.data?.list || []).map(d => ({ label: d.name, value: d.id }))
 }
 
 const loadPosts = async () => {
-  const res = await fetch('/api/v1/org/posts', {
+  const res = await fetch('/api/org/posts', {
     headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
   }).then(r => r.json())
   postOptions.value = (res.data?.list || []).map(p => ({ label: p.name, value: p.id }))

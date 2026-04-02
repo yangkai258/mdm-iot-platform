@@ -60,7 +60,7 @@
     >
       <a-form :model="form" layout="vertical">
         <a-form-item field="apiPath" label="API路径" required>
-          <a-input v-model="form.apiPath" placeholder="如 /api/v1/users" allow-clear />
+          <a-input v-model="form.apiPath" placeholder="如 /api/users" allow-clear />
         </a-form-item>
         <a-form-item field="apiName" label="API名称" required>
           <a-input v-model="form.apiName" placeholder="如 用户列表" allow-clear />
@@ -131,7 +131,7 @@ const searchForm = reactive({
 const tableData = ref([
   {
     id: 1,
-    apiPath: '/api/v1/users',
+    apiPath: '/api/users',
     apiName: '用户列表',
     method: 'GET',
     path: '/users',
@@ -141,7 +141,7 @@ const tableData = ref([
   },
   {
     id: 2,
-    apiPath: '/api/v1/users',
+    apiPath: '/api/users',
     apiName: '创建用户',
     method: 'POST',
     path: '/users',
@@ -151,7 +151,7 @@ const tableData = ref([
   },
   {
     id: 3,
-    apiPath: '/api/v1/users/:id',
+    apiPath: '/api/users/:id',
     apiName: '更新用户',
     method: 'PUT',
     path: '/users/:id',
@@ -161,7 +161,7 @@ const tableData = ref([
   },
   {
     id: 4,
-    apiPath: '/api/v1/users/:id',
+    apiPath: '/api/users/:id',
     apiName: '删除用户',
     method: 'DELETE',
     path: '/users/:id',
@@ -171,7 +171,7 @@ const tableData = ref([
   },
   {
     id: 5,
-    apiPath: '/api/v1/roles',
+    apiPath: '/api/roles',
     apiName: '角色列表',
     method: 'GET',
     path: '/roles',

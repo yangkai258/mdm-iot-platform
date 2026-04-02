@@ -81,7 +81,7 @@ const loadData = async () => {
   loading.value = true
   try {
     if (route.params.id) {
-      const res = await fetch(`/api/v1/ai/monitor/events/${route.params.id}`, {
+      const res = await fetch(`/api/ai/monitor/events/${route.params.id}`, {
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
       }).then(r => r.json())
       if (res.code === 0) data.value = res.data ? [res.data] : []

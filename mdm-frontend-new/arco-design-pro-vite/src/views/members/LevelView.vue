@@ -59,7 +59,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/members/levels?page=${pagination.current}&page_size=${pagination.pageSize}`, {
+    const res = await fetch(`/api/members/levels?page=${pagination.current}&page_size=${pagination.pageSize}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     levelList.value = res.data?.list || []

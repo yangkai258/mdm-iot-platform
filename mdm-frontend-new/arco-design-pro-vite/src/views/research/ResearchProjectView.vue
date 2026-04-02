@@ -186,7 +186,7 @@ const loadProjects = async () => {
     if (filters.keyword) params.append('keyword', filters.keyword)
     if (filters.status) params.append('status', filters.status)
 
-    const res = await fetch(`/api/v1/research/projects?${params}`)
+    const res = await fetch(`/api/research/projects?${params}`)
     const data = await res.json()
     if (data.status === 'success') {
       projectList.value = data.data
@@ -201,7 +201,7 @@ const loadProjects = async () => {
 
 const loadDatasets = async () => {
   try {
-    const res = await fetch('/api/v1/research/datasets?page_size=100')
+    const res = await fetch('/api/research/datasets?page_size=100')
     const data = await res.json()
     if (data.status === 'success') {
       datasets.value = data.data
@@ -255,7 +255,7 @@ const handleEdit = (record) => {
 
 const handleSubmit = async () => {
   try {
-    const url = isEdit.value ? `/api/v1/research/projects/${form.id}` : '/api/v1/research/projects'
+    const url = isEdit.value ? `/api/research/projects/${form.id}` : '/api/research/projects'
     const method = isEdit.value ? 'PUT' : 'POST'
     
     const submitData = {
@@ -281,7 +281,7 @@ const handleSubmit = async () => {
 
 const handleSubmitResearch = async () => {
   try {
-    const res = await fetch(`/api/v1/research/projects/${form.id}/submit`, {
+    const res = await fetch(`/api/research/projects/${form.id}/submit`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(submitForm),

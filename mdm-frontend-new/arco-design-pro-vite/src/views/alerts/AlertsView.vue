@@ -168,7 +168,7 @@ const loadRules = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('/api/v1/alerts/rules', {
+    const res = await fetch('/api/alerts/rules', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
@@ -209,7 +209,7 @@ const editRule = (record) => {
 const handleSubmit = async () => {
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('/api/v1/alerts/rules', {
+    const res = await fetch('/api/alerts/rules', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(form)

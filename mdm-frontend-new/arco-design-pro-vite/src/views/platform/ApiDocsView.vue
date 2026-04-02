@@ -24,12 +24,12 @@ import { ref } from 'vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
 const apiList = ref([
-  { path: '/api/v1/devices', method: 'GET', description: '设备列表' },
-  { path: '/api/v1/devices/:id', method: 'GET', description: '设备详情' },
-  { path: '/api/v1/devices', method: 'POST', description: '创建设备' },
-  { path: '/api/v1/members', method: 'GET', description: '会员列表' },
-  { path: '/api/v1/alerts', method: 'GET', description: '告警列表' },
-  { path: '/api/v1/ota/packages', method: 'GET', description: 'OTA包列表' },
+  { path: '/api/devices', method: 'GET', description: '设备列表' },
+  { path: '/api/devices/:id', method: 'GET', description: '设备详情' },
+  { path: '/api/devices', method: 'POST', description: '创建设备' },
+  { path: '/api/members', method: 'GET', description: '会员列表' },
+  { path: '/api/alerts', method: 'GET', description: '告警列表' },
+  { path: '/api/ota/packages', method: 'GET', description: 'OTA包列表' },
 ])
 
 const columns = [

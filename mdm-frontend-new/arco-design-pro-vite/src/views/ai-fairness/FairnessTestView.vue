@@ -64,7 +64,7 @@ const handleCreate = () => { modalTitle.value = '运行测试'; modalVisible.val
 const handleSubmit = async () => {
   modalVisible.value = false
   try {
-    await fetch('/api/v1/ai-fairness/run', {
+    await fetch('/api/ai-fairness/run', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     })
@@ -76,7 +76,7 @@ const handleSubmit = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/ai-fairness/bias-detection', {
+    const res = await fetch('/api/ai-fairness/bias-detection', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.bias_results || []

@@ -157,7 +157,7 @@ import axios from 'axios'
 
 const router = useRouter()
 
-const API_BASE = '/api/v1/digital-twin'
+const API_BASE = '/api/digital-twin'
 
 const petList = ref([])
 const selectedPetId = ref('')

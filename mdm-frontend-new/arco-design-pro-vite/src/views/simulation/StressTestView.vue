@@ -53,7 +53,7 @@
         </a-form-item>
         <a-divider>目标配置</a-divider>
         <a-form-item label="请求路径" required>
-          <a-input v-model="testForm.config.target.endpoint" placeholder="/api/v1/devices/status" />
+          <a-input v-model="testForm.config.target.endpoint" placeholder="/api/devices/status" />
         </a-form-item>
         <a-form-item label="请求方法">
           <a-select v-model="testForm.config.target.method">
@@ -183,7 +183,7 @@ const testForm = reactive({
   test_name: '',
   test_type: 'concurrent',
   config: {
-    target: { endpoint: '/api/v1/devices/status', method: 'POST', body_template: {} },
+    target: { endpoint: '/api/devices/status', method: 'POST', body_template: {} },
     load_pattern: { type: 'ramp', initial_vus: 10, max_vus: 100, ramp_up_duration: '2m', hold_duration: '5m' },
     thresholds: { http_req_duration: { p50: 100, p95: 200, p99: 500 }, http_req_failed: { rate: 0.01 } }
   }
@@ -212,7 +212,7 @@ function openCreateDrawer() {
     test_name: '',
     test_type: 'concurrent',
     config: {
-      target: { endpoint: '/api/v1/devices/status', method: 'POST', body_template: {} },
+      target: { endpoint: '/api/devices/status', method: 'POST', body_template: {} },
       load_pattern: { type: 'ramp', initial_vus: 10, max_vus: 100, ramp_up_duration: '2m', hold_duration: '5m' },
       thresholds: { http_req_duration: { p50: 100, p95: 200, p99: 500 }, http_req_failed: { rate: 0.01 } }
     }

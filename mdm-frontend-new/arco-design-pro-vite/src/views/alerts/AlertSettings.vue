@@ -103,7 +103,7 @@ const handleSubmit = async () => {
   modalVisible.value = false
   try {
     const token = localStorage.getItem('token')
-    await fetch('/api/v1/alerts/settings', {
+    await fetch('/api/alerts/settings', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(form)
@@ -119,7 +119,7 @@ const loadData = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('/api/v1/alerts/settings', { headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch('/api/alerts/settings', { headers: { 'Authorization': `Bearer ${token}` } })
     const resData = await res.json()
     if (resData.code === 0) {
       data.value = resData.data?.list || []

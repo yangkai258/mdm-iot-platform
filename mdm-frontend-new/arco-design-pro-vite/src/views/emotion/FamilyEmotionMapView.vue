@@ -56,7 +56,7 @@ async function loadData() {
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
 
-    const res = await fetch(`/api/v1/emotions/family-map?${params}`)
+    const res = await fetch(`/api/emotions/family-map?${params}`)
     const json = await res.json()
     data.value = json.data?.members || []
     pagination.total = json.data?.total || 0

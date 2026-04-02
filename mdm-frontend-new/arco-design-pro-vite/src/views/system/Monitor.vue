@@ -105,7 +105,7 @@ let timer = null
 const fetchStatus = async () => {
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch('/api/v1/system/status', {
+    const res = await fetch('/api/system/status', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     if (res.ok) {

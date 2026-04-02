@@ -87,7 +87,7 @@ const columns = [
 
 async function loadElders() {
   try {
-    const res = await fetch('/api/v1/family/members?role=elder', {
+    const res = await fetch('/api/family/members?role=elder', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     elders.value = res.data?.list || []
@@ -102,7 +102,7 @@ async function loadData() {
     if (form.status) params.append('status', form.status)
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
-    const res = await fetch(`/api/v1/family/elder-mode?${params}`, {
+    const res = await fetch(`/api/family/elder-mode?${params}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.data?.list || []
@@ -116,7 +116,7 @@ const handleCreate = () => { editingId.value = null; Object.assign(form, { elder
 const handleSubmit = async () => {
   try {
     const method = editingId.value ? 'PUT' : 'POST'
-    const url = editingId.value ? `/api/v1/family/elder-mode/${editingId.value}` : '/api/v1/family/elder-mode'
+    const url = editingId.value ? `/api/family/elder-mode/${editingId.value}` : '/api/family/elder-mode'
     await fetch(url, { method, headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
     Message.success('保存成功')
     modalVisible.value = false

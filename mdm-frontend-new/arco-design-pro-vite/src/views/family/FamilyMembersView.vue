@@ -106,7 +106,7 @@ async function loadData() {
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
 
-    const res = await fetch(`/api/v1/family/members?${params}`)
+    const res = await fetch(`/api/family/members?${params}`)
     const json = await res.json()
     data.value = json.data?.list || []
     pagination.total = json.data?.total || 0
@@ -141,14 +141,14 @@ function handleInvite() {
 async function handleSubmit() {
   try {
     if (!editingId.value) {
-      await fetch('/api/v1/family/members/invite', {
+      await fetch('/api/family/members/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form)
       })
       Message.success('邀请已发送')
     } else {
-      await fetch(`/api/v1/family/members/${editingId.value}/role`, {
+      await fetch(`/api/family/members/${editingId.value}/role`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ role: form.role })

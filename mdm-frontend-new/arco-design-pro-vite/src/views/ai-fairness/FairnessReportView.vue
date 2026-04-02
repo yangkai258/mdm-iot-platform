@@ -66,7 +66,7 @@ const handleSubmit = () => { modalVisible.value = false; Message.success('保存
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch('/api/v1/ai-fairness/reports', {
+    const res = await fetch('/api/ai-fairness/reports', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.bias_results || []

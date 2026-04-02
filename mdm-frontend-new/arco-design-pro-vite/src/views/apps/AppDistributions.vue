@@ -233,7 +233,7 @@ const loadDistributions = async () => {
   try {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     if (filters.status) params.status = filters.status
-    const res = await axios.get('/api/v1/apps/distributions', { params })
+    const res = await axios.get('/api/apps/distributions', { params })
     if (res.data.code === 0) {
       distributionList.value = res.data.data.list || []
       pagination.total = res.data.data.pagination?.total || 0
@@ -253,7 +253,7 @@ const loadDistributions = async () => {
 
 const loadApps = async () => {
   try {
-    const res = await axios.get('/api/v1/apps', { params: { page: 1, page_size: 100 } })
+    const res = await axios.get('/api/apps', { params: { page: 1, page_size: 100 } })
     if (res.data.code === 0) {
       appList.value = res.data.data.list || []
     }
@@ -264,7 +264,7 @@ const onAppChange = async (appId) => {
   createForm.app_version_id = null
   if (!appId) return
   try {
-    const res = await axios.get(`/api/v1/apps/${appId}/versions`)
+    const res = await axios.get(`/api/apps/${appId}/versions`)
     if (res.data.code === 0) {
       versionList.value = res.data.data.list || []
     }
@@ -280,7 +280,7 @@ const handleCreateSubmit = async () => {
     if (payload.scheduled_at) {
       payload.scheduled_at = new Date(payload.scheduled_at).toISOString()
     }
-    const res = await axios.post('/api/v1/apps/distributions', payload)
+    const res = await axios.post('/api/apps/distributions', payload)
     if (res.data.code === 0) {
       Message.success('创建成功')
       showCreateDrawer.value = false
@@ -306,7 +306,7 @@ const resetCreateForm = () => {
 
 const openDetail = async (record) => {
   try {
-    const res = await axios.get(`/api/v1/apps/distributions/${record.id}`)
+    const res = await axios.get(`/api/apps/distributions/${record.id}`)
     if (res.data.code === 0) {
       currentTask.value = res.data.data
       showDetailDrawer.value = true
@@ -322,7 +322,7 @@ const cancelTask = (record) => {
     content: '确定要取消该分发任务吗？',
     onOk: async () => {
       try {
-        const res = await axios.post(`/api/v1/apps/distributions/${record.id}/cancel`)
+        const res = await axios.post(`/api/apps/distributions/${record.id}/cancel`)
         if (res.data.code === 0) {
           Message.success('已取消')
           loadDistributions()

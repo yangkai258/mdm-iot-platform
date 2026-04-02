@@ -95,7 +95,7 @@ const loadData = async () => {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     if (form.name) params.name = form.name
     if (form.status) params.status = form.status
-    const res = await axios.get('/api/v1/pet-hospitals', { params })
+    const res = await axios.get('/api/pet-hospitals', { params })
     if (res.data.code === 0) {
       data.value = res.data.data.list || []
       pagination.total = res.data.data.pagination?.total || 0

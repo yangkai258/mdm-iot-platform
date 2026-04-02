@@ -57,7 +57,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import Breadcrumb from '@/components/Breadcrumb.vue'
 
-const API_BASE = '/api/v1'
+const API_BASE = '/api'
 const rules = ref([])
 const loading = ref(false)
 const modalVisible = ref(false)

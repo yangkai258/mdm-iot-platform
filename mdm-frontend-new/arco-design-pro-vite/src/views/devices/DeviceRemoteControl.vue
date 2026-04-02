@@ -463,7 +463,7 @@ const loadDevices = async () => {
 
 
 
-    const res = await fetch(`/api/v1/devices?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/devices?${new URLSearchParams(params)}`, {
 
       headers: { 'Authorization': `Bearer ${getToken()}` }
 
@@ -521,7 +521,7 @@ const loadWipeHistory = async () => {
 
   try {
 
-    const res = await fetch(`/api/v1/devices/${selectedDevice.value.device_id}/wipe-history?${new URLSearchParams({ page: historyPagination.current, page_size: historyPagination.pageSize })}`, {
+    const res = await fetch(`/api/devices/${selectedDevice.value.device_id}/wipe-history?${new URLSearchParams({ page: historyPagination.current, page_size: historyPagination.pageSize })}`, {
 
       headers: { 'Authorization': `Bearer ${getToken()}` }
 

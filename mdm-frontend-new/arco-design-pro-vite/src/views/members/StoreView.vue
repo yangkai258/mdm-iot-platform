@@ -71,7 +71,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/members/stores?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${filters.keyword}`, {
+    const res = await fetch(`/api/members/stores?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${filters.keyword}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     stores.value = res.data?.list || []

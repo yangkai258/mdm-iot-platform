@@ -68,7 +68,7 @@ const loadData = async () => {
   try {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     if (form.period) params.type = form.period
-    const res = await axios.get('/api/v1/health/reports', { params })
+    const res = await axios.get('/api/health/reports', { params })
     if (res.data.code === 0) {
       data.value = res.data.data.list || []
       pagination.total = res.data.data.pagination?.total || 0

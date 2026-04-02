@@ -47,7 +47,7 @@ const data = ref([
 
 const loadData = async () => {
   try {
-    const res = await axios.get('/api/v1/public-archives', { headers: { Authorization: `Bearer ${getToken()}` } })
+    const res = await axios.get('/api/public-archives', { headers: { Authorization: `Bearer ${getToken()}` } })
     if (res.data.code === 0) {
       data.value = res.data.data?.list || []
     }
@@ -57,7 +57,7 @@ const loadData = async () => {
 const view = (record) => { Message.info(`查看 ${record.name}`) }
 const edit = async (record) => {
   try {
-    const res = await axios.get(`/api/v1/public-archives/${record.id}`, { headers: { Authorization: `Bearer ${getToken()}` } })
+    const res = await axios.get(`/api/public-archives/${record.id}`, { headers: { Authorization: `Bearer ${getToken()}` } })
     if (res.data.code === 0) {
       Message.success('已加载详情')
     }

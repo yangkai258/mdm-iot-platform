@@ -132,7 +132,7 @@ const appId = parseInt(route.params.id)
 
 const loadAppInfo = async () => {
   try {
-    const res = await axios.get(`/api/v1/apps/${appId}`)
+    const res = await axios.get(`/api/apps/${appId}`)
     if (res.data.code === 0) appInfo.value = res.data.data
   } catch { Message.error('加载应用信息失败') }
 }
@@ -140,7 +140,7 @@ const loadAppInfo = async () => {
 const loadVersions = async () => {
   loading.value = true
   try {
-    const res = await axios.get(`/api/v1/apps/${appId}/versions`)
+    const res = await axios.get(`/api/apps/${appId}/versions`)
     if (res.data.code === 0) versionList.value = res.data.data.list || []
   } catch { Message.error('加载版本列表失败') }
   finally { loading.value = false }
@@ -148,7 +148,7 @@ const loadVersions = async () => {
 
 const handleUploadSubmit = async () => {
   try {
-    const res = await axios.post(`/api/v1/apps/${appId}/versions`, uploadForm)
+    const res = await axios.post(`/api/apps/${appId}/versions`, uploadForm)
     if (res.data.code === 0) {
       Message.success('上传成功')
       showUploadDrawer.value = false
@@ -171,7 +171,7 @@ const deleteVersion = (record) => {
     content: `确定要删除版本 ${record.version} 吗？`,
     onOk: async () => {
       try {
-        const res = await axios.delete(`/api/v1/apps/${appId}/versions/${record.id}`)
+        const res = await axios.delete(`/api/apps/${appId}/versions/${record.id}`)
         if (res.data.code === 0) { Message.success('删除成功'); loadVersions() }
         else Message.error(res.data.message || '删除失败')
       } catch { Message.error('删除失败') }

@@ -87,7 +87,7 @@ const loadData = async () => {
     const params = { page: pagination.current, pageSize: pagination.pageSize }
     if (filters.keyword) params.keyword = filters.keyword
     if (filters.mode) params.mode = filters.mode
-    const res = await fetch(`/api/v1/members/coupons/grant?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/members/coupons/grant?${new URLSearchParams(params)}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     dataList.value = res.data?.list || []

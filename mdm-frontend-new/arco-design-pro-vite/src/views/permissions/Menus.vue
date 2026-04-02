@@ -188,7 +188,7 @@ const columns = [
   { title: '操作', slotName: 'actions', width: 260, fixed: 'right' }
 ]
 
-const apiBase = '/api/v1'
+const apiBase = '/api'
 
 const getToken = () => localStorage.getItem('token')
 

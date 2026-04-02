@@ -511,7 +511,7 @@ const loadDashboard = async () => {
 
 
 
-    const res = await fetch(`/api/v1/devices/monitor/dashboard?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/devices/monitor/dashboard?${new URLSearchParams(params)}`, {
 
       headers: { 'Authorization': `Bearer ${getToken()}` }
 
@@ -559,7 +559,7 @@ const loadMetrics = async () => {
 
 
 
-    const res = await fetch(`/api/v1/devices/monitor/metrics?hours=${hours}`, {
+    const res = await fetch(`/api/devices/monitor/metrics?hours=${hours}`, {
 
       headers: { 'Authorization': `Bearer ${getToken()}` }
 

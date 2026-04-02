@@ -70,7 +70,7 @@ const loadData = async () => {
       params.start_time = form.dateRange[0].toISOString()
       params.end_time = form.dateRange[1].toISOString()
     }
-    const res = await fetch('/api/v1/alerts/notification-stats?' + new URLSearchParams(params), {
+    const res = await fetch('/api/alerts/notification-stats?' + new URLSearchParams(params), {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     if (res.code === 0) { data.value = res.data?.by_channel || []; pagination.total = data.value.length }

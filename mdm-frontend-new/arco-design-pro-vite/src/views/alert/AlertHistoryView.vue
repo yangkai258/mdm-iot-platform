@@ -97,7 +97,7 @@ const loadData = async () => {
   try {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     Object.keys(form).forEach(k => { if (form[k]) params[k] = form[k] })
-    const res = await fetch('/api/v1/alerts/history?' + new URLSearchParams(params), {
+    const res = await fetch('/api/alerts/history?' + new URLSearchParams(params), {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }

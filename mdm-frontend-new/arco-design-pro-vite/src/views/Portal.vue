@@ -129,9 +129,9 @@ const recentBroadcasts = ref([])
 const fetchDashboardData = async () => {
   try {
     const [devicesRes, alertsRes, broadcastsRes] = await Promise.all([
-      axios.get('/api/v1/devices/list', { params: { page_size: 1 } }),
-      axios.get('/api/v1/alerts', { params: { page_size: 5 } }),
-      axios.get('/api/v1/broadcasts', { params: { page_size: 5 } })
+      axios.get('/api/devices/list', { params: { page_size: 1 } }),
+      axios.get('/api/alerts', { params: { page_size: 5 } }),
+      axios.get('/api/broadcasts', { params: { page_size: 5 } })
     ])
     if (devicesRes.data.code === 0) {
       stats.value.totalDevices = devicesRes.data.data.pagination?.total || 0

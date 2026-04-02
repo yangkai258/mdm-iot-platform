@@ -255,7 +255,7 @@ const loadRequests = async () => {
 
     if (filterStatus.value) params.append('status', filterStatus.value)
 
-    const res = await fetch(`/api/v1/device/pairing/requests?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch(`/api/device/pairing/requests?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
 
     const data = await res.json()
 
@@ -301,7 +301,7 @@ const loadHistory = async () => {
 
     const params = new URLSearchParams({ page: historyPagination.current, page_size: historyPagination.pageSize })
 
-    const res = await fetch(`/api/v1/device/pairing/history?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
+    const res = await fetch(`/api/device/pairing/history?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
 
     const data = await res.json()
 
@@ -341,7 +341,7 @@ const approveRequest = async (record) => {
 
     const token = localStorage.getItem('token')
 
-    const res = await fetch(`/api/v1/device/pairing/requests/${record.id}/approve`, {
+    const res = await fetch(`/api/device/pairing/requests/${record.id}/approve`, {
 
       method: 'POST',
 
@@ -391,7 +391,7 @@ const handleReject = async () => {
 
     const token = localStorage.getItem('token')
 
-    const res = await fetch(`/api/v1/device/pairing/requests/${selectedRequest.value.id}/reject`, {
+    const res = await fetch(`/api/device/pairing/requests/${selectedRequest.value.id}/reject`, {
 
       method: 'POST',
 

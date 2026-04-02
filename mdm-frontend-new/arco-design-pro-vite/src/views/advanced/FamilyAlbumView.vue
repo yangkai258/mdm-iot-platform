@@ -326,7 +326,7 @@ async function loadPhotos() {
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
 
-    const res = await fetch(`/api/v1/advanced/album?${params}`, { credentials: 'include' })
+    const res = await fetch(`/api/advanced/album?${params}`, { credentials: 'include' })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
       photos.value = data.data?.list || data.data || []
@@ -343,7 +343,7 @@ async function loadPhotos() {
 
 async function loadAlbums() {
   try {
-    const res = await fetch('/api/v1/advanced/album/albums', { credentials: 'include' })
+    const res = await fetch('/api/advanced/album/albums', { credentials: 'include' })
     const data = await res.json()
     albums.value = data.data?.list || data.data || []
   } catch { /* ignore */ }
@@ -351,7 +351,7 @@ async function loadAlbums() {
 
 async function loadMembers() {
   try {
-    const res = await fetch('/api/v1/family/members', { credentials: 'include' })
+    const res = await fetch('/api/family/members', { credentials: 'include' })
     const data = await res.json()
     members.value = data.data?.list || data.data?.members || []
   } catch { /* ignore */ }
@@ -381,7 +381,7 @@ async function handleFileChange(e: any) {
       formData.append('file', file)
       if (albumFilter.value) formData.append('album_id', String(albumFilter.value))
 
-      const res = await fetch('/api/v1/advanced/album/upload', {
+      const res = await fetch('/api/advanced/album/upload', {
         method: 'POST',
         credentials: 'include',
         body: formData
@@ -444,7 +444,7 @@ async function handleShare() {
       payload.member_ids = shareForm.member_ids
     }
 
-    const res = await fetch('/api/v1/advanced/album/share', {
+    const res = await fetch('/api/advanced/album/share', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -489,8 +489,8 @@ async function handleAlbumSave() {
   }
   try {
     const url = albumForm.id
-      ? `/api/v1/advanced/album/albums/${albumForm.id}`
-      : '/api/v1/advanced/album/albums'
+      ? `/api/advanced/album/albums/${albumForm.id}`
+      : '/api/advanced/album/albums'
     const method = albumForm.id ? 'PUT' : 'POST'
     const res = await fetch(url, {
       method,
@@ -513,7 +513,7 @@ async function handleAlbumSave() {
 
 async function handleDeleteAlbum(album: any) {
   try {
-    const res = await fetch(`/api/v1/advanced/album/albums/${album.id}`, {
+    const res = await fetch(`/api/advanced/album/albums/${album.id}`, {
       method: 'DELETE',
       credentials: 'include'
     })
@@ -531,7 +531,7 @@ async function handleDeleteAlbum(album: any) {
 
 async function handleDelete(photo: any) {
   try {
-    const res = await fetch(`/api/v1/advanced/album/${photo.id}`, {
+    const res = await fetch(`/api/advanced/album/${photo.id}`, {
       method: 'DELETE',
       credentials: 'include'
     })

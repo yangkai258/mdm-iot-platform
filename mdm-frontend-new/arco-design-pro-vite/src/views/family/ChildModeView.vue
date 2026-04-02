@@ -79,7 +79,7 @@ const columns = [
 
 async function loadChildren() {
   try {
-    const res = await fetch('/api/v1/family/members?role=child', {
+    const res = await fetch('/api/family/members?role=child', {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     children.value = res.data?.list || []
@@ -94,7 +94,7 @@ async function loadData() {
     if (form.status) params.append('status', form.status)
     params.append('page', String(pagination.current))
     params.append('page_size', String(pagination.pageSize))
-    const res = await fetch(`/api/v1/family/child-mode?${params}`, {
+    const res = await fetch(`/api/family/child-mode?${params}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.data?.list || []
@@ -108,7 +108,7 @@ const handleCreate = () => { editingId.value = null; Object.assign(form, { child
 const handleSubmit = async () => {
   try {
     const method = editingId.value ? 'PUT' : 'POST'
-    const url = editingId.value ? `/api/v1/family/child-mode/${editingId.value}` : '/api/v1/family/child-mode'
+    const url = editingId.value ? `/api/family/child-mode/${editingId.value}` : '/api/family/child-mode'
     await fetch(url, { method, headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
     Message.success('保存成功')
     modalVisible.value = false

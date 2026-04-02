@@ -170,7 +170,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 
-const API_BASE = '/api/v1'
+const API_BASE = '/api'
 const members = ref([])
 const levels = ref([])
 const loading = ref(false)

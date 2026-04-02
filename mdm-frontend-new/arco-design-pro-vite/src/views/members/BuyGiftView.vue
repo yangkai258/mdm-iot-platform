@@ -71,7 +71,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/members/promotions/buy-gift?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${filters.keyword}`, {
+    const res = await fetch(`/api/members/promotions/buy-gift?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${filters.keyword}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     dataList.value = res.data?.list || [{ id: 1, name: '买一送一', buyCount: 1, giftCount: 1, giftName: '同款商品', productName: '全场商品', dateRange: '2026-03-01 至 2026-06-30', status: 'active' }]

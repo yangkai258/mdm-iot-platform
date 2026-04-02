@@ -126,7 +126,7 @@ import * as echarts from 'echarts'
 const router = useRouter()
 const route = useRoute()
 
-const API_BASE = '/api/v1/digital-twin'
+const API_BASE = '/api/digital-twin'
 
 const petList = ref([])
 const selectedPetId = ref('')

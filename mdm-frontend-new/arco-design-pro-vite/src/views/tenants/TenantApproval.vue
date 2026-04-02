@@ -235,8 +235,8 @@ const formatDate = (dateStr: string) => {
 const loadApplications = async () => {
   loading.value = true
   try {
-    // API: GET /api/v1/admin/tenants/applications
-    // const res = await axios.get('/api/v1/admin/tenants/applications', { params: { keyword: searchKey.value } })
+    // API: GET /api/admin/tenants/applications
+    // const res = await axios.get('/api/admin/tenants/applications', { params: { keyword: searchKey.value } })
     // if (res.data.code === 'SUCCESS') { ... }
     // 使用mock
     plans.value = mockPlans
@@ -265,14 +265,14 @@ const viewDetail = async (record: any) => {
     },
   ]
 
-  // API: GET /api/v1/admin/tenants/applications/{id}/history
+  // API: GET /api/admin/tenants/applications/{id}/history
   detailVisible.value = true
 }
 
 const handleApprove = async (record: any) => {
   try {
-    // API: POST /api/v1/admin/tenants/applications/{id}/approve
-    // await axios.post(`/api/v1/admin/tenants/applications/${record.id}/approve`, approvalForm.value)
+    // API: POST /api/admin/tenants/applications/{id}/approve
+    // await axios.post(`/api/admin/tenants/applications/${record.id}/approve`, approvalForm.value)
     record.status = 'approved'
     Message.success('已通过审核')
     detailVisible.value = false
@@ -295,8 +295,8 @@ const submitReject = async (done: (val: boolean) => void) => {
     return
   }
   try {
-    // API: POST /api/v1/admin/tenants/applications/{id}/reject
-    // await axios.post(`/api/v1/admin/tenants/applications/${currentRecord.value.id}/reject`, {
+    // API: POST /api/admin/tenants/applications/{id}/reject
+    // await axios.post(`/api/admin/tenants/applications/${currentRecord.value.id}/reject`, {
     //   reject_reason: rejectForm.value.reject_reason
     // })
     currentRecord.value.status = 'rejected'

@@ -293,7 +293,7 @@ const loadRecords = async () => {
     if (form.billing_type) params.billing_type = form.billing_type
     if (form.status) params.status = form.status
 
-    const res = await fetch(`/api/v1/billing/records?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/billing/records?${new URLSearchParams(params)}`, {
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
     const json = await res.json()
@@ -314,7 +314,7 @@ const loadRecords = async () => {
 
 const loadSummary = async () => {
   try {
-    const res = await fetch('/api/v1/billing/summary', {
+    const res = await fetch('/api/billing/summary', {
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
     const json = await res.json()
@@ -329,7 +329,7 @@ const showRecordDetail = (record) => { currentRecord.value = record; recordDetai
 const handlePay = async (record) => {
   Modal.confirm({ title: '确认支付', content: `确认支付 ¥${record.amount}？`, onOk: async () => {
     try {
-      const res = await fetch('/api/v1/billing/pay', {
+      const res = await fetch('/api/billing/pay', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ record_id: record.id, payment_method: 'alipay' })
@@ -348,7 +348,7 @@ const handlePay = async (record) => {
 }
 
 const handleExport = () => {
-  window.open('/api/v1/billing/records/export', '_blank')
+  window.open('/api/billing/records/export', '_blank')
   Message.success('导出已开始')
 }
 
@@ -367,7 +367,7 @@ const loadInvoices = async () => {
     const params = { page: invoicePagination.current, page_size: invoicePagination.pageSize }
     if (invoiceForm.status) params.status = invoiceForm.status
 
-    const res = await fetch(`/api/v1/billing/invoices?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/billing/invoices?${new URLSearchParams(params)}`, {
       headers: { 'Authorization': `Bearer ${getToken()}` }
     })
     const json = await res.json()
@@ -397,7 +397,7 @@ const handleCreateInvoice = async (done) => {
   }
   invoiceSubmitting.value = true
   try {
-    const res = await fetch('/api/v1/billing/invoices', {
+    const res = await fetch('/api/billing/invoices', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(invoiceCreateForm)
@@ -425,7 +425,7 @@ const showInvoiceDetail = (record) => { currentInvoice.value = record; invoiceDe
 const handleVoidInvoice = async (record) => {
   Modal.confirm({ title: '确认作废', content: '确定要作废该发票吗？', onOk: async () => {
     try {
-      const res = await fetch(`/api/v1/billing/invoices/${record.id}/void`, {
+      const res = await fetch(`/api/billing/invoices/${record.id}/void`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason: '用户申请作废' })

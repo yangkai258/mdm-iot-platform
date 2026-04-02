@@ -90,7 +90,7 @@ const columns = [
 const loadData = async () => {
   loading.value = true
   try {
-    const res = await fetch(`/api/v1/webhooks/logs?page=${pagination.current}&page_size=${pagination.pageSize}&webhook_id=${form.webhook_id || ''}&status=${form.status || ''}`)
+    const res = await fetch(`/api/webhooks/logs?page=${pagination.current}&page_size=${pagination.pageSize}&webhook_id=${form.webhook_id || ''}&status=${form.status || ''}`)
     const json = await res.json()
     data.value = json.data?.list || json.data || []
     pagination.total = json.data?.total || 0
@@ -103,7 +103,7 @@ const loadData = async () => {
 
 const loadWebhooks = async () => {
   try {
-    const res = await fetch('/api/v1/webhooks?page_size=100')
+    const res = await fetch('/api/webhooks?page_size=100')
     const json = await res.json()
     webhooks.value = json.data?.list || json.data || []
     if (props.webhookId) {

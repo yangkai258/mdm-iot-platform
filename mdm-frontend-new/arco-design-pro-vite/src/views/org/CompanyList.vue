@@ -69,7 +69,7 @@ const loadData = async () => {
     const params = { page: pagination.current, page_size: pagination.pageSize }
     if (filter.keyword) params.keyword = filter.keyword
     if (filter.status !== null) params.status = filter.status
-    const res = await fetch(`/api/v1/org/companies?${new URLSearchParams(params)}`, {
+    const res = await fetch(`/api/org/companies?${new URLSearchParams(params)}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
     data.value = res.data?.list || []

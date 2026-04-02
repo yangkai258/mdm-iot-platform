@@ -511,8 +511,8 @@ const isExpired = (dateStr: string | null) => {
 const loadTenants = async () => {
   loading.value = true
   try {
-    // API: GET /api/v1/admin/tenants
-    // const res = await axios.get('/api/v1/admin/tenants', { params: { ... } })
+    // API: GET /api/admin/tenants
+    // const res = await axios.get('/api/admin/tenants', { params: { ... } })
     plans.value = mockPlans
   } catch {
     Message.error('加载租户列表失败')
@@ -538,8 +538,8 @@ const openEditModal = (record: any) => {
 
 const submitEdit = async (done: (val: boolean) => void) => {
   try {
-    // API: PUT /api/v1/admin/tenants/{id}
-    // await axios.put(`/api/v1/admin/tenants/${currentRecord.value.id}`, editForm.value)
+    // API: PUT /api/admin/tenants/{id}
+    // await axios.put(`/api/admin/tenants/${currentRecord.value.id}`, editForm.value)
     Object.assign(currentRecord.value, editForm.value)
     Message.success('租户信息已保存')
     editModalVisible.value = false
@@ -565,8 +565,8 @@ const submitPlanChange = async (done: (val: boolean) => void) => {
     return
   }
   try {
-    // API: POST /api/v1/admin/tenants/{id}/change-plan
-    // await axios.post(`/api/v1/admin/tenants/${currentRecord.value.id}/change-plan`, planForm.value)
+    // API: POST /api/admin/tenants/{id}/change-plan
+    // await axios.post(`/api/admin/tenants/${currentRecord.value.id}/change-plan`, planForm.value)
     currentRecord.value.plan_id = planForm.value.new_plan_id
     const newPlan = plans.value.find(p => p.id === planForm.value.new_plan_id)
     if (newPlan) {
@@ -592,8 +592,8 @@ const openDisableConfirm = (record: any) => {
 
 const submitDisable = async (done: (val: boolean) => void) => {
   try {
-    // API: PUT /api/v1/admin/tenants/{id}/suspend
-    // await axios.put(`/api/v1/admin/tenants/${currentRecord.value.id}/suspend`, { reason: disableForm.value.reason })
+    // API: PUT /api/admin/tenants/{id}/suspend
+    // await axios.put(`/api/admin/tenants/${currentRecord.value.id}/suspend`, { reason: disableForm.value.reason })
     currentRecord.value.status = 'suspended'
     Message.warning(`已禁用租户 ${currentRecord.value.company_name}`)
     disableModalVisible.value = false
@@ -606,8 +606,8 @@ const submitDisable = async (done: (val: boolean) => void) => {
 
 const handleActivate = async (record: any) => {
   try {
-    // API: PUT /api/v1/admin/tenants/{id}/activate
-    // await axios.put(`/api/v1/admin/tenants/${record.id}/activate`)
+    // API: PUT /api/admin/tenants/{id}/activate
+    // await axios.put(`/api/admin/tenants/${record.id}/activate`)
     record.status = 'active'
     Message.success(`已启用租户 ${record.company_name}`)
   } catch {

@@ -142,7 +142,7 @@ import { Message } from '@arco-design/web-vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-const API_BASE = '/api/v1'
+const API_BASE = '/api'
 
 const devices = ref([])
 const loading = ref(false)

@@ -110,7 +110,7 @@ const loadData = async () => {
       params.start_date = form.dateRange[0].format('YYYY-MM-DD')
       params.end_date = form.dateRange[1].format('YYYY-MM-DD')
     }
-    const res = await axios.get('/api/v1/health/sleep', { params })
+    const res = await axios.get('/api/health/sleep', { params })
     if (res.data.code === 0) {
       data.value = res.data.data.list || []
       pagination.total = res.data.data.pagination?.total || 0
