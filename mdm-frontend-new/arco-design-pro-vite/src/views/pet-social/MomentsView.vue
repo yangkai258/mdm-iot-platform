@@ -1,22 +1,22 @@
-Ôªø<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="ÂÆ†Áâ©ÊúãÂèãÂúà">
+    <a-card class="general-card" title="≥ËŒÔ≈Û”—»¶">
       <template #extra>
-        <a-button @click="loadData"><icon-refresh />Âà∑Êñ∞</a-button>
+        <a-button @click="loadData"><icon-refresh />À¢–¬</a-button>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="ÂÜÖÂÆπÂÖ≥ÈîÆËØç">
-            <a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" @pressEnter="loadData" />
+          <a-form-item label="ƒ⁄»›πÿº¸¥ ">
+            <a-input v-model="form.keyword" placeholder="«Î ‰»Î" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
-            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">ÈáçÁΩÆ</a-button>
+            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">÷ÿ÷√</a-button>
           </a-space>
         </a-col>
       </a-row>
@@ -24,9 +24,8 @@
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
         <template #content="{ record }"><span>{{ record.content?.slice(0, 50) || '-' }}</span></template>
         <template #actions="{ record }">
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">Âà†Èô§</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">…æ≥˝</a-button>
         </template>
-      </a-table>
       </a-table>
     </a-card>
   </div>
@@ -42,12 +41,12 @@ const form = reactive({ keyword: '' })
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: 'ÂÆ†Áâ©ID', dataIndex: 'pet_id', width: 100 },
-  { title: 'ÂÜÖÂÆπ', slotName: 'content' },
-  { title: 'ÁÇπËµûÊï∞', dataIndex: 'like_count', width: 80 },
-  { title: 'ËØÑËÆ∫Êï∞', dataIndex: 'comment_count', width: 80 },
-  { title: 'ÂèëÂ∏ÉÊó∂Èó¥', dataIndex: 'created_at', width: 170 },
-  { title: 'Êìç‰Ωú', slotName: 'actions', width: 80 }
+  { title: '≥ËŒÔID', dataIndex: 'pet_id', width: 100 },
+  { title: 'ƒ⁄»›', slotName: 'content' },
+  { title: 'µ„‘ﬁ ˝', dataIndex: 'like_count', width: 80 },
+  { title: '∆¿¬€ ˝', dataIndex: 'comment_count', width: 80 },
+  { title: '∑¢≤º ±º‰', dataIndex: 'created_at', width: 170 },
+  { title: '≤Ÿ◊˜', slotName: 'actions', width: 80 }
 ]
 
 const loadData = async () => {
@@ -61,7 +60,7 @@ const loadData = async () => {
   } catch { data.value = [] } finally { loading.value = false }
 }
 
-const handleDelete = () => { Message.success('Âà†Èô§ÊàêÂäü'); loadData() }
+const handleDelete = () => { Message.success('…æ≥˝≥…π¶'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())

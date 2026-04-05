@@ -1,36 +1,36 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="pro-page-container">
-    <!-- é¢åŒ…å±‘ -->
+    <!-- Ãæ°üĞ¼ -->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>é¦–é¡µ</a-breadcrumb-item>
-      <a-breadcrumb-item>æ•°æ®åˆ†æ</a-breadcrumb-item>
-      <a-breadcrumb-item>æ¼æ–—åˆ†æ</a-breadcrumb-item>
+      <a-breadcrumb-item>Ê×Ò³</a-breadcrumb-item>
+      <a-breadcrumb-item>Êı¾İ·ÖÎö</a-breadcrumb-item>
+      <a-breadcrumb-item>Â©¶··ÖÎö</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- æ“ä½œæ  -->
+    <!-- ²Ù×÷À¸ -->
     <div class="pro-action-bar">
       <a-space>
-        <a-button type="primary" @click="openCreateModal">åˆ›å»ºæ¼æ–—</a-button>
+        <a-button type="primary" @click="openCreateModal">´´½¨Â©¶·</a-button>
       </a-space>
     </div>
 
-    <!-- ç­›é€‰åŒº -->
+    <!-- É¸Ñ¡Çø -->
     <div class="pro-filter-bar">
       <a-card class="filter-card">
         <a-space wrap>
-          <a-input-search v-model="searchKeyword" placeholder="æœç´¢æ¼æ–—åç§°" style="width: 240px" search-button @search="loadFunnels" />
-          <a-select v-model="filterStatus" placeholder="çŠ¶æ€" allow-clear style="width: 120px" @change="loadFunnels">
-            <a-option value="active">å¯ç”¨</a-option>
-            <a-option value="inactive">åœç”¨</a-option>
+          <a-input-search v-model="searchKeyword" placeholder="ËÑË÷Â©¶·Ãû³Æ" style="width: 240px" search-button @search="loadFunnels" />
+          <a-select v-model="filterStatus" placeholder="×´Ì¬" allow-clear style="width: 120px" @change="loadFunnels">
+            <a-option value="active">ÆôÓÃ</a-option>
+            <a-option value="inactive">Í£ÓÃ</a-option>
           </a-select>
         </a-space>
       </a-card>
     </div>
 
-    <!-- æ¼æ–—åˆ—è¡¨ -->
+    <!-- Â©¶·ÁĞ±í -->
     <div class="pro-content-area">
       <a-table :columns="columns" :data="funnels" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }" @page-change="onPageChange">
         <template #name="{ record }">
@@ -39,7 +39,7 @@
       </a-table>
         <template #status="{ record }">
           <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
-            {{ record.status === 'active' ? 'å¯ç”¨' : 'åœç”¨' }}
+            {{ record.status === 'active' ? 'ÆôÓÃ' : 'Í£ÓÃ' }}
           </a-tag>
         </template>
         <template #conversion_rate="{ record }">
@@ -47,19 +47,19 @@
         </template>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="text" size="small" @click="openFunnelDetail(record)">æŸ¥çœ‹</a-button>
-            <a-button type="text" size="small" @click="openEditModal(record)">ç¼–è¾‘</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">åˆ é™¤</a-button>
+            <a-button type="text" size="small" @click="openFunnelDetail(record)">²é¿´</a-button>
+            <a-button type="text" size="small" @click="openEditModal(record)">±à¼­</a-button>
+            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">É¾³ı</a-button>
           </a-space>
         </template>
       </a-table>
     </div>
 
-    <!-- æ¼æ–—è¯¦æƒ…é¢æ¿ -->
-    <a-drawer v-model:visible="detailVisible" :title="currentFunnel?.name || 'æ¼æ–—è¯¦æƒ…'" :width="800" @before-ok="handleSaveFunnel">
+    <!-- Â©¶·ÏêÇéÃæ°å -->
+    <a-drawer v-model:visible="detailVisible" :title="currentFunnel?.name || 'Â©¶·ÏêÇé'" :width="800" @before-ok="handleSaveFunnel">
       <div v-if="currentFunnel">
-        <!-- æ¼æ–—å¯è§†åŒ– -->
-        <a-card title="æ¼æ–—è½¬åŒ–" class="funnel-visualization">
+        <!-- Â©¶·¿ÉÊÓ»¯ -->
+        <a-card title="Â©¶·×ª»¯" class="funnel-visualization">
           <div class="funnel-container">
             <div v-for="(step, index) in funnelSteps" :key="index" class="funnel-step">
               <div class="funnel-bar-wrapper">
@@ -72,55 +72,54 @@
               </div>
               <div class="funnel-meta">
                 <span class="funnel-count">{{ step.value }}</span>
-                <span class="funnel-rate" v-if="index > 0">â†“ {{ step.conversion_rate }}%</span>
+                <span class="funnel-rate" v-if="index > 0">¡ı {{ step.conversion_rate }}%</span>
               </div>
             </div>
           </div>
         </a-card>
 
-        <!-- æ¼æ–—æ­¥éª¤è¯¦æƒ… -->
-        <a-card title="æ­¥éª¤è¯¦æƒ…" class="steps-detail">
+        <!-- Â©¶·²½ÖèÏêÇé -->
+        <a-card title="²½ÖèÏêÇé" class="steps-detail">
           <a-table :columns="stepColumns" :data="funnelSteps" :pagination="false" row-key="name" size="small">
             <template #conversion="{ record, rowIndex }">
-              <span v-if="rowIndex === 0">â€”</span>
+              <span v-if="rowIndex === 0">¡ª</span>
               <span v-else>{{ record.conversion_rate }}%</span>
             </template>
       </a-table>
-          </a-table>
         </a-card>
 
-        <!-- æ—¶é—´ç­›é€‰ -->
+        <!-- Ê±¼äÉ¸Ñ¡ -->
         <div class="detail-filter">
           <a-space>
             <a-select v-model="detailTimeRange" style="width: 120px" @change="loadFunnelData">
-              <a-option value="today">ä»Šæ—¥</a-option>
-              <a-option value="week">è¿‘7å¤©</a-option>
-              <a-option value="month">è¿‘30å¤©</a-option>
+              <a-option value="today">½ñÈÕ</a-option>
+              <a-option value="week">½ü7Ìì</a-option>
+              <a-option value="month">½ü30Ìì</a-option>
             </a-select>
           </a-space>
         </div>
       </div>
     </a-drawer>
 
-    <!-- åˆ›å»º/ç¼–è¾‘æ¼æ–—å¼¹çª— -->
-    <a-modal v-model:visible="formVisible" :title="isEditing ? 'ç¼–è¾‘æ¼æ–—' : 'åˆ›å»ºæ¼æ–—'" :width="560" @before-ok="handleSaveFunnel" @cancel="formVisible = false">
+    <!-- ´´½¨/±à¼­Â©¶·µ¯´° -->
+    <a-modal v-model:visible="formVisible" :title="isEditing ? '±à¼­Â©¶·' : '´´½¨Â©¶·'" :width="560" @before-ok="handleSaveFunnel" @cancel="formVisible = false">
       <a-form :model="funnelForm" layout="vertical" ref="formRef">
-        <a-form-item label="æ¼æ–—åç§°" field="name" required>
-          <a-input v-model="funnelForm.name" placeholder="è¯·è¾“å…¥æ¼æ–—åç§°" />
+        <a-form-item label="Â©¶·Ãû³Æ" field="name" required>
+          <a-input v-model="funnelForm.name" placeholder="ÇëÊäÈëÂ©¶·Ãû³Æ" />
         </a-form-item>
-        <a-form-item label="æè¿°" field="description">
-          <a-textarea v-model="funnelForm.description" placeholder="è¯·è¾“å…¥æè¿°" :max-length="200" />
+        <a-form-item label="ÃèÊö" field="description">
+          <a-textarea v-model="funnelForm.description" placeholder="ÇëÊäÈëÃèÊö" :max-length="200" />
         </a-form-item>
-        <a-form-item label="çŠ¶æ€" field="status">
+        <a-form-item label="×´Ì¬" field="status">
           <a-switch v-model="funnelForm.status" checked-value="active" unchecked-value="inactive" />
         </a-form-item>
-        <a-form-item label="æ­¥éª¤å®šä¹‰" field="steps">
+        <a-form-item label="²½Öè¶¨Òå" field="steps">
           <div v-for="(step, idx) in funnelForm.steps" :key="idx" class="step-item">
-            <a-input v-model="step.name" placeholder="æ­¥éª¤åç§°" style="flex: 1" />
-            <a-input-number v-model="step.value" placeholder="æ•°å€¼" style="width: 120px; margin-left: 8px" />
-            <a-button type="text" status="danger" @click="removeStep(idx)" :disabled="funnelForm.steps.length <= 2">åˆ é™¤</a-button>
+            <a-input v-model="step.name" placeholder="²½ÖèÃû³Æ" style="flex: 1" />
+            <a-input-number v-model="step.value" placeholder="ÊıÖµ" style="width: 120px; margin-left: 8px" />
+            <a-button type="text" status="danger" @click="removeStep(idx)" :disabled="funnelForm.steps.length <= 2">É¾³ı</a-button>
           </div>
-          <a-button type="dashed" @click="addStep" style="margin-top: 8px; width: 100%">+ æ·»åŠ æ­¥éª¤</a-button>
+          <a-button type="dashed" @click="addStep" style="margin-top: 8px; width: 100%">+ Ìí¼Ó²½Öè</a-button>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -131,7 +130,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import * as analytics from '@/api/analytics'
 
-// çŠ¶æ€
+// ×´Ì¬
 const funnels = ref([])
 const loading = ref(false)
 const searchKeyword = ref('')
@@ -147,24 +146,24 @@ const funnelForm = reactive({
   name: '',
   description: '',
   status: 'active',
-  steps: [{ name: 'æ­¥éª¤1', value: 1000 }, { name: 'æ­¥éª¤2', value: 500 }]
+  steps: [{ name: '²½Öè1', value: 1000 }, { name: '²½Öè2', value: 500 }]
 })
 
 const columns = [
-  { title: 'æ¼æ–—åç§°', slotName: 'name' },
-  { title: 'æè¿°', dataIndex: 'description', ellipsis: true },
-  { title: 'çŠ¶æ€', slotName: 'status' },
-  { title: 'æ€»ç”¨æˆ·æ•°', dataIndex: 'total_users', width: 100 },
-  { title: 'æœ€ç»ˆè½¬åŒ–ç‡', slotName: 'conversion_rate', width: 110 },
-  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 180 }
+  { title: 'Â©¶·Ãû³Æ', slotName: 'name' },
+  { title: 'ÃèÊö', dataIndex: 'description', ellipsis: true },
+  { title: '×´Ì¬', slotName: 'status' },
+  { title: '×ÜÓÃ»§Êı', dataIndex: 'total_users', width: 100 },
+  { title: '×îÖÕ×ª»¯ÂÊ', slotName: 'conversion_rate', width: 110 },
+  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at', width: 170 },
+  { title: '²Ù×÷', slotName: 'actions', width: 180 }
 ]
 
 const stepColumns = [
-  { title: 'æ­¥éª¤', dataIndex: 'name' },
-  { title: 'ç”¨æˆ·æ•°', dataIndex: 'value' },
-  { title: 'å æ€»ç”¨æˆ·æ¯”ä¾‹', dataIndex: 'percent', width: 130 },
-  { title: 'ä¸Šä¸€æ­¥è½¬åŒ–ç‡', slotName: 'conversion', width: 130 }
+  { title: '²½Öè', dataIndex: 'name' },
+  { title: 'ÓÃ»§Êı', dataIndex: 'value' },
+  { title: 'Õ¼×ÜÓÃ»§±ÈÀı', dataIndex: 'percent', width: 130 },
+  { title: 'ÉÏÒ»²½×ª»¯ÂÊ', slotName: 'conversion', width: 130 }
 ]
 
 async function loadFunnels() {
@@ -208,7 +207,7 @@ function openFunnelDetail(record) {
 
 function openCreateModal() {
   isEditing.value = false
-  Object.assign(funnelForm, { name: '', description: '', status: 'active', steps: [{ name: 'æ­¥éª¤1', value: 1000 }, { name: 'æ­¥éª¤2', value: 500 }] })
+  Object.assign(funnelForm, { name: '', description: '', status: 'active', steps: [{ name: '²½Öè1', value: 1000 }, { name: '²½Öè2', value: 500 }] })
   formVisible.value = true
 }
 
@@ -219,7 +218,7 @@ function openEditModal(record) {
     name: record.name,
     description: record.description,
     status: record.status,
-    steps: record.steps || [{ name: 'æ­¥éª¤1', value: 1000 }, { name: 'æ­¥éª¤2', value: 500 }]
+    steps: record.steps || [{ name: '²½Öè1', value: 1000 }, { name: '²½Öè2', value: 500 }]
   })
   formVisible.value = true
 }
@@ -249,7 +248,7 @@ async function handleDelete(record) {
 }
 
 function addStep() {
-  funnelForm.steps.push({ name: `æ­¥éª¤${funnelForm.steps.length + 1}`, value: 0 })
+  funnelForm.steps.push({ name: `²½Öè${funnelForm.steps.length + 1}`, value: 0 })
 }
 
 function removeStep(idx) {

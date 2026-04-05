@@ -1,26 +1,27 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="å®¶åº­æƒ…ç»ªåœ°å›¾">
+    <a-card class="general-card" title="¼ÒÍ¥ÇéĞ÷µØÍ¼">
       <template #extra>
-        <a-button @click="handleRefresh"><icon-refresh />åˆ·æ–°</a-button>
+        <a-button @click="handleRefresh"><icon-refresh />Ë¢ĞÂ</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="å®¶åº­ID">
-            <a-input v-model="form.family_id" placeholder="è¯·è¾“å…¥" style="width: 160px" />
+          <a-form-item label="¼ÒÍ¥ID">
+            <a-input v-model="form.family_id" placeholder="ÇëÊäÈë" style="width: 160px" />
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="handleSearch">æŸ¥è¯¢</a-button>
-            <a-button @click="handleReset">é‡ç½®</a-button>
+            <a-button type="primary" @click="handleSearch">²éÑ¯</a-button>
+            <a-button @click="handleReset">ÖØÖÃ</a-button>
           </a-form-item>
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
     </a-table>
-  </a-card>`n</div></template>
+  </a-card>
+</div></template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
@@ -41,11 +42,11 @@ const pagination = reactive({
 })
 
 const columns = [
-  { title: 'å® ç‰©ID', dataIndex: 'pet_id', width: 100 },
-  { title: 'å½“å‰æƒ…ç»ª', dataIndex: 'current_mood', width: 120 },
-  { title: 'æƒ…ç»ªå¼ºåº¦', dataIndex: 'intensity', width: 120 },
-  { title: 'äº’åŠ¨æ¬¡æ•°', dataIndex: 'interaction_count', width: 120 },
-  { title: 'æ›´æ–°æ—¶é—´', dataIndex: 'updated_at', width: 180 }
+  { title: '³èÎïID', dataIndex: 'pet_id', width: 100 },
+  { title: 'µ±Ç°ÇéĞ÷', dataIndex: 'current_mood', width: 120 },
+  { title: 'ÇéĞ÷Ç¿¶È', dataIndex: 'intensity', width: 120 },
+  { title: '»¥¶¯´ÎÊı', dataIndex: 'interaction_count', width: 120 },
+  { title: '¸üĞÂÊ±¼ä', dataIndex: 'updated_at', width: 180 }
 ]
 
 async function loadData() {
@@ -61,7 +62,7 @@ async function loadData() {
     data.value = json.data?.members || []
     pagination.total = json.data?.total || 0
   } catch {
-    Message.error('åŠ è½½å¤±è´¥')
+    Message.error('¼ÓÔØÊ§°Ü')
   } finally {
     loading.value = false
   }

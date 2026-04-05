@@ -1,51 +1,52 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="æƒ…ç»ªè¯†åˆ«é…ç½®">
+    <a-card class="general-card" title="ÇéĞ÷Ê¶±ğÅäÖÃ">
       <template #extra>
-        <a-button type="primary" @click="handleSave"><icon-save />ä¿å­˜é…ç½®</a-button>
+        <a-button type="primary" @click="handleSave"><icon-save />±£´æÅäÖÃ</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="è¯†åˆ«æ¨¡å¼">
-            <a-select v-model="form.mode" placeholder="è¯·é€‰æ‹©" style="width: 140px">
-              <a-option value="audio">è¯­éŸ³æƒ…ç»ªè¯†åˆ«</a-option>
-              <a-option value="visual">è§†è§‰æƒ…ç»ªè¯†åˆ«</a-option>
-              <a-option value="both">ç»¼åˆè¯†åˆ«</a-option>
+          <a-form-item label="Ê¶±ğÄ£Ê½">
+            <a-select v-model="form.mode" placeholder="ÇëÑ¡Ôñ" style="width: 140px">
+              <a-option value="audio">ÓïÒôÇéĞ÷Ê¶±ğ</a-option>
+              <a-option value="visual">ÊÓ¾õÇéĞ÷Ê¶±ğ</a-option>
+              <a-option value="both">×ÛºÏÊ¶±ğ</a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="handleSearch">æŸ¥è¯¢</a-button>
-            <a-button @click="handleReset">é‡ç½®</a-button>
+            <a-button type="primary" @click="handleSearch">²éÑ¯</a-button>
+            <a-button @click="handleReset">ÖØÖÃ</a-button>
           </a-form-item>
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
       </a-table>
-    <a-modal v-model:visible="modalVisible" title="ç¼–è¾‘é…ç½®" :width="480">
+    <a-modal v-model:visible="modalVisible" title="±à¼­ÅäÖÃ" :width="480">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="è¯†åˆ«æ¨¡å¼">
+        <a-form-item label="Ê¶±ğÄ£Ê½">
           <a-select v-model="form.mode">
-            <a-option value="audio">è¯­éŸ³æƒ…ç»ªè¯†åˆ«</a-option>
-            <a-option value="visual">è§†è§‰æƒ…ç»ªè¯†åˆ«</a-option>
-            <a-option value="both">ç»¼åˆè¯†åˆ«</a-option>
+            <a-option value="audio">ÓïÒôÇéĞ÷Ê¶±ğ</a-option>
+            <a-option value="visual">ÊÓ¾õÇéĞ÷Ê¶±ğ</a-option>
+            <a-option value="both">×ÛºÏÊ¶±ğ</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="è¯†åˆ«çµæ•åº¦">
+        <a-form-item label="Ê¶±ğÁéÃô¶È">
           <a-input-number v-model="form.sensitivity" :min="1" :max="10" style="width: 100%" />
         </a-form-item>
-        <a-form-item label="ç½®ä¿¡åº¦é˜ˆå€¼">
+        <a-form-item label="ÖÃĞÅ¶ÈãĞÖµ">
           <a-input-number v-model="form.threshold" :min="0" :max="100" suffix="%" style="width: 100%" />
         </a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">å–æ¶ˆ</a-button>
-        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
+        <a-button @click="modalVisible = false">È¡Ïû</a-button>
+        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
       </template>
     </a-modal>
-    </a-card>`n</div></template>
+    </a-card>
+</div></template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
@@ -70,10 +71,10 @@ const pagination = reactive({
 })
 
 const columns = [
-  { title: 'é…ç½®é¡¹', dataIndex: 'name', width: 200 },
-  { title: 'å½“å‰å€¼', dataIndex: 'value', width: 200 },
-  { title: 'æè¿°', dataIndex: 'description', ellipsis: true },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 120 }
+  { title: 'ÅäÖÃÏî', dataIndex: 'name', width: 200 },
+  { title: 'µ±Ç°Öµ', dataIndex: 'value', width: 200 },
+  { title: 'ÃèÊö', dataIndex: 'description', ellipsis: true },
+  { title: '²Ù×÷', slotName: 'actions', width: 120 }
 ]
 
 async function loadData() {
@@ -88,7 +89,7 @@ async function loadData() {
       form.threshold = res.data.threshold || 70
     }
   } catch (err: any) {
-    Message.error('åŠ è½½å¤±è´¥: ' + err.message)
+    Message.error('¼ÓÔØÊ§°Ü: ' + err.message)
   } finally {
     loading.value = false
   }
@@ -112,11 +113,11 @@ function handleSave() {
 async function handleSubmit() {
   try {
     await updateEmotionRecognizeConfig(form)
-    Message.success('ä¿å­˜æˆåŠŸ')
+    Message.success('±£´æ³É¹¦')
     modalVisible.value = false
     loadData()
   } catch (err: any) {
-    Message.error('ä¿å­˜å¤±è´¥: ' + err.message)
+    Message.error('±£´æÊ§°Ü: ' + err.message)
   }
 }
 

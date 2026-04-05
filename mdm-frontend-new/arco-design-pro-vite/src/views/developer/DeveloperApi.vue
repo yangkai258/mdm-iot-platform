@@ -1,33 +1,33 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="å¼€å‘è€…åº”ç”¨">
+    <a-card class="general-card" title="¿ª·¢ÕßÓ¦ÓÃ">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />åˆ›å»ºåº”ç”¨</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />´´½¨Ó¦ÓÃ</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="åº”ç”¨åç§°">
-            <a-input v-model="form.app_name" placeholder="è¯·è¾“å…¥åº”ç”¨åç§°" />
+          <a-form-item label="Ó¦ÓÃÃû³Æ">
+            <a-input v-model="form.app_name" placeholder="ÇëÊäÈëÓ¦ÓÃÃû³Æ" />
           </a-form-item>
-          <a-form-item label="çŠ¶æ€">
-            <a-select v-model="form.status" placeholder="è¯·é€‰æ‹©" allow-clear style="width: 120px">
-              <a-option value="active">å¯ç”¨</a-option>
-              <a-option value="disabled">ç¦ç”¨</a-option>
+          <a-form-item label="×´Ì¬">
+            <a-select v-model="form.status" placeholder="ÇëÑ¡Ôñ" allow-clear style="width: 120px">
+              <a-option value="active">ÆôÓÃ</a-option>
+              <a-option value="disabled">½ûÓÃ</a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
-            <a-button @click="handleReset">é‡ç½®</a-button>
+            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
+            <a-button @click="handleReset">ÖØÖÃ</a-button>
           </a-form-item>
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
       <template #status="{ record }">
         <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
-          {{ record.status === 'active' ? 'å¯ç”¨' : 'ç¦ç”¨' }}
+          {{ record.status === 'active' ? 'ÆôÓÃ' : '½ûÓÃ' }}
         </a-tag>
       </template>
       </a-table>
@@ -35,56 +35,57 @@
         <a-tag v-for="s in (record.scopes || [])" :key="s" size="small">{{ s }}</a-tag>
       </template>
       <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleViewKey(record)" v-if="record.api_key">æŸ¥çœ‹Key</a-button>
-        <a-button type="text" size="small" @click="handleEdit(record)">ç¼–è¾‘</a-button>
+        <a-button type="text" size="small" @click="handleViewKey(record)" v-if="record.api_key">²é¿´Key</a-button>
+        <a-button type="text" size="small" @click="handleEdit(record)">±à¼­</a-button>
         <a-button type="text" size="small" @click="handleToggle(record)">
-          {{ record.status === 'active' ? 'ç¦ç”¨' : 'å¯ç”¨' }}
+          {{ record.status === 'active' ? '½ûÓÃ' : 'ÆôÓÃ' }}
         </a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">åˆ é™¤</a-button>
+        <a-button type="text" size="small" @click="handleDelete(record)">É¾³ı</a-button>
       </template>
     </a-table>
 
-    <!-- åˆ›å»º/ç¼–è¾‘å¼¹çª— -->
+    <!-- ´´½¨/±à¼­µ¯´° -->
     <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="520" @before-ok="handleSubmit" @cancel="modalVisible = false">
       <a-form :model="formData" layout="vertical" label-col-flex="100px">
-        <a-form-item label="åº”ç”¨åç§°" required>
-          <a-input v-model="formData.app_name" placeholder="è¯·è¾“å…¥åº”ç”¨åç§°" />
+        <a-form-item label="Ó¦ÓÃÃû³Æ" required>
+          <a-input v-model="formData.app_name" placeholder="ÇëÊäÈëÓ¦ÓÃÃû³Æ" />
         </a-form-item>
-        <a-form-item label="æƒé™èŒƒå›´" required>
-          <a-select v-model="formData.scopes" multiple placeholder="è¯·é€‰æ‹©æƒé™">
-            <a-option value="device:read">è®¾å¤‡è¯»å–</a-option>
-            <a-option value="device:write">è®¾å¤‡å†™å…¥</a-option>
-            <a-option value="device:control">è®¾å¤‡æ§åˆ¶</a-option>
-            <a-option value="ota:read">OTAè¯»å–</a-option>
-            <a-option value="ota:write">OTAå†™å…¥</a-option>
-            <a-option value="alert:read">å‘Šè­¦è¯»å–</a-option>
-            <a-option value="alert:write">å‘Šè­¦å†™å…¥</a-option>
+        <a-form-item label="È¨ÏŞ·¶Î§" required>
+          <a-select v-model="formData.scopes" multiple placeholder="ÇëÑ¡ÔñÈ¨ÏŞ">
+            <a-option value="device:read">Éè±¸¶ÁÈ¡</a-option>
+            <a-option value="device:write">Éè±¸Ğ´Èë</a-option>
+            <a-option value="device:control">Éè±¸¿ØÖÆ</a-option>
+            <a-option value="ota:read">OTA¶ÁÈ¡</a-option>
+            <a-option value="ota:write">OTAĞ´Èë</a-option>
+            <a-option value="alert:read">¸æ¾¯¶ÁÈ¡</a-option>
+            <a-option value="alert:write">¸æ¾¯Ğ´Èë</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="æè¿°">
-          <a-textarea v-model="formData.description" placeholder="è¯·è¾“å…¥æè¿°" :rows="3" />
+        <a-form-item label="ÃèÊö">
+          <a-textarea v-model="formData.description" placeholder="ÇëÊäÈëÃèÊö" :rows="3" />
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <!-- æŸ¥çœ‹Keyå¼¹çª— -->
+    <!-- ²é¿´Keyµ¯´° -->
     <a-modal v-model:visible="keyVisible" title="API Key" :width="520">
       <a-alert type="warning" style="margin-bottom: 16px">
-        è¯·å¦¥å–„ä¿ç®¡æ‚¨çš„ API Keyï¼Œå…³é—­å¼¹çª—åå°†æ— æ³•å†æ¬¡æŸ¥çœ‹å®Œæ•´ Keyã€‚
+        ÇëÍ×ÉÆ±£¹ÜÄúµÄ API Key£¬¹Ø±Õµ¯´°ºó½«ÎŞ·¨ÔÙ´Î²é¿´ÍêÕû Key¡£
       </a-alert>
       <a-form :model="keyRecord" layout="vertical" label-col-flex="100px">
-        <a-form-item label="åº”ç”¨åç§°">{{ keyRecord?.app_name }}</a-form-item>
+        <a-form-item label="Ó¦ÓÃÃû³Æ">{{ keyRecord?.app_name }}</a-form-item>
         <a-form-item label="API Key">
           <a-input-group>
             <a-input v-model="keyRecord.api_key" readonly :style="{ fontFamily: 'monospace' }" />
             <template #append>
-              <a-button @click="handleCopy">å¤åˆ¶</a-button>
+              <a-button @click="handleCopy">¸´ÖÆ</a-button>
             </template>
           </a-input-group>
         </a-form-item>
       </a-form>
     </a-modal>
-    </a-card>`n</div></template>
+    </a-card>
+</div></template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
@@ -95,7 +96,7 @@ const loading = ref(false)
 const data = ref([])
 const modalVisible = ref(false)
 const keyVisible = ref(false)
-const modalTitle = ref('åˆ›å»ºåº”ç”¨')
+const modalTitle = ref('´´½¨Ó¦ÓÃ')
 const editingId = ref(null)
 const keyRecord = ref(null)
 const formData = reactive({ app_name: '', scopes: [], description: '' })
@@ -104,12 +105,12 @@ const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 
 const columns = [
   { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: 'åº”ç”¨åç§°', dataIndex: 'app_name', width: 160 },
+  { title: 'Ó¦ÓÃÃû³Æ', dataIndex: 'app_name', width: 160 },
   { title: 'API Key', dataIndex: 'api_key_preview', width: 200, ellipsis: true },
-  { title: 'æƒé™èŒƒå›´', slotName: 'scopes', width: 280 },
-  { title: 'çŠ¶æ€', slotName: 'status', width: 80 },
-  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 160 },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 240, fixed: 'right' },
+  { title: 'È¨ÏŞ·¶Î§', slotName: 'scopes', width: 280 },
+  { title: '×´Ì¬', slotName: 'status', width: 80 },
+  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at', width: 160 },
+  { title: '²Ù×÷', slotName: 'actions', width: 240, fixed: 'right' },
 ]
 
 const loadData = async () => {
@@ -127,14 +128,14 @@ const loadData = async () => {
 }
 
 const handleCreate = () => {
-  modalTitle.value = 'åˆ›å»ºåº”ç”¨'
+  modalTitle.value = '´´½¨Ó¦ÓÃ'
   editingId.value = null
   Object.assign(formData, { app_name: '', scopes: [], description: '' })
   modalVisible.value = true
 }
 
 const handleEdit = (record) => {
-  modalTitle.value = 'ç¼–è¾‘åº”ç”¨'
+  modalTitle.value = '±à¼­Ó¦ÓÃ'
   editingId.value = record.id
   Object.assign(formData, { app_name: record.app_name, scopes: record.scopes || [], description: record.description || '' })
   modalVisible.value = true
@@ -149,7 +150,7 @@ const handleSubmit = async () => {
     body: JSON.stringify(formData)
   })
   const json = await res.json()
-  Message.success(editingId.value ? 'æ›´æ–°æˆåŠŸ' : 'åˆ›å»ºæˆåŠŸ')
+  Message.success(editingId.value ? '¸üĞÂ³É¹¦' : '´´½¨³É¹¦')
   if (!editingId.value && json.data?.api_key) {
     keyRecord.value = json.data
     keyVisible.value = true
@@ -165,7 +166,7 @@ const handleViewKey = (record) => {
 
 const handleCopy = () => {
   navigator.clipboard.writeText(keyRecord.value?.api_key || '')
-  Message.success('å·²å¤åˆ¶åˆ°å‰ªè´´æ¿')
+  Message.success('ÒÑ¸´ÖÆµ½¼ôÌù°å')
 }
 
 const handleToggle = async (record) => {
@@ -175,17 +176,17 @@ const handleToggle = async (record) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: newStatus })
   })
-  Message.success(newStatus === 'active' ? 'å¯ç”¨æˆåŠŸ' : 'ç¦ç”¨æˆåŠŸ')
+  Message.success(newStatus === 'active' ? 'ÆôÓÃ³É¹¦' : '½ûÓÃ³É¹¦')
   loadData()
 }
 
 const handleDelete = (record) => {
   Modal.warning({
-    title: 'ç¡®è®¤åˆ é™¤',
-    content: 'åˆ é™¤åæ— æ³•æ¢å¤ï¼Œç¡®å®šè¦åˆ é™¤å—ï¼Ÿ',
+    title: 'È·ÈÏÉ¾³ı',
+    content: 'É¾³ıºóÎŞ·¨»Ö¸´£¬È·¶¨ÒªÉ¾³ıÂğ£¿',
     onOk: async () => {
       await fetch(`/api/developer/apps/${record.id}`, { method: 'DELETE' })
-      Message.success('åˆ é™¤æˆåŠŸ')
+      Message.success('É¾³ı³É¹¦')
       loadData()
     }
   })

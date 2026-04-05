@@ -1,7 +1,5 @@
-﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+<template>
+  <Breadcrumb :items="['Home','Console','']" />
   <div class="page-container">
     <a-card class="general-card" title="决策日志">
       <template #extra>
@@ -24,8 +22,9 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-    </a-table>
-  </a-card>`n</div></template>
+    </a-card>
+  </div>
+</template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
@@ -90,5 +89,3 @@ onMounted(() => {
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-
-

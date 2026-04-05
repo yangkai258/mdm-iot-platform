@@ -1,7 +1,5 @@
-﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+<template>
+  <Breadcrumb :items="['Home','Console','']" />
   <div class="page-container">
     <a-card class="general-card" title="地图管理">
       <template #extra>
@@ -24,26 +22,27 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="地图名称" required><a-input v-model="form.map_name" placeholder="请输入地图名称" /></a-form-item>
-        <a-form-item label="地图类型">
-          <a-select v-model="form.map_type" placeholder="选择类型">
-            <a-option value="grid">栅格地图</a-option>
-            <a-option value="semantic">语义地图</a-option>
-            <a-option value="topological">拓扑地图</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="分辨率 (m)">
-          <a-input-number v-model="form.resolution" :min="0.01" :max="1" :step="0.01" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="描述">
-          <a-textarea v-model="form.description" :rows="3" placeholder="地图描述" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
-    </a-card>`n</div></template>
+      <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
+        <a-form :model="form" label-col-flex="100px">
+          <a-form-item label="地图名称" required><a-input v-model="form.map_name" placeholder="请输入地图名称" /></a-form-item>
+          <a-form-item label="地图类型">
+            <a-select v-model="form.map_type" placeholder="选择类型">
+              <a-option value="grid">栅格地图</a-option>
+              <a-option value="semantic">语义地图</a-option>
+              <a-option value="topological">拓扑地图</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="分辨率 (m)">
+            <a-input-number v-model="form.resolution" :min="0.01" :max="1" :step="0.01" style="width: 100%" />
+          </a-form-item>
+          <a-form-item label="描述">
+            <a-textarea v-model="form.description" :rows="3" placeholder="地图描述" />
+          </a-form-item>
+        </a-form>
+      </a-modal>
+    </a-card>
+  </div>
+</template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
@@ -132,4 +131,3 @@ onMounted(() => {
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

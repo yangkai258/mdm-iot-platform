@@ -1,51 +1,50 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="ç§¯åˆ†è§„åˆ™">
+    <a-card class="general-card" title="»ý·Ö¹æÔò">
       <template #extra>
         <a-space :size="12">
-          <a-button type="primary" @click="openCreate"><icon-plus />æ–°å»º</a-button>
-          <a-button @click="loadRules"><icon-refresh />åˆ·æ–°</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />ÐÂ½¨</a-button>
+          <a-button @click="loadRules"><icon-refresh />Ë¢ÐÂ</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="å…³é”®è¯">
-            <a-input v-model="filters.keyword" placeholder="è¯·è¾“å…¥" @pressEnter="loadRules" />
+          <a-form-item label="¹Ø¼ü´Ê">
+            <a-input v-model="filters.keyword" placeholder="ÇëÊäÈë" @pressEnter="loadRules" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadRules">æŸ¥è¯¢</a-button>
-            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadRules()">é‡ç½®</a-button>
+            <a-button type="primary" @click="loadRules">²éÑ¯</a-button>
+            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadRules()">ÖØÖÃ</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="rules" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="openEdit(record)">ç¼–è¾‘</a-button>
-          <a-button type="text" size="small" @click="handleDelete(record)">åˆ é™¤</a-button>
+          <a-button type="text" size="small" @click="openEdit(record)">±à¼­</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">É¾³ý</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
-    <a-modal v-model:visible="modalVisible" :title="isEdit ? 'ç¼–è¾‘è§„åˆ™' : 'æ–°å»ºè§„åˆ™'">
+    <a-modal v-model:visible="modalVisible" :title="isEdit ? '±à¼­¹æÔò' : 'ÐÂ½¨¹æÔò'">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="è§„åˆ™åç§°"><a-input v-model="form.rule_name" /></a-form-item>
-        <a-form-item label="è§„åˆ™ç±»åž‹">
+        <a-form-item label="¹æÔòÃû³Æ"><a-input v-model="form.rule_name" /></a-form-item>
+        <a-form-item label="¹æÔòÀàÐÍ">
           <a-select v-model="form.rule_type" style="width: 100%">
-            <a-option value="consume">æ¶ˆè´¹ç§¯åˆ†</a-option>
-            <a-option value="activity">æ´»åŠ¨ç§¯åˆ†</a-option>
-            <a-option value="birthday">ç”Ÿæ—¥ç§¯åˆ†</a-option>
+            <a-option value="consume">Ïû·Ñ»ý·Ö</a-option>
+            <a-option value="activity">»î¶¯»ý·Ö</a-option>
+            <a-option value="birthday">ÉúÈÕ»ý·Ö</a-option>
           </a-select>
         </a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">å–æ¶ˆ</a-button>
-        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
+        <a-button @click="modalVisible = false">È¡Ïû</a-button>
+        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
       </template>
     </a-modal>
   </div>
@@ -78,16 +77,16 @@ const form = reactive({
 const formStatus = ref('1')
 
 const columns = [
-  { title: 'è§„åˆ™åç§°', dataIndex: 'rule_name' },
-  { title: 'è§„åˆ™ç±»åž‹', slotName: 'type', width: 120 },
-  { title: 'ç§¯åˆ†å€çŽ‡', slotName: 'ratio', width: 130 },
-  { title: 'çŠ¶æ€', slotName: 'status', width: 90 },
-  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 180, fixed: 'right' }
+  { title: '¹æÔòÃû³Æ', dataIndex: 'rule_name' },
+  { title: '¹æÔòÀàÐÍ', slotName: 'type', width: 120 },
+  { title: '»ý·Ö±¶ÂÊ', slotName: 'ratio', width: 130 },
+  { title: '×´Ì¬', slotName: 'status', width: 90 },
+  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at', width: 170 },
+  { title: '²Ù×÷', slotName: 'actions', width: 180, fixed: 'right' }
 ]
 
 const getTypeColor = (type) => ({ consume: 'blue', activity: 'purple', birthday: 'orange', level: 'green' }[type] || 'gray')
-const getTypeText = (type) => ({ consume: 'æ¶ˆè´¹ç§¯åˆ†', activity: 'æ´»åŠ¨ç§¯åˆ†', birthday: 'ç”Ÿæ—¥ç§¯åˆ†', level: 'ç­‰çº§å€çŽ‡' }[type] || type)
+const getTypeText = (type) => ({ consume: 'Ïû·Ñ»ý·Ö', activity: '»î¶¯»ý·Ö', birthday: 'ÉúÈÕ»ý·Ö', level: 'µÈ¼¶±¶ÂÊ' }[type] || type)
 const formatTime = (t) => t ? new Date(t).toLocaleString('zh-CN') : '-'
 
 const loadRules = async () => {
@@ -110,7 +109,7 @@ const loadRules = async () => {
       stats.enabled = rules.value.filter(r => r.status === 1).length
     }
   } catch (e) {
-    Message.error('åŠ è½½ç§¯åˆ†è§„åˆ™å¤±è´¥')
+    Message.error('¼ÓÔØ»ý·Ö¹æÔòÊ§°Ü')
   } finally {
     loading.value = false
   }
@@ -147,7 +146,7 @@ const openDetail = (record) => {
 }
 
 const handleSubmit = async () => {
-  if (!form.rule_name) { Message.warning('è¯·å¡«å†™è§„åˆ™åç§°'); return }
+  if (!form.rule_name) { Message.warning('ÇëÌîÐ´¹æÔòÃû³Æ'); return }
   try {
     const token = localStorage.getItem('token')
     form.status = parseInt(formStatus.value)
@@ -160,28 +159,28 @@ const handleSubmit = async () => {
     })
     const data = await res.json()
     if (data.code === 0) {
-      Message.success(isEdit.value ? 'æ›´æ–°æˆåŠŸ' : 'åˆ›å»ºæˆåŠŸ')
+      Message.success(isEdit.value ? '¸üÐÂ³É¹¦' : '´´½¨³É¹¦')
       modalVisible.value = false
       loadRules()
     } else {
-      Message.error(data.message || 'æ“ä½œå¤±è´¥')
+      Message.error(data.message || '²Ù×÷Ê§°Ü')
     }
   } catch (e) {
-    Message.error('æ“ä½œå¤±è´¥')
+    Message.error('²Ù×÷Ê§°Ü')
   }
 }
 
 const handleDelete = async (record) => {
-  if (!confirm(`ç¡®å®šåˆ é™¤è§„åˆ™ã€Œ${record.rule_name}ã€å—ï¼Ÿ`)) return
+  if (!confirm(`È·¶¨É¾³ý¹æÔò¡¸${record.rule_name}¡¹Âð£¿`)) return
   try {
     const token = localStorage.getItem('token')
     const res = await fetch(`${API_BASE}/member/points/rules/${record.id}`, {
       method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
     })
     const data = await res.json()
-    if (data.code === 0) { Message.success('åˆ é™¤æˆåŠŸ'); loadRules() }
-    else Message.error(data.message || 'åˆ é™¤å¤±è´¥')
-  } catch (e) { Message.error('åˆ é™¤å¤±è´¥') }
+    if (data.code === 0) { Message.success('É¾³ý³É¹¦'); loadRules() }
+    else Message.error(data.message || 'É¾³ýÊ§°Ü')
+  } catch (e) { Message.error('É¾³ýÊ§°Ü') }
 }
 
 const onPageChange = (page) => { pagination.current = page; loadRules() }

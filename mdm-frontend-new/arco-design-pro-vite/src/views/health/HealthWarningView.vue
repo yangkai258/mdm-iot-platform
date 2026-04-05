@@ -1,32 +1,32 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="å¥åº·é¢„è­¦">
+    <a-card class="general-card" title="½¡¿µÔ¤¾¯">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»ºé¢„è­¦</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />ĞÂ½¨Ô¤¾¯</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="ä¸¥é‡ç¨‹åº¦">
-            <a-select v-model="form.level" placeholder="å…¨éƒ¨" style="width: 120px" allow-clear>
-              <a-option value="critical">å±æ€¥</a-option>
-              <a-option value="high">é«˜</a-option>
-              <a-option value="medium">ä¸­</a-option>
-              <a-option value="low">ä½</a-option>
+          <a-form-item label="ÑÏÖØ³Ì¶È">
+            <a-select v-model="form.level" placeholder="È«²¿" style="width: 120px" allow-clear>
+              <a-option value="critical">Î£¼±</a-option>
+              <a-option value="high">¸ß</a-option>
+              <a-option value="medium">ÖĞ</a-option>
+              <a-option value="low">µÍ</a-option>
             </a-select>
           </a-form-item>
-          <a-form-item label="å¤„ç†çŠ¶æ€">
-            <a-select v-model="form.status" placeholder="å…¨éƒ¨" style="width: 120px" allow-clear>
-              <a-option value="pending">å¾…å¤„ç†</a-option>
-              <a-option value="confirmed">å·²ç¡®è®¤</a-option>
-              <a-option value="ignored">å·²å¿½ç•¥</a-option>
+          <a-form-item label="´¦Àí×´Ì¬">
+            <a-select v-model="form.status" placeholder="È«²¿" style="width: 120px" allow-clear>
+              <a-option value="pending">´ı´¦Àí</a-option>
+              <a-option value="confirmed">ÒÑÈ·ÈÏ</a-option>
+              <a-option value="ignored">ÒÑºöÂÔ</a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
-            <a-button @click="handleReset">é‡ç½®</a-button>
+            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
+            <a-button @click="handleReset">ÖØÖÃ</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -46,23 +46,24 @@
     </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="ç–¾ç—…åç§°"><a-input v-model="form.disease_name" /></a-form-item>
-        <a-form-item label="é¢„è­¦çº§åˆ«">
+        <a-form-item label="¼²²¡Ãû³Æ"><a-input v-model="form.disease_name" /></a-form-item>
+        <a-form-item label="Ô¤¾¯¼¶±ğ">
           <a-select v-model="form.level">
-            <a-option value="critical">å±æ€¥</a-option>
-            <a-option value="high">é«˜</a-option>
-            <a-option value="medium">ä¸­</a-option>
-            <a-option value="low">ä½</a-option>
+            <a-option value="critical">Î£¼±</a-option>
+            <a-option value="high">¸ß</a-option>
+            <a-option value="medium">ÖĞ</a-option>
+            <a-option value="low">µÍ</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="é¢„è­¦æè¿°"><a-textarea v-model="form.description" :rows="3" /></a-form-item>
+        <a-form-item label="Ô¤¾¯ÃèÊö"><a-textarea v-model="form.description" :rows="3" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">å–æ¶ˆ</a-button>
-        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
+        <a-button @click="modalVisible = false">È¡Ïû</a-button>
+        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
       </template>
     </a-modal>
-    </a-card>`n</div></template>
+    </a-card>
+</div></template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -72,7 +73,7 @@ import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const modalVisible = ref(false)
-const modalTitle = ref('æ–°å»º')
+const modalTitle = ref('ĞÂ½¨')
 const isEdit = ref(false)
 
 const form = reactive({
@@ -84,12 +85,12 @@ const form = reactive({
 })
 
 const columns = [
-  { title: 'é¢„è­¦ç¼–å·', dataIndex: 'id', width: 100 },
-  { title: 'ç–¾ç—…åç§°', dataIndex: 'disease_name', width: 150 },
-  { title: 'ä¸¥é‡ç¨‹åº¦', slotName: 'level', width: 100 },
-  { title: 'é¢„è­¦æè¿°', dataIndex: 'description', ellipsis: true },
-  { title: 'å‘ç”Ÿæ—¶é—´', dataIndex: 'created_at', width: 160 },
-  { title: 'çŠ¶æ€', slotName: 'status', width: 100 }
+  { title: 'Ô¤¾¯±àºÅ', dataIndex: 'id', width: 100 },
+  { title: '¼²²¡Ãû³Æ', dataIndex: 'disease_name', width: 150 },
+  { title: 'ÑÏÖØ³Ì¶È', slotName: 'level', width: 100 },
+  { title: 'Ô¤¾¯ÃèÊö', dataIndex: 'description', ellipsis: true },
+  { title: '·¢ÉúÊ±¼ä', dataIndex: 'created_at', width: 160 },
+  { title: '×´Ì¬', slotName: 'status', width: 100 }
 ]
 
 const data = ref([])
@@ -104,7 +105,7 @@ const paginationConfig = computed(() => ({
 }))
 
 const getLevelName = (level) => {
-  const map = { critical: 'å±æ€¥', high: 'é«˜', medium: 'ä¸­', low: 'ä½' }
+  const map = { critical: 'Î£¼±', high: '¸ß', medium: 'ÖĞ', low: 'µÍ' }
   return map[level] || level
 }
 
@@ -114,7 +115,7 @@ const getLevelColor = (level) => {
 }
 
 const getStatusName = (status) => {
-  const map = { pending: 'å¾…å¤„ç†', confirmed: 'å·²ç¡®è®¤', ignored: 'å·²å¿½ç•¥' }
+  const map = { pending: '´ı´¦Àí', confirmed: 'ÒÑÈ·ÈÏ', ignored: 'ÒÑºöÂÔ' }
   return map[status] || status
 }
 
@@ -145,11 +146,11 @@ const loadData = async () => {
 
 const loadMockData = () => {
   data.value = [
-    { id: 1, disease_name: 'é«˜è¡€å‹é£é™©', level: 'high', status: 'pending', description: 'è¿ç»­3å¤©è¡€å‹ç›‘æµ‹åé«˜ï¼Œå»ºè®®å¯†åˆ‡è§‚å¯Ÿ', created_at: '2026-03-22 10:30:00' },
-    { id: 2, disease_name: 'ç¡çœ å‘¼å¸æš‚åœ', level: 'critical', status: 'pending', description: 'å¤œé—´è¡€æ°§é¥±å’Œåº¦å¤šæ¬¡ä½äº90%', created_at: '2026-03-22 08:00:00' },
-    { id: 3, disease_name: 'å¿ƒå¾‹ä¸é½', level: 'medium', status: 'confirmed', description: 'å¿ƒç”µå›¾æ£€æµ‹åˆ°å¶å‘æ—©æ', created_at: '2026-03-21 15:20:00' },
-    { id: 4, disease_name: 'ä½“é‡å¼‚å¸¸æ³¢åŠ¨', level: 'low', status: 'ignored', description: 'ä¸€å‘¨å†…ä½“é‡ä¸‹é™è¶…è¿‡5%', created_at: '2026-03-20 09:00:00' },
-    { id: 5, disease_name: 'è¡€ç³–åé«˜', level: 'high', status: 'pending', description: 'ç©ºè…¹è¡€ç³–æŒç»­é«˜äºæ­£å¸¸å€¼ä¸Šé™', created_at: '2026-03-22 11:45:00' }
+    { id: 1, disease_name: '¸ßÑªÑ¹·çÏÕ', level: 'high', status: 'pending', description: 'Á¬Ğø3ÌìÑªÑ¹¼à²âÆ«¸ß£¬½¨ÒéÃÜÇĞ¹Û²ì', created_at: '2026-03-22 10:30:00' },
+    { id: 2, disease_name: 'Ë¯ÃßºôÎüÔİÍ£', level: 'critical', status: 'pending', description: 'Ò¹¼äÑªÑõ±¥ºÍ¶È¶à´ÎµÍÓÚ90%', created_at: '2026-03-22 08:00:00' },
+    { id: 3, disease_name: 'ĞÄÂÉ²»Æë', level: 'medium', status: 'confirmed', description: 'ĞÄµçÍ¼¼ì²âµ½Å¼·¢Ôç²«', created_at: '2026-03-21 15:20:00' },
+    { id: 4, disease_name: 'ÌåÖØÒì³£²¨¶¯', level: 'low', status: 'ignored', description: 'Ò»ÖÜÄÚÌåÖØÏÂ½µ³¬¹ı5%', created_at: '2026-03-20 09:00:00' },
+    { id: 5, disease_name: 'ÑªÌÇÆ«¸ß', level: 'high', status: 'pending', description: '¿Õ¸¹ÑªÌÇ³ÖĞø¸ßÓÚÕı³£ÖµÉÏÏŞ', created_at: '2026-03-22 11:45:00' }
   ]
   pagination.total = data.value.length
 }
@@ -161,15 +162,15 @@ const handleReset = () => {
 
 const handleCreate = () => {
   isEdit.value = false
-  modalTitle.value = 'æ–°å»ºé¢„è­¦'
+  modalTitle.value = 'ĞÂ½¨Ô¤¾¯'
   Object.assign(form, { id: '', disease_name: '', level: '', status: 'pending', description: '' })
   modalVisible.value = true
 }
 
 const handleSubmit = () => {
-  if (!form.disease_name) { Message.warning('è¯·å¡«å†™ç–¾ç—…åç§°'); return }
+  if (!form.disease_name) { Message.warning('ÇëÌîĞ´¼²²¡Ãû³Æ'); return }
   modalVisible.value = false
-  Message.success(isEdit.value ? 'ç¼–è¾‘æˆåŠŸ' : 'æ·»åŠ æˆåŠŸ')
+  Message.success(isEdit.value ? '±à¼­³É¹¦' : 'Ìí¼Ó³É¹¦')
   loadData()
 }
 

@@ -1,46 +1,45 @@
-Ôªø<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="Ë¥ßÂ∏ÅËÆæÁΩÆ">
+    <a-card class="general-card" title="ªı±“…Ë÷√">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate"><icon-plus />Êñ∞Âª∫</a-button>
-          <a-button @click="loadData"><icon-refresh />Âà∑Êñ∞</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />–¬Ω®</a-button>
+          <a-button @click="loadData"><icon-refresh />À¢–¬</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="Ë¥ßÂ∏ÅÂêçÁß∞">
-            <a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" @pressEnter="loadData" />
+          <a-form-item label="ªı±“√˚≥∆">
+            <a-input v-model="form.keyword" placeholder="«Î ‰»Î" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
-            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">ÈáçÁΩÆ</a-button>
+            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">÷ÿ÷√</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="openEdit(record)">ÁºñËæë</a-button>
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">Âà†Èô§</a-button>
+          <a-button type="text" size="small" @click="openEdit(record)">±‡º≠</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">…æ≥˝</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? 'ÁºñËæë' : 'Êñ∞Âª∫'">
+    <a-modal v-model="formVisible" :title="isEdit ? '±‡º≠' : '–¬Ω®'">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="Ë¥ßÂ∏ÅÂêçÁß∞"><a-input v-model="form.currency_name" /></a-form-item>
-        <a-form-item label="Ë¥ßÂ∏ÅÁ¨¶Âè∑"><a-input v-model="form.currency_symbol" placeholder="Â¶Ç $, ¬•, ‚Ç¨" /></a-form-item>
-        <a-form-item label="Ë¥ßÂ∏Å‰ª£Á†Å"><a-input v-model="form.currency_code" placeholder="Â¶Ç USD, CNY" /></a-form-item>
+        <a-form-item label="ªı±“√˚≥∆"><a-input v-model="form.currency_name" /></a-form-item>
+        <a-form-item label="ªı±“∑˚∫≈"><a-input v-model="form.currency_symbol" placeholder="»Á $, £§, Ä" /></a-form-item>
+        <a-form-item label="ªı±“¥˙¬Î"><a-input v-model="form.currency_code" placeholder="»Á USD, CNY" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">ÂèñÊ∂à</a-button>
-        <a-button type="primary" @click="handleSubmit">Á°ÆÂÆö</a-button>
+        <a-button @click="formVisible = false">»°œ˚</a-button>
+        <a-button type="primary" @click="handleSubmit">»∑∂®</a-button>
       </template>
     </a-modal>
   </div>
@@ -58,11 +57,11 @@ const form = reactive({ keyword: '', currency_name: '', currency_symbol: '', cur
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: 'Ë¥ßÂ∏ÅÂêçÁß∞', dataIndex: 'currency_name', width: 180 },
-  { title: 'Ë¥ßÂ∏ÅÁ¨¶Âè∑', dataIndex: 'currency_symbol', width: 100 },
-  { title: 'Ë¥ßÂ∏Å‰ª£Á†Å', dataIndex: 'currency_code', width: 100 },
-  { title: 'Áä∂ÊÄÅ', dataIndex: 'status', width: 90 },
-  { title: 'Êìç‰Ωú', slotName: 'actions', width: 120 }
+  { title: 'ªı±“√˚≥∆', dataIndex: 'currency_name', width: 180 },
+  { title: 'ªı±“∑˚∫≈', dataIndex: 'currency_symbol', width: 100 },
+  { title: 'ªı±“¥˙¬Î', dataIndex: 'currency_code', width: 100 },
+  { title: '◊¥Ã¨', dataIndex: 'status', width: 90 },
+  { title: '≤Ÿ◊˜', slotName: 'actions', width: 120 }
 ]
 
 const loadData = async () => {
@@ -78,8 +77,8 @@ const loadData = async () => {
 
 const openCreate = () => { isEdit.value = false; Object.assign(form, { currency_name: '', currency_symbol: '', currency_code: '' }); formVisible.value = true }
 const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? 'Êõ¥Êñ∞ÊàêÂäü' : 'ÂàõÂª∫ÊàêÂäü'); loadData() }
-const handleDelete = () => { Message.success('Âà†Èô§ÊàêÂäü'); loadData() }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '∏¸–¬≥…π¶' : '¥¥Ω®≥…π¶'); loadData() }
+const handleDelete = () => { Message.success('…æ≥˝≥…π¶'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())

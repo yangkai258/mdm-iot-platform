@@ -1,26 +1,26 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="å® ç‰©åŒ»é™¢">
+    <a-card class="general-card" title="³èÎïÒ½Ôº">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />ĞÂ½¨</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="åŒ»é™¢åç§°">
-            <a-input v-model="form.name" placeholder="è¯·è¾“å…¥åŒ»é™¢åç§°" style="width: 200px" />
+          <a-form-item label="Ò½ÔºÃû³Æ">
+            <a-input v-model="form.name" placeholder="ÇëÊäÈëÒ½ÔºÃû³Æ" style="width: 200px" />
           </a-form-item>
-          <a-form-item label="æ¥å…¥çŠ¶æ€">
-            <a-select v-model="form.status" placeholder="å…¨éƒ¨" style="width: 120px" allow-clear>
-              <a-option value="active">å·²ç»‘å®š</a-option>
-              <a-option value="inactive">æœªç»‘å®š</a-option>
+          <a-form-item label="½ÓÈë×´Ì¬">
+            <a-select v-model="form.status" placeholder="È«²¿" style="width: 120px" allow-clear>
+              <a-option value="active">ÒÑ°ó¶¨</a-option>
+              <a-option value="inactive">Î´°ó¶¨</a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
-            <a-button @click="handleReset">é‡ç½®</a-button>
+            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
+            <a-button @click="handleReset">ÖØÖÃ</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -33,28 +33,29 @@
     >
       <template #status="{ record }">
         <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
-          {{ record.status === 'active' ? 'å·²ç»‘å®š' : 'æœªç»‘å®š' }}
+          {{ record.status === 'active' ? 'ÒÑ°ó¶¨' : 'Î´°ó¶¨' }}
         </a-tag>
       </template>
     </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="åŒ»é™¢åç§°"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="åœ°å€"><a-input v-model="form.address" /></a-form-item>
-        <a-form-item label="ç”µè¯"><a-input v-model="form.phone" /></a-form-item>
-        <a-form-item label="æ¥å…¥çŠ¶æ€">
+        <a-form-item label="Ò½ÔºÃû³Æ"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="µØÖ·"><a-input v-model="form.address" /></a-form-item>
+        <a-form-item label="µç»°"><a-input v-model="form.phone" /></a-form-item>
+        <a-form-item label="½ÓÈë×´Ì¬">
           <a-select v-model="form.status">
-            <a-option value="active">å·²ç»‘å®š</a-option>
-            <a-option value="inactive">æœªç»‘å®š</a-option>
+            <a-option value="active">ÒÑ°ó¶¨</a-option>
+            <a-option value="inactive">Î´°ó¶¨</a-option>
           </a-select>
         </a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">å–æ¶ˆ</a-button>
-        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
+        <a-button @click="modalVisible = false">È¡Ïû</a-button>
+        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
       </template>
     </a-modal>
-    </a-card>`n</div></template>
+    </a-card>
+</div></template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -64,18 +65,18 @@ import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const modalVisible = ref(false)
-const modalTitle = ref('æ–°å»º')
+const modalTitle = ref('ĞÂ½¨')
 const isEdit = ref(false)
 
 const form = reactive({ id: '', name: '', address: '', phone: '', status: 'inactive' })
 
 const columns = [
-  { title: 'åŒ»é™¢åç§°', dataIndex: 'name', width: 200 },
-  { title: 'åœ°å€', dataIndex: 'address', ellipsis: true },
-  { title: 'ç”µè¯', dataIndex: 'phone', width: 140 },
-  { title: 'è·ç¦»(km)', dataIndex: 'distance', width: 100 },
-  { title: 'æ¥å…¥çŠ¶æ€', slotName: 'status', width: 100 },
-  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 160 }
+  { title: 'Ò½ÔºÃû³Æ', dataIndex: 'name', width: 200 },
+  { title: 'µØÖ·', dataIndex: 'address', ellipsis: true },
+  { title: 'µç»°', dataIndex: 'phone', width: 140 },
+  { title: '¾àÀë(km)', dataIndex: 'distance', width: 100 },
+  { title: '½ÓÈë×´Ì¬', slotName: 'status', width: 100 },
+  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at', width: 160 }
 ]
 
 const data = ref([])
@@ -111,9 +112,9 @@ const loadData = async () => {
 
 const loadMockData = () => {
   data.value = [
-    { id: '1', name: 'é˜³å…‰å® ç‰©åŒ»é™¢', address: 'æœé˜³åŒºå»ºå›½è·¯88å·', phone: '010-12345678', distance: 2.3, status: 'active', created_at: '2026-03-01 10:00:00' },
-    { id: '2', name: 'çˆ±åº·å® ç‰©è¯Šæ‰€', address: 'æµ·æ·€åŒºä¸­å…³æ‘å¤§è¡—1å·', phone: '010-87654321', distance: 5.1, status: 'active', created_at: '2026-03-05 14:00:00' },
-    { id: '3', name: 'å® ç‰©æ€¥æ•‘ä¸­å¿ƒ', address: 'ä¸œåŸåŒºä¸œå•åŒ—å¤§è¡—3å·', phone: '010-11223344', distance: 8.7, status: 'inactive', created_at: '2026-03-10 09:00:00' }
+    { id: '1', name: 'Ñô¹â³èÎïÒ½Ôº', address: '³¯ÑôÇø½¨¹úÂ·88ºÅ', phone: '010-12345678', distance: 2.3, status: 'active', created_at: '2026-03-01 10:00:00' },
+    { id: '2', name: '°®¿µ³èÎïÕïËù', address: 'º£µíÇøÖĞ¹Ø´å´ó½Ö1ºÅ', phone: '010-87654321', distance: 5.1, status: 'active', created_at: '2026-03-05 14:00:00' },
+    { id: '3', name: '³èÎï¼±¾ÈÖĞĞÄ', address: '¶«³ÇÇø¶«µ¥±±´ó½Ö3ºÅ', phone: '010-11223344', distance: 8.7, status: 'inactive', created_at: '2026-03-10 09:00:00' }
   ]
   pagination.total = data.value.length
 }
@@ -125,15 +126,15 @@ const handleReset = () => {
 
 const handleCreate = () => {
   isEdit.value = false
-  modalTitle.value = 'æ–°å»º'
+  modalTitle.value = 'ĞÂ½¨'
   Object.assign(form, { id: '', name: '', address: '', phone: '', status: 'inactive' })
   modalVisible.value = true
 }
 
 const handleSubmit = () => {
-  if (!form.name) { Message.warning('è¯·å¡«å†™åŒ»é™¢åç§°'); return }
+  if (!form.name) { Message.warning('ÇëÌîĞ´Ò½ÔºÃû³Æ'); return }
   modalVisible.value = false
-  Message.success(isEdit.value ? 'ç¼–è¾‘æˆåŠŸ' : 'æ·»åŠ æˆåŠŸ')
+  Message.success(isEdit.value ? '±à¼­³É¹¦' : 'Ìí¼Ó³É¹¦')
   loadData()
 }
 

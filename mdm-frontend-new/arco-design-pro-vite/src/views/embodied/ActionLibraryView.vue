@@ -1,6 +1,5 @@
-﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
+<template>
+  <Breadcrumb :items="['Home','Console','']" />
 
   <div class="page-container">
     <a-card class="general-card" title="动作库">
@@ -24,28 +23,29 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="动作名称" required><a-input v-model="form.action_name" placeholder="请输入动作名称" /></a-form-item>
-        <a-form-item label="描述"><a-textarea v-model="form.description" :rows="3" placeholder="动作描述" /></a-form-item>
-        <a-form-item label="难度">
-          <a-select v-model="form.difficulty" placeholder="选择难度">
-            <a-option value="easy">简单</a-option>
-            <a-option value="medium">中等</a-option>
-            <a-option value="hard">困难</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="标签">
-          <a-select v-model="form.tags" multiple placeholder="选择标签" allow-create>
-            <a-option value="dance">舞蹈</a-option>
-            <a-option value="greeting">问候</a-option>
-            <a-option value="exercise">运动</a-option>
-          </a-select>
-        </a-form-item>
-      </a-form>
-    </a-modal>
-    </a-card>`n</div></template>
+      <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
+        <a-form :model="form" label-col-flex="100px">
+          <a-form-item label="动作名称" required><a-input v-model="form.action_name" placeholder="请输入动作名称" /></a-form-item>
+          <a-form-item label="描述"><a-textarea v-model="form.description" :rows="3" placeholder="动作描述" /></a-form-item>
+          <a-form-item label="难度">
+            <a-select v-model="form.difficulty" placeholder="选择难度">
+              <a-option value="easy">简单</a-option>
+              <a-option value="medium">中等</a-option>
+              <a-option value="hard">困难</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="标签">
+            <a-select v-model="form.tags" multiple placeholder="选择标签" allow-create>
+              <a-option value="dance">舞蹈</a-option>
+              <a-option value="greeting">问候</a-option>
+              <a-option value="exercise">运动</a-option>
+            </a-select>
+          </a-form-item>
+        </a-form>
+      </a-modal>
+    </a-card>
+  </div>
+</template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
@@ -131,4 +131,3 @@ onMounted(() => {
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

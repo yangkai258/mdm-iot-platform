@@ -1,25 +1,25 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="æƒ…ç»ªå“åº”é…ç½®">
+    <a-card class="general-card" title="ÇéĞ÷ÏìÓ¦ÅäÖÃ">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»ºé…ç½®</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />ĞÂ½¨ÅäÖÃ</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="æƒ…ç»ªç±»å‹">
-            <a-select v-model="form.emotion" placeholder="è¯·é€‰æ‹©" allow-clear style="width: 140px">
-              <a-option value="happy">å¼€å¿ƒ</a-option>
-              <a-option value="sad">éš¾è¿‡</a-option>
-              <a-option value="angry">ç”Ÿæ°”</a-option>
-              <a-option value="fear">å®³æ€•</a-option>
+          <a-form-item label="ÇéĞ÷ÀàĞÍ">
+            <a-select v-model="form.emotion" placeholder="ÇëÑ¡Ôñ" allow-clear style="width: 140px">
+              <a-option value="happy">¿ªĞÄ</a-option>
+              <a-option value="sad">ÄÑ¹ı</a-option>
+              <a-option value="angry">ÉúÆø</a-option>
+              <a-option value="fear">º¦ÅÂ</a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="handleSearch">æŸ¥è¯¢</a-button>
-            <a-button @click="handleReset">é‡ç½®</a-button>
+            <a-button type="primary" @click="handleSearch">²éÑ¯</a-button>
+            <a-button @click="handleReset">ÖØÖÃ</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -27,34 +27,35 @@
       </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="520">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="æƒ…ç»ªç±»å‹">
+        <a-form-item label="ÇéĞ÷ÀàĞÍ">
           <a-select v-model="form.emotion">
-            <a-option value="happy">å¼€å¿ƒ</a-option>
-            <a-option value="sad">éš¾è¿‡</a-option>
-            <a-option value="angry">ç”Ÿæ°”</a-option>
-            <a-option value="fear">å®³æ€•</a-option>
+            <a-option value="happy">¿ªĞÄ</a-option>
+            <a-option value="sad">ÄÑ¹ı</a-option>
+            <a-option value="angry">ÉúÆø</a-option>
+            <a-option value="fear">º¦ÅÂ</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="å“åº”åŠ¨ä½œ">
-          <a-select v-model="form.actions" multiple placeholder="è¯·é€‰æ‹©">
-            <a-option value="dance">è·³èˆ</a-option>
-            <a-option value="sing">å”±æ­Œ</a-option>
-            <a-option value="wave">æŒ¥æ‰‹</a-option>
-            <a-option value="comfort">å®‰æ…°è¯­éŸ³</a-option>
-            <a-option value="hug">æ‹¥æŠ±</a-option>
-            <a-option value="calm">æ’­æ”¾å¹³å¤éŸ³ä¹</a-option>
+        <a-form-item label="ÏìÓ¦¶¯×÷">
+          <a-select v-model="form.actions" multiple placeholder="ÇëÑ¡Ôñ">
+            <a-option value="dance">ÌøÎè</a-option>
+            <a-option value="sing">³ª¸è</a-option>
+            <a-option value="wave">»ÓÊÖ</a-option>
+            <a-option value="comfort">°²Î¿ÓïÒô</a-option>
+            <a-option value="hug">Óµ±§</a-option>
+            <a-option value="calm">²¥·ÅÆ½¸´ÒôÀÖ</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="æè¿°">
+        <a-form-item label="ÃèÊö">
           <a-textarea v-model="form.description" :rows="3" />
         </a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">å–æ¶ˆ</a-button>
-        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
+        <a-button @click="modalVisible = false">È¡Ïû</a-button>
+        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
       </template>
     </a-modal>
-    </a-card>`n</div></template>
+    </a-card>
+</div></template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -78,13 +79,13 @@ const pagination = reactive({
   total: 0
 })
 
-const modalTitle = computed(() => editingId.value ? 'ç¼–è¾‘é…ç½®' : 'æ–°å»ºé…ç½®')
+const modalTitle = computed(() => editingId.value ? '±à¼­ÅäÖÃ' : 'ĞÂ½¨ÅäÖÃ')
 
 const columns = [
-  { title: 'æƒ…ç»ªç±»å‹', dataIndex: 'emotion', width: 120 },
-  { title: 'å“åº”åŠ¨ä½œ', dataIndex: 'actions', ellipsis: true, width: 300 },
-  { title: 'æè¿°', dataIndex: 'description', ellipsis: true },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 120 }
+  { title: 'ÇéĞ÷ÀàĞÍ', dataIndex: 'emotion', width: 120 },
+  { title: 'ÏìÓ¦¶¯×÷', dataIndex: 'actions', ellipsis: true, width: 300 },
+  { title: 'ÃèÊö', dataIndex: 'description', ellipsis: true },
+  { title: '²Ù×÷', slotName: 'actions', width: 120 }
 ]
 
 async function loadData() {
@@ -95,7 +96,7 @@ async function loadData() {
     data.value = json.data || []
     pagination.total = data.value.length
   } catch {
-    Message.error('åŠ è½½å¤±è´¥')
+    Message.error('¼ÓÔØÊ§°Ü')
   } finally {
     loading.value = false
   }
@@ -139,11 +140,11 @@ async function handleSubmit() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form)
     })
-    Message.success('ä¿å­˜æˆåŠŸ')
+    Message.success('±£´æ³É¹¦')
     modalVisible.value = false
     loadData()
   } catch {
-    Message.error('ä¿å­˜å¤±è´¥')
+    Message.error('±£´æÊ§°Ü')
   }
 }
 

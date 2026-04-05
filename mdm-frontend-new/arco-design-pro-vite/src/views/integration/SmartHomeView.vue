@@ -1,38 +1,39 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="æ™ºèƒ½å®¶å±…">
+    <a-card class="general-card" title="ÖÇÄÜ¼Ò¾Ó">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />ĞÂ½¨</a-button>
       </template>
       <div class="search-form">
       <a-form :model="form" layout="inline">
-        <a-form-item label="åç§°"><a-input v-model="form.name" placeholder="è¯·è¾“å…¥" /></a-form-item>
+        <a-form-item label="Ãû³Æ"><a-input v-model="form.name" placeholder="ÇëÊäÈë" /></a-form-item>
         <a-form-item>
-          <a-button type="primary" @click="handleSearch">æœç´¢</a-button>
-          <a-button @click="handleReset">é‡ç½®</a-button>
+          <a-button type="primary" @click="handleSearch">ËÑË÷</a-button>
+          <a-button @click="handleReset">ÖØÖÃ</a-button>
         </a-form-item>
       </a-form>
     </div>
     <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">æ–°å»º</a-button>
+      <a-button type="primary" @click="handleCreate">ĞÂ½¨</a-button>
     </div>
     <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
       </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="è®¾å¤‡åç§°"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="è®¾å¤‡ç±»å‹"><a-input v-model="form.type" /></a-form-item>
-        <a-form-item label="æˆ¿é—´"><a-input v-model="form.room" /></a-form-item>
+        <a-form-item label="Éè±¸Ãû³Æ"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="Éè±¸ÀàĞÍ"><a-input v-model="form.type" /></a-form-item>
+        <a-form-item label="·¿¼ä"><a-input v-model="form.room" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">å–æ¶ˆ</a-button>
-        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
+        <a-button @click="modalVisible = false">È¡Ïû</a-button>
+        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
       </template>
     </a-modal>
-    </a-card>`n</div></template>
+    </a-card>
+</div></template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
@@ -40,23 +41,23 @@ import { Message } from '@arco-design/web-vue'
 
 const loading = ref(false)
 const modalVisible = ref(false)
-const modalTitle = ref('æ–°å»º')
+const modalTitle = ref('ĞÂ½¨')
 const isEdit = ref(false)
 
 const form = reactive({ id: '', name: '', type: '', room: '' })
 
 const columns = [
-  { title: 'è®¾å¤‡åç§°', dataIndex: 'name' },
-  { title: 'è®¾å¤‡ç±»å‹', dataIndex: 'type' },
-  { title: 'æˆ¿é—´', dataIndex: 'room' },
-  { title: 'çŠ¶æ€', dataIndex: 'status_name' }
+  { title: 'Éè±¸Ãû³Æ', dataIndex: 'name' },
+  { title: 'Éè±¸ÀàĞÍ', dataIndex: 'type' },
+  { title: '·¿¼ä', dataIndex: 'room' },
+  { title: '×´Ì¬', dataIndex: 'status_name' }
 ]
 
 const pagination = reactive({ total: 0, current: 1, pageSize: 10 })
 const data = ref([])
 
 const getTypeName = (type) => {
-  const names = { light: 'ç¯å…‰', ac: 'ç©ºè°ƒ', humidifier: 'åŠ æ¹¿å™¨', speaker: 'éŸ³å“' }
+  const names = { light: 'µÆ¹â', ac: '¿Õµ÷', humidifier: '¼ÓÊªÆ÷', speaker: 'ÒôÏì' }
   return names[type] || type
 }
 
@@ -69,7 +70,7 @@ const loadDevices = async () => {
     })
     const resData = await res.json()
     if (resData.code === 0) {
-      data.value = (resData.data || []).map(d => ({ ...d, type: getTypeName(d.type), status_name: d.status ? 'å¼€å¯' : 'å…³é—­' }))
+      data.value = (resData.data || []).map(d => ({ ...d, type: getTypeName(d.type), status_name: d.status ? '¿ªÆô' : '¹Ø±Õ' }))
     } else {
       loadMockData()
     }
@@ -83,10 +84,10 @@ const loadDevices = async () => {
 
 const loadMockData = () => {
   data.value = [
-    { id: '1', name: 'å®¢å…å¤§ç¯', type: 'ç¯å…‰', room: 'å®¢å…', status: true, status_name: 'å¼€å¯' },
-    { id: '2', name: 'å§å®¤ç©ºè°ƒ', type: 'ç©ºè°ƒ', room: 'å§å®¤', status: false, status_name: 'å…³é—­' },
-    { id: '3', name: 'å®¢å…åŠ æ¹¿å™¨', type: 'åŠ æ¹¿å™¨', room: 'å®¢å…', status: true, status_name: 'å¼€å¯' },
-    { id: '4', name: 'èƒŒæ™¯éŸ³ä¹', type: 'éŸ³å“', room: 'å…¨å±‹', status: false, status_name: 'å…³é—­' }
+    { id: '1', name: '¿ÍÌü´óµÆ', type: 'µÆ¹â', room: '¿ÍÌü', status: true, status_name: '¿ªÆô' },
+    { id: '2', name: 'ÎÔÊÒ¿Õµ÷', type: '¿Õµ÷', room: 'ÎÔÊÒ', status: false, status_name: '¹Ø±Õ' },
+    { id: '3', name: '¿ÍÌü¼ÓÊªÆ÷', type: '¼ÓÊªÆ÷', room: '¿ÍÌü', status: true, status_name: '¿ªÆô' },
+    { id: '4', name: '±³¾°ÒôÀÖ', type: 'ÒôÏì', room: 'È«Îİ', status: false, status_name: '¹Ø±Õ' }
   ]
 }
 
@@ -95,21 +96,21 @@ const handleReset = () => { form.name = ''; loadDevices() }
 
 const handleCreate = () => {
   isEdit.value = false
-  modalTitle.value = 'æ–°å»º'
+  modalTitle.value = 'ĞÂ½¨'
   Object.assign(form, { id: '', name: '', type: '', room: '' })
   modalVisible.value = true
 }
 
 const handleSubmit = () => {
-  if (!form.name) { Message.warning('è¯·å¡«å†™è®¾å¤‡åç§°'); return }
+  if (!form.name) { Message.warning('ÇëÌîĞ´Éè±¸Ãû³Æ'); return }
   if (isEdit.value) {
     const idx = data.value.findIndex(d => d.id === form.id)
     if (idx !== -1) data.value[idx] = { ...form, type: getTypeName(form.type) }
-    Message.success('ç¼–è¾‘æˆåŠŸ')
+    Message.success('±à¼­³É¹¦')
   } else {
-    data.value.unshift({ ...form, id: Date.now().toString(), status: false, status_name: 'å…³é—­' })
+    data.value.unshift({ ...form, id: Date.now().toString(), status: false, status_name: '¹Ø±Õ' })
     pagination.total++
-    Message.success('æ·»åŠ æˆåŠŸ')
+    Message.success('Ìí¼Ó³É¹¦')
   }
   modalVisible.value = false
 }

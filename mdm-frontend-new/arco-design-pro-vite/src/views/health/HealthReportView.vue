@@ -1,24 +1,24 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="å¥åº·æŠ¥å‘Š">
+    <a-card class="general-card" title="½¡¿µ±¨¸æ">
       <template #extra>
-        <a-button type="primary" @click="handleGenerate"><icon-plus />ç”ŸæˆæŠ¥å‘Š</a-button>
+        <a-button type="primary" @click="handleGenerate"><icon-plus />Éú³É±¨¸æ</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="æŠ¥å‘Šå‘¨æœŸ">
-            <a-select v-model="form.period" placeholder="è¯·é€‰æ‹©" style="width: 140px" allow-clear>
-              <a-option value="week">å‘¨æŠ¥</a-option>
-              <a-option value="month">æœˆæŠ¥</a-option>
-              <a-option value="quarter">å­£æŠ¥</a-option>
+          <a-form-item label="±¨¸æÖÜÆÚ">
+            <a-select v-model="form.period" placeholder="ÇëÑ¡Ôñ" style="width: 140px" allow-clear>
+              <a-option value="week">ÖÜ±¨</a-option>
+              <a-option value="month">ÔÂ±¨</a-option>
+              <a-option value="quarter">¼¾±¨</a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
-            <a-button @click="handleReset">é‡ç½®</a-button>
+            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
+            <a-button @click="handleReset">ÖØÖÃ</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -30,7 +30,8 @@
       @page-change="onPageChange"
     />
     </a-table>
-  </a-card>`n</div></template>
+  </a-card>
+</div></template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
@@ -43,13 +44,13 @@ const loading = ref(false)
 const form = reactive({ period: '' })
 
 const columns = [
-  { title: 'æŠ¥å‘Šå‘¨æœŸ', dataIndex: 'period', width: 200 },
-  { title: 'å¹³å‡å¿ƒç‡', dataIndex: 'heart_rate', width: 100 },
-  { title: 'å¹³å‡è¡€å‹', dataIndex: 'blood_pressure', width: 120 },
-  { title: 'å¹³å‡ç¡çœ (å°æ—¶)', dataIndex: 'sleep_hours', width: 120 },
-  { title: 'è¿åŠ¨æ—¶é•¿(åˆ†é’Ÿ)', dataIndex: 'exercise_minutes', width: 130 },
-  { title: 'ç»¼åˆè¯„åˆ†', dataIndex: 'overall_score', width: 100 },
-  { title: 'ç”Ÿæˆæ—¶é—´', dataIndex: 'created_at', width: 160 }
+  { title: '±¨¸æÖÜÆÚ', dataIndex: 'period', width: 200 },
+  { title: 'Æ½¾ùĞÄÂÊ', dataIndex: 'heart_rate', width: 100 },
+  { title: 'Æ½¾ùÑªÑ¹', dataIndex: 'blood_pressure', width: 120 },
+  { title: 'Æ½¾ùË¯Ãß(Ğ¡Ê±)', dataIndex: 'sleep_hours', width: 120 },
+  { title: 'ÔË¶¯Ê±³¤(·ÖÖÓ)', dataIndex: 'exercise_minutes', width: 130 },
+  { title: '×ÛºÏÆÀ·Ö', dataIndex: 'overall_score', width: 100 },
+  { title: 'Éú³ÉÊ±¼ä', dataIndex: 'created_at', width: 160 }
 ]
 
 const data = ref([])
@@ -84,10 +85,10 @@ const loadData = async () => {
 
 const loadMockData = () => {
   data.value = [
-    { id: 1, period: '2026-03-16 è‡³ 2026-03-22', heart_rate: 72, blood_pressure: '120/80', sleep_hours: 7.5, exercise_minutes: 45, overall_score: 85, created_at: '2026-03-22 10:00:00' },
-    { id: 2, period: '2026-03-09 è‡³ 2026-03-15', heart_rate: 74, blood_pressure: '122/82', sleep_hours: 7.2, exercise_minutes: 40, overall_score: 80, created_at: '2026-03-15 10:00:00' },
-    { id: 3, period: '2026-03-02 è‡³ 2026-03-08', heart_rate: 70, blood_pressure: '118/78', sleep_hours: 7.8, exercise_minutes: 50, overall_score: 88, created_at: '2026-03-08 10:00:00' },
-    { id: 4, period: '2026-02-23 è‡³ 2026-03-01', heart_rate: 73, blood_pressure: '120/82', sleep_hours: 7.0, exercise_minutes: 35, overall_score: 78, created_at: '2026-03-01 10:00:00' }
+    { id: 1, period: '2026-03-16 ÖÁ 2026-03-22', heart_rate: 72, blood_pressure: '120/80', sleep_hours: 7.5, exercise_minutes: 45, overall_score: 85, created_at: '2026-03-22 10:00:00' },
+    { id: 2, period: '2026-03-09 ÖÁ 2026-03-15', heart_rate: 74, blood_pressure: '122/82', sleep_hours: 7.2, exercise_minutes: 40, overall_score: 80, created_at: '2026-03-15 10:00:00' },
+    { id: 3, period: '2026-03-02 ÖÁ 2026-03-08', heart_rate: 70, blood_pressure: '118/78', sleep_hours: 7.8, exercise_minutes: 50, overall_score: 88, created_at: '2026-03-08 10:00:00' },
+    { id: 4, period: '2026-02-23 ÖÁ 2026-03-01', heart_rate: 73, blood_pressure: '120/82', sleep_hours: 7.0, exercise_minutes: 35, overall_score: 78, created_at: '2026-03-01 10:00:00' }
   ]
   pagination.total = data.value.length
 }
@@ -98,9 +99,9 @@ const handleReset = () => {
 }
 
 const handleGenerate = () => {
-  Message.info('æ­£åœ¨ç”Ÿæˆå¥åº·æŠ¥å‘Š...')
+  Message.info('ÕıÔÚÉú³É½¡¿µ±¨¸æ...')
   setTimeout(() => {
-    Message.success('æŠ¥å‘Šç”ŸæˆæˆåŠŸ')
+    Message.success('±¨¸æÉú³É³É¹¦')
     loadData()
   }, 1000)
 }

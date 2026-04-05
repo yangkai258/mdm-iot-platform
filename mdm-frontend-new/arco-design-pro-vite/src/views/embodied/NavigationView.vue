@@ -1,7 +1,5 @@
-﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+<template>
+  <Breadcrumb :items="['Home','Console','']" />
   <div class="page-container">
     <a-card class="general-card" title="导航记录">
       <template #extra>
@@ -23,8 +21,7 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-    </a-table>
-  </a-card>
+    </a-card>
   </div>
 </template>
 
@@ -97,4 +94,3 @@ onMounted(() => {
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

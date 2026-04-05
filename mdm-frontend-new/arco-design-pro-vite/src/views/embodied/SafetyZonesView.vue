@@ -1,7 +1,5 @@
-﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+<template>
+  <Breadcrumb :items="['Home','Console','']" />
   <div class="page-container">
     <a-card class="general-card" title="安全区域">
       <template #extra>
@@ -24,28 +22,27 @@
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="区域名称" required><a-input v-model="form.zone_name" placeholder="请输入区域名称" /></a-form-item>
-        <a-form-item label="区域类型">
-          <a-select v-model="form.zone_type" placeholder="选择类型">
-            <a-option value="forbidden">禁区</a-option>
-            <a-option value="caution">警戒区</a-option>
-            <a-option value="safe">安全区</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="形状">
-          <a-select v-model="form.zone_shape" placeholder="选择形状">
-            <a-option value="rectangle">矩形</a-option>
-            <a-option value="circle">圆形</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="描述">
-          <a-textarea v-model="form.description" :rows="2" placeholder="区域描述" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
+      <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit">
+        <a-form :model="form" label-col-flex="100px">
+          <a-form-item label="区域名称" required><a-input v-model="form.zone_name" placeholder="请输入区域名称" /></a-form-item>
+          <a-form-item label="区域类型">
+            <a-select v-model="form.zone_type" placeholder="选择类型">
+              <a-option value="forbidden">禁区</a-option>
+              <a-option value="caution">警戒区</a-option>
+              <a-option value="safe">安全区</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="形状">
+            <a-select v-model="form.zone_shape" placeholder="选择形状">
+              <a-option value="rectangle">矩形</a-option>
+              <a-option value="circle">圆形</a-option>
+            </a-select>
+          </a-form-item>
+          <a-form-item label="描述">
+            <a-textarea v-model="form.description" :rows="2" placeholder="区域描述" />
+          </a-form-item>
+        </a-form>
+      </a-modal>
     </a-card>
   </div>
 </template>

@@ -1,31 +1,30 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="ä¼˜æƒ åˆ¸æ¶ˆæ¯">
+    <a-card class="general-card" title="ÓÅ»İÈ¯ÏûÏ¢">
       <template #extra>
-        <a-button @click="loadData"><icon-refresh />åˆ·æ–°</a-button>
+        <a-button @click="loadData"><icon-refresh />Ë¢ĞÂ</a-button>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="å…³é”®è¯">
-            <a-input v-model="filters.memberName" placeholder="ä¼šå‘˜åç§°" @pressEnter="loadData" />
+          <a-form-item label="¹Ø¼ü´Ê">
+            <a-input v-model="filters.memberName" placeholder="»áÔ±Ãû³Æ" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
-            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadData()">é‡ç½®</a-button>
+            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
+            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadData()">ÖØÖÃ</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
         <template #status="{ record }">
-          <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? 'å¯ç”¨' : 'ç¦ç”¨' }}</a-tag>
+          <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? 'ÆôÓÃ' : '½ûÓÃ' }}</a-tag>
         </template>
-      </a-table>
       </a-table>
     </a-card>
   </div>
@@ -50,18 +49,18 @@ const paginationConfig = computed(() => ({
 }))
 
 const columns = [
-  { title: 'æ¶ˆæ¯ç±»å‹', slotName: 'type', width: 120 },
-  { title: 'ä¼šå‘˜åç§°', dataIndex: 'memberName', width: 150 },
-  { title: 'ä¼˜æƒ åˆ¸åç§°', dataIndex: 'couponName', width: 160 },
-  { title: 'æ¶ˆæ¯å†…å®¹', dataIndex: 'content', width: 280, ellipsis: true },
-  { title: 'å‘é€æ—¶é—´', dataIndex: 'sendTime', width: 170 },
-  { title: 'çŠ¶æ€', slotName: 'status', width: 100 }
+  { title: 'ÏûÏ¢ÀàĞÍ', slotName: 'type', width: 120 },
+  { title: '»áÔ±Ãû³Æ', dataIndex: 'memberName', width: 150 },
+  { title: 'ÓÅ»İÈ¯Ãû³Æ', dataIndex: 'couponName', width: 160 },
+  { title: 'ÏûÏ¢ÄÚÈİ', dataIndex: 'content', width: 280, ellipsis: true },
+  { title: '·¢ËÍÊ±¼ä', dataIndex: 'sendTime', width: 170 },
+  { title: '×´Ì¬', slotName: 'status', width: 100 }
 ]
 
 const getTypeColor = (t) => ({ grant: 'blue', remind: 'orange', use: 'green', expire: 'purple' }[t] || 'gray')
-const getTypeText = (t) => ({ grant: 'å‘æ”¾é€šçŸ¥', remind: 'åˆ°æœŸæé†’', use: 'æ ¸é”€é€šçŸ¥', expire: 'è¿‡æœŸé€šçŸ¥' }[t] || t)
+const getTypeText = (t) => ({ grant: '·¢·ÅÍ¨Öª', remind: 'µ½ÆÚÌáĞÑ', use: 'ºËÏúÍ¨Öª', expire: '¹ıÆÚÍ¨Öª' }[t] || t)
 const getStatusColor = (s) => ({ success: 'green', failed: 'red', pending: 'orange' }[s] || 'gray')
-const getStatusText = (s) => ({ success: 'å·²å‘é€', failed: 'å‘é€å¤±è´¥', pending: 'å¾…å‘é€' }[s] || s)
+const getStatusText = (s) => ({ success: 'ÒÑ·¢ËÍ', failed: '·¢ËÍÊ§°Ü', pending: '´ı·¢ËÍ' }[s] || s)
 
 const loadData = async () => {
   loading.value = true
@@ -79,14 +78,14 @@ const loadData = async () => {
     dataList.value = d.list || []
     pagination.total = d.total || 0
   } catch (err) {
-    Message.error('åŠ è½½æ¶ˆæ¯æµæ°´å¤±è´¥: ' + err.message)
+    Message.error('¼ÓÔØÏûÏ¢Á÷Ë®Ê§°Ü: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
 const handleExport = () => {
-  Message.info('å¯¼å‡ºåŠŸèƒ½å¼€å‘ä¸­')
+  Message.info('µ¼³ö¹¦ÄÜ¿ª·¢ÖĞ')
 }
 
 const onPageChange = (page) => { pagination.current = page; loadData() }

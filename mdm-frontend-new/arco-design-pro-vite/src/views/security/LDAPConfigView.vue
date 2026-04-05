@@ -1,38 +1,38 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <!-- Tab åˆ‡æ¢ -->
+    <!-- Tab ÇĞ»» -->
     <a-tabs v-model:active-tab="activeTab" class="ldap-tabs">
-      <!-- Tab1: LDAP é…ç½® -->
-      <a-tab-pane key="config" title="LDAP é…ç½®">
+      <!-- Tab1: LDAP ÅäÖÃ -->
+      <a-tab-pane key="config" title="LDAP ÅäÖÃ">
         <a-card class="content-card">
           <template #title>
             <div class="card-header">
-              <span>LDAP/AD é…ç½®</span>
-              <a-tag v-if="ldapConfig.is_enabled" color="green">å·²å¯ç”¨</a-tag>
-              <a-tag v-else color="gray">æœªå¯ç”¨</a-tag>
+              <span>LDAP/AD ÅäÖÃ</span>
+              <a-tag v-if="ldapConfig.is_enabled" color="green">ÒÑÆôÓÃ</a-tag>
+              <a-tag v-else color="gray">Î´ÆôÓÃ</a-tag>
             </div>
           </template>
 
           <a-form :model="form" layout="vertical" class="ldap-form">
             <div class="form-section">
-              <div class="section-label">æœåŠ¡å™¨é…ç½®</div>
-              <a-form-item label="é…ç½®åç§°" required>
-                <a-input v-model="form.config_name" placeholder="ä¾‹å¦‚ï¼šä¼ä¸šLDAP" style="width: 300px" />
+              <div class="section-label">·şÎñÆ÷ÅäÖÃ</div>
+              <a-form-item label="ÅäÖÃÃû³Æ" required>
+                <a-input v-model="form.config_name" placeholder="ÀıÈç£ºÆóÒµLDAP" style="width: 300px" />
               </a-form-item>
-              <a-form-item label="LDAPæœåŠ¡å™¨åœ°å€" required>
-                <a-input v-model="form.host" placeholder="ldap.company.com æˆ– ldaps://ldap.company.com" style="width: 360px" />
+              <a-form-item label="LDAP·şÎñÆ÷µØÖ·" required>
+                <a-input v-model="form.host" placeholder="ldap.company.com »ò ldaps://ldap.company.com" style="width: 360px" />
               </a-form-item>
-              <a-form-item label="ç«¯å£" required>
+              <a-form-item label="¶Ë¿Ú" required>
                 <a-input-number v-model="form.port" :min="1" :max="65535" style="width: 120px" />
-                <span class="form-tip">389ï¼ˆLDAPï¼‰æˆ– 636ï¼ˆLDAPSï¼‰</span>
+                <span class="form-tip">389£¨LDAP£©»ò 636£¨LDAPS£©</span>
               </a-form-item>
-              <a-form-item label="ä½¿ç”¨ SSL">
+              <a-form-item label="Ê¹ÓÃ SSL">
                 <a-switch v-model="form.use_ssl" />
               </a-form-item>
-              <a-form-item label="ä½¿ç”¨ TLS">
+              <a-form-item label="Ê¹ÓÃ TLS">
                 <a-switch v-model="form.use_tls" />
               </a-form-item>
             </div>
@@ -40,27 +40,27 @@
             <a-divider />
 
             <div class="form-section">
-              <div class="section-label">è®¤è¯é…ç½®</div>
-              <a-form-item label="åŸºå‡† DN" required>
+              <div class="section-label">ÈÏÖ¤ÅäÖÃ</div>
+              <a-form-item label="»ù×¼ DN" required>
                 <a-input v-model="form.base_dn" placeholder="dc=company,dc=com" style="width: 360px" />
               </a-form-item>
-              <a-form-item label="ç®¡ç†å‘˜ DN" required>
+              <a-form-item label="¹ÜÀíÔ± DN" required>
                 <a-input v-model="form.bind_dn" placeholder="cn=admin,dc=company,dc=com" style="width: 360px" />
               </a-form-item>
-              <a-form-item label="ç®¡ç†å‘˜å¯†ç ">
-                <a-input-password v-model="form.bind_password" placeholder="è¯·è¾“å…¥å¯†ç ï¼ˆåŠ å¯†å­˜å‚¨ï¼‰" allow-clear style="width: 240px" />
+              <a-form-item label="¹ÜÀíÔ±ÃÜÂë">
+                <a-input-password v-model="form.bind_password" placeholder="ÇëÊäÈëÃÜÂë£¨¼ÓÃÜ´æ´¢£©" allow-clear style="width: 240px" />
               </a-form-item>
             </div>
 
             <a-divider />
 
             <div class="form-section">
-              <div class="section-label">è¿‡æ»¤è§„åˆ™</div>
-              <a-form-item label="ç”¨æˆ·è¿‡æ»¤å™¨">
+              <div class="section-label">¹ıÂË¹æÔò</div>
+              <a-form-item label="ÓÃ»§¹ıÂËÆ÷">
                 <a-input v-model="form.user_filter" placeholder="(objectClass=user)" style="width: 400px" />
-                <div class="form-tip">ç”¨äºæœç´¢ç”¨æˆ·ï¼Œå¸¸ç”¨ï¼š(objectClass=user)</div>
+                <div class="form-tip">ÓÃÓÚËÑË÷ÓÃ»§£¬³£ÓÃ£º(objectClass=user)</div>
               </a-form-item>
-              <a-form-item label="åˆ†ç»„è¿‡æ»¤å™¨">
+              <a-form-item label="·Ö×é¹ıÂËÆ÷">
                 <a-input v-model="form.group_filter" placeholder="(objectClass=group)" style="width: 400px" />
               </a-form-item>
             </div>
@@ -68,125 +68,123 @@
             <a-divider />
 
             <div class="form-section">
-              <div class="section-label">åŒæ­¥é…ç½®</div>
-              <a-form-item label="åŒæ­¥é—´éš”ï¼ˆç§’ï¼‰">
+              <div class="section-label">Í¬²½ÅäÖÃ</div>
+              <a-form-item label="Í¬²½¼ä¸ô£¨Ãë£©">
                 <a-input-number v-model="form.sync_interval" :min="60" :step="60" style="width: 120px" />
-                <span class="form-tip">é»˜è®¤ 3600 ç§’ï¼ˆ1å°æ—¶ï¼‰ï¼Œå»ºè®®ä¸ä½äº 300 ç§’</span>
+                <span class="form-tip">Ä¬ÈÏ 3600 Ãë£¨1Ğ¡Ê±£©£¬½¨Òé²»µÍÓÚ 300 Ãë</span>
               </a-form-item>
-              <a-form-item label="å¯ç”¨çŠ¶æ€">
+              <a-form-item label="ÆôÓÃ×´Ì¬">
                 <a-switch v-model="form.is_enabled" />
               </a-form-item>
-              <a-form-item label="æè¿°">
-                <a-textarea v-model="form.description" placeholder="å¯é€‰æè¿°ä¿¡æ¯" :rows="2" style="width: 400px" />
+              <a-form-item label="ÃèÊö">
+                <a-textarea v-model="form.description" placeholder="¿ÉÑ¡ÃèÊöĞÅÏ¢" :rows="2" style="width: 400px" />
               </a-form-item>
             </div>
 
             <div class="form-actions">
               <a-button @click="handleTest" :loading="testing" :disabled="!form.host || !form.port">
-                æµ‹è¯•è¿æ¥
+                ²âÊÔÁ¬½Ó
               </a-button>
               <a-button type="primary" @click="handleSave" :loading="saving">
-                ä¿å­˜é…ç½®
+                ±£´æÅäÖÃ
               </a-button>
             </div>
           </a-form>
         </a-card>
       </a-tab-pane>
 
-      <!-- Tab2: ç”¨æˆ·åŒæ­¥ -->
-      <a-tab-pane key="users" title="ç”¨æˆ·åŒæ­¥">
+      <!-- Tab2: ÓÃ»§Í¬²½ -->
+      <a-tab-pane key="users" title="ÓÃ»§Í¬²½">
         <a-card class="content-card">
           <template #title>
-            <span>LDAP ç”¨æˆ·åˆ—è¡¨</span>
+            <span>LDAP ÓÃ»§ÁĞ±í</span>
           </template>
           <template #extra>
             <a-space>
-              <a-button type="primary" @click="handleSync" :loading="syncing">åŒæ­¥ç”¨æˆ·</a-button>
-              <a-button @click="loadUsers">åˆ·æ–°</a-button>
+              <a-button type="primary" @click="handleSync" :loading="syncing">Í¬²½ÓÃ»§</a-button>
+              <a-button @click="loadUsers">Ë¢ĞÂ</a-button>
             </a-space>
           </template>
 
-          <!-- åŒæ­¥ç»“æœç»Ÿè®¡ -->
+          <!-- Í¬²½½á¹ûÍ³¼Æ -->
           <a-alert v-if="syncResult" class="sync-alert" :type="syncResult.errors?.length > 0 ? 'warning' : 'success'" closable>
             <template #title>
-              åŒæ­¥å®Œæˆï¼šå…± {{ syncResult.total_users }} ç”¨æˆ·ï¼Œæ–°å¢ {{ syncResult.added }}ï¼Œæ›´æ–° {{ syncResult.updated }}ï¼Œè·³è¿‡ {{ syncResult.skipped }}
+              Í¬²½Íê³É£º¹² {{ syncResult.total_users }} ÓÃ»§£¬ĞÂÔö {{ syncResult.added }}£¬¸üĞÂ {{ syncResult.updated }}£¬Ìø¹ı {{ syncResult.skipped }}
             </template>
           </a-alert>
 
-          <!-- æœç´¢ -->
+          <!-- ËÑË÷ -->
           <div class="search-bar">
-            <a-input-search v-model="userKeyword" placeholder="æœç´¢ç”¨æˆ·å/é‚®ç®±" style="width: 240px" @search="loadUsers" search-button />
+            <a-input-search v-model="userKeyword" placeholder="ËÑË÷ÓÃ»§Ãû/ÓÊÏä" style="width: 240px" @search="loadUsers" search-button />
           </div>
 
           <a-table :columns="userColumns" :data="ldapUsers" :loading="usersLoading" :pagination="userPagination" row-key="dn" @page-change="handleUserPageChange" size="small">
             <template #actions="{ record }">
-              <a-button type="text" size="small" @click="showUserDetail(record)">æŸ¥çœ‹</a-button>
-              <a-button type="text" size="small" status="danger" @click="removeUser(record)">ç§»é™¤</a-button>
+              <a-button type="text" size="small" @click="showUserDetail(record)">²é¿´</a-button>
+              <a-button type="text" size="small" status="danger" @click="removeUser(record)">ÒÆ³ı</a-button>
             </template>
       </a-table>
-          </a-table>
         </a-card>
       </a-tab-pane>
 
-      <!-- Tab3: åˆ†ç»„-è§’è‰²æ˜ å°„ -->
-      <a-tab-pane key="mapping" title="åˆ†ç»„-è§’è‰²æ˜ å°„">
+      <!-- Tab3: ·Ö×é-½ÇÉ«Ó³Éä -->
+      <a-tab-pane key="mapping" title="·Ö×é-½ÇÉ«Ó³Éä">
         <a-card class="content-card">
           <template #title>
-            <span>LDAP åˆ†ç»„ - è§’è‰²æ˜ å°„</span>
+            <span>LDAP ·Ö×é - ½ÇÉ«Ó³Éä</span>
           </template>
           <template #extra>
-            <a-button type="primary" @click="showMappingModal">æ·»åŠ æ˜ å°„</a-button>
+            <a-button type="primary" @click="showMappingModal">Ìí¼ÓÓ³Éä</a-button>
           </template>
 
           <a-table :columns="mappingColumns" :data="groupMappings" :loading="mappingLoading" :pagination="false" row-key="id" size="small">
             <template #actions="{ record }">
-              <a-button type="text" size="small" status="danger" @click="removeMapping(record)">åˆ é™¤</a-button>
+              <a-button type="text" size="small" status="danger" @click="removeMapping(record)">É¾³ı</a-button>
             </template>
       </a-table>
-          </a-table>
         </a-card>
       </a-tab-pane>
     </a-tabs>
 
-    <!-- æµ‹è¯•è¿æ¥ç»“æœå¼¹çª— -->
-    <a-modal v-model:visible="testResultVisible" title="è¿æ¥æµ‹è¯•ç»“æœ" width="440px" :footer="null">
+    <!-- ²âÊÔÁ¬½Ó½á¹ûµ¯´° -->
+    <a-modal v-model:visible="testResultVisible" title="Á¬½Ó²âÊÔ½á¹û" width="440px" :footer="null">
       <a-result
         :status="testResult?.success ? 'success' : 'error'"
-        :title="testResult?.success ? 'è¿æ¥æˆåŠŸ' : 'è¿æ¥å¤±è´¥'"
+        :title="testResult?.success ? 'Á¬½Ó³É¹¦' : 'Á¬½ÓÊ§°Ü'"
       >
         <template #content>
           <div>{{ testResult?.message }}</div>
-          <div v-if="testResult?.server_info" class="server-info">æœåŠ¡å™¨ä¿¡æ¯ï¼š{{ testResult.server_info }}</div>
+          <div v-if="testResult?.server_info" class="server-info">·şÎñÆ÷ĞÅÏ¢£º{{ testResult.server_info }}</div>
         </template>
       </a-result>
     </a-modal>
 
-    <!-- ç”¨æˆ·è¯¦æƒ…å¼¹çª— -->
-    <a-modal v-model:visible="userDetailVisible" title="ç”¨æˆ·è¯¦æƒ…" width="480px" :footer="null">
+    <!-- ÓÃ»§ÏêÇéµ¯´° -->
+    <a-modal v-model:visible="userDetailVisible" title="ÓÃ»§ÏêÇé" width="480px" :footer="null">
       <a-descriptions :column="2" bordered v-if="currentUser">
         <a-descriptions-item label="DN" :span="2">{{ currentUser.dn }}</a-descriptions-item>
-        <a-descriptions-item label="ç”¨æˆ·å">{{ currentUser.username }}</a-descriptions-item>
-        <a-descriptions-item label="æ˜¾ç¤ºåç§°">{{ currentUser.display_name }}</a-descriptions-item>
-        <a-descriptions-item label="é‚®ç®±">{{ currentUser.email }}</a-descriptions-item>
-        <a-descriptions-item label="åˆ†ç»„" :span="2">
+        <a-descriptions-item label="ÓÃ»§Ãû">{{ currentUser.username }}</a-descriptions-item>
+        <a-descriptions-item label="ÏÔÊ¾Ãû³Æ">{{ currentUser.display_name }}</a-descriptions-item>
+        <a-descriptions-item label="ÓÊÏä">{{ currentUser.email }}</a-descriptions-item>
+        <a-descriptions-item label="·Ö×é" :span="2">
           <a-tag v-for="g in currentUser.groups" :key="g" size="small">{{ g }}</a-tag>
         </a-descriptions-item>
       </a-descriptions>
     </a-modal>
 
-    <!-- æ·»åŠ æ˜ å°„å¼¹çª— -->
-    <a-modal v-model:visible="mappingModalVisible" title="æ·»åŠ åˆ†ç»„-è§’è‰²æ˜ å°„" :width="480" :loading="mappingSubmitting" @before-ok="handleAddMapping" @cancel="mappingModalVisible = false">
+    <!-- Ìí¼ÓÓ³Éäµ¯´° -->
+    <a-modal v-model:visible="mappingModalVisible" title="Ìí¼Ó·Ö×é-½ÇÉ«Ó³Éä" :width="480" :loading="mappingSubmitting" @before-ok="handleAddMapping" @cancel="mappingModalVisible = false">
       <a-form :model="mappingForm" layout="vertical">
-        <a-form-item label="LDAPåˆ†ç»„" required>
-          <a-select v-model="mappingForm.ldap_group_dn" placeholder="é€‰æ‹©LDAPåˆ†ç»„" show-search>
+        <a-form-item label="LDAP·Ö×é" required>
+          <a-select v-model="mappingForm.ldap_group_dn" placeholder="Ñ¡ÔñLDAP·Ö×é" show-search>
             <a-option v-for="g in ldapGroups" :key="g.dn" :value="g.dn">{{ g.name }} ({{ g.dn }})</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="æ˜ å°„åç§°">
-          <a-input v-model="mappingForm.ldap_group_name" placeholder="åˆ†ç»„åç§°" />
+        <a-form-item label="Ó³ÉäÃû³Æ">
+          <a-input v-model="mappingForm.ldap_group_name" placeholder="·Ö×éÃû³Æ" />
         </a-form-item>
-        <a-form-item label="å…³è”è§’è‰²" required>
-          <a-select v-model="mappingForm.role_id" placeholder="é€‰æ‹©è§’è‰²">
+        <a-form-item label="¹ØÁª½ÇÉ«" required>
+          <a-select v-model="mappingForm.role_id" placeholder="Ñ¡Ôñ½ÇÉ«">
             <a-option v-for="r in roles" :key="r.id" :value="r.id">{{ r.name }}</a-option>
           </a-select>
         </a-form-item>
@@ -244,17 +242,17 @@ const mappingForm = reactive({ ldap_group_dn: '', ldap_group_name: '', role_id: 
 
 const userColumns = [
   { title: 'DN', dataIndex: 'dn', ellipsis: true },
-  { title: 'ç”¨æˆ·å', dataIndex: 'username', width: 120 },
-  { title: 'æ˜¾ç¤ºåç§°', dataIndex: 'display_name', width: 120 },
-  { title: 'é‚®ç®±', dataIndex: 'email', width: 180 },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 120 }
+  { title: 'ÓÃ»§Ãû', dataIndex: 'username', width: 120 },
+  { title: 'ÏÔÊ¾Ãû³Æ', dataIndex: 'display_name', width: 120 },
+  { title: 'ÓÊÏä', dataIndex: 'email', width: 180 },
+  { title: '²Ù×÷', slotName: 'actions', width: 120 }
 ]
 
 const mappingColumns = [
-  { title: 'LDAPåˆ†ç»„DN', dataIndex: 'ldap_group_dn', ellipsis: true },
-  { title: 'åˆ†ç»„åç§°', dataIndex: 'ldap_group_name', width: 140 },
-  { title: 'å…³è”è§’è‰²', dataIndex: 'role_name', width: 120 },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 80 }
+  { title: 'LDAP·Ö×éDN', dataIndex: 'ldap_group_dn', ellipsis: true },
+  { title: '·Ö×éÃû³Æ', dataIndex: 'ldap_group_name', width: 140 },
+  { title: '¹ØÁª½ÇÉ«', dataIndex: 'role_name', width: 120 },
+  { title: '²Ù×÷', slotName: 'actions', width: 80 }
 ]
 
 onMounted(async () => {
@@ -286,7 +284,7 @@ const loadConfig = async () => {
       })
     }
   } catch (e) {
-    console.error('åŠ è½½LDAPé…ç½®å¤±è´¥', e)
+    console.error('¼ÓÔØLDAPÅäÖÃÊ§°Ü', e)
   }
 }
 
@@ -298,7 +296,7 @@ const loadUsers = async () => {
     ldapUsers.value = data.list || []
     userPagination.total = data.total || 0
   } catch (e) {
-    console.error('åŠ è½½ç”¨æˆ·å¤±è´¥', e)
+    console.error('¼ÓÔØÓÃ»§Ê§°Ü', e)
   } finally {
     usersLoading.value = false
   }
@@ -309,14 +307,14 @@ const loadMappings = async () => {
   try {
     const res = await getLdapGroupMappings()
     groupMappings.value = (res.data || res)?.list || []
-    // åŠ è½½åˆ†ç»„
+    // ¼ÓÔØ·Ö×é
     const grpRes = await getLdapGroups()
     ldapGroups.value = (grpRes.data || grpRes)?.list || []
-    // åŠ è½½è§’è‰²
+    // ¼ÓÔØ½ÇÉ«
     const roleRes = await getRoles()
     roles.value = (roleRes.data || roleRes)?.list || roleRes || []
   } catch (e) {
-    console.error('åŠ è½½æ˜ å°„å¤±è´¥', e)
+    console.error('¼ÓÔØÓ³ÉäÊ§°Ü', e)
   } finally {
     mappingLoading.value = false
   }
@@ -324,16 +322,16 @@ const loadMappings = async () => {
 
 const handleSave = async () => {
   if (!form.config_name || !form.host || !form.base_dn || !form.bind_dn) {
-    Message.warning('è¯·å¡«å†™å¿…å¡«å­—æ®µ')
+    Message.warning('ÇëÌîĞ´±ØÌî×Ö¶Î')
     return
   }
   saving.value = true
   try {
     await updateLdapConfig({ ...form })
     Object.assign(ldapConfig, { is_enabled: form.is_enabled })
-    Message.success('ä¿å­˜æˆåŠŸ')
+    Message.success('±£´æ³É¹¦')
   } catch (e) {
-    Message.error('ä¿å­˜å¤±è´¥')
+    Message.error('±£´æÊ§°Ü')
   } finally {
     saving.value = false
   }
@@ -351,9 +349,9 @@ const handleTest = async () => {
       bind_dn: form.bind_dn,
       bind_password: form.bind_password
     })
-    testResult.value = { success: res.success !== false, message: res.message || 'è¿æ¥æˆåŠŸ', server_info: res.server_info }
+    testResult.value = { success: res.success !== false, message: res.message || 'Á¬½Ó³É¹¦', server_info: res.server_info }
   } catch (e) {
-    testResult.value = { success: false, message: e.message || 'è¿æ¥å¤±è´¥' }
+    testResult.value = { success: false, message: e.message || 'Á¬½ÓÊ§°Ü' }
   } finally {
     testing.value = false
     testResultVisible.value = true
@@ -366,10 +364,10 @@ const handleSync = async () => {
   try {
     const res = await syncLdapUsers()
     syncResult.value = res.data || res
-    Message.success('åŒæ­¥å®Œæˆ')
+    Message.success('Í¬²½Íê³É')
     loadUsers()
   } catch (e) {
-    Message.error('åŒæ­¥å¤±è´¥')
+    Message.error('Í¬²½Ê§°Ü')
   } finally {
     syncing.value = false
   }
@@ -380,8 +378,8 @@ const handleUserPageChange = (page) => { userPagination.current = page; loadUser
 const showUserDetail = (user) => { currentUser.value = user; userDetailVisible.value = true }
 
 const removeUser = async (user) => {
-  // è°ƒç”¨ç§»é™¤æ¥å£ï¼ˆåç«¯å®ç°ï¼‰
-  Message.info('ç§»é™¤ç”¨æˆ·ï¼š' + user.username)
+  // µ÷ÓÃÒÆ³ı½Ó¿Ú£¨ºó¶ËÊµÏÖ£©
+  Message.info('ÒÆ³ıÓÃ»§£º' + user.username)
 }
 
 const showMappingModal = () => {
@@ -391,19 +389,19 @@ const showMappingModal = () => {
 
 const handleAddMapping = async (done) => {
   if (!mappingForm.ldap_group_dn || !mappingForm.role_id) {
-    Message.warning('è¯·å¡«å†™åˆ†ç»„å’Œè§’è‰²')
+    Message.warning('ÇëÌîĞ´·Ö×éºÍ½ÇÉ«')
     done(false)
     return
   }
   mappingSubmitting.value = true
   try {
     await setLdapGroupMapping(mappingForm)
-    Message.success('æ˜ å°„æ·»åŠ æˆåŠŸ')
+    Message.success('Ó³ÉäÌí¼Ó³É¹¦')
     mappingModalVisible.value = false
     loadMappings()
     done(true)
   } catch (e) {
-    Message.error('æ·»åŠ å¤±è´¥')
+    Message.error('Ìí¼ÓÊ§°Ü')
     done(false)
   } finally {
     mappingSubmitting.value = false
@@ -411,8 +409,8 @@ const handleAddMapping = async (done) => {
 }
 
 const removeMapping = async (record) => {
-  // ç®€åŒ–å¤„ç†ï¼Œå®é™…åº”è°ƒç”¨åˆ é™¤API
-  Message.info('åˆ é™¤æ˜ å°„ï¼š' + record.ldap_group_name)
+  // ¼ò»¯´¦Àí£¬Êµ¼ÊÓ¦µ÷ÓÃÉ¾³ıAPI
+  Message.info('É¾³ıÓ³Éä£º' + record.ldap_group_name)
   loadMappings()
 }
 </script>

@@ -1,32 +1,32 @@
-Ôªø<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="WebhookÊó•Âøó">
+    <a-card class="general-card" title="Webhook»’÷æ">
       <div class="search-form">
         <a-form :model="form" layout="inline">
           <a-form-item label="Webhook">
-            <a-select v-model="form.webhook_id" placeholder="ËØ∑ÈÄâÊã©" allow-clear style="width: 200px" @change="loadData">
+            <a-select v-model="form.webhook_id" placeholder="«Î—°‘Ò" allow-clear style="width: 200px" @change="loadData">
               <a-option v-for="wh in webhooks" :key="wh.id" :value="wh.id">{{ wh.url }}</a-option>
             </a-select>
           </a-form-item>
-          <a-form-item label="Áä∂ÊÄÅ">
-            <a-select v-model="form.status" placeholder="ËØ∑ÈÄâÊã©" allow-clear style="width: 120px" @change="loadData">
-              <a-option value="success">ÊàêÂäü</a-option>
-              <a-option value="failed">Â§±Ë¥•</a-option>
+          <a-form-item label="◊¥Ã¨">
+            <a-select v-model="form.status" placeholder="«Î—°‘Ò" allow-clear style="width: 120px" @change="loadData">
+              <a-option value="success">≥…π¶</a-option>
+              <a-option value="failed"> ß∞‹</a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
-            <a-button @click="handleReset">ÈáçÁΩÆ</a-button>
+            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
+            <a-button @click="handleReset">÷ÿ÷√</a-button>
           </a-form-item>
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
       <template #status="{ record }">
         <a-tag :color="record.status === 'success' ? 'green' : 'red'">
-          {{ record.status === 'success' ? 'ÊàêÂäü' : 'Â§±Ë¥•' }}
+          {{ record.status === 'success' ? '≥…π¶' : ' ß∞‹' }}
         </a-tag>
       </template>
       </a-table>
@@ -34,35 +34,36 @@
         {{ record.response_time }}ms
       </template>
       <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleViewDetail(record)">ËØ¶ÊÉÖ</a-button>
+        <a-button type="text" size="small" @click="handleViewDetail(record)">œÍ«È</a-button>
       </template>
     </a-table>
 
-    <!-- ËØ¶ÊÉÖÂºπÁ™ó -->
-    <a-modal v-model:visible="detailVisible" title="Ë∞ÉÁî®ËØ¶ÊÉÖ" :width="700">
+    <!-- œÍ«ÈµØ¥∞ -->
+    <a-modal v-model:visible="detailVisible" title="µ˜”√œÍ«È" :width="700">
       <a-form :model="currentRecord" layout="vertical" label-col-flex="100px">
         <a-form-item label="Webhook">
           {{ currentRecord?.webhook_url }}
         </a-form-item>
-        <a-form-item label="‰∫ã‰ª∂Á±ªÂûã">
+        <a-form-item label=" ¬º˛¿‡–Õ">
           <a-tag>{{ currentRecord?.event_type }}</a-tag>
         </a-form-item>
-        <a-form-item label="Áä∂ÊÄÅ">
+        <a-form-item label="◊¥Ã¨">
           <a-tag :color="currentRecord?.status === 'success' ? 'green' : 'red'">
-            {{ currentRecord?.status === 'success' ? 'ÊàêÂäü' : 'Â§±Ë¥•' }}
+            {{ currentRecord?.status === 'success' ? '≥…π¶' : ' ß∞‹' }}
           </a-tag>
           ({{ currentRecord?.response_time }}ms)
         </a-form-item>
-        <a-form-item label="Ëß¶ÂèëÊó∂Èó¥">{{ currentRecord?.triggered_at }}</a-form-item>
-        <a-form-item label="ËØ∑Ê±Ç‰Ωì">
+        <a-form-item label="¥•∑¢ ±º‰">{{ currentRecord?.triggered_at }}</a-form-item>
+        <a-form-item label="«Î«ÛÃÂ">
           <a-textarea :model-value="JSON.stringify(JSON.parse(currentRecord?.request_body || '{}'), null, 2)" :rows="6" readonly />
         </a-form-item>
-        <a-form-item label="ÂìçÂ∫î">
+        <a-form-item label="œÏ”¶">
           <a-textarea :model-value="currentRecord?.response_body || '-'" :rows="4" readonly />
         </a-form-item>
       </a-form>
     </a-modal>
-    </a-card>`n</div></template>
+    </a-card>
+</div></template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
@@ -80,11 +81,11 @@ const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
   { title: 'ID', dataIndex: 'id', width: 80 },
   { title: 'Webhook', dataIndex: 'webhook_url', ellipsis: true, width: 200 },
-  { title: '‰∫ã‰ª∂Á±ªÂûã', dataIndex: 'event_type', width: 140 },
-  { title: 'Áä∂ÊÄÅ', slotName: 'status', width: 80 },
-  { title: 'ÂìçÂ∫îÊó∂Èó¥', slotName: 'response_time', width: 100 },
-  { title: 'Ëß¶ÂèëÊó∂Èó¥', dataIndex: 'triggered_at', width: 160 },
-  { title: 'Êìç‰Ωú', slotName: 'actions', width: 80, fixed: 'right' },
+  { title: ' ¬º˛¿‡–Õ', dataIndex: 'event_type', width: 140 },
+  { title: '◊¥Ã¨', slotName: 'status', width: 80 },
+  { title: 'œÏ”¶ ±º‰', slotName: 'response_time', width: 100 },
+  { title: '¥•∑¢ ±º‰', dataIndex: 'triggered_at', width: 160 },
+  { title: '≤Ÿ◊˜', slotName: 'actions', width: 80, fixed: 'right' },
 ]
 
 const loadData = async () => {

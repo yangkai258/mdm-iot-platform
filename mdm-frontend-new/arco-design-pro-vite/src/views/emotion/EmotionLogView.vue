@@ -1,26 +1,26 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="æƒ…ç»ªæ—¥å¿—">
+    <a-card class="general-card" title="ÇéÐ÷ÈÕÖ¾">
       <template #extra>
-        <a-button @click="handleExport"><icon-download />å¯¼å‡º</a-button>
+        <a-button @click="handleExport"><icon-download />µ¼³ö</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="æƒ…ç»ªç±»åž‹">
-            <a-select v-model="form.emotion" placeholder="è¯·é€‰æ‹©" allow-clear style="width: 140px">
-              <a-option value="happy">å¼€å¿ƒ</a-option>
-              <a-option value="sad">éš¾è¿‡</a-option>
-              <a-option value="angry">ç”Ÿæ°”</a-option>
-              <a-option value="fear">å®³æ€•</a-option>
-              <a-option value="neutral">å¹³é™</a-option>
+          <a-form-item label="ÇéÐ÷ÀàÐÍ">
+            <a-select v-model="form.emotion" placeholder="ÇëÑ¡Ôñ" allow-clear style="width: 140px">
+              <a-option value="happy">¿ªÐÄ</a-option>
+              <a-option value="sad">ÄÑ¹ý</a-option>
+              <a-option value="angry">ÉúÆø</a-option>
+              <a-option value="fear">º¦ÅÂ</a-option>
+              <a-option value="neutral">Æ½¾²</a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="handleSearch">æŸ¥è¯¢</a-button>
-            <a-button @click="handleReset">é‡ç½®</a-button>
+            <a-button type="primary" @click="handleSearch">²éÑ¯</a-button>
+            <a-button @click="handleReset">ÖØÖÃ</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -32,7 +32,8 @@
       @page-change="onPageChange"
     />
     </a-table>
-  </a-card>`n</div></template>
+  </a-card>
+</div></template>
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
@@ -54,11 +55,11 @@ const pagination = reactive({
 })
 
 const columns = [
-  { title: 'æ—¶é—´', dataIndex: 'created_at', width: 180 },
-  { title: 'è®¾å¤‡', dataIndex: 'device_id', width: 120 },
-  { title: 'æƒ…ç»ªç±»åž‹', dataIndex: 'emotion_label', width: 120 },
-  { title: 'å¼ºåº¦', dataIndex: 'intensity', width: 150 },
-  { title: 'è§¦å‘åŽŸå› ', dataIndex: 'trigger', ellipsis: true }
+  { title: 'Ê±¼ä', dataIndex: 'created_at', width: 180 },
+  { title: 'Éè±¸', dataIndex: 'device_id', width: 120 },
+  { title: 'ÇéÐ÷ÀàÐÍ', dataIndex: 'emotion_label', width: 120 },
+  { title: 'Ç¿¶È', dataIndex: 'intensity', width: 150 },
+  { title: '´¥·¢Ô­Òò', dataIndex: 'trigger', ellipsis: true }
 ]
 
 async function loadData() {
@@ -70,7 +71,7 @@ async function loadData() {
     data.value = res.data?.list || res.data || []
     pagination.total = res.data?.total || 0
   } catch (err: any) {
-    Message.error('åŠ è½½å¤±è´¥: ' + err.message)
+    Message.error('¼ÓÔØÊ§°Ü: ' + err.message)
   } finally {
     loading.value = false
   }
@@ -93,7 +94,7 @@ function onPageChange(page: number) {
 }
 
 function handleExport() {
-  Message.info('å¯¼å‡ºåŠŸèƒ½å¼€å‘ä¸­')
+  Message.info('µ¼³ö¹¦ÄÜ¿ª·¢ÖÐ')
 }
 
 onMounted(() => loadData())

@@ -1,29 +1,29 @@
-Ôªø<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="ÂëäË≠¶ËÆæÁΩÆ">
+    <a-card class="general-card" title="∏ÊæØ…Ë÷√">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />Êñ∞Â¢ûËÆæÁΩÆ</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />–¬‘ˆ…Ë÷√</a-button>
       </template>
       <div class="search-form">
         <a-form :model="searchForm" layout="inline">
           <a-row :gutter="16" style="width: 100%">
             <a-col :span="8">
-              <a-form-item label="ËÆæÁΩÆÂêçÁß∞"><a-input v-model="searchForm.keyword" placeholder="ÊêúÁ¥¢ËÆæÁΩÆÈ°π" /></a-form-item>
+              <a-form-item label="…Ë÷√√˚≥∆"><a-input v-model="searchForm.keyword" placeholder="À—À˜…Ë÷√œÓ" /></a-form-item>
             </a-col>
             <a-col :span="8">
-              <a-form-item label="Á±ªÂûã">
-                <a-select v-model="searchForm.type" placeholder="ËØ∑ÈÄâÊã©" allow-clear>
-                  <a-option value="email">ÈÇÆ‰ª∂</a-option>
-                  <a-option value="sms">Áü≠‰ø°</a-option>
+              <a-form-item label="¿‡–Õ">
+                <a-select v-model="searchForm.type" placeholder="«Î—°‘Ò" allow-clear>
+                  <a-option value="email">” º˛</a-option>
+                  <a-option value="sms">∂Ã–≈</a-option>
                   <a-option value="webhook">Webhook</a-option>
                 </a-select>
               </a-form-item>
             </a-col>
             <a-col :span="8" style="display: flex; justify-content: flex-end">
-              <a-form-item><a-button type="primary" @click="handleSearch">Êü•ËØ¢</a-button><a-button style="margin-left: 8px" @click="handleReset">ÈáçÁΩÆ</a-button></a-form-item>
+              <a-form-item><a-button type="primary" @click="handleSearch">≤È—Ø</a-button><a-button style="margin-left: 8px" @click="handleReset">÷ÿ÷√</a-button></a-form-item>
             </a-col>
           </a-row>
         </a-form>
@@ -32,21 +32,22 @@
       </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="ËÆæÁΩÆÂêçÁß∞"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="Á±ªÂûã"><a-select v-model="form.type" style="width: 200px">
-          <a-option value="email">ÈÇÆ‰ª∂</a-option>
-          <a-option value="sms">Áü≠‰ø°</a-option>
+        <a-form-item label="…Ë÷√√˚≥∆"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="¿‡–Õ"><a-select v-model="form.type" style="width: 200px">
+          <a-option value="email">” º˛</a-option>
+          <a-option value="sms">∂Ã–≈</a-option>
           <a-option value="webhook">Webhook</a-option>
         </a-select></a-form-item>
-        <a-form-item label="ÈÖçÁΩÆÂÄº"><a-input v-model="form.config_value" /></a-form-item>
-        <a-form-item label="ÊèèËø∞"><a-input v-model="form.description" /></a-form-item>
+        <a-form-item label="≈‰÷√÷µ"><a-input v-model="form.config_value" /></a-form-item>
+        <a-form-item label="√Ë ˆ"><a-input v-model="form.description" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">ÂèñÊ∂à</a-button>
-        <a-button type="primary" @click="handleSubmit">Á°ÆÂÆö</a-button>
+        <a-button @click="modalVisible = false">»°œ˚</a-button>
+        <a-button type="primary" @click="handleSubmit">»∑∂®</a-button>
       </template>
     </a-modal>
-    </a-card>`n</div></template>
+    </a-card>
+</div></template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
@@ -56,7 +57,7 @@ import { IconPlus } from '@arco-design/web-vue/es/icon'
 const loading = ref(false)
 const data = ref([])
 const modalVisible = ref(false)
-const modalTitle = ref('Êñ∞Â¢ûËÆæÁΩÆ')
+const modalTitle = ref('–¬‘ˆ…Ë÷√')
 
 const searchForm = reactive({
   keyword: '',
@@ -77,11 +78,11 @@ const pagination = reactive({
 })
 
 const columns = [
-  { title: 'ËÆæÁΩÆÂêçÁß∞', dataIndex: 'name', width: 200 },
-  { title: 'Á±ªÂûã', dataIndex: 'type', width: 120 },
-  { title: 'ÈÖçÁΩÆÂÄº', dataIndex: 'config_value', ellipsis: true },
-  { title: 'ÊèèËø∞', dataIndex: 'description', ellipsis: true },
-  { title: 'ÂêØÁî®Áä∂ÊÄÅ', dataIndex: 'enabled', width: 100, render: ({ record }) => record.enabled ? 'ÊòØ' : 'Âê¶' }
+  { title: '…Ë÷√√˚≥∆', dataIndex: 'name', width: 200 },
+  { title: '¿‡–Õ', dataIndex: 'type', width: 120 },
+  { title: '≈‰÷√÷µ', dataIndex: 'config_value', ellipsis: true },
+  { title: '√Ë ˆ', dataIndex: 'description', ellipsis: true },
+  { title: '∆Ù”√◊¥Ã¨', dataIndex: 'enabled', width: 100, render: ({ record }) => record.enabled ? ' «' : '∑Ò' }
 ]
 
 const handleSearch = () => {
@@ -95,7 +96,7 @@ const handleReset = () => {
 }
 
 const handleCreate = () => {
-  modalTitle.value = 'Êñ∞Â¢ûËÆæÁΩÆ'
+  modalTitle.value = '–¬‘ˆ…Ë÷√'
   modalVisible.value = true
 }
 
@@ -108,10 +109,10 @@ const handleSubmit = async () => {
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(form)
     })
-    Message.success('‰øùÂ≠òÊàêÂäü')
+    Message.success('±£¥Ê≥…π¶')
     loadData()
   } catch (e) {
-    Message.error('Êìç‰ΩúÂ§±Ë¥•')
+    Message.error('≤Ÿ◊˜ ß∞‹')
   }
 }
 
@@ -126,7 +127,7 @@ const loadData = async () => {
       pagination.total = data.value.length
     }
   } catch (e) {
-    Message.error('Âä†ËΩΩÂ§±Ë¥•')
+    Message.error('º”‘ÿ ß∞‹')
   } finally {
     loading.value = false
   }
