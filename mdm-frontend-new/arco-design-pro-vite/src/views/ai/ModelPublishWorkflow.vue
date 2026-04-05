@@ -1,77 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="模型发布流程">
+  <Breadcrumb :items="['Home','Ai','Modelpublishworkflow','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="M o d e l p u b l i s h w o r k f l o w">
       <template #extra>
-        <a-space :size="12">
-          <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
-          <a-button @click="handleSearch"><icon-refresh />刷新</a-button>
-        </a-space>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="8">
-          <a-form-item label="模型">
-            <a-input v-model="form.model_id" placeholder="选择模型" />
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="handleSearch">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" row-key="id" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const data = ref([])
-const modalVisible = ref(false)
-const modalTitle = ref('新建')
-const form = reactive({ model_id: '', version_id: '', change_log: '' })
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '版本', dataIndex: 'version_id', width: 120 },
-  { title: '变更说明', dataIndex: 'change_log', ellipsis: true },
-  { title: '状态', dataIndex: 'status', width: 120 },
-  { title: '发布时间', dataIndex: 'created_at', width: 170 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const handleSearch = () => { loadData() }
-const handleReset = () => { Object.keys(form).forEach(k => form[k] = ''); loadData() }
-const handleCreate = () => { modalTitle.value = '新建'; modalVisible.value = true }
-const handleSubmit = async () => { modalVisible.value = false; Message.success('保存成功') }
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const loadData = async () => {
-  loading.value = true
+async function loadData() {
   try {
-    const params = { page: pagination.current, page_size: pagination.pageSize }
-    if (form.model_id) params.model_id = form.model_id
-    const res = await fetch('/api/ai/models?' + new URLSearchParams(params), {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }
-  } catch (e) { Message.error('加载失败') } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
 onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

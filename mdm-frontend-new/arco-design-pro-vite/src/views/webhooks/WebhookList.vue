@@ -1,198 +1,53 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+ï»¿<template>
+  <Breadcrumb :items="['Home','Webhooks','Webhooklist','']" />
   <div class="page-container">
-    <a-card class="general-card" title="WebhookÁĞ±í">
+    <a-card class="general-card" title="W e b h o o k l i s t">
       <template #extra>
-        <a-space>
-          <a-button type="primary" @click="handleCreate"><icon-plus />ĞÂ½¨</a-button>
-          <a-button @click="handleViewLogs">ÈÕÖ¾</a-button>
-        </a-space>
+        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="¶ËµãURL">
-            <a-input v-model="form.url" placeholder="ÇëÊäÈëURL" />
-          </a-form-item>
-          <a-form-item label="ÊÂ¼şÀàĞÍ">
-            <a-select v-model="form.event_type" placeholder="ÇëÑ¡Ôñ" allow-clear style="width: 160px">
-              <a-option value="device.online">Éè±¸ÉÏÏß</a-option>
-              <a-option value="device.offline">Éè±¸ÀëÏß</a-option>
-              <a-option value="device.data">Éè±¸Êı¾İ</a-option>
-              <a-option value="alert.created">¸æ¾¯´´½¨</a-option>
-              <a-option value="ota.started">OTA¿ªÊ¼</a-option>
-              <a-option value="ota.completed">OTAÍê³É</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item label="×´Ì¬">
-            <a-select v-model="form.status" placeholder="ÇëÑ¡Ôñ" allow-clear style="width: 120px">
-              <a-option value="enabled">ÆôÓÃ</a-option>
-              <a-option value="disabled">½ûÓÃ</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
-            <a-button @click="handleReset">ÖØÖÃ</a-button>
-          </a-form-item>
+          <a-form-item label="å…³é”®è¯"><a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button><a-button @click="handleReset">é‡ç½®</a-button></a-form-item>
         </a-form>
       </div>
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #status="{ record }">
-        <a-tag :color="record.status === 'enabled' ? 'green' : 'gray'">
-          {{ record.status === 'enabled' ? 'ÆôÓÃ' : '½ûÓÃ' }}
-        </a-tag>
-      </template>
-      </a-table>
-      <template #event_types="{ record }">
-        <a-tag v-for="e in (record.event_types || [])" :key="e" size="small">{{ e }}</a-tag>
-      </template>
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleEdit(record)">±à¼­</a-button>
-        <a-button type="text" size="small" @click="handleToggle(record)">
-          {{ record.status === 'enabled' ? '½ûÓÃ' : 'ÆôÓÃ' }}
-        </a-button>
-        <a-button type="text" size="small" @click="handleTest(record)">²âÊÔ</a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">É¾³ı</a-button>
-      </template>
-    </a-table>
-
-    <!-- ĞÂ½¨/±à¼­µ¯´° -->
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="520" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="formData" layout="vertical" label-col-flex="100px">
-        <a-form-item label="¶ËµãURL" required>
-          <a-input v-model="formData.url" placeholder="https://example.com/webhook" />
-        </a-form-item>
-        <a-form-item label="ÊÂ¼şÀàĞÍ" required>
-          <a-select v-model="formData.event_types" multiple placeholder="ÇëÑ¡ÔñÊÂ¼şÀàĞÍ">
-            <a-option value="device.online">Éè±¸ÉÏÏß</a-option>
-            <a-option value="device.offline">Éè±¸ÀëÏß</a-option>
-            <a-option value="device.data">Éè±¸Êı¾İ</a-option>
-            <a-option value="alert.created">¸æ¾¯´´½¨</a-option>
-            <a-option value="ota.started">OTA¿ªÊ¼</a-option>
-            <a-option value="ota.completed">OTAÍê³É</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="Ç©ÃûÃÜÔ¿">
-          <a-input v-model="formData.secret" placeholder="ÓÃÓÚÇ©ÃûÑéÖ¤" />
-        </a-form-item>
-        <a-form-item label="ÃèÊö">
-          <a-textarea v-model="formData.description" placeholder="ÇëÊäÈëÃèÊö" :rows="3" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
-
-    <!-- ÈÕÖ¾µ¯´° -->
-    <a-drawer v-model:visible="logsVisible" title="Webhook ÈÕÖ¾" :width="800">
-      <WebhookLogs :webhook-id="currentWebhookId" />
-    </a-drawer>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-</div></template>
+  </div>
+</template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { Message, Modal } from '@arco-design/web-vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
 import { IconPlus } from '@arco-design/web-vue/es/icon'
-import WebhookLogs from './WebhookLogs.vue'
 
-const router = useRouter()
 const loading = ref(false)
-const data = ref([])
-const modalVisible = ref(false)
-const logsVisible = ref(false)
-const modalTitle = ref('ĞÂ½¨Webhook')
-const currentWebhookId = ref(null)
-const formData = reactive({ url: '', event_types: [], secret: '', description: '' })
-const editingId = ref(null)
-
-const form = reactive({ url: '', event_type: undefined, status: undefined })
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: '¶ËµãURL', dataIndex: 'url', ellipsis: true },
-  { title: 'ÊÂ¼şÀàĞÍ', slotName: 'event_types', width: 240 },
-  { title: '×´Ì¬', slotName: 'status', width: 80 },
-  { title: '×î½ü´¥·¢', dataIndex: 'last_triggered_at', width: 160 },
-  { title: '²Ù×÷', slotName: 'actions', width: 200, fixed: 'right' },
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'åç§°', dataIndex: 'name', width: 160 },
+  { title: 'çŠ¶æ€', dataIndex: 'status', width: 90 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadData = async () => {
-  loading.value = true
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const res = await fetch(`/api/webhooks?page=${pagination.current}&page_size=${pagination.pageSize}`)
-    const json = await res.json()
-    data.value = json.data?.list || json.data || []
-    pagination.total = json.data?.total || 0
-  } catch {
+    loading.value = true
     data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('åŠ è½½å¤±è´¥: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-const handleCreate = () => {
-  modalTitle.value = 'ĞÂ½¨Webhook'
-  editingId.value = null
-  Object.assign(formData, { url: '', event_types: [], secret: '', description: '' })
-  modalVisible.value = true
-}
-
-const handleEdit = (record) => {
-  modalTitle.value = '±à¼­Webhook'
-  editingId.value = record.id
-  Object.assign(formData, { url: record.url, event_types: record.event_types || [], secret: record.secret || '', description: record.description || '' })
-  modalVisible.value = true
-}
-
-const handleSubmit = async () => {
-  const method = editingId.value ? 'PUT' : 'POST'
-  const url = editingId.value ? `/api/webhooks/${editingId.value}` : '/api/webhooks'
-  await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData)
-  })
-  Message.success('±£´æ³É¹¦')
-  modalVisible.value = false
-  loadData()
-}
-
-const handleToggle = async (record) => {
-  const newStatus = record.status === 'enabled' ? 'disabled' : 'enabled'
-  await fetch(`/api/webhooks/${record.id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: newStatus })
-  })
-  Message.success(newStatus === 'enabled' ? 'ÆôÓÃ³É¹¦' : '½ûÓÃ³É¹¦')
-  loadData()
-}
-
-const handleTest = async (record) => {
-  await fetch(`/api/webhooks/${record.id}/test`, { method: 'POST' })
-  Message.success('²âÊÔÇëÇóÒÑ·¢ËÍ')
-}
-
-const handleDelete = (record) => {
-  Modal.warning({
-    title: 'È·ÈÏÉ¾³ı',
-    content: 'É¾³ıºóÎŞ·¨»Ö¸´£¬È·¶¨ÒªÉ¾³ıÂğ£¿',
-    onOk: async () => {
-      await fetch(`/api/webhooks/${record.id}`, { method: 'DELETE' })
-      Message.success('É¾³ı³É¹¦')
-      loadData()
-    }
-  })
-}
-
-const handleViewLogs = () => {
-  router.push('/webhooks/logs')
-}
-
-const handleReset = () => { form.url = ''; form.event_type = undefined; form.status = undefined; loadData() }
-const onPageChange = (page) => { pagination.current = page; loadData() }
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
 onMounted(() => { loadData() })
 </script>
 
@@ -200,4 +55,3 @@ onMounted(() => { loadData() })
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

@@ -1,48 +1,48 @@
-<template>
+Ôªø<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="‘±π§π‹¿Ì">
+    <a-card class="general-card" title="ÂëòÂ∑•ÁÆ°ÁêÜ">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate"><icon-plus />–¬Ω®‘±π§</a-button>
-          <a-button @click="loadData"><icon-refresh />À¢–¬</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />Êñ∞Âª∫ÂëòÂ∑•</a-button>
+          <a-button @click="loadData"><icon-refresh />Âà∑Êñ∞</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-input-search v-model="filter.keyword" placeholder="À—À˜‘±π§–’√˚/π§∫≈/ ÷ª˙∫≈" @search="loadData" />
+          <a-input-search v-model="filter.keyword" placeholder="ÊêúÁ¥¢ÂëòÂ∑•ÂßìÂêç/Â∑•Âè∑/ÊâãÊú∫Âè∑" @search="loadData" />
         </a-col>
         <a-col :span="6">
-          <a-select v-model="filter.department_id" placeholder="—°‘Ò≤ø√≈" allow-clear style="width: 100%" @change="loadData">
+          <a-select v-model="filter.department_id" placeholder="ÈÄâÊã©ÈÉ®Èó®" allow-clear style="width: 100%" @change="loadData">
             <a-option v-for="d in deptOptions" :key="d.value" :value="d.value">{{ d.label }}</a-option>
           </a-select>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
-            <a-button @click="Object.keys(filter).forEach(k => filter[k] = ''); loadData()">÷ÿ÷√</a-button>
+            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
+            <a-button @click="Object.keys(filter).forEach(k => filter[k] = ''); loadData()">ÈáçÁΩÆ</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 16px 0 0 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" style="margin-top: 16px">
-        <template #status="{ record }"><a-badge :color="record.status === 1 ? 'green' : 'red'" :text="record.status === 1 ? '’˝≥£' : 'Ω˚”√'" /></template>
+        <template #status="{ record }"><a-badge :color="record.status === 1 ? 'green' : 'red'" :text="record.status === 1 ? 'Ê≠£Â∏∏' : 'Á¶ÅÁî®'" /></template>
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="openEdit(record)">±‡º≠</a-button>
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">…æ≥˝</a-button>
+          <a-button type="text" size="small" @click="openEdit(record)">ÁºñËæë</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">Âà†Èô§</a-button>
         </template>
       </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '±‡º≠‘±π§' : '–¬Ω®‘±π§'" :width="560" @ok="handleSubmit">
+    <a-modal v-model="formVisible" :title="isEdit ? 'ÁºñËæëÂëòÂ∑•' : 'Êñ∞Âª∫ÂëòÂ∑•'" :width="560" @ok="handleSubmit">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="‘±π§–’√˚" required><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="π§∫≈"><a-input v-model="form.employee_no" /></a-form-item>
-        <a-form-item label=" ÷ª˙∫≈"><a-input v-model="form.phone" /></a-form-item>
-        <a-form-item label="À˘ Ù≤ø√≈"><a-select v-model="form.department_id" :options="deptOptions" style="width: 100%" /></a-form-item>
-        <a-form-item label="∏⁄Œª"><a-select v-model="form.post_id" :options="postOptions" style="width: 100%" /></a-form-item>
-        <a-form-item label="◊¥Ã¨"><a-switch v-model="form.status" /></a-form-item>
+        <a-form-item label="ÂëòÂ∑•ÂßìÂêç" required><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="Â∑•Âè∑"><a-input v-model="form.employee_no" /></a-form-item>
+        <a-form-item label="ÊâãÊú∫Âè∑"><a-input v-model="form.phone" /></a-form-item>
+        <a-form-item label="ÊâÄÂ±ûÈÉ®Èó®"><a-select v-model="form.department_id" :options="deptOptions" style="width: 100%" /></a-form-item>
+        <a-form-item label="Â≤ó‰Ωç"><a-select v-model="form.post_id" :options="postOptions" style="width: 100%" /></a-form-item>
+        <a-form-item label="Áä∂ÊÄÅ"><a-switch v-model="form.status" /></a-form-item>
       </a-form>
     </a-modal>
   </div>
@@ -63,13 +63,13 @@ const deptOptions = ref([])
 const postOptions = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: '‘±π§–’√˚', dataIndex: 'name', width: 140 },
-  { title: 'π§∫≈', dataIndex: 'employee_no', width: 120 },
-  { title: ' ÷ª˙∫≈', dataIndex: 'phone', width: 130 },
-  { title: '≤ø√≈', dataIndex: 'department_name', width: 160 },
-  { title: '∏⁄Œª', dataIndex: 'post_name', width: 140 },
-  { title: '◊¥Ã¨', slotName: 'status', width: 90 },
-  { title: '≤Ÿ◊˜', slotName: 'actions', width: 120 }
+  { title: 'ÂëòÂ∑•ÂßìÂêç', dataIndex: 'name', width: 140 },
+  { title: 'Â∑•Âè∑', dataIndex: 'employee_no', width: 120 },
+  { title: 'ÊâãÊú∫Âè∑', dataIndex: 'phone', width: 130 },
+  { title: 'ÈÉ®Èó®', dataIndex: 'department_name', width: 160 },
+  { title: 'Â≤ó‰Ωç', dataIndex: 'post_name', width: 140 },
+  { title: 'Áä∂ÊÄÅ', slotName: 'status', width: 90 },
+  { title: 'Êìç‰Ωú', slotName: 'actions', width: 120 }
 ]
 
 const loadData = async () => {
@@ -102,8 +102,8 @@ const loadPosts = async () => {
 
 const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', employee_no: '', phone: '', department_id: null, post_id: null, status: true }); formVisible.value = true }
 const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '∏¸–¬≥…π¶' : '¥¥Ω®≥…π¶'); loadData() }
-const handleDelete = () => { Message.success('…æ≥˝≥…π¶'); loadData() }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? 'Êõ¥Êñ∞ÊàêÂäü' : 'ÂàõÂª∫ÊàêÂäü'); loadData() }
+const handleDelete = () => { Message.success('Âà†Èô§ÊàêÂäü'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => { loadData(); loadDepts(); loadPosts() })

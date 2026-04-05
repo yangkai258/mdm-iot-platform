@@ -1,65 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="AI 质量仪表盘">
+  <Breadcrumb :items="['Home','Ai','Aiqualitydashboard','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="A i q u a l i t y d a s h b o a r d">
       <template #extra>
-        <a-button @click="handleSearch"><icon-refresh />刷新</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="8">
-          <a-form-item label="时间范围">
-            <a-range-picker v-model="form.time_range" style="width: 100%" />
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="handleSearch">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" row-key="id" />
-    </a-table>
-  </a-card>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const data = ref([])
-const form = reactive({ time_range: [] })
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '推理次数', dataIndex: 'total_inferences', width: 120 },
-  { title: '平均延迟(ms)', dataIndex: 'avg_latency_ms', width: 120 },
-  { title: '错误率', dataIndex: 'error_rate', width: 100 },
-  { title: '置信度', dataIndex: 'avg_confidence', width: 100 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const handleSearch = () => { loadData() }
-const handleReset = () => { form.time_range = []; loadData() }
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const loadData = async () => {
-  loading.value = true
+async function loadData() {
   try {
-    const params = {}
-    if (form.time_range && form.time_range.length === 2) {
-      params.start_time = form.time_range[0].toISOString()
-      params.end_time = form.time_range[1].toISOString()
-    }
-    const res = await fetch('/api/ai/quality/metrics?' + new URLSearchParams(params), {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }
-  } catch (e) { Message.error('加载失败') } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
 onMounted(() => { loadData() })
 </script>
 
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

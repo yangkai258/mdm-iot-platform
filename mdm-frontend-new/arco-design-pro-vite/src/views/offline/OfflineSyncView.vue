@@ -1,61 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="离线数据同步">
+  <Breadcrumb :items="['Home','Offline','Offlinesync','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="O f f l i n e s y n c">
       <template #extra>
-        <a-button type="primary" @click="handleSync"><icon-refresh />立即同步</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="6">
-          <a-statistic title="待同步" :value="stats.pending" color="orange" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="同步成功" :value="stats.success" color="green" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="同步失败" :value="stats.failed" color="red" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="最后同步" :value="stats.last_sync" />
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
-    </a-table>
-  </a-card>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const data = ref([])
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-const stats = reactive({ pending: 0, success: 0, failed: 0, last_sync: '-' })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '记录ID', dataIndex: 'id', width: 80 },
-  { title: '数据类型', dataIndex: 'data_type', width: 120 },
-  { title: '设备ID', dataIndex: 'device_id', width: 120 },
-  { title: '同步状态', dataIndex: 'status', width: 100 },
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
   { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadData = async () => {
-  loading.value = true
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const res = await fetch('/api/offline/sync-records', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
-    data.value = res.data?.list || []
-    pagination.total = data.value.length
-    if (res.data?.stats) Object.assign(stats, res.data.stats)
-  } catch { data.value = [] } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
-const handleSync = () => { Message.success('同步任务已启动'); loadData() }
-const onPageChange = (page) => { pagination.current = page; loadData() }
-onMounted(() => loadData())
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

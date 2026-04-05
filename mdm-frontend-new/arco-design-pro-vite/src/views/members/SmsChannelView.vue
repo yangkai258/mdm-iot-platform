@@ -1,44 +1,44 @@
-<template>
+Ôªø<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="∂Ã–≈Õ®µ¿">
+    <a-card class="general-card" title="Áü≠‰ø°ÈÄöÈÅì">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate"><icon-plus />–¬Ω®</a-button>
-          <a-button @click="loadData"><icon-refresh />À¢–¬</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />Êñ∞Âª∫</a-button>
+          <a-button @click="loadData"><icon-refresh />Âà∑Êñ∞</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="πÿº¸¥ "><a-input v-model="form.keyword" placeholder="«Î ‰»Î" @pressEnter="loadData" /></a-form-item>
+          <a-form-item label="ÂÖ≥ÈîÆËØç"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" @pressEnter="loadData" /></a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
-            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">÷ÿ÷√</a-button>
+            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">ÈáçÁΩÆ</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-        <template #status="{ record }"><a-badge :color="record.status === 'active' ? 'green' : 'gray'" :text="record.status === 'active' ? '∆Ù”√' : 'Ω˚”√'" /></template>
+        <template #status="{ record }"><a-badge :color="record.status === 'active' ? 'green' : 'gray'" :text="record.status === 'active' ? 'ÂêØÁî®' : 'Á¶ÅÁî®'" /></template>
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="openEdit(record)">±‡º≠</a-button>
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">…æ≥˝</a-button>
+          <a-button type="text" size="small" @click="openEdit(record)">ÁºñËæë</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">Âà†Èô§</a-button>
         </template>
       </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '±‡º≠' : '–¬Ω®'" :width="560">
+    <a-modal v-model="formVisible" :title="isEdit ? 'ÁºñËæë' : 'Êñ∞Âª∫'" :width="560">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="Õ®µ¿√˚≥∆"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="Õ®µ¿¿‡–Õ"><a-input v-model="form.channel_type" /></a-form-item>
+        <a-form-item label="ÈÄöÈÅìÂêçÁß∞"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="ÈÄöÈÅìÁ±ªÂûã"><a-input v-model="form.channel_type" /></a-form-item>
         <a-form-item label="API Key"><a-input v-model="form.api_key" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">»°œ˚</a-button>
-        <a-button type="primary" @click="handleSubmit">»∑∂®</a-button>
+        <a-button @click="formVisible = false">ÂèñÊ∂à</a-button>
+        <a-button type="primary" @click="handleSubmit">Á°ÆÂÆö</a-button>
       </template>
     </a-modal>
   </div>
@@ -56,10 +56,10 @@ const form = reactive({ keyword: '', name: '', channel_type: '', api_key: '' })
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: 'Õ®µ¿√˚≥∆', dataIndex: 'name', width: 180 },
-  { title: 'Õ®µ¿¿‡–Õ', dataIndex: 'channel_type', width: 120 },
-  { title: '◊¥Ã¨', slotName: 'status', width: 90 },
-  { title: '≤Ÿ◊˜', slotName: 'actions', width: 120 }
+  { title: 'ÈÄöÈÅìÂêçÁß∞', dataIndex: 'name', width: 180 },
+  { title: 'ÈÄöÈÅìÁ±ªÂûã', dataIndex: 'channel_type', width: 120 },
+  { title: 'Áä∂ÊÄÅ', slotName: 'status', width: 90 },
+  { title: 'Êìç‰Ωú', slotName: 'actions', width: 120 }
 ]
 
 const loadData = async () => {
@@ -72,8 +72,8 @@ const loadData = async () => {
 }
 const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', channel_type: '', api_key: '' }); formVisible.value = true }
 const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '∏¸–¬≥…π¶' : '¥¥Ω®≥…π¶'); loadData() }
-const handleDelete = () => { Message.success('…æ≥˝≥…π¶'); loadData() }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? 'Êõ¥Êñ∞ÊàêÂäü' : 'ÂàõÂª∫ÊàêÂäü'); loadData() }
+const handleDelete = () => { Message.success('Âà†Èô§ÊàêÂäü'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>

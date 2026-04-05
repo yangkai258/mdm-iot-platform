@@ -1,121 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="儿童模式">
+  <Breadcrumb :items="['Home','Family','Childmode','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="C h i l d m o d e">
       <template #extra>
-        <a-space :size="12">
-          <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
-          <a-button @click="handleSearch"><icon-refresh />刷新</a-button>
-        </a-space>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="6">
-          <a-form-item label="儿童账号">
-            <a-select v-model="form.child_id" placeholder="请选择" allow-clear style="width: 100%">
-              <a-option v-for="c in children" :key="c.id" :value="c.id">{{ c.name }}</a-option>
-            </a-select>
-          </a-form-item>
-        </a-col>
-        <a-col :span="6">
-          <a-form-item label="状态">
-            <a-select v-model="form.status" placeholder="请选择" allow-clear style="width: 100%">
-              <a-option value="enabled">已启用</a-option>
-              <a-option value="disabled">已禁用</a-option>
-            </a-select>
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="handleSearch">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="560">
-      <a-form :model="form" label-col-flex="130px">
-        <a-form-item label="儿童账号">
-          <a-select v-model="form.child_id" placeholder="请选择">
-            <a-option v-for="c in children" :key="c.id" :value="c.id">{{ c.name }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="内容过滤"><a-switch v-model="form.content_filter_enabled" /></a-form-item>
-        <a-form-item label="时间限制"><a-switch v-model="form.time_limit_enabled" /></a-form-item>
-        <a-form-item label="每日时长(分钟)"><a-input-number v-model="form.daily_time_limit" :min="15" :max="480" style="width: 100%" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const data = ref<any[]>([])
-const children = ref<any[]>([])
-const modalVisible = ref(false)
-const editingId = ref<number | null>(null)
-const form = reactive({ child_id: null as number | null, content_filter_enabled: false, time_limit_enabled: false, daily_time_limit: 60 })
-const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
-const modalTitle = computed(() => editingId.value ? '编辑配置' : '新建配置')
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '儿童账号', dataIndex: 'child_name', width: 160 },
-  { title: '模式开关', dataIndex: 'enabled', width: 120 },
-  { title: '内容过滤', dataIndex: 'content_filter_enabled', width: 120 },
-  { title: '时间限制', dataIndex: 'time_limit', width: 160 },
-  { title: '操作', slotName: 'actions', width: 160 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-async function loadChildren() {
-  try {
-    const res = await fetch('/api/family/members?role=child', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    children.value = res.data?.list || []
-  } catch {}
-}
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
 async function loadData() {
-  loading.value = true
   try {
-    const params = new URLSearchParams()
-    if (form.child_id) params.append('child_id', String(form.child_id))
-    if (form.status) params.append('status', form.status)
-    params.append('page', String(pagination.current))
-    params.append('page_size', String(pagination.pageSize))
-    const res = await fetch(`/api/family/child-mode?${params}`, {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    data.value = res.data?.list || []
-    pagination.total = res.data?.total || 0
-  } catch { Message.error('加载失败') } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
 
-const handleSearch = () => { pagination.current = 1; loadData() }
-const handleReset = () => { form.child_id = null; form.status = ''; pagination.current = 1; loadData() }
-const handleCreate = () => { editingId.value = null; Object.assign(form, { child_id: null, content_filter_enabled: false, time_limit_enabled: false, daily_time_limit: 60 }); modalVisible.value = true }
-const handleSubmit = async () => {
-  try {
-    const method = editingId.value ? 'PUT' : 'POST'
-    const url = editingId.value ? `/api/family/child-mode/${editingId.value}` : '/api/family/child-mode'
-    await fetch(url, { method, headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    Message.success('保存成功')
-    modalVisible.value = false
-    loadData()
-  } catch { Message.error('保存失败') }
-}
-const onPageChange = (page: number) => { pagination.current = page; loadData() }
-
-onMounted(() => { loadChildren(); loadData() })
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

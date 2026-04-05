@@ -1,126 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+ï»¿<template>
+  <Breadcrumb :items="['Home','Integration','Smarthome','']" />
   <div class="page-container">
-    <a-card class="general-card" title="ÖÇÄÜ¼Ò¾Ó">
+    <a-card class="general-card" title="S m a r t h o m e">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />ĞÂ½¨</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
       </template>
       <div class="search-form">
-      <a-form :model="form" layout="inline">
-        <a-form-item label="Ãû³Æ"><a-input v-model="form.name" placeholder="ÇëÊäÈë" /></a-form-item>
-        <a-form-item>
-          <a-button type="primary" @click="handleSearch">ËÑË÷</a-button>
-          <a-button @click="handleReset">ÖØÖÃ</a-button>
-        </a-form-item>
-      </a-form>
-    </div>
-    <div class="toolbar">
-      <a-button type="primary" @click="handleCreate">ĞÂ½¨</a-button>
-    </div>
-    <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="Éè±¸Ãû³Æ"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="Éè±¸ÀàĞÍ"><a-input v-model="form.type" /></a-form-item>
-        <a-form-item label="·¿¼ä"><a-input v-model="form.room" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">È¡Ïû</a-button>
-        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
-      </template>
-    </a-modal>
+        <a-form :model="form" layout="inline">
+          <a-form-item label="å…³é”®è¯"><a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button><a-button @click="handleReset">é‡ç½®</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-</div></template>
+  </div>
+</template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const modalVisible = ref(false)
-const modalTitle = ref('ĞÂ½¨')
-const isEdit = ref(false)
-
-const form = reactive({ id: '', name: '', type: '', room: '' })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: 'Éè±¸Ãû³Æ', dataIndex: 'name' },
-  { title: 'Éè±¸ÀàĞÍ', dataIndex: 'type' },
-  { title: '·¿¼ä', dataIndex: 'room' },
-  { title: '×´Ì¬', dataIndex: 'status_name' }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'åç§°', dataIndex: 'name', width: 160 },
+  { title: 'çŠ¶æ€', dataIndex: 'status', width: 90 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 }
 ]
 
-const pagination = reactive({ total: 0, current: 1, pageSize: 10 })
-const data = ref([])
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const getTypeName = (type) => {
-  const names = { light: 'µÆ¹â', ac: '¿Õµ÷', humidifier: '¼ÓÊªÆ÷', speaker: 'ÒôÏì' }
-  return names[type] || type
-}
-
-const loadDevices = async () => {
-  loading.value = true
+async function loadData() {
   try {
-    const token = localStorage.getItem('token')
-    const res = await fetch('/api/integration/devices', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    const resData = await res.json()
-    if (resData.code === 0) {
-      data.value = (resData.data || []).map(d => ({ ...d, type: getTypeName(d.type), status_name: d.status ? '¿ªÆô' : '¹Ø±Õ' }))
-    } else {
-      loadMockData()
-    }
-  } catch {
-    loadMockData()
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('åŠ è½½å¤±è´¥: ' + err.message)
   } finally {
-    pagination.total = data.value.length
     loading.value = false
   }
 }
 
-const loadMockData = () => {
-  data.value = [
-    { id: '1', name: '¿ÍÌü´óµÆ', type: 'µÆ¹â', room: '¿ÍÌü', status: true, status_name: '¿ªÆô' },
-    { id: '2', name: 'ÎÔÊÒ¿Õµ÷', type: '¿Õµ÷', room: 'ÎÔÊÒ', status: false, status_name: '¹Ø±Õ' },
-    { id: '3', name: '¿ÍÌü¼ÓÊªÆ÷', type: '¼ÓÊªÆ÷', room: '¿ÍÌü', status: true, status_name: '¿ªÆô' },
-    { id: '4', name: '±³¾°ÒôÀÖ', type: 'ÒôÏì', room: 'È«Îİ', status: false, status_name: '¹Ø±Õ' }
-  ]
-}
-
-const handleSearch = () => loadDevices()
-const handleReset = () => { form.name = ''; loadDevices() }
-
-const handleCreate = () => {
-  isEdit.value = false
-  modalTitle.value = 'ĞÂ½¨'
-  Object.assign(form, { id: '', name: '', type: '', room: '' })
-  modalVisible.value = true
-}
-
-const handleSubmit = () => {
-  if (!form.name) { Message.warning('ÇëÌîĞ´Éè±¸Ãû³Æ'); return }
-  if (isEdit.value) {
-    const idx = data.value.findIndex(d => d.id === form.id)
-    if (idx !== -1) data.value[idx] = { ...form, type: getTypeName(form.type) }
-    Message.success('±à¼­³É¹¦')
-  } else {
-    data.value.unshift({ ...form, id: Date.now().toString(), status: false, status_name: '¹Ø±Õ' })
-    pagination.total++
-    Message.success('Ìí¼Ó³É¹¦')
-  }
-  modalVisible.value = false
-}
-
-onMounted(() => loadDevices())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.page-container { background: #fff; border-radius: 4px; padding: 20px; }
-.search-form { margin-bottom: 16px; padding: 16px; background: #f7f8fa; border-radius: 4px; }
-.toolbar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

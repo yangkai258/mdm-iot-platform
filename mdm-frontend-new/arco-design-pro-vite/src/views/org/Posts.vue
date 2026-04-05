@@ -1,112 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="company-list-page">
-    <a-card class="general-card" title="岗位管理">
+  <Breadcrumb :items="['Home','Org','Posts','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="P o s t s">
       <template #extra>
-        <a-button type="primary" @click="openCreateModal(null)"><icon-plus />新建</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <div class="search-bar">
-        <a-input-search v-model="searchKey" placeholder="搜索岗位..." style="width: 260px" @search="loadPosts" allow-clear />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
       </div>
-      <a-table :columns="columns" :data="filteredData" :loading="loading" :pagination="{ pageSize: 10 }" row-key="id">
-        <template #status="{ record }">
-          <a-tag :color="record.status === 1 ? 'green' : 'gray'">{{ record.status === 1 ? '正常' : '禁用' }}</a-tag>
-        </template>
-      </a-table>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="openCreateModal(record)">「编辑」</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">「删除」</a-button>
-          </a-space>
-        </template>
-      </a-table>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑岗位' : '新建岗位'" @before-ok="submitForm">
-      <a-form :model="formData" layout="vertical">
-        <a-form-item label="岗位名称" required>
-          <a-input v-model="formData.pos_name" placeholder="请输入" />
-        </a-form-item>
-        <a-form-item label="岗位编码">
-          <a-input v-model="formData.pos_code" placeholder="请输入" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const searchKey = ref('')
-const showFilter = ref(false)
-const filterStatus = ref<number | ''>('')
-const formVisible = ref(false)
-const isEdit = ref(false)
-const formData = ref({ pos_name: '', pos_code: '' })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '岗位编码', dataIndex: 'pos_code', width: 120 },
-  { title: '岗位名称', dataIndex: 'pos_name', width: 150 },
-  { title: '类别', dataIndex: 'category', width: 100 },
-  { title: '级别', dataIndex: 'level', width: 80 },
-  { title: '状态', slotName: 'status', width: 80 },
-  { title: '操作', slotName: 'actions', width: 120, fixed: 'right' },
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const mockData = ref([
-  { id: 1, pos_code: 'P001', pos_name: '前端开发工程师', category: '技术', level: 'P3', status: 1 },
-  { id: 2, pos_code: 'P002', pos_name: '后端开发工程师', category: '技术', level: 'P3', status: 1 },
-  { id: 3, pos_code: 'P003', pos_name: '产品经理', category: '产品', level: 'P2', status: 1 },
-])
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const filteredData = computed(() => {
-  let data = mockData.value
-  if (searchKey.value) {
-    const kw = searchKey.value.toLowerCase()
-    data = data.filter(item => item.pos_name.toLowerCase().includes(kw) || item.pos_code.toLowerCase().includes(kw))
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
   }
-  if (filterStatus.value !== '') {
-    data = data.filter(item => item.status === filterStatus.value)
-  }
-  return data
-})
-
-const loadPosts = async () => {
-  loading.value = true
-  await new Promise(r => setTimeout(r, 300))
-  loading.value = false
 }
 
-const resetFilter = () => {
-  filterStatus.value = ''
-  loadPosts()
-}
-
-const openCreateModal = (record: any) => {
-  isEdit.value = !!record
-  formData.value = record ? { ...record } : { pos_name: '', pos_code: '' }
-  formVisible.value = true
-}
-
-const submitForm = async (done: (val: boolean) => void) => {
-  Message.success(isEdit.value ? '保存成功' : '创建成功')
-  done(true)
-}
-
-const handleDelete = (record: any) => {
-  Message.success('删除成功')
-}
-
-onMounted(() => loadPosts())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.company-list-page { padding: 16px; }
-.search-bar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

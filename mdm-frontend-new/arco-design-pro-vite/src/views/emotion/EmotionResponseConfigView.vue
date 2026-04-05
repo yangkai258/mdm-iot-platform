@@ -1,163 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+ï»¿<template>
+  <Breadcrumb :items="['Home','Emotion','Emotionresponseconfig','']" />
   <div class="page-container">
-    <a-card class="general-card" title="ÇéĞ÷ÏìÓ¦ÅäÖÃ">
+    <a-card class="general-card" title="E m o t i o n r e s p o n s e c o n f i g">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />ĞÂ½¨ÅäÖÃ</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="ÇéĞ÷ÀàĞÍ">
-            <a-select v-model="form.emotion" placeholder="ÇëÑ¡Ôñ" allow-clear style="width: 140px">
-              <a-option value="happy">¿ªĞÄ</a-option>
-              <a-option value="sad">ÄÑ¹ı</a-option>
-              <a-option value="angry">ÉúÆø</a-option>
-              <a-option value="fear">º¦ÅÂ</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="handleSearch">²éÑ¯</a-button>
-            <a-button @click="handleReset">ÖØÖÃ</a-button>
-          </a-form-item>
+          <a-form-item label="å…³é”®è¯"><a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button><a-button @click="handleReset">é‡ç½®</a-button></a-form-item>
         </a-form>
       </div>
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="520">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="ÇéĞ÷ÀàĞÍ">
-          <a-select v-model="form.emotion">
-            <a-option value="happy">¿ªĞÄ</a-option>
-            <a-option value="sad">ÄÑ¹ı</a-option>
-            <a-option value="angry">ÉúÆø</a-option>
-            <a-option value="fear">º¦ÅÂ</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="ÏìÓ¦¶¯×÷">
-          <a-select v-model="form.actions" multiple placeholder="ÇëÑ¡Ôñ">
-            <a-option value="dance">ÌøÎè</a-option>
-            <a-option value="sing">³ª¸è</a-option>
-            <a-option value="wave">»ÓÊÖ</a-option>
-            <a-option value="comfort">°²Î¿ÓïÒô</a-option>
-            <a-option value="hug">Óµ±§</a-option>
-            <a-option value="calm">²¥·ÅÆ½¸´ÒôÀÖ</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="ÃèÊö">
-          <a-textarea v-model="form.description" :rows="3" />
-        </a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">È¡Ïû</a-button>
-        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
-      </template>
-    </a-modal>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-</div></template>
+  </div>
+</template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const data = ref<any[]>([])
-const modalVisible = ref(false)
-const editingId = ref<number | null>(null)
-
-const form = reactive({
-  emotion: '',
-  actions: [] as string[],
-  description: ''
-})
-
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
-})
-
-const modalTitle = computed(() => editingId.value ? '±à¼­ÅäÖÃ' : 'ĞÂ½¨ÅäÖÃ')
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: 'ÇéĞ÷ÀàĞÍ', dataIndex: 'emotion', width: 120 },
-  { title: 'ÏìÓ¦¶¯×÷', dataIndex: 'actions', ellipsis: true, width: 300 },
-  { title: 'ÃèÊö', dataIndex: 'description', ellipsis: true },
-  { title: '²Ù×÷', slotName: 'actions', width: 120 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'åç§°', dataIndex: 'name', width: 160 },
+  { title: 'çŠ¶æ€', dataIndex: 'status', width: 90 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 }
 ]
 
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
 async function loadData() {
-  loading.value = true
   try {
-    const res = await fetch('/api/emotion/response-config')
-    const json = await res.json()
-    data.value = json.data || []
-    pagination.total = data.value.length
-  } catch {
-    Message.error('¼ÓÔØÊ§°Ü')
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('åŠ è½½å¤±è´¥: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-function handleSearch() {
-  pagination.current = 1
-  loadData()
-}
-
-function handleReset() {
-  form.emotion = ''
-  form.actions = []
-  form.description = ''
-  pagination.current = 1
-  loadData()
-}
-
-function handleCreate() {
-  editingId.value = null
-  form.emotion = ''
-  form.actions = []
-  form.description = ''
-  modalVisible.value = true
-}
-
-function handleEdit(record: any) {
-  editingId.value = record.id
-  form.emotion = record.emotion
-  form.actions = record.actions || []
-  form.description = record.description || ''
-  modalVisible.value = true
-}
-
-async function handleSubmit() {
-  try {
-    const method = editingId.value ? 'PUT' : 'POST'
-    const url = editingId.value ? `/api/emotion/response-config/${editingId.value}` : '/api/emotion/response-config'
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    })
-    Message.success('±£´æ³É¹¦')
-    modalVisible.value = false
-    loadData()
-  } catch {
-    Message.error('±£´æÊ§°Ü')
-  }
-}
-
-function onPageChange(page: number) {
-  pagination.current = page
-  loadData()
-}
-
-onMounted(() => loadData())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

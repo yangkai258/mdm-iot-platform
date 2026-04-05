@@ -1,70 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="public-archives">
-    <a-card class="general-card" title="公共档案">
-      <a-alert type="info">
-        公共档案用于管理跨租户共享的基础数据，如设备型号库、协议模板等。
-      </a-alert>
-      <a-divider />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="{ pageSize: 10 }" row-key="id">
-        <template #type="{ record }">
-          <a-tag>{{ record.type }}</a-tag>
-        </template>
-      </a-table>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="view(record)">查看</a-button>
-            <a-button type="text" size="small" @click="edit(record)">编辑</a-button>
-          </a-space>
-        </template>
-      </a-table>
+  <Breadcrumb :items="['Home','Tenants','Publicarchives','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="P u b l i c a r c h i v e s">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import axios from 'axios'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-
-const getToken = () => localStorage.getItem('token')
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '档案编号', dataIndex: 'id' },
-  { title: '档案名称', dataIndex: 'name' },
-  { title: '类型', slotName: 'type' },
-  { title: '创建时间', dataIndex: 'created_at' },
-  { title: '操作', slotName: 'actions', width: 160 },
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
-const data = ref([
-  { id: 'ARCH-001', name: 'M5Stack Core2 设备型号', type: '设备型号', created_at: '2026-01-15' },
-  { id: 'ARCH-002', name: 'MQTT协议配置模板', type: '协议模板', created_at: '2026-02-01' },
-  { id: 'ARCH-003', name: 'OTA升级包命名规范', type: '规范文档', created_at: '2026-02-10' },
-])
 
-const loadData = async () => {
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const res = await axios.get('/api/public-archives', { headers: { Authorization: `Bearer ${getToken()}` } })
-    if (res.data.code === 0) {
-      data.value = res.data.data?.list || []
-    }
-  } catch { /* use mock */ }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
 
-const view = (record) => { Message.info(`查看 ${record.name}`) }
-const edit = async (record) => {
-  try {
-    const res = await axios.get(`/api/public-archives/${record.id}`, { headers: { Authorization: `Bearer ${getToken()}` } })
-    if (res.data.code === 0) {
-      Message.success('已加载详情')
-    }
-  } catch { Message.info(`编辑 ${record.name}`) }
-}
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.public-archives { padding: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

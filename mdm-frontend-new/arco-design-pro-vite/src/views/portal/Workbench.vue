@@ -1,40 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="工作台">
-      <a-row :gutter="16" style="margin-bottom: 16px">
-        <a-col :span="6"><a-statistic title="待办事项" :value="stats.todo" color="blue" /></a-col>
-        <a-col :span="6"><a-statistic title="进行中" :value="stats.in_progress" color="orange" /></a-col>
-        <a-col :span="6"><a-statistic title="已完成" :value="stats.done" color="green" /></a-col>
-        <a-col :span="6"><a-statistic title="总任务" :value="stats.total" /></a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="tasks" :pagination="pagination" row-key="id">
-        <template #priority="{ record }"><a-tag :color="record.priority === 'high' ? 'red' : record.priority === 'medium' ? 'orange' : 'blue'">{{ record.priority }}</a-tag></template>
-      </a-table>
+  <Breadcrumb :items="['Home','Portal','Workbench','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="W o r k b e n c h">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
-      </a-table>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const stats = reactive({ todo: 0, in_progress: 0, done: 0, total: 0 })
-const tasks = ref([])
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '任务名称', dataIndex: 'title', width: 240 },
-  { title: '优先级', slotName: 'priority', width: 100 },
-  { title: '状态', dataIndex: 'status', width: 100 },
-  { title: '截止时间', dataIndex: 'deadline', width: 170 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-onMounted(() => {
-  tasks.value = []
-  pagination.total = 0
-})
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

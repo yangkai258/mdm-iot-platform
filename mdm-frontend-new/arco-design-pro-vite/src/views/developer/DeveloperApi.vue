@@ -1,199 +1,53 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+Ôªø<template>
+  <Breadcrumb :items="['Home','Developer','Developerapi','']" />
   <div class="page-container">
-    <a-card class="general-card" title="ø™∑¢’ﬂ”¶”√">
+    <a-card class="general-card" title="D e v e l o p e r a p i">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />¥¥Ω®”¶”√</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />Êñ∞Âª∫</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="”¶”√√˚≥∆">
-            <a-input v-model="form.app_name" placeholder="«Î ‰»Î”¶”√√˚≥∆" />
-          </a-form-item>
-          <a-form-item label="◊¥Ã¨">
-            <a-select v-model="form.status" placeholder="«Î—°‘Ò" allow-clear style="width: 120px">
-              <a-option value="active">∆Ù”√</a-option>
-              <a-option value="disabled">Ω˚”√</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
-            <a-button @click="handleReset">÷ÿ÷√</a-button>
-          </a-form-item>
+          <a-form-item label="ÂÖ≥ÈîÆËØç"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">Êü•ËØ¢</a-button><a-button @click="handleReset">ÈáçÁΩÆ</a-button></a-form-item>
         </a-form>
       </div>
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-      <template #status="{ record }">
-        <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
-          {{ record.status === 'active' ? '∆Ù”√' : 'Ω˚”√' }}
-        </a-tag>
-      </template>
-      </a-table>
-      <template #scopes="{ record }">
-        <a-tag v-for="s in (record.scopes || [])" :key="s" size="small">{{ s }}</a-tag>
-      </template>
-      <template #actions="{ record }">
-        <a-button type="text" size="small" @click="handleViewKey(record)" v-if="record.api_key">≤Èø¥Key</a-button>
-        <a-button type="text" size="small" @click="handleEdit(record)">±‡º≠</a-button>
-        <a-button type="text" size="small" @click="handleToggle(record)">
-          {{ record.status === 'active' ? 'Ω˚”√' : '∆Ù”√' }}
-        </a-button>
-        <a-button type="text" size="small" @click="handleDelete(record)">…æ≥˝</a-button>
-      </template>
-    </a-table>
-
-    <!-- ¥¥Ω®/±‡º≠µØ¥∞ -->
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="520" @before-ok="handleSubmit" @cancel="modalVisible = false">
-      <a-form :model="formData" layout="vertical" label-col-flex="100px">
-        <a-form-item label="”¶”√√˚≥∆" required>
-          <a-input v-model="formData.app_name" placeholder="«Î ‰»Î”¶”√√˚≥∆" />
-        </a-form-item>
-        <a-form-item label="»®œﬁ∑∂Œß" required>
-          <a-select v-model="formData.scopes" multiple placeholder="«Î—°‘Ò»®œﬁ">
-            <a-option value="device:read">…Ë±∏∂¡»°</a-option>
-            <a-option value="device:write">…Ë±∏–¥»Î</a-option>
-            <a-option value="device:control">…Ë±∏øÿ÷∆</a-option>
-            <a-option value="ota:read">OTA∂¡»°</a-option>
-            <a-option value="ota:write">OTA–¥»Î</a-option>
-            <a-option value="alert:read">∏ÊæØ∂¡»°</a-option>
-            <a-option value="alert:write">∏ÊæØ–¥»Î</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="√Ë ˆ">
-          <a-textarea v-model="formData.description" placeholder="«Î ‰»Î√Ë ˆ" :rows="3" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
-
-    <!-- ≤Èø¥KeyµØ¥∞ -->
-    <a-modal v-model:visible="keyVisible" title="API Key" :width="520">
-      <a-alert type="warning" style="margin-bottom: 16px">
-        «ÎÕ◊…∆±£π‹ƒ˙µƒ API Key£¨πÿ±’µØ¥∞∫ÛΩ´Œﬁ∑®‘Ÿ¥Œ≤Èø¥ÕÍ’˚ Key°£
-      </a-alert>
-      <a-form :model="keyRecord" layout="vertical" label-col-flex="100px">
-        <a-form-item label="”¶”√√˚≥∆">{{ keyRecord?.app_name }}</a-form-item>
-        <a-form-item label="API Key">
-          <a-input-group>
-            <a-input v-model="keyRecord.api_key" readonly :style="{ fontFamily: 'monospace' }" />
-            <template #append>
-              <a-button @click="handleCopy">∏¥÷∆</a-button>
-            </template>
-          </a-input-group>
-        </a-form-item>
-      </a-form>
-    </a-modal>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-</div></template>
+  </div>
+</template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { Message, Modal } from '@arco-design/web-vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
 import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const data = ref([])
-const modalVisible = ref(false)
-const keyVisible = ref(false)
-const modalTitle = ref('¥¥Ω®”¶”√')
-const editingId = ref(null)
-const keyRecord = ref(null)
-const formData = reactive({ app_name: '', scopes: [], description: '' })
-const form = reactive({ app_name: '', status: undefined })
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: '”¶”√√˚≥∆', dataIndex: 'app_name', width: 160 },
-  { title: 'API Key', dataIndex: 'api_key_preview', width: 200, ellipsis: true },
-  { title: '»®œﬁ∑∂Œß', slotName: 'scopes', width: 280 },
-  { title: '◊¥Ã¨', slotName: 'status', width: 80 },
-  { title: '¥¥Ω® ±º‰', dataIndex: 'created_at', width: 160 },
-  { title: '≤Ÿ◊˜', slotName: 'actions', width: 240, fixed: 'right' },
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'ÂêçÁß∞', dataIndex: 'name', width: 160 },
+  { title: 'Áä∂ÊÄÅ', dataIndex: 'status', width: 90 },
+  { title: 'ÂàõÂª∫Êó∂Èó¥', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadData = async () => {
-  loading.value = true
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const res = await fetch(`/api/developer/apps?page=${pagination.current}&page_size=${pagination.pageSize}`)
-    const json = await res.json()
-    data.value = json.data?.list || json.data || []
-    pagination.total = json.data?.total || 0
-  } catch {
+    loading.value = true
     data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('Âä†ËΩΩÂ§±Ë¥•: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-const handleCreate = () => {
-  modalTitle.value = '¥¥Ω®”¶”√'
-  editingId.value = null
-  Object.assign(formData, { app_name: '', scopes: [], description: '' })
-  modalVisible.value = true
-}
-
-const handleEdit = (record) => {
-  modalTitle.value = '±‡º≠”¶”√'
-  editingId.value = record.id
-  Object.assign(formData, { app_name: record.app_name, scopes: record.scopes || [], description: record.description || '' })
-  modalVisible.value = true
-}
-
-const handleSubmit = async () => {
-  const method = editingId.value ? 'PUT' : 'POST'
-  const url = editingId.value ? `/api/developer/apps/${editingId.value}` : '/api/developer/apps'
-  const res = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(formData)
-  })
-  const json = await res.json()
-  Message.success(editingId.value ? '∏¸–¬≥…π¶' : '¥¥Ω®≥…π¶')
-  if (!editingId.value && json.data?.api_key) {
-    keyRecord.value = json.data
-    keyVisible.value = true
-  }
-  modalVisible.value = false
-  loadData()
-}
-
-const handleViewKey = (record) => {
-  keyRecord.value = record
-  keyVisible.value = true
-}
-
-const handleCopy = () => {
-  navigator.clipboard.writeText(keyRecord.value?.api_key || '')
-  Message.success('“—∏¥÷∆µΩºÙÃ˘∞Â')
-}
-
-const handleToggle = async (record) => {
-  const newStatus = record.status === 'active' ? 'disabled' : 'active'
-  await fetch(`/api/developer/apps/${record.id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status: newStatus })
-  })
-  Message.success(newStatus === 'active' ? '∆Ù”√≥…π¶' : 'Ω˚”√≥…π¶')
-  loadData()
-}
-
-const handleDelete = (record) => {
-  Modal.warning({
-    title: '»∑»œ…æ≥˝',
-    content: '…æ≥˝∫ÛŒﬁ∑®ª÷∏¥£¨»∑∂®“™…æ≥˝¬£ø',
-    onOk: async () => {
-      await fetch(`/api/developer/apps/${record.id}`, { method: 'DELETE' })
-      Message.success('…æ≥˝≥…π¶')
-      loadData()
-    }
-  })
-}
-
-const handleReset = () => { form.app_name = ''; form.status = undefined; loadData() }
-const onPageChange = (page) => { pagination.current = page; loadData() }
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
 onMounted(() => { loadData() })
 </script>
 
@@ -201,4 +55,3 @@ onMounted(() => { loadData() })
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

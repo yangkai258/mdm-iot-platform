@@ -1,99 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+Ôªø<template>
+  <Breadcrumb :items="['Home','Emotion','Familyemotionmap','']" />
   <div class="page-container">
-    <a-card class="general-card" title="º“Õ•«È–˜µÿÕº">
+    <a-card class="general-card" title="F a m i l y e m o t i o n m a p">
       <template #extra>
-        <a-button @click="handleRefresh"><icon-refresh />À¢–¬</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />Êñ∞Âª∫</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="º“Õ•ID">
-            <a-input v-model="form.family_id" placeholder="«Î ‰»Î" style="width: 160px" />
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="handleSearch">≤È—Ø</a-button>
-            <a-button @click="handleReset">÷ÿ÷√</a-button>
-          </a-form-item>
+          <a-form-item label="ÂÖ≥ÈîÆËØç"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">Êü•ËØ¢</a-button><a-button @click="handleReset">ÈáçÁΩÆ</a-button></a-form-item>
         </a-form>
       </div>
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" />
-    </a-table>
-  </a-card>
-</div></template>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
+  </div>
+</template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconRefresh } from '@arco-design/web-vue/es/icon'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const data = ref<any[]>([])
-
-const form = reactive({
-  family_id: ''
-})
-
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
-})
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '≥ËŒÔID', dataIndex: 'pet_id', width: 100 },
-  { title: 'µ±«∞«È–˜', dataIndex: 'current_mood', width: 120 },
-  { title: '«È–˜«ø∂»', dataIndex: 'intensity', width: 120 },
-  { title: 'ª•∂Ø¥Œ ˝', dataIndex: 'interaction_count', width: 120 },
-  { title: '∏¸–¬ ±º‰', dataIndex: 'updated_at', width: 180 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'ÂêçÁß∞', dataIndex: 'name', width: 160 },
+  { title: 'Áä∂ÊÄÅ', dataIndex: 'status', width: 90 },
+  { title: 'ÂàõÂª∫Êó∂Èó¥', dataIndex: 'created_at', width: 170 }
 ]
 
-async function loadData() {
-  loading.value = true
-  try {
-    const params = new URLSearchParams()
-    if (form.family_id) params.append('family_id', form.family_id)
-    params.append('page', String(pagination.current))
-    params.append('page_size', String(pagination.pageSize))
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-    const res = await fetch(`/api/emotions/family-map?${params}`)
-    const json = await res.json()
-    data.value = json.data?.members || []
-    pagination.total = json.data?.total || 0
-  } catch {
-    Message.error('º”‘ÿ ß∞‹')
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('Âä†ËΩΩÂ§±Ë¥•: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-function handleSearch() {
-  pagination.current = 1
-  loadData()
-}
-
-function handleReset() {
-  form.family_id = ''
-  pagination.current = 1
-  loadData()
-}
-
-function handleRefresh() {
-  loadData()
-}
-
-function onPageChange(page: number) {
-  pagination.current = page
-  loadData()
-}
-
-onMounted(() => loadData())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-
-

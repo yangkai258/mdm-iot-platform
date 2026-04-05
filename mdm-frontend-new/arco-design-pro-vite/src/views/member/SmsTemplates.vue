@@ -1,119 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="sms-templates-page">
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>会员管理</a-breadcrumb-item>
-      <a-breadcrumb-item>会员服务</a-breadcrumb-item>
-      <a-breadcrumb-item>短信模板设置</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <a-card class="action-card">
-      <a-space>
-        <a-button type="primary" @click="showCreate">新建模板</a-button>
-        <a-button @click="loadData">刷新</a-button>
-      </a-space>
+  <Breadcrumb :items="['Home','Member','Smstemplates','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="S m s t e m p l a t e s">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-
-    <a-card>
-      <a-table :columns="columns" :data="templateList" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }">
-        <template #name="{ record }"><a-tag color="arcoblue">{{ record.name }}</a-tag></template>
-        <template #type="{ record }"><a-tag>{{ record.type }}</a-tag></template>
-      </a-table>
-        <template #content="{ record }">
-          <span style="color: #666; font-size: 13px;">{{ record.content?.slice(0, 50) }}{{ record.content?.length > 50 ? '...' : '' }}</span>
-        </template>
-        <template #status="{ record }"><a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '已启用' : '已禁用' }}</a-tag></template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </a-card>
-
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑模板' : '新建模板'"
-      @before-ok="handleFormSubmit" @cancel="formVisible = false" :width="600" :loading="formLoading">
-      <a-form :model="form" layout="vertical">
-        <a-form-item label="模板名称" :rules="[{ required: true, message: '请输入模板名称' }]">
-          <a-input v-model="form.name" placeholder="如：入会欢迎短信" />
-        </a-form-item>
-        <a-form-item label="模板类型">
-          <a-select v-model="form.type" placeholder="选择类型">
-            <a-option value="入会">入会</a-option>
-            <a-option value="生日">生日</a-option>
-            <a-option value="活动">活动</a-option>
-            <a-option value="节日">节日</a-option>
-            <a-option value="积分">积分</a-option>
-            <a-option value="促销">促销</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="短信内容" :rules="[{ required: true, message: '请输入短信内容' }]">
-          <a-textarea v-model="form.content" :rows="4" placeholder="请输入短信内容，支持变量：{name}会员姓名、{level}等级、{points}积分等" />
-        </a-form-item>
-        <a-form-item label="状态"><a-switch v-model="form.status" checked-value="active" unchecked-value="inactive" /></a-form-item>
-      </a-form>
-    </a-modal>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { Message, Modal } from '@arco-design/web-vue'
-import * as api from '@/api/marketing'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const templateList = ref([])
 const loading = ref(false)
-const formLoading = ref(false)
-const formVisible = ref(false)
-const isEdit = ref(false)
-const currentId = ref(null)
-
-const form = reactive({ name: '', type: '入会', content: '', status: 'active' })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '模板名称', slotName: 'name', width: 160 },
-  { title: '类型', slotName: 'type', width: 100 },
-  { title: '短信内容', slotName: 'content' },
-  { title: '状态', slotName: 'status', width: 100 },
-  { title: '操作', slotName: 'actions', width: 140 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadData = async () => {
-  loading.value = true
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const res = await api.getSmsTemplateList()
-    templateList.value = res.data || []
-  } catch (err) { Message.error('加载数据失败: ' + err.message) } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
 
-const showCreate = () => { isEdit.value = false; Object.assign(form, { name: '', type: '入会', content: '', status: 'active' }); formVisible.value = true }
-const showEdit = (record) => { isEdit.value = true; currentId.value = record.id; Object.assign(form, { ...record }); formVisible.value = true }
-
-const handleFormSubmit = async (done) => {
-  if (!form.name || !form.content) { Message.warning('请填写完整信息'); done(false); return }
-  formLoading.value = true
-  try {
-    if (isEdit.value) await api.updateSmsTemplate(currentId.value, { ...form })
-    else await api.createSmsTemplate({ ...form })
-    Message.success('保存成功'); formVisible.value = false; loadData(); done(true)
-  } catch (err) { Message.error(err.message || '操作失败'); done(false) } finally { formLoading.value = false }
-}
-
-const handleDelete = (record) => {
-  Modal.warning({ title: '确认删除', content: `确定删除模板「${record.name}」吗？`, okText: '确认删除',
-    onOk: async () => { try { await api.deleteSmsTemplate(record.id); Message.success('删除成功'); loadData() } catch (err) { Message.error(err.message || '删除失败') } }
-  })
-}
-
-onMounted(() => loadData())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.sms-templates-page { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-.breadcrumb { margin-bottom: 16px; }
-.action-card { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

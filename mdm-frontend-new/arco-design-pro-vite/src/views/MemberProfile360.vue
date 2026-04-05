@@ -1,109 +1,57 @@
-<template>
-  <div class="container">
-    <a-row :gutter="16">
-      <a-col :span="8">
-        <a-card title="基本信息">
-          <a-descriptions :column="1" bordered>
-            <a-descriptions-item label="会员ID">{{ profile.id }}</a-descriptions-item>
-            <a-descriptions-item label="昵称">{{ profile.nickname }}</a-descriptions-item>
-            <a-descriptions-item label="手机号">{{ profile.phone }}</a-descriptions-item>
-            <a-descriptions-item label="注册时间">{{ profile.registerTime }}</a-descriptions-item>
-            <a-descriptions-item label="会员等级">
-              <a-tag :color="profile.levelColor">{{ profile.level }}</a-tag>
-            </a-descriptions-item>
-          </a-descriptions>
-        </a-card>
-
-        <a-card title="标签云" style="margin-top: 16px">
-          <a-tag v-for="tag in profile.tags" :key="tag" :color="tag.color" : closable>{{ tag.name }}</a-tag>
-          <a-button type="text" @click="handleAddTag">
-            <template #icon><icon-plus /></template>
-            添加标签
-          </a-button>
-        </a-card>
-
-        <a-card title="价值分层" style="margin-top: 16px">
-          <a-progress :percent="profile.valueScore" :stroke-color="getValueColor(profile.valueLevel)" />
-          <a-space style="margin-top: 8px">
-            <a-tag :color="getValueColor(profile.valueLevel)">{{ profile.valueLevel }}</a-tag>
-            <span class="score">{{ profile.valueScore }}分</span>
-          </a-space>
-        </a-card>
-      </a-col>
-
-      <a-col :span="16">
-        <a-card title="行为分析">
-          <a-row :gutter="16">
-            <a-col :span="8">
-              <a-statistic title="活跃度" :value="profile.activity" suffix="分" />
-            </a-col>
-            <a-col :span="8">
-              <a-statistic title="消费能力" :value="profile.spending" suffix="分" />
-            </a-col>
-            <a-col :span="8">
-              <a-statistic title="互动频率" :value="profile.interaction" suffix="次/周" />
-            </a-col>
-          </a-row>
-          <a-divider />
-          <a-chart :option="behaviorChart" style="height: 200px" />
-        </a-card>
-
-        <a-card title="兴趣偏好" style="margin-top: 16px">
-          <a-tag v-for="interest in profile.interests" :key="interest.name" :color="interest.color">
-            {{ interest.name }} ({{ interest.score }}%)
-          </a-tag>
-        </a-card>
-
-        <a-card title="消费记录" style="margin-top: 16px">
-          <a-table :columns="spendColumns" :data="spendData" size="small" :pagination="pagination" />
-        </a-card>
-      </a-col>
-    </a-row>
+﻿<template>
+  <Breadcrumb :items="['Home','Misc','Memberprofile360','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="M e m b e r p r o f i l e360">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const profile = reactive({
-  id: 'M001', nickname: '张三', phone: '138****8888', registerTime: '2025-01-15',
-  level: '黄金', levelColor: 'orange', tags: [
-    { name: '高价值', color: 'gold' }, { name: '活跃用户', color: 'green' }, { name: '宠物爱好者', color: 'blue' }
-  ],
-  valueLevel: '高价值用户', valueScore: 85, activity: 92, spending: 78, interaction: 15,
-  interests: [
-    { name: '宠物用品', color: 'orange', score: 85 },
-    { name: '智能设备', color: 'blue', score: 72 },
-    { name: '健康管理', color: 'green', score: 65 }
-  ]
-})
+const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
-const pagination = reactive({ current: 1, pageSize: 5, total: 20 })
-const spendColumns = [
-  { title: '时间', dataIndex: 'time' },
-  { title: '类型', dataIndex: 'type' },
-  { title: '金额', dataIndex: 'amount' }
+const columns = [
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
-const spendData = ref([
-  { time: '2026-03-28', type: '订阅续费', amount: '¥99' },
-  { time: '2026-03-15', type: '积分兑换', amount: '-200积分' }
-])
 
-const behaviorChart = reactive({
-  tooltip: {}, radar: {
-    indicator: [
-      { name: 'AI对话', max: 100 }, { name: '设备使用', max: 100 },
-      { name: '社交互动', max: 100 }, { name: '内容消费', max: 100 }
-    ]
-  },
-  series: [{ type: 'radar', data: [{ value: [85, 72, 68, 90], name: '行为分析' }] }]
-})
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const getValueColor = (level) => ({ '高价值用户': 'gold', '中价值用户': 'blue', '低价值用户': 'gray' }[level] || 'gray')
-const handleAddTag = () => { }
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.container { padding: 16px; }
-.score { font-size: 12px; color: #909399; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

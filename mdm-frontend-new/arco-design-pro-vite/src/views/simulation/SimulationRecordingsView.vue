@@ -1,511 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="pro-page-container">
-
-    <!-- …∏—°«¯ -->
-    <div class="pro-filter-bar">
-      <a-card class="filter-card">
-        <a-space wrap>
-          <a-input v-model="filterDeviceId" placeholder="…Ë±∏ID" style="width: 160px" @change="loadPlaybacks" allow-clear />
-          <a-select v-model="filterRecordType" placeholder="¬º÷∆¿‡–Õ" allow-clear style="width: 120px" @change="loadPlaybacks">
-            <a-option value="auto">◊‘∂Ø</a-option>
-            <a-option value="manual"> ÷∂Ø</a-option>
-          </a-select>
-          <a-select v-model="filterStatus" placeholder="◊¥Ã¨" allow-clear style="width: 120px" @change="loadPlaybacks">
-            <a-option value="recording">¬º÷∆÷–</a-option>
-            <a-option value="completed">“—ÕÍ≥…</a-option>
-            <a-option value="playing">≤•∑≈÷–</a-option>
-          </a-select>
-          <a-range-picker v-model="dateRange" style="width: 260px" @change="loadPlaybacks" />
-        </a-space>
-      </a-card>
-    </div>
-
-    <!-- ≤Ÿ◊˜¿∏ -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button type="primary" @click="handleStartRecording">ø™ º¬º÷∆</a-button>
-        <a-button @click="loadPlaybacks">À¢–¬</a-button>
-      </a-space>
-    </div>
-
-    <!-- ªÿ∑≈¡–±Ì -->
-    <div class="pro-content-area">
-      <a-table :columns="columns" :data="playbacks" :loading="loading" :pagination="{ pageSize: 10 }" row-key="id" @page-change="onPageChange">
-        <template #record_type="{ record }">
-          <a-tag :color="record.record_type === 'auto' ? 'arcoblue' : 'green'">
-            {{ record.record_type === 'auto' ? '◊‘∂Ø' : ' ÷∂Ø' }}
-          </a-tag>
-        </template>
-      </a-table>
-        <template #status="{ record }">
-          <a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag>
-        </template>
-        <template #duration="{ record }">
-          <span>{{ formatDuration(record.duration_ms) }}</span>
-        </template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" :disabled="record.status === 'recording'" @click="handlePlay(record)">≤•∑≈</a-button>
-            <a-button type="text" size="small" :disabled="record.status === 'playing'" @click="handleStopPlayback(record)">Õ£÷π</a-button>
-            <a-button type="text" size="small" @click="openCompareDrawer(record)">∂‘±»</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">…æ≥˝</a-button>
-          </a-space>
-        </template>
-      </a-table>
-
-      <div class="pro-pagination" v-if="total > 0">
-        <a-pagination :total="total" :current="page" :page-size="pageSize" show-total @page-size-change="onPageSizeChange" @change="onPageChange" />
+Ôªø<template>
+  <Breadcrumb :items="['Home','Simulation','Simulationrecordings','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="S i m u l a t i o n r e c o r d i n g s">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />Êñ∞Âª∫</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="ÂÖ≥ÈîÆËØç"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">Êü•ËØ¢</a-button><a-button @click="handleReset">ÈáçÁΩÆ</a-button></a-form-item>
+        </a-form>
       </div>
-    </div>
-
-    <!-- ≤•∑≈≥ÈÃÎ -->
-    <a-drawer v-model:visible="playerDrawerVisible" title="ªÿ∑≈≤•∑≈" :width="680" @close="handleClosePlayer">
-      <div v-if="currentPlayback" class="player-content">
-        <a-card class="player-info-card">
-          <a-descriptions :column="2" size="small">
-            <a-descriptions-item label="ªÿ∑≈ID">{{ currentPlayback.id }}</a-descriptions-item>
-            <a-descriptions-item label="…Ë±∏ID">{{ currentPlayback.device_id }}</a-descriptions-item>
-            <a-descriptions-item label="¬º÷∆¿‡–Õ">
-              <a-tag :color="currentPlayback.record_type === 'auto' ? 'arcoblue' : 'green'" size="small">
-                {{ currentPlayback.record_type === 'auto' ? '◊‘∂Ø' : ' ÷∂Ø' }}
-              </a-tag>
-            </a-descriptions-item>
-            <a-descriptions-item label="◊¥Ã¨">
-              <a-tag :color="getStatusColor(playerStatus)" size="small">{{ getStatusName(playerStatus) }}</a-tag>
-            </a-descriptions-item>
-            <a-descriptions-item label="ø™ º ±º‰">{{ currentPlayback.start_time }}</a-descriptions-item>
-            <a-descriptions-item label=" ±≥§">{{ formatDuration(currentPlayback.duration_ms) }}</a-descriptions-item>
-          </a-descriptions>
-        </a-card>
-
-        <a-divider>≤•∑≈øÿ÷∆</a-divider>
-        <div class="player-controls">
-          <a-space wrap>
-            <a-button-group>
-              <a-button :disabled="playerStatus === 'playing'" @click="handlePlayBtn">
-                <icon-play-backward-fill v-if="playerStatus !== 'playing'" />
-                <icon-sound v-else />
-              </a-button>
-              <a-button :disabled="playerStatus !== 'playing'" status="success" @click="handleResume">
-                <icon-play-arrow-fill />
-              </a-button>
-              <a-button :disabled="playerStatus !== 'playing'" status="warning" @click="handlePause">
-                <icon-pause />
-              </a-button>
-              <a-button :disabled="playerStatus !== 'playing'" status="danger" @click="handleStopPlayback(currentPlayback)">
-                <icon-stop />
-              </a-button>
-            </a-button-group>
-            <a-input-number v-model="playbackSpeed" :min="0.1" :max="5" :step="0.1" style="width: 100px" />
-            <span>±∂ÀŸ</span>
-          </a-space>
-        </div>
-
-        <a-divider>ªÿ∑≈Ω¯∂»</a-divider>
-        <div class="player-progress">
-          <a-progress :percent="playbackProgress" :color="getStatusColor(playerStatus)" size="large" />
-          <div class="progress-time">
-            <span>{{ formatDuration(currentPosition) }}</span>
-            <span>{{ formatDuration(currentPlayback?.duration_ms || 0) }}</span>
-          </div>
-        </div>
-
-        <a-divider>ªÿ∑≈ ˝æ›</a-divider>
-        <a-card size="small" class="player-data-card">
-          <a-descriptions :column="1" size="small">
-            <a-descriptions-item label="¥´∏–∆˜ ˝æ›">
-              <a-tag v-for="(val, key) in (currentPlayback.sensor_data || {})" :key="key" style="margin: 2px">
-                {{ key }}: {{ typeof val === 'number' ? val.toFixed(2) : val }}
-              </a-tag>
-              <span v-if="!currentPlayback.sensor_data" class="text-muted">‘›Œﬁ</span>
-            </a-descriptions-item>
-            <a-descriptions-item label="”√ªß≤Ÿ◊˜">
-              <span v-if="currentPlayback.user_actions?.length">
-                {{ currentPlayback.user_actions.length }} ¥Œ≤Ÿ◊˜
-              </span>
-              <span v-else class="text-muted">‘›Œﬁ</span>
-            </a-descriptions-item>
-            <a-descriptions-item label=" ¬º˛ ˝">
-              <span v-if="currentPlayback.events?.length">{{ currentPlayback.events.length }} ∏ˆ ¬º˛</span>
-              <span v-else class="text-muted">‘›Œﬁ</span>
-            </a-descriptions-item>
-          </a-descriptions>
-        </a-card>
-      </div>
-    </a-drawer>
-
-    <!-- ∂‘±»≥ÈÃÎ -->
-    <a-drawer v-model:visible="compareDrawerVisible" title="ªÿ∑≈∂‘±»" :width="720">
-      <div v-if="compareResult" class="compare-content">
-        <a-alert>
-          <template #title>∂‘±»∑÷Œˆ</template>
-          “‘œ¬ «¡Ω¥Œªÿ∑≈µƒ≤Ó“Ï∂‘±»Ω·π˚°£
-        </a-alert>
-
-        <a-divider>÷∏±Í∂‘±»</a-divider>
-        <a-row :gutter="16">
-          <a-col :span="12">
-            <a-card title="ªÿ∑≈ 1" size="small">
-              <a-statistic title="∆Ωæ˘œÏ”¶ ±º‰" :value="compareResult.metrics?.response_time?.playback_1_avg || 0" suffix="ms" />
-            </a-card>
-          </a-col>
-          <a-col :span="12">
-            <a-card title="ªÿ∑≈ 2" size="small">
-              <a-statistic title="∆Ωæ˘œÏ”¶ ±º‰" :value="compareResult.metrics?.response_time?.playback_2_avg || 0" suffix="ms" />
-            </a-card>
-          </a-col>
-        </a-row>
-
-        <a-divider>≤Ó“ÏœÍ«È</a-divider>
-        <a-table :columns="compareColumns" :data="compareMetrics" size="small">
-          <template #diff="{ record }">
-            <span :class="record.diff > 0 ? 'text-success' : record.diff < 0 ? 'text-danger' : ''">
-              {{ record.diff > 0 ? '+' : '' }}{{ record.diff?.toFixed(2) || 0 }}
-            </span>
-          </template>
-      </a-table>
-      </div>
-      <a-empty v-else description="‘›Œﬁ∂‘±» ˝æ›" />
-    </a-drawer>
-
-    <!-- ø™ º¬º÷∆∂‘ª∞øÚ -->
-    <a-modal v-model="recordDialogVisible" title="ø™ º¬º÷∆" @before-ok="confirmStartRecording">
-      <a-form :model="recordForm" layout="vertical">
-        <a-form-item label="…Ë±∏ID" required>
-          <a-input v-model="recordForm.device_id" placeholder="«Î ‰»Î…Ë±∏ID" />
-        </a-form-item>
-        <a-form-item label="—°‘Ò≥ËŒÔ">
-          <a-select v-model="recordForm.pet_id" placeholder="«Î—°‘Ò–Èƒ‚≥ËŒÔ" allow-clear>
-            <a-option v-for="pet in availablePets" :key="pet.id" :value="pet.id">{{ pet.pet_name }}</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="¬º÷∆¿‡–Õ">
-          <a-select v-model="recordForm.record_type">
-            <a-option value="auto">◊‘∂Ø¬º÷∆</a-option>
-            <a-option value="manual"> ÷∂Ø¬º÷∆</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="≥°æ∞√˚≥∆">
-          <a-input v-model="recordForm.metadata.scenario" placeholder="»Á£∫øÕÃ¸»’≥£" />
-        </a-form-item>
-        <a-form-item label="±∏◊¢">
-          <a-textarea v-model="recordForm.metadata.notes" placeholder="«Î ‰»Î±∏◊¢–≈œ¢" :auto-size="{ minRows: 2, maxRows: 4 }" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { getPlaybacks, createPlayback, playPlayback, stopPlayback, comparePlaybacks, deletePlayback, getSimulationPets } from '@/api/simulation'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const playbacks = ref([])
-const total = ref(0)
-const page = ref(1)
-const pageSize = ref(20)
 const loading = ref(false)
-const filterDeviceId = ref('')
-const filterRecordType = ref('')
-const filterStatus = ref('')
-const dateRange = ref([])
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '–Ú∫≈', width: 60, render: ({ rowIndex }) => (page.value - 1) * pageSize.value + rowIndex + 1 },
-  { title: 'ªÿ∑≈ID', dataIndex: 'id', width: 80 },
-  { title: '…Ë±∏ID', dataIndex: 'device_id', width: 140, ellipsis: true },
-  { title: '¬º÷∆¿‡–Õ', dataIndex: 'record_type', slotName: 'record_type', width: 100 },
-  { title: ' ±≥§', dataIndex: 'duration_ms', slotName: 'duration', width: 100 },
-  { title: '◊¥Ã¨', dataIndex: 'status', slotName: 'status', width: 100 },
-  { title: '¥¥Ω® ±º‰', dataIndex: 'created_at', width: 180 },
-  { title: '≤Ÿ◊˜', slotName: 'actions', width: 180, fixed: 'right' }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'ÂêçÁß∞', dataIndex: 'name', width: 160 },
+  { title: 'Áä∂ÊÄÅ', dataIndex: 'status', width: 90 },
+  { title: 'ÂàõÂª∫Êó∂Èó¥', dataIndex: 'created_at', width: 170 }
 ]
 
-const playerDrawerVisible = ref(false)
-const currentPlayback = ref(null)
-const playerStatus = ref('idle')
-const playbackProgress = ref(0)
-const currentPosition = ref(0)
-const playbackSpeed = ref(1.0)
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const compareDrawerVisible = ref(false)
-const compareResult = ref(null)
-const compareColumns = [
-  { title: '÷∏±Í', dataIndex: 'metric' },
-  { title: 'ªÿ∑≈ 1', dataIndex: 'playback_1' },
-  { title: 'ªÿ∑≈ 2', dataIndex: 'playback_2' },
-  { title: '≤Ó“Ï', dataIndex: 'diff', slotName: 'diff' }
-]
-const compareMetrics = ref([])
-
-const recordDialogVisible = ref(false)
-const availablePets = ref([])
-const recordForm = reactive({
-  device_id: '',
-  pet_id: null,
-  record_type: 'auto',
-  metadata: { scenario: '', notes: '' }
-})
-
-let playbackTimer = null
-
-async function loadPlaybacks() {
-  loading.value = true
+async function loadData() {
   try {
-    const params = { page: page.value, page_size: pageSize.value }
-    if (filterDeviceId.value) params.device_id = filterDeviceId.value
-    if (filterRecordType.value) params.record_type = filterRecordType.value
-    if (filterStatus.value) params.status = filterStatus.value
-    const res = await getPlaybacks(params)
-    playbacks.value = res.data?.items || res.data || []
-    total.value = res.data?.total || playbacks.value.length
-  } catch {
-    playbacks.value = []
-    total.value = 0
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('Âä†ËΩΩÂ§±Ë¥•: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-async function handleStartRecording() {
-  // º”‘ÿø…”√≥ËŒÔ
-  try {
-    const res = await getSimulationPets({ page: 1, page_size: 100 })
-    availablePets.value = res.data?.items || res.data || []
-  } catch {
-    availablePets.value = []
-  }
-  Object.assign(recordForm, { device_id: '', pet_id: null, record_type: 'auto', metadata: { scenario: '', notes: '' } })
-  recordDialogVisible.value = true
-}
-
-async function confirmStartRecording(done) {
-  if (!recordForm.device_id) {
-    Message.error('«Î ‰»Î…Ë±∏ID')
-    done(false)
-    return
-  }
-  try {
-    await createPlayback(recordForm)
-    Message.success('ø™ º¬º÷∆')
-    recordDialogVisible.value = false
-    loadPlaybacks()
-    done(true)
-  } catch {
-    Message.error('¥¥Ω® ß∞‹')
-    done(false)
-  }
-}
-
-async function handlePlay(record) {
-  currentPlayback.value = record
-  playerStatus.value = 'loading'
-  playbackProgress.value = 0
-  currentPosition.value = 0
-  try {
-    await playPlayback(record.id, { start_position_ms: 0, speed: playbackSpeed.value })
-    playerStatus.value = 'playing'
-    playerDrawerVisible.value = true
-    startPlaybackTimer()
-  } catch {
-    playerStatus.value = 'idle'
-    Message.error('≤•∑≈ ß∞‹')
-  }
-}
-
-function handlePlayBtn() {
-  if (currentPlayback.value) {
-    handlePlay(currentPlayback.value)
-  }
-}
-
-async function handleResume() {
-  if (!currentPlayback.value) return
-  try {
-    await playPlayback(currentPlayback.value.id, { speed: playbackSpeed.value })
-    playerStatus.value = 'playing'
-    startPlaybackTimer()
-  } catch {
-    Message.error('ª÷∏¥ ß∞‹')
-  }
-}
-
-async function handlePause() {
-  if (!currentPlayback.value) return
-  try {
-    await stopPlayback(currentPlayback.value.id)
-    playerStatus.value = 'paused'
-    stopPlaybackTimer()
-  } catch {
-    Message.error('‘›Õ£ ß∞‹')
-  }
-}
-
-async function handleStopPlayback(record) {
-  try {
-    await stopPlayback(record.id)
-    playerStatus.value = 'idle'
-    stopPlaybackTimer()
-    if (playerDrawerVisible.value) {
-      playerDrawerVisible.value = false
-    }
-    Message.success('“—Õ£÷π')
-    loadPlaybacks()
-  } catch {
-    Message.error('Õ£÷π ß∞‹')
-  }
-}
-
-function startPlaybackTimer() {
-  stopPlaybackTimer()
-  playbackTimer = setInterval(() => {
-    if (playerStatus.value === 'playing' && currentPlayback.value) {
-      const duration = currentPlayback.value.duration_ms || 60000
-      currentPosition.value += 100 * playbackSpeed.value
-      playbackProgress.value = Math.min((currentPosition.value / duration) * 100, 100)
-      if (currentPosition.value >= duration) {
-        playerStatus.value = 'completed'
-        stopPlaybackTimer()
-      }
-    }
-  }, 100)
-}
-
-function stopPlaybackTimer() {
-  if (playbackTimer) {
-    clearInterval(playbackTimer)
-    playbackTimer = null
-  }
-}
-
-function handleClosePlayer() {
-  stopPlaybackTimer()
-  if (currentPlayback.value && playerStatus.value === 'playing') {
-    stopPlayback(currentPlayback.value.id)
-  }
-  playerStatus.value = 'idle'
-}
-
-async function openCompareDrawer(record) {
-  // ªÒ»°ø…∂‘±»µƒªÿ∑≈¡–±Ì
-  const others = playbacks.value.filter(p => p.id !== record.id && p.status === 'completed')
-  if (others.length === 0) {
-    // ƒ£ƒ‚∂‘±» ˝æ›
-    compareResult.value = {
-      metrics: {
-        response_time: { playback_1_avg: 120, playback_2_avg: 115, difference_pct: -4.2 }
-      },
-      significant_differences: []
-    }
-    compareMetrics.value = [
-      { metric: 'œÏ”¶ ±º‰ (ms)', playback_1: 120, playback_2: 115, diff: -5 },
-      { metric: '◊º»∑¬ ', playback_1: '0.95', playback_2: '0.97', diff: 0.02 },
-      { metric: '”√ªß≤Œ”Î∂»', playback_1: '0.78', playback_2: '0.82', diff: 0.04 }
-    ]
-  } else {
-    try {
-      const res = await comparePlaybacks(record.id, { compare_playback_id: others[0].id })
-      compareResult.value = res.data
-      if (res.data?.metrics) {
-        compareMetrics.value = Object.entries(res.data.metrics).map(([key, val]) => ({
-          metric: key,
-          playback_1: val.playback_1_avg ?? val.playback_1 ?? '-',
-          playback_2: val.playback_2_avg ?? val.playback_2 ?? '-',
-          diff: val.difference_pct ?? 0
-        }))
-      }
-    } catch {
-      compareResult.value = null
-      Message.error('º”‘ÿ∂‘±» ˝æ› ß∞‹')
-    }
-  }
-  compareDrawerVisible.value = true
-}
-
-async function handleDelete(record) {
-  try {
-    await deletePlayback(record.id)
-    Message.success('…æ≥˝≥…π¶')
-    loadPlaybacks()
-  } catch {
-    Message.error('…æ≥˝ ß∞‹')
-  }
-}
-
-function getStatusColor(status) {
-  const colors = { recording: 'green', completed: 'arcoblue', playing: 'orange', paused: 'gray' }
-  return colors[status] || 'gray'
-}
-
-function getStatusName(status) {
-  const names = { recording: '¬º÷∆÷–', completed: '“—ÕÍ≥…', playing: '≤•∑≈÷–', paused: '“—‘›Õ£' }
-  return names[status] || status
-}
-
-function formatDuration(ms) {
-  if (!ms) return '0:00'
-  const seconds = Math.floor(ms / 1000)
-  const minutes = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return `${minutes}:${secs.toString().padStart(2, '0')}`
-}
-
-function onPageChange(p) {
-  page.value = p
-  loadPlaybacks()
-}
-
-function onPageSizeChange(s) {
-  pageSize.value = s
-  page.value = 1
-  loadPlaybacks()
-}
-
-onMounted(() => {
-  loadPlaybacks()
-})
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.filter-card {
-  background: #F2F3F5;
-  border-radius: 4px;
-}
-.player-content {
-  min-height: 400px;
-}
-.player-info-card {
-  margin-bottom: 16px;
-}
-.player-controls {
-  margin-bottom: 16px;
-}
-.player-progress {
-  margin-bottom: 16px;
-}
-.progress-time {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-  color: var(--color-text-3);
-}
-.player-data-card {
-  background: #F7F8FA;
-}
-.compare-content {
-  min-height: 400px;
-}
-.text-success {
-  color: rgb(var(--success-6));
-}
-.text-danger {
-  color: rgb(var(--danger-6));
-}
-.text-muted {
-  color: var(--color-text-3);
-}
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

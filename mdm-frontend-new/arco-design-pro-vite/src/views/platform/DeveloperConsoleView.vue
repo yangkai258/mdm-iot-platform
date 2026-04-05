@@ -1,60 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="开发者控制台">
-      <a-row :gutter="16" style="margin-bottom: 16px">
-        <a-col :span="6">
-          <a-statistic title="API调用次数" :value="stats.api_calls" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="错误率" :value="stats.error_rate" suffix="%" color="red" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="配额使用" :value="stats.quota_usage" suffix="%" />
-        </a-col>
-        <a-col :span="6">
-          <a-statistic title="响应时间" :value="stats.avg_time" suffix="ms" />
-        </a-col>
-      </a-row>
-      <a-tabs>
-        <a-tab-pane key="logs" title="调用日志">
-          <a-table :columns="logColumns" :data="logs" :pagination="pagination" row-key="id">
-            <template #status="{ record }"><a-badge :color="record.status < 400 ? 'green' : 'red'" :text="record.status" /></template>
-          </a-table>
-        </a-tab-pane>
-        <a-tab-pane key="quota" title="配额管理">
-          <a-form :model="quotaForm" layout="vertical" style="max-width: 400px">
-            <a-form-item label="日配额"><a-input-number v-model="quotaForm.daily" :min="0" style="width:100%" /></a-form-item>
-            <a-form-item label="月配额"><a-input-number v-model="quotaForm.monthly" :min="0" style="width:100%" /></a-form-item>
-            <a-button type="primary">保存</a-button>
-          </a-form>
-        </a-tab-pane>
-      </a-tabs>
+  <Breadcrumb :items="['Home','Platform','Developerconsole','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="D e v e l o p e r c o n s o l e">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
-      </a-table>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const stats = reactive({ api_calls: 0, error_rate: 0, quota_usage: 0, avg_time: 0 })
-const quotaForm = reactive({ daily: 10000, monthly: 300000 })
-const logs = ref([])
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-const logColumns = [
-  { title: '时间', dataIndex: 'time', width: 170 },
-  { title: '接口', dataIndex: 'path', ellipsis: true },
-  { title: '方法', dataIndex: 'method', width: 80 },
-  { title: '状态', slotName: 'status', width: 80 },
-  { title: '耗时', dataIndex: 'duration', width: 100 }
+const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
+const columns = [
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-onMounted(() => {
-  logs.value = [{ id: 1, time: '2026-03-29 10:00:00', path: '/api/devices', method: 'GET', status: 200, duration: '45ms' }]
-  pagination.total = 1
-})
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

@@ -1,49 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="区域同步状态">
+  <Breadcrumb :items="['Home','Globalization','Regionsyncstatus','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="R e g i o n s y n c s t a t u s">
       <template #extra>
-        <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16" style="margin-bottom: 16px">
-        <a-col :span="6"><a-statistic title="同步中" :value="stats.syncing" color="blue" /></a-col>
-        <a-col :span="6"><a-statistic title="已同步" :value="stats.synced" color="green" /></a-col>
-        <a-col :span="6"><a-statistic title="失败" :value="stats.failed" color="red" /></a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
-    </a-table>
-  </a-card>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const stats = reactive({ syncing: 0, synced: 0, failed: 0 })
-const data = ref([])
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '区域', dataIndex: 'region', width: 120 },
-  { title: '同步类型', dataIndex: 'sync_type', width: 120 },
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
   { title: '状态', dataIndex: 'status', width: 90 },
-  { title: '开始时间', dataIndex: 'started_at', width: 170 },
-  { title: '完成时间', dataIndex: 'completed_at', width: 170 }
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadData = async () => {
-  loading.value = true
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const res = await fetch('/api/globalization/region-sync-status', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
-    data.value = res.data?.list || []
-    pagination.total = data.value.length
-  } catch { data.value = [] } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
-const onPageChange = (page) => { pagination.current = page; loadData() }
-onMounted(() => loadData())
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

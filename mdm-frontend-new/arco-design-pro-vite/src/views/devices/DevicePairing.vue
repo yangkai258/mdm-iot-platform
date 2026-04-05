@@ -1,451 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-
-  <div class="pro-page-container">
-
-    <!-- Ãæ°üĞ¼ -->
-
-    <a-breadcrumb class="pro-breadcrumb">
-
-      <a-breadcrumb-item>Ê×Ò³</a-breadcrumb-item>
-
-      <a-breadcrumb-item>Éè±¸¹ÜÀí</a-breadcrumb-item>
-
-      <a-breadcrumb-item>Åä¶Ô¹ÜÀí</a-breadcrumb-item>
-
-    </a-breadcrumb>
-
-
-
-    <!-- ËÑË÷À¸ -->
-
-    <div class="pro-search-bar">
-
-      <a-space>
-
-        <a-input-search v-model="searchKeyword" placeholder="ËÑË÷Éè±¸ID/ÓÃ»§" style="width: 280px" @search="loadRequests" search-button />
-
-        <a-select v-model="filterStatus" placeholder="ÇëÇó×´Ì¬" allow-clear style="width: 130px" @change="loadRequests">
-
-          <a-option value="pending">´ıÉóÅú</a-option>
-
-          <a-option value="approved">ÒÑÅú×¼</a-option>
-
-          <a-option value="rejected">ÒÑ¾Ü¾ø</a-option>
-
-          <a-option value="expired">ÒÑ¹ıÆÚ</a-option>
-
-        </a-select>
-
-      </a-space>
-
-    </div>
-
-
-
-    <!-- ²Ù×÷°´Å¥ -->
-
-    <div class="pro-action-bar">
-
-      <a-space>
-
-        <a-button type="primary" @click="loadRequests">Ë¢ĞÂ</a-button>
-
-      </a-space>
-
-    </div>
-
-
-
-    <!-- Åä¶ÔÇëÇóÁĞ±í -->
-
-    <div class="pro-content-area">
-
-      <a-table :columns="columns" :data="requests" :loading="loading" :pagination="pagination" row-key="id" @page-change="handlePageChange">
-
-        <template #status="{ record }">
-
-          <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
-
-        </template>
-
-      </a-table>
-
-        <template #actions="{ record }">
-
-          <a-space>
-
-            <a-button type="primary" size="small" :disabled="record.status !== 'pending'" @click="approveRequest(record)">Åú×¼</a-button>
-
-            <a-button type="primary" status="danger" size="small" :disabled="record.status !== 'pending'" @click="rejectRequest(record)">¾Ü¾ø</a-button>
-
-          </a-space>
-
-        </template>
-
-      </a-table>
-
-    </div>
-
-
-
-    <!-- Åä¶ÔÀúÊ· -->
-
-    <a-card class="history-card" title="Åä¶ÔÀúÊ·¼ÇÂ¼">
-
-      <a-table :columns="historyColumns" :data="history" :loading="historyLoading" :pagination="historyPagination" row-key="id" @page-change="handleHistoryPageChange">
-
-        <template #action="{ record }">
-
-          <a-tag :color="record.action === 'approved' ? 'green' : 'red'">{{ record.action === 'approved' ? 'Åú×¼' : '¾Ü¾ø' }}</a-tag>
-
-        </template>
-
-      </a-table>
-
+ï»¿<template>
+  <Breadcrumb :items="['Home','Devices','Devicepairing','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="D e v i c e p a i r i n g">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="å…³é”®è¯"><a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button><a-button @click="handleReset">é‡ç½®</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-
-
-
-    <!-- ¾Ü¾øÔ­Òòµ¯´° -->
-
-    <a-modal v-model:visible="rejectModalVisible" title="¾Ü¾øÅä¶ÔÇëÇó" @ok="handleReject" :width="480" :loading="submitting">
-
-      <a-form layout="vertical">
-
-        <a-form-item label="Ä¿±êÉè±¸">
-
-          <a-input :value="selectedRequest?.device_name + ' (' + selectedRequest?.device_id + ')'" disabled />
-
-        </a-form-item>
-
-        <a-form-item label="¾Ü¾øÔ­Òò" required>
-
-          <a-select v-model="rejectReason" placeholder="Ñ¡Ôñ»òÊäÈëÔ­Òò">
-
-            <a-option value="unauthorized">Î´¾­ÊÚÈ¨µÄÉè±¸</a-option>
-
-            <a-option value="duplicate">ÖØ¸´Åä¶Ô</a-option>
-
-            <a-option value="policy">Î¥·´Éè±¸²ßÂÔ</a-option>
-
-            <a-option value="user_cancel">ÓÃ»§È¡Ïû</a-option>
-
-            <a-option value="other">ÆäËûÔ­Òò</a-option>
-
-          </a-select>
-
-        </a-form-item>
-
-        <a-form-item label="±¸×¢">
-
-          <a-textarea v-model="rejectNote" placeholder="²¹³äËµÃ÷" :rows="2" />
-
-        </a-form-item>
-
-      </a-form>
-
-    </a-modal>
-
   </div>
-
 </template>
 
-
-
-<script setup>
-
-import { ref, reactive, onMounted } from 'vue'
-
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-
-
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-
-const historyLoading = ref(false)
-
-const submitting = ref(false)
-
-const requests = ref([])
-
-const history = ref([])
-
-const searchKeyword = ref('')
-
-const filterStatus = ref('')
-
-const selectedRequest = ref(null)
-
-const rejectModalVisible = ref(false)
-
-const rejectReason = ref('')
-
-const rejectNote = ref('')
-
-
-
-const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
-
-const historyPagination = reactive({ current: 1, pageSize: 10, total: 0 })
-
-
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-
-  { title: 'ÇëÇóID', dataIndex: 'id', width: 80 },
-
-  { title: 'Éè±¸ID', dataIndex: 'device_id', ellipsis: true },
-
-  { title: 'Éè±¸Ãû³Æ', dataIndex: 'device_name' },
-
-  { title: 'ÉêÇëÓÃ»§', dataIndex: 'user_name', width: 120 },
-
-  { title: 'Éè±¸ĞÍºÅ', dataIndex: 'device_model', width: 120 },
-
-  { title: 'ÇëÇóÊ±¼ä', dataIndex: 'requested_at', width: 170 },
-
-  { title: '×´Ì¬', slotName: 'status', width: 90 },
-
-  { title: '²Ù×÷', slotName: 'actions', width: 160, fixed: 'right' }
-
-]
-
-
-
-const historyColumns = [
-
   { title: 'ID', dataIndex: 'id', width: 70 },
-
-  { title: 'Éè±¸ID', dataIndex: 'device_id', width: 100 },
-
-  { title: 'Éè±¸Ãû³Æ', dataIndex: 'device_name', ellipsis: true },
-
-  { title: '²Ù×÷ÈË', dataIndex: 'operator' },
-
-  { title: '²Ù×÷', slotName: 'action', width: 80 },
-
-  { title: 'Ê±¼ä', dataIndex: 'operated_at', width: 170 }
-
+  { title: 'åç§°', dataIndex: 'name', width: 160 },
+  { title: 'çŠ¶æ€', dataIndex: 'status', width: 90 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 }
 ]
 
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-
-const getStatusColor = (s) => ({ pending: 'blue', approved: 'green', rejected: 'red', expired: 'gray' }[s] || 'gray')
-
-const getStatusText = (s) => ({ pending: '´ıÉóÅú', approved: 'ÒÑÅú×¼', rejected: 'ÒÑ¾Ü¾ø', expired: 'ÒÑ¹ıÆÚ' }[s] || s)
-
-
-
-const loadRequests = async () => {
-
-  loading.value = true
-
+async function loadData() {
   try {
-
-    const token = localStorage.getItem('token')
-
-    const params = new URLSearchParams({ page: pagination.current, page_size: pagination.pageSize })
-
-    if (searchKeyword.value) params.append('keyword', searchKeyword.value)
-
-    if (filterStatus.value) params.append('status', filterStatus.value)
-
-    const res = await fetch(`/api/device/pairing/requests?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
-
-    const data = await res.json()
-
-    if (data.code === 0) {
-
-      requests.value = data.data.list || []
-
-      pagination.total = data.data.total || 0
-
-    }
-
-  } catch (e) {
-
-    requests.value = [
-
-      { id: 1, device_id: 'DEV-001', device_name: '²âÊÔÉè±¸A', user_name: 'ÕÅÈı', device_model: 'M5Stack', requested_at: '2026-03-24 10:00:00', status: 'pending' },
-
-      { id: 2, device_id: 'DEV-002', device_name: '²âÊÔÉè±¸B', user_name: 'ÀîËÄ', device_model: 'M5Stack', requested_at: '2026-03-24 09:30:00', status: 'approved' },
-
-      { id: 3, device_id: 'DEV-003', device_name: '²âÊÔÉè±¸C', user_name: 'ÍõÎå', device_model: 'M5Stack', requested_at: '2026-03-23 16:00:00', status: 'rejected' }
-
-    ]
-
-    pagination.total = 3
-
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('åŠ è½½å¤±è´¥: ' + err.message)
   } finally {
-
     loading.value = false
-
   }
-
 }
 
-
-
-const loadHistory = async () => {
-
-  historyLoading.value = true
-
-  try {
-
-    const token = localStorage.getItem('token')
-
-    const params = new URLSearchParams({ page: historyPagination.current, page_size: historyPagination.pageSize })
-
-    const res = await fetch(`/api/device/pairing/history?${params}`, { headers: { 'Authorization': `Bearer ${token}` } })
-
-    const data = await res.json()
-
-    if (data.code === 0) {
-
-      history.value = data.data.list || []
-
-      historyPagination.total = data.data.total || 0
-
-    }
-
-  } catch (e) {
-
-    history.value = [
-
-      { id: 1, device_id: 'DEV-002', device_name: '²âÊÔÉè±¸B', operator: '¹ÜÀíÔ±', action: 'approved', operated_at: '2026-03-24 09:35:00' },
-
-      { id: 2, device_id: 'DEV-003', device_name: '²âÊÔÉè±¸C', operator: '¹ÜÀíÔ±', action: 'rejected', operated_at: '2026-03-23 16:30:00' }
-
-    ]
-
-    historyPagination.total = 2
-
-  } finally {
-
-    historyLoading.value = false
-
-  }
-
-}
-
-
-
-const approveRequest = async (record) => {
-
-  try {
-
-    const token = localStorage.getItem('token')
-
-    const res = await fetch(`/api/device/pairing/requests/${record.id}/approve`, {
-
-      method: 'POST',
-
-      headers: { 'Authorization': `Bearer ${token}` }
-
-    })
-
-    const data = await res.json()
-
-    if (data.code === 0) {
-
-      Message.success('Åä¶ÔÇëÇóÒÑÅú×¼')
-
-      loadRequests()
-
-      loadHistory()
-
-    } else { Message.error(data.message || 'Åú×¼Ê§°Ü') }
-
-  } catch (e) { Message.error('Åú×¼Ê§°Ü') }
-
-}
-
-
-
-const rejectRequest = (record) => {
-
-  selectedRequest.value = record
-
-  rejectReason.value = ''
-
-  rejectNote.value = ''
-
-  rejectModalVisible.value = true
-
-}
-
-
-
-const handleReject = async () => {
-
-  if (!rejectReason.value) { Message.warning('ÇëÑ¡Ôñ¾Ü¾øÔ­Òò'); return }
-
-  submitting.value = true
-
-  try {
-
-    const token = localStorage.getItem('token')
-
-    const res = await fetch(`/api/device/pairing/requests/${selectedRequest.value.id}/reject`, {
-
-      method: 'POST',
-
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-
-      body: JSON.stringify({ reason: rejectReason.value, note: rejectNote.value })
-
-    })
-
-    const data = await res.json()
-
-    if (data.code === 0) {
-
-      Message.success('Åä¶ÔÇëÇóÒÑ¾Ü¾ø')
-
-      rejectModalVisible.value = false
-
-      loadRequests()
-
-      loadHistory()
-
-    } else { Message.error(data.message || '¾Ü¾øÊ§°Ü') }
-
-  } catch (e) { Message.error('¾Ü¾øÊ§°Ü') }
-
-  finally { submitting.value = false }
-
-}
-
-
-
-const handlePageChange = (page) => { pagination.current = page; loadRequests() }
-
-const handleHistoryPageChange = (page) => { historyPagination.current = page; loadHistory() }
-
-
-
-onMounted(() => { loadRequests(); loadHistory() })
-
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
-
-
 <style scoped>
-
-.pro-page-container { padding: 20px 24px; min-height: calc(100vh - 64px); background: #f5f7fa; }
-
-.pro-breadcrumb { margin-bottom: 16px; }
-
-.pro-search-bar { margin-bottom: 12px; }
-
-.pro-action-bar { margin-bottom: 16px; }
-
-.pro-content-area { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 16px; }
-
-.history-card { border-radius: 8px; }
-
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

@@ -1,73 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="文件库">
+  <Breadcrumb :items="['Home','Content','Contentlibrary','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="C o n t e n t l i b r a r y">
       <template #extra>
-        <a-space>
-          <a-select v-model="filter.category" placeholder="选择分类" style="width: 120px" allow-clear>
-            <a-option value="emoticon">表情包</a-option>
-            <a-option value="action">动作</a-option>
-            <a-option value="voice">声音</a-option>
-            <a-option value="wallpaper">壁纸</a-option>
-          </a-select>
-          <a-button type="primary"><icon-upload />上传文件</a-button>
-        </a-space>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-spin :loading="loading">
-        <a-table :columns="columns" :data="files" :pagination="{ pageSize: 12 }" row-key="id">
-          <template #file_name="{ record }">
-            <div style="display: flex; align-items: center; gap: 8px">
-              <icon-file :size="20" />
-              {{ record.file_name }}
-            </div>
-          </template>
-      </a-table>
-          <template #file_type="{ record }"><a-tag>{{ record.file_type }}</a-tag></template>
-          <template #actions="{ record }">
-            <a-button size="small" type="text" @click="download(record)">下载</a-button>
-            <a-button size="small" type="text" @click="distribute(record)">分发</a-button>
-            <a-button size="small" type="text" status="danger" @click="remove(record)">删除</a-button>
-          </template>
-        </a-table>
-      </a-spin>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const filter = ref({ category: '' })
-const files = ref([])
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '文件名', dataIndex: 'file_name', slotName: 'file_name' },
-  { title: '类型', dataIndex: 'file_type', slotName: 'file_type' },
-  { title: '大小', dataIndex: 'file_size', render: ({ file_size }) => `${(file_size/1024).toFixed(1)} KB` },
-  { title: '下载量', dataIndex: 'download_count' },
-  { title: '操作', slotName: 'actions', width: 180 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const load = async () => {
-  loading.value = true
-  const url = filter.value.category ? `/api/content/files?category=${filter.value.category}` : '/api/content/files'
-  const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
-  const data = await res.json()
-  files.value = data.files || []
-  loading.value = false
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
 
-const download = async (record) => {
-  const res = await fetch(`/api/content/files/${record.id}/download`, { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } })
-  const data = await res.json()
-  if (data.download_url) window.open(data.download_url, '_blank')
-}
-const distribute = () => Message.info('分发功能开发中')
-const remove = () => Message.success('删除成功')
-
-onMounted(load)
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

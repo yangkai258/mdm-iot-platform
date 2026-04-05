@@ -1,65 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="积分管理">
+  <Breadcrumb :items="['Home','Members','Points','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="P o i n t s">
       <template #extra>
-        <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="8">
-          <a-form-item label="关键词">
-            <a-input v-model="filters.keyword" placeholder="姓名/手机号" @pressEnter="loadData" />
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">查询</a-button>
-            <a-button @click="filters.keyword = ''; loadData()">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="memberColumns" :data="memberList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
-      </a-table>
 
-<script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const memberList = ref([])
 const loading = ref(false)
-const filters = reactive({ keyword: '', levelId: undefined })
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
-const memberColumns = [
-  { title: '会员名称', dataIndex: 'name', width: 150 },
-  { title: '手机号', dataIndex: 'mobile', width: 130 },
-  { title: '当前积分', slotName: 'points', width: 120 },
-  { title: '成长值', slotName: 'growthValue', width: 100 },
-  { title: '注册时间', dataIndex: 'createdAt', width: 160 }
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
+const columns = [
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadData = async () => {
-  loading.value = true
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const params = { page: pagination.current, pageSize: pagination.pageSize }
-    if (filters.keyword) params.keyword = filters.keyword
-    const res = await fetch(`/api/members/points?${new URLSearchParams(params)}`, {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    memberList.value = res.data?.list || []
-    pagination.total = res.data?.total || 0
-  } catch { memberList.value = [] } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
 
-const onPageChange = (page) => { pagination.current = page; loadData() }
-
-onMounted(() => loadData())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
-</a-card>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

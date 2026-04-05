@@ -1,75 +1,47 @@
-﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
+<template>
+  <Breadcrumb :items="['Home','Alert','AlertHistory','']" />
+  <div class="page-container">
     <a-card class="general-card" title="告警历史">
       <template #extra>
-        <a-space :size="12">
-          <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
-          <a-button @click="handleSearch"><icon-refresh />刷新</a-button>
-        </a-space>
+        <a-button @click="loadData"><icon-refresh />刷新</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="6">
-          <a-form-item label="设备">
-            <a-input v-model="form.device_id" placeholder="设备ID" @pressEnter="handleSearch" />
-          </a-form-item>
-        </a-col>
-        <a-col :span="6">
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="设备ID"><a-input v-model="form.device_id" placeholder="设备ID" /></a-form-item>
           <a-form-item label="告警类型">
-            <a-select v-model="form.alert_type" placeholder="选择类型" allow-clear style="width: 100%">
+            <a-select v-model="form.alert_type" placeholder="选择类型" allow-clear style="width: 120px">
               <a-option value="temperature">温度告警</a-option>
               <a-option value="battery">电量告警</a-option>
               <a-option value="offline">离线告警</a-option>
             </a-select>
           </a-form-item>
-        </a-col>
-        <a-col :span="6">
           <a-form-item label="级别">
-            <a-select v-model="form.severity" placeholder="选择级别" allow-clear style="width: 100%">
+            <a-select v-model="form.severity" placeholder="选择级别" allow-clear style="width: 100px">
               <a-option value="info">提示</a-option>
               <a-option value="warning">警告</a-option>
               <a-option value="error">错误</a-option>
             </a-select>
           </a-form-item>
-        </a-col>
-        <a-col :span="6">
-          <a-form-item label="状态">
-            <a-select v-model="form.status" placeholder="选择状态" allow-clear style="width: 100%">
-              <a-option value="pending">待处理</a-option>
-              <a-option value="resolved">已处理</a-option>
-            </a-select>
+          <a-form-item>
+            <a-button type="primary" @click="loadData">查询</a-button>
+            <a-button @click="handleReset">重置</a-button>
           </a-form-item>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" row-key="id" />
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconRefresh } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const data = ref([])
-const modalVisible = ref(false)
-const modalTitle = ref('新建')
-const form = reactive({ name: '', device_id: '', alert_type: '', severity: undefined, status: undefined })
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ device_id: '', alert_type: '', severity: '' })
+
 const columns = [
   { title: '时间', dataIndex: 'created_at', width: 170 },
   { title: '设备', dataIndex: 'device_id', width: 140 },
@@ -80,28 +52,29 @@ const columns = [
   { title: '状态', dataIndex: 'status', width: 90 }
 ]
 
-const handleSearch = () => {
-  pagination.current = 1
-  loadData()
-}
-const handleReset = () => {
-  Object.keys(form).forEach(k => { form[k] = k === 'severity' || k === 'status' ? undefined : '' })
-  pagination.current = 1
-  loadData()
-}
-const handleCreate = () => { modalTitle.value = '新建'; modalVisible.value = true }
-const handleSubmit = () => { modalVisible.value = false; Message.success('保存成功') }
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const loadData = async () => {
-  loading.value = true
+async function loadData() {
   try {
-    const params = { page: pagination.current, page_size: pagination.pageSize }
-    Object.keys(form).forEach(k => { if (form[k]) params[k] = form[k] })
-    const res = await fetch('/api/alerts/history?' + new URLSearchParams(params), {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }
-  } catch (e) { Message.error('加载失败') } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
+
+function handleReset() {
+  form.value = { device_id: '', alert_type: '', severity: '' }
+  loadData()
+}
+
 onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

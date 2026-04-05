@@ -1,43 +1,43 @@
-<template>
+Ôªø<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="¥Ú”°ª˙π‹¿Ì">
+    <a-card class="general-card" title="ÊâìÂç∞Êú∫ÁÆ°ÁêÜ">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate"><icon-plus />ÃÌº”</a-button>
-          <a-button @click="loadData"><icon-refresh />À¢–¬</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />Ê∑ªÂä†</a-button>
+          <a-button @click="loadData"><icon-refresh />Âà∑Êñ∞</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="¥Ú”°ª˙√˚≥∆"><a-input v-model="form.keyword" placeholder="«Î ‰»Î" @pressEnter="loadData" /></a-form-item>
+          <a-form-item label="ÊâìÂç∞Êú∫ÂêçÁß∞"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" @pressEnter="loadData" /></a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
-            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">÷ÿ÷√</a-button>
+            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">ÈáçÁΩÆ</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-        <template #status="{ record }"><a-badge :color="record.status === 'online' ? 'green' : 'gray'" :text="record.status === 'online' ? '‘⁄œﬂ' : '¿Îœﬂ'" /></template>
+        <template #status="{ record }"><a-badge :color="record.status === 'online' ? 'green' : 'gray'" :text="record.status === 'online' ? 'Âú®Á∫ø' : 'Á¶ªÁ∫ø'" /></template>
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="openEdit(record)">±‡º≠</a-button>
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">…æ≥˝</a-button>
+          <a-button type="text" size="small" @click="openEdit(record)">ÁºñËæë</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">Âà†Èô§</a-button>
         </template>
       </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '±‡º≠' : 'ÃÌº”'" :width="560">
+    <a-modal v-model="formVisible" :title="isEdit ? 'ÁºñËæë' : 'Ê∑ªÂä†'" :width="560">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="¥Ú”°ª˙√˚≥∆"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="IPµÿ÷∑"><a-input v-model="form.ip" /></a-form-item>
+        <a-form-item label="ÊâìÂç∞Êú∫ÂêçÁß∞"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="IPÂú∞ÂùÄ"><a-input v-model="form.ip" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">»°œ˚</a-button>
-        <a-button type="primary" @click="handleSubmit">»∑∂®</a-button>
+        <a-button @click="formVisible = false">ÂèñÊ∂à</a-button>
+        <a-button type="primary" @click="handleSubmit">Á°ÆÂÆö</a-button>
       </template>
     </a-modal>
   </div>
@@ -55,10 +55,10 @@ const form = reactive({ keyword: '', name: '', ip: '' })
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: '¥Ú”°ª˙√˚≥∆', dataIndex: 'name', width: 200 },
-  { title: 'IPµÿ÷∑', dataIndex: 'ip', width: 160 },
-  { title: '◊¥Ã¨', slotName: 'status', width: 90 },
-  { title: '≤Ÿ◊˜', slotName: 'actions', width: 120 }
+  { title: 'ÊâìÂç∞Êú∫ÂêçÁß∞', dataIndex: 'name', width: 200 },
+  { title: 'IPÂú∞ÂùÄ', dataIndex: 'ip', width: 160 },
+  { title: 'Áä∂ÊÄÅ', slotName: 'status', width: 90 },
+  { title: 'Êìç‰Ωú', slotName: 'actions', width: 120 }
 ]
 
 const loadData = async () => {
@@ -71,8 +71,8 @@ const loadData = async () => {
 }
 const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', ip: '' }); formVisible.value = true }
 const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '∏¸–¬≥…π¶' : 'ÃÌº”≥…π¶'); loadData() }
-const handleDelete = () => { Message.success('…æ≥˝≥…π¶'); loadData() }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? 'Êõ¥Êñ∞ÊàêÂäü' : 'Ê∑ªÂä†ÊàêÂäü'); loadData() }
+const handleDelete = () => { Message.success('Âà†Èô§ÊàêÂäü'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>

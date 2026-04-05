@@ -1,99 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="AI 行为详情">
+  <Breadcrumb :items="['Home','Ai','Aibehaviordetail','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="A i b e h a v i o r d e t a i l">
       <template #extra>
-        <a-space :size="12">
-          <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
-          <a-button @click="handleSearch"><icon-refresh />刷新</a-button>
-        </a-space>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="8">
-          <a-form-item label="行为ID">
-            <a-input v-model="form.id" placeholder="请输入行为ID" @pressEnter="handleSearch" />
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="handleSearch">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" row-key="id" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="名称"><a-input v-model="form.name" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const route = useRoute()
 const loading = ref(false)
-const data = ref([])
-const modalVisible = ref(false)
-const modalTitle = ref('新建')
-
-const form = reactive({
-  id: ''
-})
-
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
-})
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '时间', dataIndex: 'created_at', width: 170 },
-  { title: '设备', dataIndex: 'device_id', width: 140 },
-  { title: '用户', dataIndex: 'user_id', width: 100 },
-  { title: '模型', dataIndex: 'model_version', width: 160 },
-  { title: '事件类型', dataIndex: 'behavior_type', width: 120 },
-  { title: '延迟(ms)', dataIndex: 'latency_ms', width: 90 },
-  { title: '置信度', dataIndex: 'confidence', width: 90 },
-  { title: '状态', dataIndex: 'status', width: 90 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const handleSearch = () => { loadData() }
-const handleReset = () => { form.id = ''; loadData() }
-const handleCreate = () => { modalTitle.value = '新建'; modalVisible.value = true }
-const handleSubmit = () => { modalVisible.value = false; Message.success('保存成功') }
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const loadData = async () => {
-  loading.value = true
+async function loadData() {
   try {
-    if (route.params.id) {
-      const res = await fetch(`/api/ai/monitor/events/${route.params.id}`, {
-        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-      }).then(r => r.json())
-      if (res.code === 0) data.value = res.data ? [res.data] : []
-    } else {
-      data.value = []
-    }
-  } catch (e) {
-    Message.error('加载失败')
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
 onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

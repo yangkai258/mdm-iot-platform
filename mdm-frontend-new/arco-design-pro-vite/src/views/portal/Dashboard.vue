@@ -1,334 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="dashboard-container">
-    <!-- √Ê∞¸–º -->
-    <a-breadcrumb class="breadcrumb">
-      <a-breadcrumb-item> ◊“≥</a-breadcrumb-item>
-      <a-breadcrumb-item>“«±Ì≈Ã</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- …Ë±∏Õ≥º∆ø®∆¨ -->
-    <a-row :gutter="[16, 16]">
-      <a-col :xs="24" :sm="12" :lg="6">
-        <a-card class="stat-card device-card">
-          <a-statistic title="…Ë±∏◊‹ ˝" :value="deviceStats.total" :value-style="{ color: '#165dff' }">
-            <template #prefix><icon-desktop style="margin-right: 6px;" /></template>
-            <template #suffix><span class="stat-unit">Ã®</span></template>
-          </a-statistic>
-          <div class="stat-trend up">
-            <icon-trending-up /> Ωœ…œ‘¬ +12%
-          </div>
-        </a-card>
-      </a-col>
-      <a-col :xs="24" :sm="12" :lg="6">
-        <a-card class="stat-card online-card">
-          <a-statistic title="‘⁄œﬂ…Ë±∏" :value="deviceStats.online" :value-style="{ color: '#52c41a' }">
-            <template #prefix><icon-check-circle style="margin-right: 6px;" /></template>
-            <template #suffix><span class="stat-unit">Ã®</span></template>
-          </a-statistic>
-          <div class="stat-trend up">
-            <icon-trending-up /> Ωœ…œ‘¬ +8%
-          </div>
-        </a-card>
-      </a-col>
-      <a-col :xs="24" :sm="12" :lg="6">
-        <a-card class="stat-card offline-card">
-          <a-statistic title="¿Îœﬂ…Ë±∏" :value="deviceStats.offline" :value-style="{ color: '#ff4d4f' }">
-            <template #prefix><icon-close-circle style="margin-right: 6px;" /></template>
-            <template #suffix><span class="stat-unit">Ã®</span></template>
-          </a-statistic>
-          <div class="stat-trend down">
-            <icon-trending-down /> Ωœ…œ‘¬ -3%
-          </div>
-        </a-card>
-      </a-col>
-      <a-col :xs="24" :sm="12" :lg="6">
-        <a-card class="stat-card alert-card">
-          <a-statistic title="¥˝¥¶¿Ì∏ÊæØ" :value="alertStats.pending" :value-style="{ color: '#faad14' }">
-            <template #prefix><icon-alert style="margin-right: 6px;" /></template>
-            <template #suffix><span class="stat-unit">Ãı</span></template>
-          </a-statistic>
-          <div class="stat-trend warn">
-            <icon-alert /> ¥˝¥¶¿Ì
-          </div>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- ª·‘±Õ≥º∆ø®∆¨ -->
-    <a-row :gutter="[16, 16]" style="margin-top: 16px;">
-      <a-col :xs="24" :sm="12" :lg="6">
-        <a-card class="stat-card member-card">
-          <a-statistic title="ª·‘±◊‹ ˝" :value="memberStats.total" :value-style="{ color: '#722ed1' }">
-            <template #prefix><icon-user-group style="margin-right: 6px;" /></template>
-            <template #suffix><span class="stat-unit">»À</span></template>
-          </a-statistic>
-          <div class="stat-trend up">
-            <icon-trending-up /> Ωœ…œ‘¬ +15%
-          </div>
-        </a-card>
-      </a-col>
-      <a-col :xs="24" :sm="12" :lg="6">
-        <a-card class="stat-card vip-card">
-          <a-statistic title="VIP ª·‘±" :value="memberStats.vip" :value-style="{ color: '#d91ad9' }">
-            <template #prefix><icon-star style="margin-right: 6px;" /></template>
-            <template #suffix><span class="stat-unit">»À</span></template>
-          </a-statistic>
-          <div class="stat-trend up">
-            <icon-trending-up /> Ωœ…œ‘¬ +5%
-          </div>
-        </a-card>
-      </a-col>
-      <a-col :xs="24" :sm="12" :lg="6">
-        <a-card class="stat-card active-card">
-          <a-statistic title="ªÓ‘æª·‘±" :value="memberStats.active" :value-style="{ color: '#0fc6c2' }">
-            <template #prefix><icon-activity style="margin-right: 6px;" /></template>
-            <template #suffix><span class="stat-unit">»À</span></template>
-          </a-statistic>
-          <div class="stat-trend up">
-            <icon-trending-up /> ±æ‘¬
-          </div>
-        </a-card>
-      </a-col>
-      <a-col :xs="24" :sm="12" :lg="6">
-        <a-card class="stat-card new-card">
-          <a-statistic title="±æ‘¬–¬‘ˆ" :value="memberStats.newThisMonth" :value-style="{ color: '#165dff' }">
-            <template #prefix><icon-user-add style="margin-right: 6px;" /></template>
-            <template #suffix><span class="stat-unit">»À</span></template>
-          </a-statistic>
-          <div class="stat-trend up">
-            <icon-trending-up /> »’æ˘ +3
-          </div>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- Õº±Ì«¯”Ú -->
-    <a-row :gutter="[16, 16]" style="margin-top: 16px;">
-      <a-col :xs="24" :lg="12">
-        <a-card title="…Ë±∏◊¥Ã¨∑÷≤º" class="chart-card">
-          <div class="chart-placeholder">
-            <a-progress type="circle" :percent="deviceOnlineRate" :width="160" :color="deviceOnlineRate > 80 ? '#52c41a' : deviceOnlineRate > 50 ? '#faad14' : '#ff4d4f'">
-              <template #formatter>
-                <div style="text-align: center;">
-                  <div style="font-size: 28px; font-weight: 600;">{{ deviceOnlineRate }}%</div>
-                  <div style="font-size: 12px; color: #86909c;">‘⁄œﬂ¬ </div>
-                </div>
-              </template>
-            </a-progress>
-            <div class="device-dist">
-              <div class="dist-item"><span class="dot green"></span>‘⁄œﬂ {{ deviceStats.online }} Ã®</div>
-              <div class="dist-item"><span class="dot red"></span>¿Îœﬂ {{ deviceStats.offline }} Ã®</div>
-            </div>
-          </div>
-        </a-card>
-      </a-col>
-      <a-col :xs="24" :lg="12">
-        <a-card title="∏ÊæØº∂±∑÷≤º" class="chart-card">
-          <div class="chart-placeholder">
-            <a-progress type="circle" :percent="alertResolveRate" :width="160" :color="alertResolveRate > 70 ? '#52c41a' : '#faad14'">
-              <template #formatter>
-                <div style="text-align: center;">
-                  <div style="font-size: 28px; font-weight: 600;">{{ alertResolveRate }}%</div>
-                  <div style="font-size: 12px; color: #86909c;">Ω‚æˆ¬ </div>
-                </div>
-              </template>
-            </a-progress>
-            <div class="device-dist">
-              <div class="dist-item"><span class="dot red"></span>ΩÙº± {{ alertStats.critical }}</div>
-              <div class="dist-item"><span class="dot orange"></span>æØ∏Ê {{ alertStats.warning }}</div>
-              <div class="dist-item"><span class="dot blue"></span>Ã· æ {{ alertStats.info }}</div>
-            </div>
-          </div>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- œÍœ∏ ˝æ›±Ì∏Ò -->
-    <a-row :gutter="[16, 16]" style="margin-top: 16px;">
-      <a-col :span="24">
-        <a-card title="ª·‘±µ»º∂∑÷≤º" class="table-card">
-          <a-table :columns="memberLevelColumns" :data="memberLevelData" :pagination="false" size="small">
-            <template #level="{ record }">
-              <a-tag :color="record.color">{{ record.level }}</a-tag>
-            </template>
-      </a-table>
-            <template #percent="{ record }">
-              <a-progress :percent="record.percent" :color="record.color" size="small" />
-            </template>
-          </a-table>
-        </a-card>
-      </a-col>
-    </a-row>
-
-    <!-- ∏ÊæØ¡–±Ì -->
-    <a-row :gutter="[16, 16]" style="margin-top: 16px;">
-      <a-col :span="24">
-        <a-card title="◊Ó–¬∏ÊæØ" class="table-card">
-          <template #extra>
-            <a-link @click="$router.push('/alert')">≤Èø¥»´≤ø</a-link>
-          </template>
-          <a-table :columns="alertColumns" :data="alertList" :pagination="{ pageSize: 5 }" size="small">
-            <template #severity="{ record }">
-              <a-tag :color="getSeverityColor(record.severity)">{{ record.severity_text }}</a-tag>
-            </template>
-      </a-table>
-        </a-card>
-      </a-col>
-    </a-row>
+Ôªø<template>
+  <Breadcrumb :items="['Home','Portal','Dashboard','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="D a s h b o a r d">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />Êñ∞Âª∫</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="ÂÖ≥ÈîÆËØç"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">Êü•ËØ¢</a-button><a-button @click="handleReset">ÈáçÁΩÆ</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const deviceStats = ref({ total: 128, online: 96, offline: 32 })
-const memberStats = ref({ total: 845, vip: 56, active: 312, newThisMonth: 43 })
-const alertStats = ref({ pending: 7, critical: 2, warning: 3, info: 8, resolved: 6 })
+const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
-const deviceOnlineRate = computed(() => {
-  if (deviceStats.value.total === 0) return 0
-  return Math.round((deviceStats.value.online / deviceStats.value.total) * 100)
-})
-
-const alertResolveRate = computed(() => {
-  const total = alertStats.value.critical + alertStats.value.warning + alertStats.value.info
-  if (total === 0) return 100
-  return Math.round((alertStats.value.resolved / total) * 100)
-})
-
-const memberLevelColumns = [
-  { title: 'µ»º∂', dataIndex: 'level', slot: 'level' },
-  { title: '»À ˝', dataIndex: 'count' },
-  { title: '’º±»', dataIndex: 'percent', slot: 'percent' }
+const columns = [
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'ÂêçÁß∞', dataIndex: 'name', width: 160 },
+  { title: 'Áä∂ÊÄÅ', dataIndex: 'status', width: 90 },
+  { title: 'ÂàõÂª∫Êó∂Èó¥', dataIndex: 'created_at', width: 170 }
 ]
 
-const memberLevelData = ref([
-  { level: '∆’Õ®ª·‘±', count: 520, percent: 62, color: 'gray' },
-  { level: '“¯ø®ª·‘±', count: 186, percent: 22, color: '#86909c' },
-  { level: 'Ωø®ª·‘±', count: 83, percent: 10, color: '#faad14' },
-  { level: 'VIP ª·‘±', count: 56, percent: 6, color: '#d91ad9' }
-])
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const alertColumns = [
-  { title: '…Ë±∏ID', dataIndex: 'device_id' },
-  { title: '∏ÊæØƒ⁄»›', dataIndex: 'message' },
-  { title: 'º∂±', dataIndex: 'severity', slot: 'severity' },
-  { title: ' ±º‰', dataIndex: 'created_at' }
-]
-
-const alertList = ref([
-  { device_id: 'MDM-001', message: '…Ë±∏¿Îœﬂ≥¨π˝30∑÷÷”', severity: 4, severity_text: 'ΩÙº±', created_at: '10:30' },
-  { device_id: 'MDM-015', message: 'µÁ¡øµÕ”⁄15%', severity: 3, severity_text: 'æØ∏Ê', created_at: '09:45' },
-  { device_id: 'MDM-008', message: 'OTA …˝º∂ ß∞‹', severity: 3, severity_text: 'æØ∏Ê', created_at: '09:20' },
-  { device_id: 'MDM-022', message: 'Õ¯¬Á–≈∫≈»ı', severity: 2, severity_text: 'Ã· æ', created_at: '08:55' },
-  { device_id: 'MDM-003', message: '…Ë±∏÷ÿ∆Ù', severity: 2, severity_text: 'Ã· æ', created_at: '08:30' }
-])
-
-const getSeverityColor = (severity) => ({ 4: 'red', 3: 'orange', 2: 'blue', 1: 'green' }[severity] || 'gray')
-
-const loadData = async () => {
+async function loadData() {
   try {
-    const token = localStorage.getItem('token')
-    // ≥¢ ‘¥”∫Û∂Àº”‘ÿ’Ê µ ˝æ›
-    const res = await fetch('/api/dashboard/stats', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-    if (res.ok) {
-      const data = await res.json()
-      if (data.code === 0) {
-        const d = data.data || {}
-        deviceStats.value.total = d.device_total || d.total_devices || deviceStats.value.total
-        deviceStats.value.online = d.device_online || d.online_devices || deviceStats.value.online
-        deviceStats.value.offline = d.device_offline || d.offline_devices || deviceStats.value.offline
-      }
-    }
-  } catch (e) {
-    console.warn('º”‘ÿ“«±Ì≈Ã ˝æ› ß∞‹£¨ π”√ƒ£ƒ‚ ˝æ›:', e)
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('Âä†ËΩΩÂ§±Ë¥•: ' + err.message)
+  } finally {
+    loading.value = false
   }
 }
 
-onMounted(() => {
-  loadData()
-})
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.dashboard-container {
-  padding: 0;
-}
-
-.breadcrumb {
-  margin-bottom: 16px;
-}
-
-.stat-card {
-  border-radius: 8px;
-  transition: box-shadow 0.3s;
-}
-
-.stat-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.stat-unit {
-  font-size: 14px;
-  color: #86909c;
-  margin-left: 4px;
-}
-
-.stat-trend {
-  margin-top: 8px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.stat-trend.up { color: #52c41a; }
-.stat-trend.down { color: #ff4d4f; }
-.stat-trend.warn { color: #faad14; }
-
-.chart-card {
-  border-radius: 8px;
-}
-
-.chart-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 0;
-  gap: 20px;
-}
-
-.device-dist {
-  display: flex;
-  gap: 24px;
-}
-
-.dist-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #4e5969;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.dot.green { background: #52c41a; }
-.dot.red { background: #ff4d4f; }
-.dot.orange { background: #faad14; }
-.dot.blue { background: #1890ff; }
-
-.table-card {
-  border-radius: 8px;
-}
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

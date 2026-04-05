@@ -1,39 +1,18 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="company-list-page">
-    <a-card class="general-card" title="权限组管理">
+  <Breadcrumb :items="['Home','Permissions','Permissiongroups','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="P e r m i s s i o n g r o u p s">
       <template #extra>
-        <a-button type="primary" @click="addGroup"><icon-plus />新建</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <div class="search-bar">
-        <a-input-search v-model="searchKey" placeholder="搜索..." style="width: 260px" @search="loadGroups" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
       </div>
-      <a-table :columns="columns" :data="groups" :loading="loading" :pagination="{ pageSize: 10 }" row-key="id">
-        <template #status="{ record }">
-          <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '启用' : '禁用' }}</a-tag>
-        </template>
-      </a-table>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="editGroup(record)">「编辑」</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">「删除」</a-button>
-          </a-space>
-        </template>
-      </a-table>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑权限组' : '新建权限组'" @before-ok="submitForm">
-      <a-form :model="formData" layout="vertical">
-        <a-form-item label="权限组名称" required>
-          <a-input v-model="formData.group_name" placeholder="请输入" />
-        </a-form-item>
-        <a-form-item label="权限组编码">
-          <a-input v-model="formData.group_code" placeholder="请输入" />
-        </a-form-item>
-      </a-form>
-    </a-modal>
   </div>
 </template>
 
@@ -42,56 +21,37 @@ import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const searchKey = ref('')
 const loading = ref(false)
-const formVisible = ref(false)
-const isEdit = ref(false)
-const formData = ref({ group_name: '', group_code: '' })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '权限组编码', dataIndex: 'group_code', width: 150 },
-  { title: '权限组名称', dataIndex: 'group_name', width: 200 },
-  { title: '描述', dataIndex: 'description', width: 200 },
-  { title: '状态', slotName: 'status', width: 80 },
-  { title: '操作', slotName: 'actions', width: 120, fixed: 'right' },
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const groups = ref([
-  { id: 1, group_code: 'G001', group_name: '管理员', description: '系统管理员', status: 'active' },
-  { id: 2, group_code: 'G002', group_name: '普通用户', description: '普通用户权限', status: 'active' },
-])
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const loadGroups = async () => {
-  loading.value = true
-  await new Promise(r => setTimeout(r, 300))
-  loading.value = false
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
 
-const addGroup = () => {
-  isEdit.value = false
-  formData.value = { group_name: '', group_code: '' }
-  formVisible.value = true
-}
-
-const editGroup = (record: any) => {
-  isEdit.value = true
-  formData.value = { ...record }
-  formVisible.value = true
-}
-
-const submitForm = async (done: (val: boolean) => void) => {
-  Message.success(isEdit.value ? '保存成功' : '创建成功')
-  done(true)
-}
-
-const handleDelete = (record: any) => {
-  Message.success('删除成功')
-}
-
-onMounted(() => loadGroups())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.company-list-page { padding: 16px; }
-.search-bar { margin-bottom: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

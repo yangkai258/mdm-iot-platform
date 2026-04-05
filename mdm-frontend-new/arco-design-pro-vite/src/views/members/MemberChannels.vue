@@ -1,47 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="会员渠道统计">
+  <Breadcrumb :items="['Home','Members','Memberchannels','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="M e m b e r c h a n n e l s">
       <template #extra>
-        <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16" style="margin-bottom: 16px">
-        <a-col :span="6"><a-statistic title="总渠道数" :value="stats.total" /></a-col>
-        <a-col :span="6"><a-statistic title="活跃渠道" :value="stats.active" color="green" /></a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
-      </a-table>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const stats = reactive({ total: 0, active: 0 })
-const data = ref([])
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '渠道名称', dataIndex: 'name', width: 180 },
-  { title: '会员数', dataIndex: 'member_count', width: 100 },
-  { title: '新增会员', dataIndex: 'new_count', width: 100 },
-  { title: '状态', dataIndex: 'status', width: 90 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadData = async () => {
-  loading.value = true
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const res = await fetch('/api/members/channel-stats', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') } }).then(r => r.json())
-    data.value = res.data?.list || []
-    pagination.total = data.value.length
-  } catch { data.value = [] } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
-const onPageChange = (page) => { pagination.current = page; loadData() }
-onMounted(() => loadData())
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
-</a-card>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

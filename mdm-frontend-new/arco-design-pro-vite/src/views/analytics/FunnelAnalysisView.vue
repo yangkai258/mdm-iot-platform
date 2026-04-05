@@ -1,330 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="pro-page-container">
-    <!-- √Ê∞¸–º -->
-    <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item> ◊“≥</a-breadcrumb-item>
-      <a-breadcrumb-item> ˝æ›∑÷Œˆ</a-breadcrumb-item>
-      <a-breadcrumb-item>¬©∂∑∑÷Œˆ</a-breadcrumb-item>
-    </a-breadcrumb>
-
-    <!-- ≤Ÿ◊˜¿∏ -->
-    <div class="pro-action-bar">
-      <a-space>
-        <a-button type="primary" @click="openCreateModal">¥¥Ω®¬©∂∑</a-button>
-      </a-space>
-    </div>
-
-    <!-- …∏—°«¯ -->
-    <div class="pro-filter-bar">
-      <a-card class="filter-card">
-        <a-space wrap>
-          <a-input-search v-model="searchKeyword" placeholder="À—À˜¬©∂∑√˚≥∆" style="width: 240px" search-button @search="loadFunnels" />
-          <a-select v-model="filterStatus" placeholder="◊¥Ã¨" allow-clear style="width: 120px" @change="loadFunnels">
-            <a-option value="active">∆Ù”√</a-option>
-            <a-option value="inactive">Õ£”√</a-option>
-          </a-select>
-        </a-space>
-      </a-card>
-    </div>
-
-    <!-- ¬©∂∑¡–±Ì -->
-    <div class="pro-content-area">
-      <a-table :columns="columns" :data="funnels" :loading="loading" row-key="id" :pagination="{ pageSize: 10 }" @page-change="onPageChange">
-        <template #name="{ record }">
-          <a-link @click="openFunnelDetail(record)">{{ record.name }}</a-link>
-        </template>
-      </a-table>
-        <template #status="{ record }">
-          <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
-            {{ record.status === 'active' ? '∆Ù”√' : 'Õ£”√' }}
-          </a-tag>
-        </template>
-        <template #conversion_rate="{ record }">
-          <span :class="record.conversion_rate < 30 ? 'text-danger' : ''">{{ record.conversion_rate || 0 }}%</span>
-        </template>
-        <template #actions="{ record }">
-          <a-space>
-            <a-button type="text" size="small" @click="openFunnelDetail(record)">≤Èø¥</a-button>
-            <a-button type="text" size="small" @click="openEditModal(record)">±‡º≠</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">…æ≥˝</a-button>
-          </a-space>
-        </template>
-      </a-table>
-    </div>
-
-    <!-- ¬©∂∑œÍ«È√Ê∞Â -->
-    <a-drawer v-model:visible="detailVisible" :title="currentFunnel?.name || '¬©∂∑œÍ«È'" :width="800" @before-ok="handleSaveFunnel">
-      <div v-if="currentFunnel">
-        <!-- ¬©∂∑ø… ”ªØ -->
-        <a-card title="¬©∂∑◊™ªØ" class="funnel-visualization">
-          <div class="funnel-container">
-            <div v-for="(step, index) in funnelSteps" :key="index" class="funnel-step">
-              <div class="funnel-bar-wrapper">
-                <div
-                  class="funnel-bar"
-                  :style="{ width: step.percent + '%', backgroundColor: getStepColor(index) }"
-                >
-                  <span class="funnel-bar-label">{{ step.name }}</span>
-                </div>
-              </div>
-              <div class="funnel-meta">
-                <span class="funnel-count">{{ step.value }}</span>
-                <span class="funnel-rate" v-if="index > 0">°˝ {{ step.conversion_rate }}%</span>
-              </div>
-            </div>
-          </div>
-        </a-card>
-
-        <!-- ¬©∂∑≤Ω÷ËœÍ«È -->
-        <a-card title="≤Ω÷ËœÍ«È" class="steps-detail">
-          <a-table :columns="stepColumns" :data="funnelSteps" :pagination="false" row-key="name" size="small">
-            <template #conversion="{ record, rowIndex }">
-              <span v-if="rowIndex === 0">°™</span>
-              <span v-else>{{ record.conversion_rate }}%</span>
-            </template>
-      </a-table>
-        </a-card>
-
-        <!--  ±º‰…∏—° -->
-        <div class="detail-filter">
-          <a-space>
-            <a-select v-model="detailTimeRange" style="width: 120px" @change="loadFunnelData">
-              <a-option value="today">ΩÒ»’</a-option>
-              <a-option value="week">Ω¸7ÃÏ</a-option>
-              <a-option value="month">Ω¸30ÃÏ</a-option>
-            </a-select>
-          </a-space>
-        </div>
+Ôªø<template>
+  <Breadcrumb :items="['Home','Analytics','Funnelanalysis','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="F u n n e l a n a l y s i s">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />Êñ∞Âª∫</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="ÂÖ≥ÈîÆËØç"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">Êü•ËØ¢</a-button><a-button @click="handleReset">ÈáçÁΩÆ</a-button></a-form-item>
+        </a-form>
       </div>
-    </a-drawer>
-
-    <!-- ¥¥Ω®/±‡º≠¬©∂∑µØ¥∞ -->
-    <a-modal v-model:visible="formVisible" :title="isEditing ? '±‡º≠¬©∂∑' : '¥¥Ω®¬©∂∑'" :width="560" @before-ok="handleSaveFunnel" @cancel="formVisible = false">
-      <a-form :model="funnelForm" layout="vertical" ref="formRef">
-        <a-form-item label="¬©∂∑√˚≥∆" field="name" required>
-          <a-input v-model="funnelForm.name" placeholder="«Î ‰»Î¬©∂∑√˚≥∆" />
-        </a-form-item>
-        <a-form-item label="√Ë ˆ" field="description">
-          <a-textarea v-model="funnelForm.description" placeholder="«Î ‰»Î√Ë ˆ" :max-length="200" />
-        </a-form-item>
-        <a-form-item label="◊¥Ã¨" field="status">
-          <a-switch v-model="funnelForm.status" checked-value="active" unchecked-value="inactive" />
-        </a-form-item>
-        <a-form-item label="≤Ω÷Ë∂®“Â" field="steps">
-          <div v-for="(step, idx) in funnelForm.steps" :key="idx" class="step-item">
-            <a-input v-model="step.name" placeholder="≤Ω÷Ë√˚≥∆" style="flex: 1" />
-            <a-input-number v-model="step.value" placeholder=" ˝÷µ" style="width: 120px; margin-left: 8px" />
-            <a-button type="text" status="danger" @click="removeStep(idx)" :disabled="funnelForm.steps.length <= 2">…æ≥˝</a-button>
-          </div>
-          <a-button type="dashed" @click="addStep" style="margin-top: 8px; width: 100%">+ ÃÌº”≤Ω÷Ë</a-button>
-        </a-form-item>
-      </a-form>
-    </a-modal>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
-import * as analytics from '@/api/analytics'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-// ◊¥Ã¨
-const funnels = ref([])
 const loading = ref(false)
-const searchKeyword = ref('')
-const filterStatus = ref('')
-const detailVisible = ref(false)
-const formVisible = ref(false)
-const isEditing = ref(false)
-const currentFunnel = ref(null)
-const funnelSteps = ref([])
-const detailTimeRange = ref('week')
-
-const funnelForm = reactive({
-  name: '',
-  description: '',
-  status: 'active',
-  steps: [{ name: '≤Ω÷Ë1', value: 1000 }, { name: '≤Ω÷Ë2', value: 500 }]
-})
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '¬©∂∑√˚≥∆', slotName: 'name' },
-  { title: '√Ë ˆ', dataIndex: 'description', ellipsis: true },
-  { title: '◊¥Ã¨', slotName: 'status' },
-  { title: '◊‹”√ªß ˝', dataIndex: 'total_users', width: 100 },
-  { title: '◊Ó÷’◊™ªØ¬ ', slotName: 'conversion_rate', width: 110 },
-  { title: '¥¥Ω® ±º‰', dataIndex: 'created_at', width: 170 },
-  { title: '≤Ÿ◊˜', slotName: 'actions', width: 180 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'ÂêçÁß∞', dataIndex: 'name', width: 160 },
+  { title: 'Áä∂ÊÄÅ', dataIndex: 'status', width: 90 },
+  { title: 'ÂàõÂª∫Êó∂Èó¥', dataIndex: 'created_at', width: 170 }
 ]
 
-const stepColumns = [
-  { title: '≤Ω÷Ë', dataIndex: 'name' },
-  { title: '”√ªß ˝', dataIndex: 'value' },
-  { title: '’º◊‹”√ªß±»¿˝', dataIndex: 'percent', width: 130 },
-  { title: '…œ“ª≤Ω◊™ªØ¬ ', slotName: 'conversion', width: 130 }
-]
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-async function loadFunnels() {
-  loading.value = true
+async function loadData() {
   try {
-    const res = await analytics.getFunnelList({
-      keyword: searchKeyword.value,
-      status: filterStatus.value
-    })
-    funnels.value = res.data?.list || []
-  } catch (e) {
-    console.error('loadFunnels error:', e)
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('Âä†ËΩΩÂ§±Ë¥•: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-async function loadFunnelData() {
-  if (!currentFunnel.value) return
-  try {
-    const res = await analytics.getFunnelData(currentFunnel.value.id, {
-      time_range: detailTimeRange.value
-    })
-    const data = res.data?.steps || []
-    const max = Math.max(...data.map(s => s.value), 1)
-    funnelSteps.value = data.map((s, i) => ({
-      ...s,
-      percent: Math.round((s.value / max) * 100),
-      conversion_rate: i === 0 ? 100 : Math.round((s.value / data[i - 1].value) * 100)
-    }))
-  } catch (e) {
-    console.error('loadFunnelData error:', e)
-  }
-}
-
-function openFunnelDetail(record) {
-  currentFunnel.value = record
-  detailVisible.value = true
-  loadFunnelData()
-}
-
-function openCreateModal() {
-  isEditing.value = false
-  Object.assign(funnelForm, { name: '', description: '', status: 'active', steps: [{ name: '≤Ω÷Ë1', value: 1000 }, { name: '≤Ω÷Ë2', value: 500 }] })
-  formVisible.value = true
-}
-
-function openEditModal(record) {
-  isEditing.value = true
-  currentFunnel.value = record
-  Object.assign(funnelForm, {
-    name: record.name,
-    description: record.description,
-    status: record.status,
-    steps: record.steps || [{ name: '≤Ω÷Ë1', value: 1000 }, { name: '≤Ω÷Ë2', value: 500 }]
-  })
-  formVisible.value = true
-}
-
-async function handleSaveFunnel() {
-  try {
-    if (isEditing.value) {
-      await analytics.updateFunnel(currentFunnel.value.id, funnelForm)
-    } else {
-      await analytics.createFunnel(funnelForm)
-    }
-    formVisible.value = false
-    detailVisible.value = false
-    loadFunnels()
-  } catch (e) {
-    console.error('handleSaveFunnel error:', e)
-  }
-}
-
-async function handleDelete(record) {
-  try {
-    await analytics.deleteFunnel(record.id)
-    loadFunnels()
-  } catch (e) {
-    console.error('handleDelete error:', e)
-  }
-}
-
-function addStep() {
-  funnelForm.steps.push({ name: `≤Ω÷Ë${funnelForm.steps.length + 1}`, value: 0 })
-}
-
-function removeStep(idx) {
-  funnelForm.steps.splice(idx, 1)
-}
-
-function onPageChange(page) {
-  loadFunnels()
-}
-
-function getStepColor(index) {
-  const colors = ['#1650ff', '#0bc6b0', '#7b61ff', '#ff7a00', '#f53f3f', '#0fbf60']
-  return colors[index % colors.length]
-}
-
-onMounted(() => {
-  loadFunnels()
-})
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.funnel-visualization {
-  margin-bottom: 16px;
-}
-.funnel-container {
-  padding: 16px 0;
-}
-.funnel-step {
-  margin-bottom: 12px;
-}
-.funnel-bar-wrapper {
-  display: flex;
-  align-items: center;
-}
-.funnel-bar {
-  height: 40px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  transition: width 0.6s ease;
-  min-width: 60px;
-}
-.funnel-bar-label {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-.funnel-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 4px;
-  padding-left: 8px;
-}
-.funnel-count {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-}
-.funnel-rate {
-  font-size: 12px;
-  color: #f53f3f;
-}
-.steps-detail {
-  margin-bottom: 16px;
-}
-.detail-filter {
-  margin-bottom: 8px;
-}
-.step-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.text-danger {
-  color: #f53f3f;
-}
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

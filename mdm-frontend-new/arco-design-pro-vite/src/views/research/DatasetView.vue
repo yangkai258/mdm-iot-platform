@@ -1,52 +1,52 @@
-<template>
+ï»¿<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="Êý¾Ý¼¯¹ÜÀí">
+    <a-card class="general-card" title="æ•°æ®é›†ç®¡ç†">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate"><icon-plus />ÐÂ½¨Êý¾Ý¼¯</a-button>
-          <a-button @click="loadData"><icon-refresh />Ë¢ÐÂ</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />æ–°å»ºæ•°æ®é›†</a-button>
+          <a-button @click="loadData"><icon-refresh />åˆ·æ–°</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="Êý¾Ý¼¯Ãû³Æ">
-            <a-input v-model="form.keyword" placeholder="ÇëÊäÈë" @pressEnter="loadData" />
+          <a-form-item label="æ•°æ®é›†åç§°">
+            <a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
-            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">ÖØÖÃ</a-button>
+            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">é‡ç½®</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="openEdit(record)">±à¼­</a-button>
-          <a-button type="text" size="small" @click="exportData(record)">µ¼³ö</a-button>
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">É¾³ý</a-button>
+          <a-button type="text" size="small" @click="openEdit(record)">ç¼–è¾‘</a-button>
+          <a-button type="text" size="small" @click="exportData(record)">å¯¼å‡º</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">åˆ é™¤</a-button>
         </template>
       </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '±à¼­Êý¾Ý¼¯' : 'ÐÂ½¨Êý¾Ý¼¯'" :width="560">
+    <a-modal v-model="formVisible" :title="isEdit ? 'ç¼–è¾‘æ•°æ®é›†' : 'æ–°å»ºæ•°æ®é›†'" :width="560">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="Êý¾Ý¼¯Ãû³Æ"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="Êý¾Ý¼¯ÃèÊö"><a-textarea v-model="form.description" :rows="3" /></a-form-item>
-        <a-form-item label="Êý¾ÝÀàÐÍ">
+        <a-form-item label="æ•°æ®é›†åç§°"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="æ•°æ®é›†æè¿°"><a-textarea v-model="form.description" :rows="3" /></a-form-item>
+        <a-form-item label="æ•°æ®ç±»åž‹">
           <a-select v-model="form.data_type" style="width: 100%">
-            <a-option value="image">Í¼Æ¬</a-option>
-            <a-option value="audio">ÒôÆµ</a-option>
-            <a-option value="text">ÎÄ±¾</a-option>
+            <a-option value="image">å›¾ç‰‡</a-option>
+            <a-option value="audio">éŸ³é¢‘</a-option>
+            <a-option value="text">æ–‡æœ¬</a-option>
           </a-select>
         </a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">È¡Ïû</a-button>
-        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
+        <a-button @click="formVisible = false">å–æ¶ˆ</a-button>
+        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
       </template>
     </a-modal>
   </div>
@@ -64,11 +64,11 @@ const form = reactive({ keyword: '', name: '', description: '', data_type: 'imag
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: 'Êý¾Ý¼¯Ãû³Æ', dataIndex: 'name', width: 220 },
-  { title: 'Êý¾ÝÀàÐÍ', dataIndex: 'data_type', width: 100 },
-  { title: 'Ñù±¾ÊýÁ¿', dataIndex: 'sample_count', width: 100 },
-  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at', width: 170 },
-  { title: '²Ù×÷', slotName: 'actions', width: 200 }
+  { title: 'æ•°æ®é›†åç§°', dataIndex: 'name', width: 220 },
+  { title: 'æ•°æ®ç±»åž‹', dataIndex: 'data_type', width: 100 },
+  { title: 'æ ·æœ¬æ•°é‡', dataIndex: 'sample_count', width: 100 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 },
+  { title: 'æ“ä½œ', slotName: 'actions', width: 200 }
 ]
 
 const loadData = async () => {
@@ -84,9 +84,9 @@ const loadData = async () => {
 
 const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', description: '', data_type: 'image' }); formVisible.value = true }
 const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '¸üÐÂ³É¹¦' : '´´½¨³É¹¦'); loadData() }
-const exportData = () => Message.info('µ¼³ö¹¦ÄÜ¿ª·¢ÖÐ')
-const handleDelete = () => { Message.success('É¾³ý³É¹¦'); loadData() }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? 'æ›´æ–°æˆåŠŸ' : 'åˆ›å»ºæˆåŠŸ'); loadData() }
+const exportData = () => Message.info('å¯¼å‡ºåŠŸèƒ½å¼€å‘ä¸­')
+const handleDelete = () => { Message.success('åˆ é™¤æˆåŠŸ'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())

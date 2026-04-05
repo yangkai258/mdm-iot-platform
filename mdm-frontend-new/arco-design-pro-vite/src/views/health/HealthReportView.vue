@@ -1,116 +1,53 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+Ôªø<template>
+  <Breadcrumb :items="['Home','Health','Healthreport','']" />
   <div class="page-container">
-    <a-card class="general-card" title="Ω°øµ±®∏Ê">
+    <a-card class="general-card" title="H e a l t h r e p o r t">
       <template #extra>
-        <a-button type="primary" @click="handleGenerate"><icon-plus />…˙≥…±®∏Ê</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />Êñ∞Âª∫</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="±®∏Ê÷‹∆⁄">
-            <a-select v-model="form.period" placeholder="«Î—°‘Ò" style="width: 140px" allow-clear>
-              <a-option value="week">÷‹±®</a-option>
-              <a-option value="month">‘¬±®</a-option>
-              <a-option value="quarter">ºæ±®</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
-            <a-button @click="handleReset">÷ÿ÷√</a-button>
-          </a-form-item>
+          <a-form-item label="ÂÖ≥ÈîÆËØç"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">Êü•ËØ¢</a-button><a-button @click="handleReset">ÈáçÁΩÆ</a-button></a-form-item>
         </a-form>
       </div>
-      <a-table
-      :columns="columns"
-      :data="data"
-      :loading="loading"
-      :pagination="paginationConfig"
-      @page-change="onPageChange"
-    />
-    </a-table>
-  </a-card>
-</div></template>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
+  </div>
+</template>
 
-<script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
-import axios from 'axios'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
 import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-
-const form = reactive({ period: '' })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '±®∏Ê÷‹∆⁄', dataIndex: 'period', width: 200 },
-  { title: '∆Ωæ˘–ƒ¬ ', dataIndex: 'heart_rate', width: 100 },
-  { title: '∆Ωæ˘—™—π', dataIndex: 'blood_pressure', width: 120 },
-  { title: '∆Ωæ˘ÀØ√ﬂ(–° ±)', dataIndex: 'sleep_hours', width: 120 },
-  { title: '‘À∂Ø ±≥§(∑÷÷”)', dataIndex: 'exercise_minutes', width: 130 },
-  { title: '◊€∫œ∆¿∑÷', dataIndex: 'overall_score', width: 100 },
-  { title: '…˙≥… ±º‰', dataIndex: 'created_at', width: 160 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'ÂêçÁß∞', dataIndex: 'name', width: 160 },
+  { title: 'Áä∂ÊÄÅ', dataIndex: 'status', width: 90 },
+  { title: 'ÂàõÂª∫Êó∂Èó¥', dataIndex: 'created_at', width: 170 }
 ]
 
-const data = ref([])
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const paginationConfig = computed(() => ({
-  current: pagination.current,
-  pageSize: pagination.pageSize,
-  total: pagination.total,
-  showTotal: true,
-  showPageSize: true
-}))
-
-const loadData = async () => {
-  loading.value = true
+async function loadData() {
   try {
-    const params = { page: pagination.current, page_size: pagination.pageSize }
-    if (form.period) params.type = form.period
-    const res = await axios.get('/api/health/reports', { params })
-    if (res.data.code === 0) {
-      data.value = res.data.data.list || []
-      pagination.total = res.data.data.pagination?.total || 0
-    } else {
-      loadMockData()
-    }
-  } catch {
-    loadMockData()
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('Âä†ËΩΩÂ§±Ë¥•: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-const loadMockData = () => {
-  data.value = [
-    { id: 1, period: '2026-03-16 ÷¡ 2026-03-22', heart_rate: 72, blood_pressure: '120/80', sleep_hours: 7.5, exercise_minutes: 45, overall_score: 85, created_at: '2026-03-22 10:00:00' },
-    { id: 2, period: '2026-03-09 ÷¡ 2026-03-15', heart_rate: 74, blood_pressure: '122/82', sleep_hours: 7.2, exercise_minutes: 40, overall_score: 80, created_at: '2026-03-15 10:00:00' },
-    { id: 3, period: '2026-03-02 ÷¡ 2026-03-08', heart_rate: 70, blood_pressure: '118/78', sleep_hours: 7.8, exercise_minutes: 50, overall_score: 88, created_at: '2026-03-08 10:00:00' },
-    { id: 4, period: '2026-02-23 ÷¡ 2026-03-01', heart_rate: 73, blood_pressure: '120/82', sleep_hours: 7.0, exercise_minutes: 35, overall_score: 78, created_at: '2026-03-01 10:00:00' }
-  ]
-  pagination.total = data.value.length
-}
-
-const handleReset = () => {
-  form.period = ''
-  loadData()
-}
-
-const handleGenerate = () => {
-  Message.info('’˝‘⁄…˙≥…Ω°øµ±®∏Ê...')
-  setTimeout(() => {
-    Message.success('±®∏Ê…˙≥…≥…π¶')
-    loadData()
-  }, 1000)
-}
-
-const onPageChange = (page) => {
-  pagination.current = page
-  loadData()
-}
-
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
 onMounted(() => { loadData() })
 </script>
 
@@ -118,5 +55,3 @@ onMounted(() => { loadData() })
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-
-

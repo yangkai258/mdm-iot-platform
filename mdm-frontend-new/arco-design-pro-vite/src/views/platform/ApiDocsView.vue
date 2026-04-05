@@ -1,42 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="API文档">
-      <a-tabs>
-        <a-tab-pane key="list" title="接口列表">
-          <a-table :columns="columns" :data="apiList" row-key="path">
-            <template #method="{ record }"><a-tag :color="methodColor(record.method)">{{ record.method }}</a-tag></template>
-          </a-table>
-        </a-tab-pane>
-        <a-tab-pane key="detail" title="接口详情">
-          <a-empty description="选择一个接口查看详情" />
-        </a-tab-pane>
-      </a-tabs>
+  <Breadcrumb :items="['Home','Platform','Apidocs','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="A p i d o c s">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
+      </template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
-      </a-table>
 
-<script setup>
-import { ref } from 'vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const apiList = ref([
-  { path: '/api/devices', method: 'GET', description: '设备列表' },
-  { path: '/api/devices/:id', method: 'GET', description: '设备详情' },
-  { path: '/api/devices', method: 'POST', description: '创建设备' },
-  { path: '/api/members', method: 'GET', description: '会员列表' },
-  { path: '/api/alerts', method: 'GET', description: '告警列表' },
-  { path: '/api/ota/packages', method: 'GET', description: 'OTA包列表' },
-])
+const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '方法', slotName: 'method', width: 100 },
-  { title: '路径', dataIndex: 'path', width: 240 },
-  { title: '描述', dataIndex: 'description' }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const methodColor = (m) => ({ GET: 'blue', POST: 'green', PUT: 'orange', DELETE: 'red' }[m] || 'gray')
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

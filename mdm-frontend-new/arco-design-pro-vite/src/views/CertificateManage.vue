@@ -1,79 +1,57 @@
-<template>
-  <div class="container">
-    <a-card>
-      <template #title>
-        <a-space><icon-certificate /> 证书管理</a-space>
-      </template>
+﻿<template>
+  <Breadcrumb :items="['Home','Misc','Certificatemanage','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="C e r t i f i c a t e m a n a g e">
       <template #extra>
-        <a-button type="primary" @click="handleCreate">
-          <template #icon><icon-plus /></template>
-          创建证书
-        </a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-
-      <a-row :gutter="16" style="margin-bottom: 16px">
-        <a-col :span="6">
-          <a-card>
-            <a-statistic title="有效证书" :value="stats.valid" />
-          </a-card>
-        </a-col>
-        <a-col :span="6">
-          <a-card>
-            <a-statistic title="即将过期" :value="stats.expiring" :value-style="{ color: '#E6A23C' }" />
-          </a-card>
-        </a-col>
-        <a-col :span="6">
-          <a-card>
-            <a-statistic title="已过�? :value="stats.expired" :value-style="{ color: '#F56C6C' }" />
-          </a-card>
-        </a-col>
-      </a-row>
-
-      <a-table :columns="columns" :data="certificates">
-        <template #status="{ record }">
-          <a-tag :color="getStatusColor(record.status)">{{ getStatusLabel(record.status) }}</a-tag>
-        </template>
-        <template #expiry="{ record }">
-          <span :class="{ expired: record.status === 'expired' }">{{ record.expiresAt }}</span>
-        </template>
-        <template #actions="{ record }">
-          <a-link @click="handleView(record)">详情</a-link>
-          <a-link @click="handleRenew(record)">续期</a-link>
-          <a-link @click="handleRevoke(record)">吊销</a-link>
-        </template>
-      </a-table>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const stats = reactive({ valid: 45, expiring: 5, expired: 2 })
+const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '证书ID', dataIndex: 'id' },
-  { title: '证书名称', dataIndex: 'name' },
-  { title: '设备', dataIndex: 'deviceId' },
-  { title: '状�?, slotName: 'status', width: 120 },
-  { title: '过期时间', slotName: 'expiry', width: 180 },
-  { title: '操作', slotName: 'actions', width: 180 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const certificates = ref([
-  { id: 'C001', name: '设备证书', deviceId: 'D001', status: 'valid', expiresAt: '2027-03-28' }
-])
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const getStatusColor = (s) => ({ valid: 'green', expiring: 'orange', expired: 'red' }[s] || 'gray')
-const getStatusLabel = (s) => ({ valid: '有效', expiring: '即将过期', expired: '已过�? }[s] || s)
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
+}
 
-const handleCreate = () => { }
-const handleView = (r) => { }
-const handleRenew = (r) => { }
-const handleRevoke = (r) => { }
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.container { padding: 16px; }
-.expired { color: #F56C6C; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

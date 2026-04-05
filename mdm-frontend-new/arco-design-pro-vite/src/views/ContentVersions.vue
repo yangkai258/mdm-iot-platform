@@ -1,83 +1,57 @@
-<template>
-  <div class="container">
-    <a-card>
-      <template #title>
-        <a-space><icon-history /> 内容版本历史</a-space>
+﻿<template>
+  <Breadcrumb :items="['Home','Misc','Contentversions','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="C o n t e n t v e r s i o n s">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-
-      <a-row :gutter="16">
-        <a-col :span="6">
-          <a-card title="版本时间轴" size="small">
-            <a-timeline>
-              <a-timeline-item v-for="v in versions" :key="v.version" :color="v.current ? 'green' : 'gray'">
-                <template #label>v{{ v.version }}</template>
-                <a-space direction="vertical" size="mini">
-                  <span class="time">{{ v.createdAt }}</span>
-                  <span class="user">{{ v.createdBy }}</span>
-                  <a-tag v-if="v.current" color="green" size="small">当前</a-tag>
-                </a-space>
-              </a-timeline-item>
-            </a-timeline>
-          </a-card>
-        </a-col>
-        <a-col :span="18">
-          <a-card title="版本详情">
-            <a-descriptions :column="2" bordered>
-              <a-descriptions-item label="版本号">v{{ selectedVersion.version }}</a-descriptions-item>
-              <a-descriptions-item label="状态">
-                <a-tag :color="selectedVersion.current ? 'green' : 'gray'">{{ selectedVersion.current ? '当前版本' : '历史版本' }}</a-tag>
-              </a-descriptions-item>
-              <a-descriptions-item label="创建时间">{{ selectedVersion.createdAt }}</a-descriptions-item>
-              <a-descriptions-item label="创建人">{{ selectedVersion.createdBy }}</a-descriptions-item>
-              <a-descriptions-item label="变更说明" :span="2>{{ selectedVersion.changeSummary }}</a-descriptions-item>
-            </a-descriptions>
-
-            <a-divider>文件信息</a-divider>
-            <a-table :columns="fileColumns" :data="selectedVersion.files" size="small" :pagination="false">
-              <template #size="{ record }">{{ (record.size / 1024).toFixed(2) }} KB</template>
-            </a-table>
-          </a-card>
-
-          <a-card title="版本对比" style="margin-top: 16px">
-            <template #extra>
-              <a-space>
-                <a-select v-model="compareVersion" placeholder="选择对比版本" style="width: 150px">
-                  <a-option v-for="v in versions" :key="v.version" :value="v.version">{{ v.version }}</a-option>
-                </a-select>
-                <a-button @click="handleCompare">对比</a-button>
-              </a-space>
-            </template>
-            <a-diff :old-value="diffOld" language="json" />
-          </a-card>
-        </a-col>
-      </a-row>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const versions = ref([
-  { version: '3', createdAt: '2026-03-28 10:00', createdBy: 'admin', current: true, changeSummary: '更新UI组件', files: [{ name: 'index.vue', size: 12340 }] },
-  { version: '2', createdAt: '2026-03-27 15:00', createdBy: 'dev', current: false, changeSummary: '修复bug', files: [{ name: 'index.vue', size: 12000 }] },
-  { version: '1', createdAt: '2026-03-26 09:00', createdBy: 'dev', current: false, changeSummary: '初始版本', files: [{ name: 'index.vue', size: 10000 }] }
-])
-const selectedVersion = ref(versions.value[0])
-const compareVersion = ref('')
-const diffOld = ref('{}')
+const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
-const fileColumns = [
-  { title: '文件名', dataIndex: 'name' },
-  { title: '大小', slotName: 'size' },
-  { title: '哈希', dataIndex: 'hash' }
+const columns = [
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const handleCompare = () => { }
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.container { padding: 16px; }
-.time { font-size: 12px; color: #909399; }
-.user { font-size: 11px; color: #c0c4cc; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

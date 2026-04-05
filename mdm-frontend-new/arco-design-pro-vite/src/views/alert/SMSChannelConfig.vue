@@ -1,95 +1,47 @@
-﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="短信渠道配置">
+<template>
+  <Breadcrumb :items="['Home','Alert','SMSChannel','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="短信通知">
       <template #extra>
-        <a-space :size="12">
-          <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
-          <a-button @click="handleSearch"><icon-refresh />刷新</a-button>
-        </a-space>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="8">
-          <a-form-item label="渠道名称">
-            <a-input v-model="form.channel_name" placeholder="请输入" @pressEnter="handleSearch" />
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="handleSearch">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" row-key="id" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="状态"><a-select v-model="form.enabled" placeholder="选择状态" allow-clear style="width: 120px"><a-option value="1">启用</a-option><a-option value="0">禁用</a-option></a-select></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="520">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="渠道名称"><a-input v-model="form.channel_name" /></a-form-item>
-        <a-form-item label="服务商">
-          <a-select v-model="form.sms_provider">
-            <a-option value="aliyun">阿里云</a-option>
-            <a-option value="tencent">腾讯云</a-option>
-            <a-option value="huawei">华为云</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="AccessKey"><a-input v-model="form.access_key" /></a-form-item>
-        <a-form-item label="SecretKey"><a-input-password v-model="form.secret_key" /></a-form-item>
-        <a-form-item label="签名"><a-input v-model="form.sign_name" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const data = ref([])
-const modalVisible = ref(false)
-const modalTitle = ref('新建')
-const form = reactive({ channel_name: '', sms_provider: 'aliyun', access_key: '', secret_key: '', sign_name: '' })
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ enabled: '' })
+
 const columns = [
-  { title: '渠道名称', dataIndex: 'channel_name', width: 200 },
-  { title: '服务商', dataIndex: 'config', customRender: ({ record }) => record.config?.sms_provider || '-', width: 120 },
-  { title: '签名', dataIndex: 'config', customRender: ({ record }) => record.config?.sign_name || '-', width: 180 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '服务商', dataIndex: 'provider', width: 120 },
+  { title: 'AppKey', dataIndex: 'app_key', width: 180 },
+  { title: '签名', dataIndex: 'sign_name', width: 120 },
+  { title: '状态', dataIndex: 'enabled', width: 80 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const handleSearch = () => { loadData() }
-const handleReset = () => { form.channel_name = ''; loadData() }
-const handleCreate = () => { modalTitle.value = '新建'; modalVisible.value = true }
-const handleSubmit = async () => {
-  modalVisible.value = false
-  try {
-    await fetch('/api/alerts/channels', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token'), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ channel_type: 'sms', channel_name: form.channel_name, config: { sms_provider: form.sms_provider, access_key: form.access_key, secret_key: form.secret_key, sign_name: form.sign_name } })
-    })
-    Message.success('保存成功')
-    loadData()
-  } catch (e) { Message.error('保存失败') }
-}
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const loadData = async () => {
-  loading.value = true
-  try {
-    const res = await fetch('/api/alerts/channels?channel_type=sms', {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }
-  } catch (e) { Message.error('加载失败') } finally { loading.value = false }
-}
+async function loadData() { loading.value = true; data.value = []; loading.value = false }
+function handleCreate() {}
 onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

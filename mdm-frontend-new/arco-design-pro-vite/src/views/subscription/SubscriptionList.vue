@@ -1,31 +1,31 @@
-<template>
+ï»¿<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="pro-page-container">
 
-    <!-- ËÑË÷±íµ¥ -->
+    <!-- æœç´¢è¡¨å• -->
     <div class="pro-search-bar">
       <a-space wrap>
-        <a-input-search v-model="form.user_id" placeholder="ÓÃ»§ID" style="width: 160px" @search="loadData" search-button />
-        <a-select v-model="form.status" placeholder="¶©ÔÄ×´Ì¬" allow-clear style="width: 150px" @change="loadData">
-          <a-option value="active">ÉúĞ§ÖĞ</a-option>
-          <a-option value="expired">ÒÑ¹ıÆÚ</a-option>
-          <a-option value="cancelled">ÒÑÈ¡Ïû</a-option>
-          <a-option value="suspended">ÒÑÔİÍ£</a-option>
+        <a-input-search v-model="form.user_id" placeholder="ç”¨æˆ·ID" style="width: 160px" @search="loadData" search-button />
+        <a-select v-model="form.status" placeholder="è®¢é˜…çŠ¶æ€" allow-clear style="width: 150px" @change="loadData">
+          <a-option value="active">ç”Ÿæ•ˆä¸­</a-option>
+          <a-option value="expired">å·²è¿‡æœŸ</a-option>
+          <a-option value="cancelled">å·²å–æ¶ˆ</a-option>
+          <a-option value="suspended">å·²æš‚åœ</a-option>
         </a-select>
-        <a-input-search v-model="form.plan_name" placeholder="¼Æ»®Ãû³Æ" style="width: 160px" @search="loadData" search-button />
-        <a-button @click="handleReset">ÖØÖÃ</a-button>
+        <a-input-search v-model="form.plan_name" placeholder="è®¡åˆ’åç§°" style="width: 160px" @search="loadData" search-button />
+        <a-button @click="handleReset">é‡ç½®</a-button>
       </a-space>
     </div>
 
-    <!-- ²Ù×÷°´Å¥ -->
+    <!-- æ“ä½œæŒ‰é’® -->
     <div class="pro-action-bar">
-      <a-button type="primary" @click="showCreateModal">ĞÂ½¨¶©ÔÄ</a-button>
-      <a-button @click="loadData">Ë¢ĞÂ</a-button>
+      <a-button type="primary" @click="showCreateModal">æ–°å»ºè®¢é˜…</a-button>
+      <a-button @click="loadData">åˆ·æ–°</a-button>
     </div>
 
-    <!-- ¶©ÔÄÁĞ±í -->
+    <!-- è®¢é˜…åˆ—è¡¨ -->
     <div class="pro-content-area">
       <a-table
         :columns="columns"
@@ -37,14 +37,14 @@
       >
         <template #plan_type="{ record }">
           <a-tag :color="record.plan_type === 'yearly' ? 'blue' : 'green'">
-            {{ record.plan_type === 'yearly' ? 'Äê¸¶' : 'ÔÂ¸¶' }}
+            {{ record.plan_type === 'yearly' ? 'å¹´ä»˜' : 'æœˆä»˜' }}
           </a-tag>
         </template>
         <template #status="{ record }">
           <a-tag :color="getStatusColor(record.status)">{{ getStatusText(record.status) }}</a-tag>
         </template>
         <template #price="{ record }">
-          <span class="price">£¤{{ record.price }}</span>
+          <span class="price">ï¿¥{{ record.price }}</span>
         </template>
         <template #validity="{ record }">
           <span :class="{ 'text-expired': record.status === 'expired' }">
@@ -56,83 +56,83 @@
         </template>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="text" size="small" @click="showDetailModal(record)">ÏêÇé</a-button>
-            <a-button type="text" size="small" @click="handleRenew(record)" v-if="record.status === 'expired' || record.status === 'suspended'">Ğø·Ñ</a-button>
-            <a-button type="text" size="small" @click="handleCancelRenewal(record)" v-if="record.auto_renew && record.status === 'active'">È¡Ïû×Ô¶¯Ğø·Ñ</a-button>
-            <a-button type="text" size="small" @click="handleResume(record)" v-if="record.status === 'suspended'">»Ö¸´</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleCancel(record)" v-if="record.status === 'active' || record.status === 'suspended'">È¡Ïû¶©ÔÄ</a-button>
+            <a-button type="text" size="small" @click="showDetailModal(record)">è¯¦æƒ…</a-button>
+            <a-button type="text" size="small" @click="handleRenew(record)" v-if="record.status === 'expired' || record.status === 'suspended'">ç»­è´¹</a-button>
+            <a-button type="text" size="small" @click="handleCancelRenewal(record)" v-if="record.auto_renew && record.status === 'active'">å–æ¶ˆè‡ªåŠ¨ç»­è´¹</a-button>
+            <a-button type="text" size="small" @click="handleResume(record)" v-if="record.status === 'suspended'">æ¢å¤</a-button>
+            <a-button type="text" size="small" status="danger" @click="handleCancel(record)" v-if="record.status === 'active' || record.status === 'suspended'">å–æ¶ˆè®¢é˜…</a-button>
           </a-space>
         </template>
       </a-table>
     </div>
 
-    <!-- ĞÂ½¨¶©ÔÄµ¯´° -->
-    <a-modal v-model:visible="createModalVisible" title="ĞÂ½¨¶©ÔÄ" :width="520" :loading="submitting" @before-ok="handleCreate" @cancel="createModalVisible = false">
+    <!-- æ–°å»ºè®¢é˜…å¼¹çª— -->
+    <a-modal v-model:visible="createModalVisible" title="æ–°å»ºè®¢é˜…" :width="520" :loading="submitting" @before-ok="handleCreate" @cancel="createModalVisible = false">
       <a-form :model="createForm" layout="vertical">
-        <a-form-item label="ÓÃ»§ID" required>
-          <a-input-number v-model="createForm.user_id" :min="1" placeholder="ÇëÊäÈëÓÃ»§ID" style="width: 100%" />
+        <a-form-item label="ç”¨æˆ·ID" required>
+          <a-input-number v-model="createForm.user_id" :min="1" placeholder="è¯·è¾“å…¥ç”¨æˆ·ID" style="width: 100%" />
         </a-form-item>
-        <a-form-item label="¼Æ»®Ãû³Æ" required>
-          <a-input v-model="createForm.plan_name" placeholder="ÀıÈç£ºÄê¶È¸ß¼¶°æ" />
+        <a-form-item label="è®¡åˆ’åç§°" required>
+          <a-input v-model="createForm.plan_name" placeholder="ä¾‹å¦‚ï¼šå¹´åº¦é«˜çº§ç‰ˆ" />
         </a-form-item>
-        <a-form-item label="¼Æ»®ÀàĞÍ" required>
-          <a-select v-model="createForm.plan_type" placeholder="Ñ¡Ôñ¼Æ»®ÀàĞÍ">
-            <a-option value="monthly">ÔÂ¸¶</a-option>
-            <a-option value="yearly">Äê¸¶</a-option>
+        <a-form-item label="è®¡åˆ’ç±»å‹" required>
+          <a-select v-model="createForm.plan_type" placeholder="é€‰æ‹©è®¡åˆ’ç±»å‹">
+            <a-option value="monthly">æœˆä»˜</a-option>
+            <a-option value="yearly">å¹´ä»˜</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="¼Û¸ñ£¨Ôª£©" required>
-          <a-input-number v-model="createForm.price" :min="0" :precision="2" placeholder="ÀıÈç£º299.00" style="width: 100%" />
+        <a-form-item label="ä»·æ ¼ï¼ˆå…ƒï¼‰" required>
+          <a-input-number v-model="createForm.price" :min="0" :precision="2" placeholder="ä¾‹å¦‚ï¼š299.00" style="width: 100%" />
         </a-form-item>
-        <a-form-item label="Ê±³¤£¨Ìì£©">
-          <a-input-number v-model="createForm.duration" :min="1" placeholder="ÔÂ¸¶30Ìì£¬Äê¸¶365Ìì" style="width: 100%" />
+        <a-form-item label="æ—¶é•¿ï¼ˆå¤©ï¼‰">
+          <a-input-number v-model="createForm.duration" :min="1" placeholder="æœˆä»˜30å¤©ï¼Œå¹´ä»˜365å¤©" style="width: 100%" />
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <!-- Ğø·Ñµ¯´° -->
-    <a-modal v-model:visible="renewModalVisible" title="Ğø·Ñ¶©ÔÄ" :width="480" :loading="submitting" @before-ok="handleRenewSubmit" @cancel="renewModalVisible = false">
+    <!-- ç»­è´¹å¼¹çª— -->
+    <a-modal v-model:visible="renewModalVisible" title="ç»­è´¹è®¢é˜…" :width="480" :loading="submitting" @before-ok="handleRenewSubmit" @cancel="renewModalVisible = false">
       <a-form :model="renewForm" layout="vertical">
-        <a-form-item label="¶©ÔÄID">
+        <a-form-item label="è®¢é˜…ID">
           <a-input :value="String(selectedSub?.id)" disabled />
         </a-form-item>
-        <a-form-item label="µ±Ç°µ½ÆÚÈÕÆÚ">
+        <a-form-item label="å½“å‰åˆ°æœŸæ—¥æœŸ">
           <a-input :value="formatDate(selectedSub?.end_date)" disabled />
         </a-form-item>
-        <a-form-item label="Ğø·ÑÊ±³¤£¨Ìì£©" required>
+        <a-form-item label="ç»­è´¹æ—¶é•¿ï¼ˆå¤©ï¼‰" required>
           <a-input-number v-model="renewForm.duration" :min="1" style="width: 100%" />
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <!-- ÏêÇéµ¯´° -->
-    <a-modal v-model:visible="detailModalVisible" title="¶©ÔÄÏêÇé" :width="620" :footer="null">
+    <!-- è¯¦æƒ…å¼¹çª— -->
+    <a-modal v-model:visible="detailModalVisible" title="è®¢é˜…è¯¦æƒ…" :width="620" :footer="null">
       <a-descriptions :column="2" bordered v-if="currentSub">
-        <a-descriptions-item label="¶©ÔÄID">{{ currentSub.id }}</a-descriptions-item>
-        <a-descriptions-item label="ÓÃ»§ID">{{ currentSub.user_id }}</a-descriptions-item>
-        <a-descriptions-item label="¼Æ»®Ãû³Æ">{{ currentSub.plan_name }}</a-descriptions-item>
-        <a-descriptions-item label="¼Æ»®ÀàĞÍ">
-          <a-tag :color="currentSub.plan_type === 'yearly' ? 'blue' : 'green'">{{ currentSub.plan_type === 'yearly' ? 'Äê¸¶' : 'ÔÂ¸¶' }}</a-tag>
+        <a-descriptions-item label="è®¢é˜…ID">{{ currentSub.id }}</a-descriptions-item>
+        <a-descriptions-item label="ç”¨æˆ·ID">{{ currentSub.user_id }}</a-descriptions-item>
+        <a-descriptions-item label="è®¡åˆ’åç§°">{{ currentSub.plan_name }}</a-descriptions-item>
+        <a-descriptions-item label="è®¡åˆ’ç±»å‹">
+          <a-tag :color="currentSub.plan_type === 'yearly' ? 'blue' : 'green'">{{ currentSub.plan_type === 'yearly' ? 'å¹´ä»˜' : 'æœˆä»˜' }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="¼Û¸ñ">£¤{{ currentSub.price }}</a-descriptions-item>
-        <a-descriptions-item label="Ê±³¤">{{ currentSub.duration }}Ìì</a-descriptions-item>
-        <a-descriptions-item label="¿ªÊ¼ÈÕÆÚ">{{ formatDate(currentSub.start_date) }}</a-descriptions-item>
-        <a-descriptions-item label="½áÊøÈÕÆÚ">{{ formatDate(currentSub.end_date) }}</a-descriptions-item>
-        <a-descriptions-item label="×´Ì¬">
+        <a-descriptions-item label="ä»·æ ¼">ï¿¥{{ currentSub.price }}</a-descriptions-item>
+        <a-descriptions-item label="æ—¶é•¿">{{ currentSub.duration }}å¤©</a-descriptions-item>
+        <a-descriptions-item label="å¼€å§‹æ—¥æœŸ">{{ formatDate(currentSub.start_date) }}</a-descriptions-item>
+        <a-descriptions-item label="ç»“æŸæ—¥æœŸ">{{ formatDate(currentSub.end_date) }}</a-descriptions-item>
+        <a-descriptions-item label="çŠ¶æ€">
           <a-tag :color="getStatusColor(currentSub.status)">{{ getStatusText(currentSub.status) }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="×Ô¶¯Ğø·Ñ">
+        <a-descriptions-item label="è‡ªåŠ¨ç»­è´¹">
           <a-switch :model-value="currentSub.auto_renew" disabled />
         </a-descriptions-item>
-        <a-descriptions-item label="Ğø·Ñ´ÎÊı">{{ currentSub.renew_count || 0 }}</a-descriptions-item>
-        <a-descriptions-item label="×îºóĞø·ÑÊ±¼ä">{{ formatDate(currentSub.last_renew_at) }}</a-descriptions-item>
+        <a-descriptions-item label="ç»­è´¹æ¬¡æ•°">{{ currentSub.renew_count || 0 }}</a-descriptions-item>
+        <a-descriptions-item label="æœ€åç»­è´¹æ—¶é—´">{{ formatDate(currentSub.last_renew_at) }}</a-descriptions-item>
       </a-descriptions>
 
-      <!-- Ğø·ÑÀúÊ· -->
-      <a-divider>Ğø·ÑÀúÊ·</a-divider>
+      <!-- ç»­è´¹å†å² -->
+      <a-divider>ç»­è´¹å†å²</a-divider>
       <a-table :columns="renewalLogColumns" :data="renewalLogs" size="small" :pagination="{ pageSize: 5 }" row-key="id">
         <template #status="{ record }">
-          <a-tag :color="record.status === 'success' ? 'green' : 'red'">{{ record.status === 'success' ? '³É¹¦' : 'Ê§°Ü' }}</a-tag>
+          <a-tag :color="record.status === 'success' ? 'green' : 'red'">{{ record.status === 'success' ? 'æˆåŠŸ' : 'å¤±è´¥' }}</a-tag>
         </template>
       </a-table>
     </a-modal>
@@ -160,27 +160,27 @@ const renewForm = reactive({ duration: 365 })
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 
 const columns = [
-  { title: '¶©ÔÄID', dataIndex: 'id', width: 80 },
-  { title: 'ÓÃ»§ID', dataIndex: 'user_id', width: 80 },
-  { title: '¼Æ»®Ãû³Æ', dataIndex: 'plan_name', width: 140, ellipsis: true },
-  { title: '¼Æ»®ÀàĞÍ', slotName: 'plan_type', width: 90 },
-  { title: '¼Û¸ñ', slotName: 'price', width: 100 },
-  { title: 'ÓĞĞ§ÆÚ', slotName: 'validity', width: 220 },
-  { title: '×´Ì¬', slotName: 'status', width: 90 },
-  { title: '×Ô¶¯Ğø·Ñ', slotName: 'auto_renew', width: 90 },
-  { title: '²Ù×÷', slotName: 'actions', width: 280, fixed: 'right' }
+  { title: 'è®¢é˜…ID', dataIndex: 'id', width: 80 },
+  { title: 'ç”¨æˆ·ID', dataIndex: 'user_id', width: 80 },
+  { title: 'è®¡åˆ’åç§°', dataIndex: 'plan_name', width: 140, ellipsis: true },
+  { title: 'è®¡åˆ’ç±»å‹', slotName: 'plan_type', width: 90 },
+  { title: 'ä»·æ ¼', slotName: 'price', width: 100 },
+  { title: 'æœ‰æ•ˆæœŸ', slotName: 'validity', width: 220 },
+  { title: 'çŠ¶æ€', slotName: 'status', width: 90 },
+  { title: 'è‡ªåŠ¨ç»­è´¹', slotName: 'auto_renew', width: 90 },
+  { title: 'æ“ä½œ', slotName: 'actions', width: 280, fixed: 'right' }
 ]
 
 const renewalLogColumns = [
   { title: 'ID', dataIndex: 'id', width: 60 },
-  { title: 'Ğø·ÑÊ±¼ä', dataIndex: 'renewed_at', width: 170 },
-  { title: '½ğ¶î', dataIndex: 'amount', width: 100 },
-  { title: '×´Ì¬', slotName: 'status' }
+  { title: 'ç»­è´¹æ—¶é—´', dataIndex: 'renewed_at', width: 170 },
+  { title: 'é‡‘é¢', dataIndex: 'amount', width: 100 },
+  { title: 'çŠ¶æ€', slotName: 'status' }
 ]
 
 const getToken = () => localStorage.getItem('token')
 const getStatusColor = (s) => ({ active: 'green', expired: 'red', cancelled: 'gray', suspended: 'orange' }[s] || 'gray')
-const getStatusText = (s) => ({ active: 'ÉúĞ§ÖĞ', expired: 'ÒÑ¹ıÆÚ', cancelled: 'ÒÑÈ¡Ïû', suspended: 'ÒÑÔİÍ£' }[s] || s)
+const getStatusText = (s) => ({ active: 'ç”Ÿæ•ˆä¸­', expired: 'å·²è¿‡æœŸ', cancelled: 'å·²å–æ¶ˆ', suspended: 'å·²æš‚åœ' }[s] || s)
 const formatDate = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-'
 
 const loadData = async () => {
@@ -200,7 +200,7 @@ const loadData = async () => {
       pagination.total = json.data?.total || 0
     }
   } catch (e) {
-    Message.error('¼ÓÔØ¶©ÔÄÁĞ±íÊ§°Ü')
+    Message.error('åŠ è½½è®¢é˜…åˆ—è¡¨å¤±è´¥')
   } finally {
     loading.value = false
   }
@@ -227,7 +227,7 @@ const showCreateModal = () => {
 
 const handleCreate = async (done) => {
   if (!createForm.user_id || !createForm.plan_name || !createForm.price) {
-    Message.warning('ÇëÌîĞ´±ØÌî×Ö¶Î')
+    Message.warning('è¯·å¡«å†™å¿…å¡«å­—æ®µ')
     done(false)
     return
   }
@@ -240,16 +240,16 @@ const handleCreate = async (done) => {
     })
     const json = await res.json()
     if (json.code === 0) {
-      Message.success('¶©ÔÄ´´½¨³É¹¦')
+      Message.success('è®¢é˜…åˆ›å»ºæˆåŠŸ')
       createModalVisible.value = false
       loadData()
       done(true)
     } else {
-      Message.error(json.message || '´´½¨Ê§°Ü')
+      Message.error(json.message || 'åˆ›å»ºå¤±è´¥')
       done(false)
     }
   } catch (e) {
-    Message.error('´´½¨Ê§°Ü')
+    Message.error('åˆ›å»ºå¤±è´¥')
     done(false)
   } finally {
     submitting.value = false
@@ -278,16 +278,16 @@ const handleRenewSubmit = async (done) => {
     })
     const json = await res.json()
     if (json.code === 0) {
-      Message.success('Ğø·Ñ³É¹¦')
+      Message.success('ç»­è´¹æˆåŠŸ')
       renewModalVisible.value = false
       loadData()
       done(true)
     } else {
-      Message.error(json.message || 'Ğø·ÑÊ§°Ü')
+      Message.error(json.message || 'ç»­è´¹å¤±è´¥')
       done(false)
     }
   } catch (e) {
-    Message.error('Ğø·ÑÊ§°Ü')
+    Message.error('ç»­è´¹å¤±è´¥')
     done(false)
   } finally {
     submitting.value = false
@@ -302,13 +302,13 @@ const handleCancelRenewal = async (record) => {
     })
     const json = await res.json()
     if (json.code === 0) {
-      Message.success('ÒÑÈ¡Ïû×Ô¶¯Ğø·Ñ')
+      Message.success('å·²å–æ¶ˆè‡ªåŠ¨ç»­è´¹')
       loadData()
     } else {
-      Message.error(json.message || '²Ù×÷Ê§°Ü')
+      Message.error(json.message || 'æ“ä½œå¤±è´¥')
     }
   } catch (e) {
-    Message.error('²Ù×÷Ê§°Ü')
+    Message.error('æ“ä½œå¤±è´¥')
   }
 }
 
@@ -320,21 +320,21 @@ const handleResume = async (record) => {
     })
     const json = await res.json()
     if (json.code === 0) {
-      Message.success('¶©ÔÄÒÑ»Ö¸´')
+      Message.success('è®¢é˜…å·²æ¢å¤')
       loadData()
     } else {
-      Message.error(json.message || '»Ö¸´Ê§°Ü')
+      Message.error(json.message || 'æ¢å¤å¤±è´¥')
     }
   } catch (e) {
-    Message.error('»Ö¸´Ê§°Ü')
+    Message.error('æ¢å¤å¤±è´¥')
   }
 }
 
 const handleCancel = async (record) => {
   Modal.warning({
-    title: 'È·ÈÏÈ¡Ïû¶©ÔÄ',
-    content: `È·¶¨ÒªÈ¡Ïû¸Ã¶©ÔÄÂğ£¿`,
-    okText: 'È·ÈÏÈ¡Ïû',
+    title: 'ç¡®è®¤å–æ¶ˆè®¢é˜…',
+    content: `ç¡®å®šè¦å–æ¶ˆè¯¥è®¢é˜…å—ï¼Ÿ`,
+    okText: 'ç¡®è®¤å–æ¶ˆ',
     onOk: async () => {
       try {
         const res = await fetch(`/api/subscriptions/${record.id}`, {
@@ -343,13 +343,13 @@ const handleCancel = async (record) => {
         })
         const json = await res.json()
         if (json.code === 0) {
-          Message.success('¶©ÔÄÒÑÈ¡Ïû')
+          Message.success('è®¢é˜…å·²å–æ¶ˆ')
           loadData()
         } else {
-          Message.error(json.message || 'È¡ÏûÊ§°Ü')
+          Message.error(json.message || 'å–æ¶ˆå¤±è´¥')
         }
       } catch (e) {
-        Message.error('È¡ÏûÊ§°Ü')
+        Message.error('å–æ¶ˆå¤±è´¥')
       }
     }
   })

@@ -1,131 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+ï»¿<template>
+  <Breadcrumb :items="['Home','Emotion','Emotionrecognize','']" />
   <div class="page-container">
-    <a-card class="general-card" title="ÇéĞ÷Ê¶±ğÅäÖÃ">
+    <a-card class="general-card" title="E m o t i o n r e c o g n i z e">
       <template #extra>
-        <a-button type="primary" @click="handleSave"><icon-save />±£´æÅäÖÃ</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="Ê¶±ğÄ£Ê½">
-            <a-select v-model="form.mode" placeholder="ÇëÑ¡Ôñ" style="width: 140px">
-              <a-option value="audio">ÓïÒôÇéĞ÷Ê¶±ğ</a-option>
-              <a-option value="visual">ÊÓ¾õÇéĞ÷Ê¶±ğ</a-option>
-              <a-option value="both">×ÛºÏÊ¶±ğ</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="handleSearch">²éÑ¯</a-button>
-            <a-button @click="handleReset">ÖØÖÃ</a-button>
-          </a-form-item>
+          <a-form-item label="å…³é”®è¯"><a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button><a-button @click="handleReset">é‡ç½®</a-button></a-form-item>
         </a-form>
       </div>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
-      </a-table>
-    <a-modal v-model:visible="modalVisible" title="±à¼­ÅäÖÃ" :width="480">
-      <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="Ê¶±ğÄ£Ê½">
-          <a-select v-model="form.mode">
-            <a-option value="audio">ÓïÒôÇéĞ÷Ê¶±ğ</a-option>
-            <a-option value="visual">ÊÓ¾õÇéĞ÷Ê¶±ğ</a-option>
-            <a-option value="both">×ÛºÏÊ¶±ğ</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item label="Ê¶±ğÁéÃô¶È">
-          <a-input-number v-model="form.sensitivity" :min="1" :max="10" style="width: 100%" />
-        </a-form-item>
-        <a-form-item label="ÖÃĞÅ¶ÈãĞÖµ">
-          <a-input-number v-model="form.threshold" :min="0" :max="100" suffix="%" style="width: 100%" />
-        </a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">È¡Ïû</a-button>
-        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
-      </template>
-    </a-modal>
     </a-card>
-</div></template>
+  </div>
+</template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconSave } from '@arco-design/web-vue/es/icon'
-import { getEmotionRecognizeConfig, updateEmotionRecognizeConfig } from '@/api/emotion'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const data = ref<any[]>([])
-const modalVisible = ref(false)
-
-const form = reactive({
-  mode: 'both',
-  sensitivity: 5,
-  threshold: 70
-})
-
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
-})
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: 'ÅäÖÃÏî', dataIndex: 'name', width: 200 },
-  { title: 'µ±Ç°Öµ', dataIndex: 'value', width: 200 },
-  { title: 'ÃèÊö', dataIndex: 'description', ellipsis: true },
-  { title: '²Ù×÷', slotName: 'actions', width: 120 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'åç§°', dataIndex: 'name', width: 160 },
+  { title: 'çŠ¶æ€', dataIndex: 'status', width: 90 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 }
 ]
+
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
 async function loadData() {
   try {
     loading.value = true
-    const res = await getEmotionRecognizeConfig()
-    data.value = res.data || []
-    pagination.total = data.value.length
-    if (res.data) {
-      form.mode = res.data.mode || 'both'
-      form.sensitivity = res.data.sensitivity || 5
-      form.threshold = res.data.threshold || 70
-    }
+    data.value = []
+    pagination.value.total = 0
   } catch (err: any) {
-    Message.error('¼ÓÔØÊ§°Ü: ' + err.message)
+    Message.error('åŠ è½½å¤±è´¥: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-function handleSearch() {
-  loadData()
-}
-
-function handleReset() {
-  form.mode = 'both'
-  form.sensitivity = 5
-  form.threshold = 70
-  loadData()
-}
-
-function handleSave() {
-  modalVisible.value = true
-}
-
-async function handleSubmit() {
-  try {
-    await updateEmotionRecognizeConfig(form)
-    Message.success('±£´æ³É¹¦')
-    modalVisible.value = false
-    loadData()
-  } catch (err: any) {
-    Message.error('±£´æÊ§°Ü: ' + err.message)
-  }
-}
-
-onMounted(() => loadData())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-

@@ -1,91 +1,57 @@
-<template>
-  <div class="container">
-    <a-card>
-      <template #title>
-        <a-space><icon-check-circle /> 权限审批</a-space>
+﻿<template>
+  <Breadcrumb :items="['Home','Misc','Permissionapprove','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="P e r m i s s i o n a p p r o v e">
+      <template #extra>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-
-      <a-space style="margin-bottom: 16px">
-        <a-button type="primary" @click="handleBatchApprove">
-          <template #icon><icon-check /></template>
-          批量通过
-        </a-button>
-        <a-button status="danger" @click="handleBatchReject">
-          <template #icon><icon-close /></template>
-          批量拒绝
-        </a-button>
-      </a-space>
-
-      <a-table :columns="columns" :data="requests" :row-selection="{ type: 'checkbox' }">
-        <template #permissionType="{ record }">
-          <a-tag>{{ record.permissionName }}</a-tag>
-        </template>
-        <template #expires="{ record }">
-          <span v-if="record.expiresAt">{{ record.expiresAt }}</span>
-          <a-tag v-else color="green">永久</a-tag>
-        </span>
-        </template>
-        <template #actions="{ record }">
-          <a-button type="primary" size="small" @click="handleApprove(record)">通过</a-button>
-          <a-button size="small" @click="handleViewDetail(record)">详情</a-button>
-          <a-button status="danger" size="small" @click="handleReject(record)">拒绝</a-button>
-        </template>
-      </a-table>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-
-    <a-drawer v-model:visible="detailVisible" title="申请详情" :width="500">
-      <a-descriptions :column="1" bordered v-if="selectedRequest">
-        <a-descriptions-item label="申请人">{{ selectedRequest.requester }}</a-descriptions-item>
-        <a-descriptions-item label="权限">{{ selectedRequest.permissionName }}</a-descriptions-item>
-        <a-descriptions-item label="申请时间">{{ selectedRequest.applyTime }}</a-descriptions-item>
-        <a-descriptions-item label="有效期">{{ selectedRequest.expiresAt || '永久' }}</a-descriptions-item>
-        <a-descriptions-item label="申请理由">{{ selectedRequest.reason }}</a-descriptions-item>
-      </a-descriptions>
-      <a-divider>审批</a-divider>
-      <a-form :model="approveForm" layout="vertical">
-        <a-form-item label="审批意见">
-          <a-textarea v-model="approveForm.comment" placeholder="请输入审批意见" />
-        </a-form-item>
-        <a-space>
-          <a-button type="primary" @click="handleApproveConfirm">通过</a-button>
-          <a-button status="danger" @click="handleRejectConfirm">拒绝</a-button>
-        </a-space>
-      </a-form>
-    </a-drawer>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { Message } from '@arco-design/web-vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
-const detailVisible = ref(false)
-const selectedRequest = ref(null)
-const approveForm = reactive({ comment: '' })
+const loading = ref(false)
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: '申请人', dataIndex: 'requester' },
-  { title: '部门', dataIndex: 'department' },
-  { title: '权限', slotName: 'permissionType' },
-  { title: '申请时间', dataIndex: 'applyTime' },
-  { title: '有效期', slotName: 'expires' },
-  { title: '状态', dataIndex: 'status' },
-  { title: '操作', slotName: 'actions', width: 200 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const requests = ref([
-  { id: 1, requester: '张三', department: '研发部', permissionName: '设备控制', applyTime: '2026-03-28 10:00', expiresAt: '2026-04-28', status: '待审批' },
-  { id: 2, requester: '李四', department: '运维部', permissionName: '数据导出', applyTime: '2026-03-28 09:00', expiresAt: '', status: '待审批' }
-])
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const handleBatchApprove = () => { }
-const handleBatchReject = () => { }
-const handleApprove = (r) => { selectedRequest.value = r; detailVisible.value = true }
-const handleViewDetail = (r) => { selectedRequest.value = r; detailVisible.value = true }
-const handleReject = (r) => { selectedRequest.value = r; detailVisible.value = true }
-const handleApproveConfirm = () => { detailVisible.value = false }
-const handleRejectConfirm = () => { detailVisible.value = false }
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
-.container { padding: 16px; }
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>

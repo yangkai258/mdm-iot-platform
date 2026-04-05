@@ -1,33 +1,33 @@
-<template>
+﻿<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="container">
-    <a-card class="general-card" title="��Ա�ȼ�">
+    <a-card class="general-card" title="会员等级">
       <template #extra>
         <a-space :size="12">
-          <a-button type="primary" @click="showCreate"><icon-plus />�½�</a-button>
-          <a-button @click="loadData"><icon-refresh />ˢ��</a-button>
+          <a-button type="primary" @click="showCreate"><icon-plus />新建</a-button>
+          <a-button @click="loadData"><icon-refresh />刷新</a-button>
         </a-space>
       </template>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="levelList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id">
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showEdit(record)">�༭</a-button>
-          <a-button type="text" size="small" @click="handleDelete(record)">ɾ��</a-button>
+          <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
     </a-card>
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '�༭�ȼ�' : '�½��ȼ�'">
+    <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑等级' : '新建等级'">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="�ȼ�����"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="�ȼ�����"><a-input v-model="form.code" /></a-form-item>
-        <a-form-item label="�ۿ���"><a-input-number v-model="form.discountRate" :min="0" :max="1" :precision="2" style="width: 100%" /></a-form-item>
-        <a-form-item label="���ֱ���"><a-input-number v-model="form.pointsRate" :min="1" style="width: 100%" /></a-form-item>
+        <a-form-item label="等级名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="等级编码"><a-input v-model="form.code" /></a-form-item>
+        <a-form-item label="折扣率"><a-input-number v-model="form.discountRate" :min="0" :max="1" :precision="2" style="width: 100%" /></a-form-item>
+        <a-form-item label="积分倍率"><a-input-number v-model="form.pointsRate" :min="1" style="width: 100%" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">ȡ��</a-button>
-        <a-button type="primary" @click="handleFormSubmit">ȷ��</a-button>
+        <a-button @click="formVisible = false">取消</a-button>
+        <a-button type="primary" @click="handleFormSubmit">确定</a-button>
       </template>
     </a-modal>
   </div>
@@ -46,13 +46,13 @@ const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
 const form = reactive({ name: '', code: '', discountRate: 1, pointsRate: 1 })
 const columns = [
-  { title: '�ȼ�', slotName: 'levelColor', width: 120 },
-  { title: '����', dataIndex: 'code', width: 100 },
-  { title: '�ۿ���', dataIndex: 'discountRate', width: 100 },
-  { title: '���ֱ���', dataIndex: 'pointsRate', width: 110 },
-  { title: '�ȼ�Ȩ��', slotName: 'benefits' },
-  { title: '��Ա��', dataIndex: 'memberCount', width: 90 },
-  { title: '����', slotName: 'actions', width: 140 }
+  { title: '等级', slotName: 'levelColor', width: 120 },
+  { title: '编码', dataIndex: 'code', width: 100 },
+  { title: '折扣率', dataIndex: 'discountRate', width: 100 },
+  { title: '积分倍率', dataIndex: 'pointsRate', width: 110 },
+  { title: '等级权益', slotName: 'benefits' },
+  { title: '会员数', dataIndex: 'memberCount', width: 90 },
+  { title: '操作', slotName: 'actions', width: 140 }
 ]
 
 const loadData = async () => {
@@ -68,8 +68,8 @@ const loadData = async () => {
 
 const showCreate = () => { isEdit.value = false; Object.assign(form, { name: '', code: '', discountRate: 1, pointsRate: 1 }); formVisible.value = true }
 const showEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleFormSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '���³ɹ�' : '�����ɹ�'); loadData() }
-const handleDelete = () => { Message.success('ɾ���ɹ�'); loadData() }
+const handleFormSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
+const handleDelete = () => { Message.success('删除成功'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())

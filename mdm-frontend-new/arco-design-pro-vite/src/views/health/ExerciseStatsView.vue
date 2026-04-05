@@ -1,86 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="运动统计">
+  <Breadcrumb :items="['Home','Health','Exercisestats','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="E x e r c i s e s t a t s">
       <template #extra>
-        <a-space :size="12">
-          <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
-          <a-button @click="loadData"><icon-refresh />刷新</a-button>
-        </a-space>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="8">
-          <a-form-item label="设备ID">
-            <a-input v-model="form.deviceId" placeholder="请输入设备ID" @pressEnter="loadData" />
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
-      </a-table>
-    <a-modal v-model:visible="modalVisible" :title="modalTitle">
-      <a-form :model="form" layout="vertical">
-        <a-form-item label="步数"><a-input-number v-model="form.steps" :min="0" style="width: 100%" /></a-form-item>
-        <a-form-item label="距离(km)"><a-input-number v-model="form.distance" :min="0" :precision="1" style="width: 100%" /></a-form-item>
-        <a-form-item label="卡路里(kcal)"><a-input-number v-model="form.calories" :min="0" style="width: 100%" /></a-form-item>
-      </a-form>
-      <template #footer>
-        <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
-      </template>
-    </a-modal>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const modalVisible = ref(false)
-const modalTitle = ref('新建')
-const isEdit = ref(false)
-const form = reactive({ deviceId: '', steps: 0, distance: 0, calories: 0 })
-const data = ref([])
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
-const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '日期', dataIndex: 'date', width: 120 },
-  { title: '设备ID', dataIndex: 'device_id', width: 120 },
-  { title: '步数', dataIndex: 'steps', width: 100 },
-  { title: '距离(km)', dataIndex: 'distance', width: 100 },
-  { title: '卡路里(kcal)', dataIndex: 'calories', width: 120 },
-  { title: '时长(分钟)', dataIndex: 'duration', width: 120 },
-  { title: '创建时间', dataIndex: 'created_at', width: 160 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const loadData = async () => {
-  loading.value = true
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
+
+async function loadData() {
   try {
-    const params = { page: pagination.current, page_size: pagination.pageSize }
-    if (form.deviceId) params.device_id = form.deviceId
-    const res = await fetch(`/api/health/exercise-stats?${new URLSearchParams(params)}`, {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.pagination?.total || 0 }
-    else data.value = [{ id: 1, date: '2026-03-22', device_id: 'DEV001', steps: 8500, distance: 5.2, calories: 320, duration: 45, created_at: '2026-03-22 23:00:00' }]
-  } catch { data.value = [] } finally { loading.value = false }
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
+    loading.value = false
+  }
 }
 
-const handleReset = () => { Object.assign(form, { deviceId: '', steps: 0, distance: 0, calories: 0 }); loadData() }
-const handleCreate = () => { isEdit.value = false; modalTitle.value = '新建'; modalVisible.value = true }
-const handleSubmit = () => { modalVisible.value = false; Message.success(isEdit.value ? '编辑成功' : '添加成功'); loadData() }
-const onPageChange = (page) => { pagination.current = page; loadData() }
-
-onMounted(() => loadData())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

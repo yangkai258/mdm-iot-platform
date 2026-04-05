@@ -1,108 +1,57 @@
-<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
+ï»¿<template>
+  <Breadcrumb :items="['Home','Emotion','Emotionlog','']" />
   <div class="page-container">
-    <a-card class="general-card" title="ÇéĞ÷ÈÕÖ¾">
+    <a-card class="general-card" title="E m o t i o n l o g">
       <template #extra>
-        <a-button @click="handleExport"><icon-download />µ¼³ö</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="ÇéĞ÷ÀàĞÍ">
-            <a-select v-model="form.emotion" placeholder="ÇëÑ¡Ôñ" allow-clear style="width: 140px">
-              <a-option value="happy">¿ªĞÄ</a-option>
-              <a-option value="sad">ÄÑ¹ı</a-option>
-              <a-option value="angry">ÉúÆø</a-option>
-              <a-option value="fear">º¦ÅÂ</a-option>
-              <a-option value="neutral">Æ½¾²</a-option>
-            </a-select>
-          </a-form-item>
-          <a-form-item>
-            <a-button type="primary" @click="handleSearch">²éÑ¯</a-button>
-            <a-button @click="handleReset">ÖØÖÃ</a-button>
-          </a-form-item>
+          <a-form-item label="å…³é”®è¯"><a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button><a-button @click="handleReset">é‡ç½®</a-button></a-form-item>
         </a-form>
       </div>
-      <a-table
-      :columns="columns"
-      :data="data"
-      :loading="loading"
-      :pagination="pagination"
-      @page-change="onPageChange"
-    />
-    </a-table>
-  </a-card>
-</div></template>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
+  </div>
+</template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import { IconDownload } from '@arco-design/web-vue/es/icon'
-import { getEmotionLogs } from '@/api/emotion'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const data = ref<any[]>([])
-
-const form = reactive({
-  emotion: ''
-})
-
-const pagination = reactive({
-  current: 1,
-  pageSize: 20,
-  total: 0
-})
+const form = ref<any>({ keyword: '' })
 
 const columns = [
-  { title: 'Ê±¼ä', dataIndex: 'created_at', width: 180 },
-  { title: 'Éè±¸', dataIndex: 'device_id', width: 120 },
-  { title: 'ÇéĞ÷ÀàĞÍ', dataIndex: 'emotion_label', width: 120 },
-  { title: 'Ç¿¶È', dataIndex: 'intensity', width: 150 },
-  { title: '´¥·¢Ô­Òò', dataIndex: 'trigger', ellipsis: true }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: 'åç§°', dataIndex: 'name', width: 160 },
+  { title: 'çŠ¶æ€', dataIndex: 'status', width: 90 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 }
 ]
+
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
 async function loadData() {
   try {
     loading.value = true
-    const params: any = { page: pagination.current, page_size: pagination.pageSize }
-    if (form.emotion) params.emotion = form.emotion
-    const res = await getEmotionLogs(params)
-    data.value = res.data?.list || res.data || []
-    pagination.total = res.data?.total || 0
+    data.value = []
+    pagination.value.total = 0
   } catch (err: any) {
-    Message.error('¼ÓÔØÊ§°Ü: ' + err.message)
+    Message.error('åŠ è½½å¤±è´¥: ' + err.message)
   } finally {
     loading.value = false
   }
 }
 
-function handleSearch() {
-  pagination.current = 1
-  loadData()
-}
-
-function handleReset() {
-  form.emotion = ''
-  pagination.current = 1
-  loadData()
-}
-
-function onPageChange(page: number) {
-  pagination.current = page
-  loadData()
-}
-
-function handleExport() {
-  Message.info('µ¼³ö¹¦ÄÜ¿ª·¢ÖĞ')
-}
-
-onMounted(() => loadData())
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
 
 <style scoped>
 .page-container { padding: 16px; }
 .search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
 </style>
-
-

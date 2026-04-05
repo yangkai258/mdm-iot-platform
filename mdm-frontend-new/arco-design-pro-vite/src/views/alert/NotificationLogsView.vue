@@ -1,80 +1,46 @@
-﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
+<template>
+  <Breadcrumb :items="['Home','Alert','NotificationLogs','']" />
+  <div class="page-container">
     <a-card class="general-card" title="通知日志">
-      <template #extra>
-        <a-button @click="handleSearch"><icon-refresh />刷新</a-button>
-      </template>
-      <a-row :gutter="16">
-        <a-col :span="6">
-          <a-form-item label="渠道类型">
-            <a-select v-model="form.channel_type" placeholder="选择渠道" allow-clear>
-              <a-option value="email">邮件</a-option>
-              <a-option value="sms">短信</a-option>
-              <a-option value="webhook">Webhook</a-option>
-            </a-select>
-          </a-form-item>
-        </a-col>
-        <a-col :span="6">
-          <a-form-item label="发送状态">
-            <a-select v-model="form.status" placeholder="选择状态" allow-clear>
-              <a-option value="success">成功</a-option>
-              <a-option value="failed">失败</a-option>
-            </a-select>
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="handleSearch">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" row-key="id" />
-    </a-table>
-  </a-card>
+      <template #extra><a-button @click="loadData"><icon-refresh />刷新</a-button></template>
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="通知类型"><a-select v-model="form.channel" placeholder="选择类型" allow-clear style="width: 120px"><a-option value="email">邮件</a-option><a-option value="sms">短信</a-option><a-option value="webhook">Webhook</a-option></a-select></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
+    </a-card>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconRefresh } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const data = ref([])
-const modalVisible = ref(false)
-const modalTitle = ref('新建')
-const form = reactive({ channel_type: '', status: '' })
-const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ channel: '' })
+
 const columns = [
-  { title: '时间', dataIndex: 'created_at', width: 170 },
-  { title: '渠道', dataIndex: 'channel_type', width: 90 },
-  { title: '渠道名称', dataIndex: 'channel_name', width: 140 },
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '告警ID', dataIndex: 'alert_id', width: 90 },
+  { title: '通知类型', dataIndex: 'channel', width: 100 },
   { title: '接收人', dataIndex: 'recipient', width: 160 },
-  { title: '主题', dataIndex: 'subject', ellipsis: true },
+  { title: '内容', dataIndex: 'message', ellipsis: true },
   { title: '状态', dataIndex: 'status', width: 90 },
-  { title: '重试次数', dataIndex: 'attempt_count', width: 90 }
+  { title: '发送时间', dataIndex: 'sent_at', width: 170 }
 ]
 
-const handleSearch = () => { pagination.current = 1; loadData() }
-const handleReset = () => { form.channel_type = ''; form.status = ''; pagination.current = 1; loadData() }
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const loadData = async () => {
-  loading.value = true
-  try {
-    const params = { page: pagination.current, page_size: pagination.pageSize }
-    if (form.channel_type) params.channel_type = form.channel_type
-    if (form.status) params.status = form.status
-    const res = await fetch('/api/alerts/notification-logs?' + new URLSearchParams(params), {
-      headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-    }).then(r => r.json())
-    if (res.code === 0) { data.value = res.data?.list || []; pagination.total = res.data?.total || 0 }
-  } catch (e) { Message.error('加载失败') } finally { loading.value = false }
-}
+async function loadData() { loading.value = true; data.value = []; loading.value = false }
+function handleReset() { form.value = { channel: '' }; loadData() }
 onMounted(() => { loadData() })
 </script>
 
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>

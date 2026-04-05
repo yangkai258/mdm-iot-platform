@@ -1,23 +1,23 @@
-<template>
+ï»¿<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="page-container">
-    <a-card class="general-card" title="Ë¯Ãß·ÖÎö">
+    <a-card class="general-card" title="ç¡çœ åˆ†æ">
       <template #extra>
-        <a-button type="primary" @click="handleCreate"><icon-plus />ĞÂ½¨</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />æ–°å»º</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="ÈÕÆÚ·¶Î§">
+          <a-form-item label="æ—¥æœŸèŒƒå›´">
             <a-range-picker v-model="form.dateRange" style="width: 240px" />
           </a-form-item>
-          <a-form-item label="Éè±¸ID">
-            <a-input v-model="form.deviceId" placeholder="ÇëÊäÈëÉè±¸ID" style="width: 160px" />
+          <a-form-item label="è®¾å¤‡ID">
+            <a-input v-model="form.deviceId" placeholder="è¯·è¾“å…¥è®¾å¤‡ID" style="width: 160px" />
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
-            <a-button @click="handleReset">ÖØÖÃ</a-button>
+            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
+            <a-button @click="handleReset">é‡ç½®</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -34,16 +34,16 @@
     </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="ÈÕÆÚ"><a-date-picker v-model="form.date" style="width: 100%" /></a-form-item>
-        <a-form-item label="ÈëË¯Ê±¼ä"><a-time-picker v-model="form.sleep_time" format="HH:mm" style="width: 100%" /></a-form-item>
-        <a-form-item label="ĞÑÀ´Ê±¼ä"><a-time-picker v-model="form.wake_time" format="HH:mm" style="width: 100%" /></a-form-item>
-        <a-form-item label="ÉîË¯(Ğ¡Ê±)"><a-input-number v-model="form.deep_sleep" :min="0" :precision="1" style="width: 100%" /></a-form-item>
-        <a-form-item label="Ç³Ë¯(Ğ¡Ê±)"><a-input-number v-model="form.light_sleep" :min="0" :precision="1" style="width: 100%" /></a-form-item>
-        <a-form-item label="Ë¯ÃßÖÊÁ¿ÆÀ·Ö"><a-input-number v-model="form.quality" :min="0" :max="100" style="width: 100%" /></a-form-item>
+        <a-form-item label="æ—¥æœŸ"><a-date-picker v-model="form.date" style="width: 100%" /></a-form-item>
+        <a-form-item label="å…¥ç¡æ—¶é—´"><a-time-picker v-model="form.sleep_time" format="HH:mm" style="width: 100%" /></a-form-item>
+        <a-form-item label="é†’æ¥æ—¶é—´"><a-time-picker v-model="form.wake_time" format="HH:mm" style="width: 100%" /></a-form-item>
+        <a-form-item label="æ·±ç¡(å°æ—¶)"><a-input-number v-model="form.deep_sleep" :min="0" :precision="1" style="width: 100%" /></a-form-item>
+        <a-form-item label="æµ…ç¡(å°æ—¶)"><a-input-number v-model="form.light_sleep" :min="0" :precision="1" style="width: 100%" /></a-form-item>
+        <a-form-item label="ç¡çœ è´¨é‡è¯„åˆ†"><a-input-number v-model="form.quality" :min="0" :max="100" style="width: 100%" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="modalVisible = false">È¡Ïû</a-button>
-        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
+        <a-button @click="modalVisible = false">å–æ¶ˆ</a-button>
+        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
       </template>
     </a-modal>
     </a-card>
@@ -57,7 +57,7 @@ import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
 const modalVisible = ref(false)
-const modalTitle = ref('ĞÂ½¨')
+const modalTitle = ref('æ–°å»º')
 const isEdit = ref(false)
 
 const form = reactive({
@@ -73,15 +73,15 @@ const form = reactive({
 })
 
 const columns = [
-  { title: 'ÈÕÆÚ', dataIndex: 'date', width: 120 },
-  { title: 'Éè±¸ID', dataIndex: 'device_id', width: 120 },
-  { title: 'ÈëË¯Ê±¼ä', dataIndex: 'sleep_time', width: 100 },
-  { title: 'ĞÑÀ´Ê±¼ä', dataIndex: 'wake_time', width: 100 },
-  { title: 'Ë¯ÃßÊ±³¤', dataIndex: 'total_hours', width: 100 },
-  { title: 'ÉîË¯(h)', dataIndex: 'deep_sleep', width: 80 },
-  { title: 'Ç³Ë¯(h)', dataIndex: 'light_sleep', width: 80 },
-  { title: 'Ë¯ÃßÖÊÁ¿', slotName: 'quality', width: 120 },
-  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at', width: 160 }
+  { title: 'æ—¥æœŸ', dataIndex: 'date', width: 120 },
+  { title: 'è®¾å¤‡ID', dataIndex: 'device_id', width: 120 },
+  { title: 'å…¥ç¡æ—¶é—´', dataIndex: 'sleep_time', width: 100 },
+  { title: 'é†’æ¥æ—¶é—´', dataIndex: 'wake_time', width: 100 },
+  { title: 'ç¡çœ æ—¶é•¿', dataIndex: 'total_hours', width: 100 },
+  { title: 'æ·±ç¡(h)', dataIndex: 'deep_sleep', width: 80 },
+  { title: 'æµ…ç¡(h)', dataIndex: 'light_sleep', width: 80 },
+  { title: 'ç¡çœ è´¨é‡', slotName: 'quality', width: 120 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 160 }
 ]
 
 const data = ref([])
@@ -143,14 +143,14 @@ const handleReset = () => {
 
 const handleCreate = () => {
   isEdit.value = false
-  modalTitle.value = 'ĞÂ½¨'
+  modalTitle.value = 'æ–°å»º'
   Object.assign(form, { id: '', date: null, sleep_time: null, wake_time: null, deep_sleep: 0, light_sleep: 0, quality: 0 })
   modalVisible.value = true
 }
 
 const handleSubmit = () => {
   modalVisible.value = false
-  Message.success(isEdit.value ? '±à¼­³É¹¦' : 'Ìí¼Ó³É¹¦')
+  Message.success(isEdit.value ? 'ç¼–è¾‘æˆåŠŸ' : 'æ·»åŠ æˆåŠŸ')
   loadData()
 }
 

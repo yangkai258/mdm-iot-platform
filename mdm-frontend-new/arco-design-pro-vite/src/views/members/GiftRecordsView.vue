@@ -1,72 +1,57 @@
 ﻿<template>
-    <Breadcrumb :items="['Home','Console','']" />
-
-
-  <div class="container">
-    <a-card class="general-card" title="礼包记录">
+  <Breadcrumb :items="['Home','Members','Giftrecords','']" />
+  <div class="page-container">
+    <a-card class="general-card" title="G i f t r e c o r d s">
       <template #extra>
-        <a-button @click="loadData"><icon-refresh />刷新</a-button>
+        <a-button type="primary" @click="handleCreate"><icon-plus />新建</a-button>
       </template>
-      <a-row :gutter="16">
-        <a-col :span="8">
-          <a-form-item label="关键词">
-            <a-input v-model="filters.keyword" placeholder="请输入" @pressEnter="loadData" />
-          </a-form-item>
-        </a-col>
-        <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
-          <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">查询</a-button>
-            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadData()">重置</a-button>
-          </a-space>
-        </a-col>
-      </a-row>
-      <a-divider style="margin: 0 0 16px 0" />
-      <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" />
+      <div class="search-form">
+        <a-form :model="form" layout="inline">
+          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" /></a-form-item>
+          <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
+        </a-form>
+      </div>
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" />
     </a-card>
   </div>
 </template>
-      </a-table>
 
-<script setup>
-import { ref, reactive } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const loading = ref(false)
-const dataList = ref([])
-const filters = reactive({ keyword: '', giftName: '', status: '', dateRange: [] })
-const paginationConfig = reactive({ current: 1, pageSize: 10, total: 0 })
+const data = ref<any[]>([])
+const form = ref<any>({ keyword: '' })
+
 const columns = [
-  { title: '会员名称', dataIndex: 'memberName', width: 150 },
-  { title: '手机号', dataIndex: 'phone', width: 130 },
-  { title: '礼包名称', dataIndex: 'giftName', width: 180 },
-  { title: '礼包价值', dataIndex: 'giftValue', width: 100 },
-  { title: '发放时间', dataIndex: 'grantTime', width: 180 },
-  { title: '领取时间', dataIndex: 'claimTime', width: 180 },
-  { title: '状态', slotName: 'status', width: 100 },
-  { title: '操作', slotName: 'actions', width: 120 }
+  { title: 'ID', dataIndex: 'id', width: 70 },
+  { title: '名称', dataIndex: 'name', width: 160 },
+  { title: '状态', dataIndex: 'status', width: 90 },
+  { title: '创建时间', dataIndex: 'created_at', width: 170 }
 ]
 
-const statusColor = (s) => ({ claimed: 'green', unclaimed: 'orange', expired: 'gray' }[s] || 'gray')
-const statusText = (s) => ({ claimed: '已领取', unclaimed: '未领取', expired: '已过期' }[s] || s)
+const pagination = ref({ current: 1, pageSize: 20, total: 0, showTotal: true })
 
-const mockData = () => [
-  { id: 1, memberName: '张三', phone: '13800138001', giftName: '新会员礼包', giftValue: 50, grantTime: '2026-03-01 10:00:00', claimTime: '2026-03-01 11:30:00', status: 'claimed' },
-  { id: 2, memberName: '李四', phone: '13800138002', giftName: '生日专属礼包', giftValue: 100, grantTime: '2026-03-05 09:00:00', claimTime: '-', status: 'unclaimed' },
-  { id: 3, memberName: '王五', phone: '13800138003', giftName: '节日礼包', giftValue: 80, grantTime: '2026-02-14 08:00:00', claimTime: '-', status: 'expired' }
-]
-
-const loadData = () => {
-  loading.value = true
-  setTimeout(() => {
-    dataList.value = mockData()
-    paginationConfig.total = dataList.value.length
+async function loadData() {
+  try {
+    loading.value = true
+    data.value = []
+    pagination.value.total = 0
+  } catch (err: any) {
+    Message.error('加载失败: ' + err.message)
+  } finally {
     loading.value = false
-  }, 400)
+  }
 }
 
-const onPageChange = (page) => { paginationConfig.current = page; loadData() }
-
-loadData()
+function handleCreate() {}
+function handleReset() { form.value = { keyword: '' }; loadData() }
+onMounted(() => { loadData() })
 </script>
-</a-card>
+
+<style scoped>
+.page-container { padding: 16px; }
+.search-form { margin-bottom: 16px; padding: 16px; background: var(--color-fill-lightest); border-radius: 4px; }
+</style>
