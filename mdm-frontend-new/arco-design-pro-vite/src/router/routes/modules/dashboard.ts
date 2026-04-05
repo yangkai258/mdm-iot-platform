@@ -118,7 +118,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
     meta: {
       locale: 'menu.devices',
       requiresAuth: true,
-      icon: 'icon-device',
+      icon: 'icon-desktop',
       order: 1,
     },
     children: [
@@ -402,7 +402,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
     meta: {
       locale: 'menu.orders',
       requiresAuth: true,
-      icon: 'icon-shopping-cart',
+      icon: 'icon-gift',
       order: 1,
     },
     children: [
@@ -622,7 +622,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
     meta: {
       locale: 'menu.subscriptions',
       requiresAuth: true,
-      icon: 'icon-subscription',
+      icon: 'icon-subscribe',
       order: 1,
     },
     children: [
@@ -1037,7 +1037,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       { path: 'test', name: 'FairnessTest', component: () => import('@/views/ai-fairness/FairnessTestView.vue'), meta: { locale: 'menu.aiFairness.test', requiresAuth: true, roles: ['*'] }},
     ],
   },
-  { path: '/simulation', name: 'SimulationModule', component: DEFAULT_LAYOUT, meta: { locale: 'menu.simulation', requiresAuth: true, icon: 'icon-simulation', order: 2 }, children: [
+  { path: '/simulation', name: 'SimulationModule', component: DEFAULT_LAYOUT, meta: { locale: 'menu.simulation', requiresAuth: true, icon: 'icon-experiment', order: 2 }, children: [
       { path: '', redirect: '/simulation/ab', meta: { hideInMenu: true }},
       { path: 'ab', name: 'ABExperiment', component: () => import('@/views/simulation/ABExperimentView.vue'), meta: { locale: 'menu.simulation.ab', requiresAuth: true, roles: ['*'] }},
       { path: 'replay', name: 'SimulationReplay', component: () => import('@/views/simulation/ReplayView.vue'), meta: { locale: 'menu.simulation.replay', requiresAuth: true, roles: ['*'] }},
@@ -1074,7 +1074,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       { path: 'project', name: 'ResearchProject', component: () => import('@/views/research/ResearchProjectView.vue'), meta: { locale: 'menu.research.project', requiresAuth: true, roles: ['*'] }},
     ],
   },
-  { path: '/policies', name: 'Policies', component: DEFAULT_LAYOUT, meta: { locale: 'menu.policies', requiresAuth: true, icon: 'icon-shield', order: 2 }, children: [
+  { path: '/policies', name: 'Policies', component: DEFAULT_LAYOUT, meta: { locale: 'menu.policies', requiresAuth: true, icon: 'icon-lock', order: 2 }, children: [
       { path: '', redirect: '/policies/list', meta: { hideInMenu: true }},
       { path: 'list', name: 'PolicyList', component: () => import('@/views/policies/PolicyList.vue'), meta: { locale: 'menu.policies.list', requiresAuth: true, roles: ['*'] }},
       { path: 'compliance-rules', name: 'ComplianceRules', component: () => import('@/views/policies/ComplianceRules.vue'), meta: { locale: 'menu.policies.complianceRules', requiresAuth: true, roles: ['*'] }},
@@ -1085,7 +1085,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       { path: 'policy-templates', name: 'PolicyTemplates', component: () => import('@/views/policies/PolicyTemplatesView.vue'), meta: { locale: 'menu.policies.policyTemplates', requiresAuth: true, roles: ['*'] }},
     ],
   },
-  { path: '/globalization', name: 'Globalization', component: DEFAULT_LAYOUT, meta: { locale: 'menu.globalization', requiresAuth: true, icon: 'icon-global', order: 2 }, children: [
+  { path: '/globalization', name: 'Globalization', component: DEFAULT_LAYOUT, meta: { locale: 'menu.globalization', requiresAuth: true, icon: 'icon-language', order: 2 }, children: [
       { path: '', redirect: '/globalization/language', meta: { hideInMenu: true }},
       { path: 'language', name: 'LanguagePack', component: () => import('@/views/globalization/LanguagePackView.vue'), meta: { locale: 'menu.globalization.language', requiresAuth: true, roles: ['*'] }},
       { path: 'region', name: 'RegionManage', component: () => import('@/views/globalization/RegionManageView.vue'), meta: { locale: 'menu.globalization.region', requiresAuth: true, roles: ['*'] }},
@@ -1115,7 +1115,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       { path: 'conversations', name: 'PetConversations', component: () => import('@/views/pet/PetConversations.vue'), meta: { locale: 'menu.petConsole.conversations', requiresAuth: true, roles: ['*'] }},
     ],
   },
-  { path: '/device-manage', name: 'DeviceManage', component: DEFAULT_LAYOUT, meta: { locale: 'menu.deviceManage', requiresAuth: true, icon: 'icon-device', order: 2 }, children: [
+  { path: '/device-manage', name: 'DeviceManage', component: DEFAULT_LAYOUT, meta: { locale: 'menu.deviceManage', requiresAuth: true, icon: 'icon-desktop', order: 2 }, children: [
       { path: '', redirect: '/device-manage/certificates', meta: { hideInMenu: true }},
       { path: 'certificates', name: 'DeviceCertificates', component: () => import('@/views/devices/DeviceCertificates.vue'), meta: { locale: 'menu.deviceManage.certificates', requiresAuth: true, roles: ['*'] }},
       { path: 'geofence', name: 'DeviceGeofence', component: () => import('@/views/devices/DeviceGeofence.vue'), meta: { locale: 'menu.deviceManage.geofence', requiresAuth: true, roles: ['*'] }},
@@ -1129,7 +1129,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       { path: 'deployments', name: 'OTADeployments', component: () => import('@/views/ota/OtaDeployments.vue'), meta: { locale: 'menu.otaManage.deployments', requiresAuth: true, roles: ['*'] }},
     ],
   },
-  { path: '/marketing', name: 'Marketing', component: DEFAULT_LAYOUT, meta: { locale: 'menu.marketing', requiresAuth: true, icon: 'icon-promotion', order: 2 }, children: [
+  { path: '/marketing', name: 'Marketing', component: DEFAULT_LAYOUT, meta: { locale: 'menu.marketing', requiresAuth: true, icon: 'icon-gift', order: 2 }, children: [
       { path: '', redirect: '/marketing/redpacket', meta: { hideInMenu: true }},
       { path: 'redpacket', name: 'MarketingRedpacket', component: () => import('@/views/marketing/RedpacketView.vue'), meta: { locale: 'menu.marketing.redpacket', requiresAuth: true, roles: ['*'] }},
       { path: 'temp-coupon', name: 'TempCouponGrant', component: () => import('@/views/marketing/TempCouponGrantView.vue'), meta: { locale: 'menu.marketing.tempCoupon', requiresAuth: true, roles: ['*'] }},
@@ -1137,7 +1137,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       { path: 'temp-redpacket', name: 'TempRedpacket', component: () => import('@/views/marketing/TempRedpacketView.vue'), meta: { locale: 'menu.marketing.tempRedpacket', requiresAuth: true, roles: ['*'] }},
     ],
   },
-  { path: '/market', name: 'Market', component: DEFAULT_LAYOUT, meta: { locale: 'menu.market', requiresAuth: true, icon: 'icon-shopping-cart', order: 2 }, children: [
+  { path: '/market', name: 'Market', component: DEFAULT_LAYOUT, meta: { locale: 'menu.market', requiresAuth: true, icon: 'icon-gift', order: 2 }, children: [
       { path: '', redirect: '/market/action', meta: { hideInMenu: true }},
       { path: 'action', name: 'ActionMarket', component: () => import('@/views/market/ActionMarketView.vue'), meta: { locale: 'menu.market.action', requiresAuth: true, roles: ['*'] }},
       { path: 'ad-campaign', name: 'AdCampaign', component: () => import('@/views/market/AdCampaignView.vue'), meta: { locale: 'menu.market.adCampaign', requiresAuth: true, roles: ['*'] }},
@@ -1153,7 +1153,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       { path: 'list', name: 'KnowledgeList', component: () => import('@/views/knowledge/KnowledgeList.vue'), meta: { locale: 'menu.knowledge.list', requiresAuth: true, roles: ['*'] }},
     ],
   },
-  { path: '/org', name: 'Org', component: DEFAULT_LAYOUT, meta: { locale: 'menu.org', requiresAuth: true, icon: 'icon-tree', order: 2 }, children: [
+  { path: '/org', name: 'Org', component: DEFAULT_LAYOUT, meta: { locale: 'menu.org', requiresAuth: true, icon: 'icon-mind-mapping', order: 2 }, children: [
       { path: '', redirect: '/org/companies', meta: { hideInMenu: true }},
       { path: 'companies', name: 'Companies', component: () => import('@/views/org/Companies.vue'), meta: { locale: 'menu.org.companies', requiresAuth: true, roles: ['*'] }},
       { path: 'departments', name: 'OrgDepartments', component: () => import('@/views/org/Departments.vue'), meta: { locale: 'menu.org.departments', requiresAuth: true, roles: ['*'] }},
@@ -1170,7 +1170,7 @@ const MDM_ROUTES: AppRouteRecordRaw[] = [
       { path: 'roles', name: 'PermissionRoles', component: () => import('@/views/permissions/Roles.vue'), meta: { locale: 'menu.permissionManage.roles', requiresAuth: true, roles: ['*'] }},
     ],
   },
-  { path: '/store', name: 'Store', component: DEFAULT_LAYOUT, meta: { locale: 'menu.store', requiresAuth: true, icon: 'icon-shopping-cart', order: 2 }, children: [
+  { path: '/store', name: 'Store', component: DEFAULT_LAYOUT, meta: { locale: 'menu.store', requiresAuth: true, icon: 'icon-gift', order: 2 }, children: [
       { path: '', redirect: '/store/promotion', meta: { hideInMenu: true }},
       { path: 'promotion', name: 'StorePromotion', component: () => import('@/views/store/PromotionTypesView.vue'), meta: { locale: 'menu.store.promotion', requiresAuth: true, roles: ['*'] }},
       { path: 'locations', name: 'StoreLocations', component: () => import('@/views/store/StoreLocationsView.vue'), meta: { locale: 'menu.store.locations', requiresAuth: true, roles: ['*'] }},
