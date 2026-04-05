@@ -4,7 +4,7 @@
       <icon-apps />
     </a-breadcrumb-item>
     <a-breadcrumb-item v-for="item in items" :key="item">
-      {{ $t(item) }}
+      {{ item ? $t(item) === item ? item : $t(item) : '' }}
     </a-breadcrumb-item>
   </a-breadcrumb>
 </template>

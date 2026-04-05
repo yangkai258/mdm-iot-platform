@@ -154,7 +154,7 @@ const handleEdit = (record: any) => { isEdit.value = true; Object.assign(form, r
 const handleTest = (record: any) => {};
 const handleLogs = (record: any) => { logsVisible.value = true; };
 const handleDelete = (record: any) => {};
-const handleSubmit = (done: boolean) => { done(true); editVisible.value = false; };
+const handleSubmit = (done: (closed: boolean) => void) => { done(true); editVisible.value = false; };
 </script>
 
 <style scoped>

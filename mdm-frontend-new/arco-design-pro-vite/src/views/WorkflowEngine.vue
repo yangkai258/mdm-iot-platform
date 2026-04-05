@@ -89,7 +89,7 @@ const runColumns = [
 ];
 
 const handleCreate = () => { createVisible.value = true; };
-const handleSubmit = (done: boolean) => { done(true); createVisible.value = false; };
+const handleSubmit = (done: (closed: boolean) => void) => { done(true); createVisible.value = false; };
 </script>
 
 <style scoped>
