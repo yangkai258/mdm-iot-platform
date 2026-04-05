@@ -66,17 +66,19 @@ func (ActionExecution) TableName() string {
 
 // SafetyZone 禁区表
 type SafetyZone struct {
-	ID         uint           `gorm:"primaryKey" json:"id"`
-	DeviceID   string         `gorm:"type:varchar(100);not null;index" json:"device_id"`
-	ZoneType   string         `gorm:"type:varchar(20);not null" json:"zone_type"`   // forbidden/caution/safe
-	ZoneShape  string         `gorm:"type:varchar(20);not null" json:"zone_shape"`  // rectangle/circle/polygon
-	ZoneData   string         `gorm:"type:jsonb;not null" json:"zone_data"`        // 区域坐标数据
-	ZoneName   string         `gorm:"type:varchar(100)" json:"zone_name"`
-	IsEnabled  bool           `gorm:"type:boolean;default:true" json:"is_enabled"`
-	CreatedBy  *uint          `json:"created_by"`
-	CreatedAt  time.Time      `json:"created_at"`
-	UpdatedAt  time.Time      `json:"updated_at"`
-	DeletedAt  gorm.DeletedAt `gorm:"index" json:"-"`
+	ID           uint      `gorm:"primaryKey" json:"id"`
+	DeviceID    string    `gorm:"type:varchar(100);index" json:"device_id"`
+	ZoneID      string    `gorm:"type:varchar(100)" json:"zone_id"`
+	ZoneName    string    `gorm:"type:varchar(100)" json:"zone_name"`
+	ZoneType    string    `gorm:"type:varchar(20)" json:"zone_type"`    // forbidden/caution/safe
+	Boundary    string    `gorm:"type:jsonb" json:"boundary"`           // 区域坐标数据
+	CenterLat   float64   `gorm:"type:double precision" json:"center_lat"`
+	CenterLng   float64   `gorm:"type:double precision" json:"center_lng"`
+	Radius      float64   `gorm:"type:double precision" json:"radius"`
+	IsActive    bool      `gorm:"type:boolean;default:true" json:"is_active"`
+	AlertEnabled bool     `gorm:"type:boolean;default:true" json:"alert_enabled"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 // TableName 指定表名

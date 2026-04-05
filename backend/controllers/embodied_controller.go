@@ -54,6 +54,8 @@ func (ctrl *EmbodiedController) RegisterEmbodiedRoutes(api *gin.RouterGroup) {
 	embodied.DELETE("/:device_id/safety/zones/:id", embodiedCtrl.DeleteSafetyZone)
 	embodied.POST("/:device_id/safety/emergency-stop", embodiedCtrl.EmergencyStop)
 	embodied.GET("/:device_id/safety/logs", embodiedCtrl.GetSafetyLogs)
+	// 全局安全区域（无需 device_id）
+	embodied.GET("/safety/zones", embodiedCtrl.GetSafetyZones)
 
 	// 动作模仿 API（全局，动作库管理）
 	library := embodied.Group("")
@@ -753,7 +755,12 @@ func (ctrl *EmbodiedController) GetSafetyZones(c *gin.Context) {
 	deviceID := c.Param("device_id")
 
 	var zones []models.SafetyZone
-	if err := ctrl.DB.Where("device_id = ?", deviceID).Order("created_at DESC").Find(&zones).Error; err != nil {
+	query := ctrl.DB.Model(&models.SafetyZone{})
+	if deviceID != "" {
+		query = query.Where("device_id = ?", deviceID)
+	}
+
+	if err := query.Order("created_at DESC").Find(&zones).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "failed to get safety zones"})
 		return
 	}
@@ -765,29 +772,34 @@ func (ctrl *EmbodiedController) GetSafetyZones(c *gin.Context) {
 func (ctrl *EmbodiedController) CreateSafetyZone(c *gin.Context) {
 	deviceID := c.Param("device_id")
 	var req struct {
-		ZoneType  string `json:"zone_type" binding:"required"`
-		ZoneShape string `json:"zone_shape" binding:"required"`
-		ZoneData  string `json:"zone_data" binding:"required"`
+		ZoneType   string `json:"zone_type" binding:"required"`
+		Boundary  string `json:"boundary" binding:"required"`
 		ZoneName  string `json:"zone_name"`
-		IsEnabled *bool  `json:"is_enabled"`
+		CenterLat float64 `json:"center_lat"`
+		CenterLng float64 `json:"center_lng"`
+		Radius    float64 `json:"radius"`
+		IsActive  *bool   `json:"is_active"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "invalid request"})
 		return
 	}
 
-	enabled := true
-	if req.IsEnabled != nil {
-		enabled = *req.IsEnabled
+	active := true
+	if req.IsActive != nil {
+		active = *req.IsActive
 	}
 
 	zone := models.SafetyZone{
-		DeviceID:  deviceID,
-		ZoneType:  req.ZoneType,
-		ZoneShape: req.ZoneShape,
-		ZoneData:  req.ZoneData,
-		ZoneName:  req.ZoneName,
-		IsEnabled: enabled,
+		DeviceID:    deviceID,
+		ZoneType:    req.ZoneType,
+		Boundary:   req.Boundary,
+		ZoneName:   req.ZoneName,
+		CenterLat:  req.CenterLat,
+		CenterLng:  req.CenterLng,
+		Radius:     req.Radius,
+		IsActive:   active,
+		AlertEnabled: true,
 	}
 
 	if err := ctrl.DB.Create(&zone).Error; err != nil {

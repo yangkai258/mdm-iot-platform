@@ -321,22 +321,26 @@ export interface SafetyLog {
 }
 
 export async function getSafetyZones(deviceId: string, params = {}) {
-  const res = await axios.get(`/api/embodied/${deviceId}/safety/zones`, { params, headers: headers() })
+  const path = deviceId ? `/api/embodied/${deviceId}/safety/zones` : '/api/embodied/safety/zones'
+  const res = await axios.get(path, { params, headers: headers() })
   return res.data
 }
 
 export async function createSafetyZone(deviceId: string, data: any) {
-  const res = await axios.post(`/api/embodied/${deviceId}/safety/zones`, data, { headers: headers() })
+  const path = deviceId ? `/api/embodied/${deviceId}/safety/zones` : '/api/embodied/safety/zones'
+  const res = await axios.post(path, data, { headers: headers() })
   return res.data
 }
 
 export async function updateSafetyZone(deviceId: string, zoneId: number, data: any) {
-  const res = await axios.put(`/api/embodied/${deviceId}/safety/zones/${zoneId}`, data, { headers: headers() })
+  const base = deviceId ? `/api/embodied/${deviceId}` : '/api/embodied'
+  const res = await axios.put(`${base}/safety/zones/${zoneId}`, data, { headers: headers() })
   return res.data
 }
 
 export async function deleteSafetyZone(deviceId: string, zoneId: number) {
-  const res = await axios.delete(`/api/embodied/${deviceId}/safety/zones/${zoneId}`, { headers: headers() })
+  const base = deviceId ? `/api/embodied/${deviceId}` : '/api/embodied'
+  const res = await axios.delete(`${base}/safety/zones/${zoneId}`, { headers: headers() })
   return res.data
 }
 
