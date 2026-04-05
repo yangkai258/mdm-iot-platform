@@ -52,7 +52,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import Breadcrumb from '@/components/breadcrumb'
 
 const tagList = ref([])
 const loading = ref(false)

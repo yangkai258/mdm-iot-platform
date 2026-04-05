@@ -22,7 +22,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import Breadcrumb from '@/components/breadcrumb'
 
 const form = reactive({ app_id: '', app_secret: '', push_enabled: true, template_id: '' })
 const handleSave = () => Message.success('保存成功')

@@ -19,7 +19,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import Breadcrumb from '@/components/breadcrumb'
 
 const form = reactive({ enabled: true, consume_ratio: 1, redeem_ratio: 0.01 })
 const handleSave = () => Message.success('保存成功')

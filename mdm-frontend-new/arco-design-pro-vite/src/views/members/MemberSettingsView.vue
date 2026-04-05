@@ -28,7 +28,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import Breadcrumb from '@/components/breadcrumb'
 
 const form = reactive({ register_points: 100, consume_ratio: 1, redeem_ratio: 0.01, validity_days: 365 })
 

@@ -17,7 +17,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/Breadcrumb.vue'
+import Breadcrumb from '@/components/breadcrumb'
 
 const inputText = ref('')
 const messages = ref([])
