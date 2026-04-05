@@ -478,11 +478,14 @@ func (ctrl *EmbodiedController) ListActionLibrary(c *gin.Context) {
 	}
 
 	var total int64
-	query.Count(&total)
+	if err := query.Count(&total).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "failed to list action library", "detail": err.Error()})
+		return
+	}
 
 	var items []models.ActionLibrary
 	if err := query.Order("created_at DESC").Offset((page - 1) * pageSize).Limit(pageSize).Find(&items).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "failed to list action library"})
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "failed to list action library", "detail": err.Error()})
 		return
 	}
 

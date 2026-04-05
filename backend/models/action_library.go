@@ -30,7 +30,7 @@ type ActionLibrary struct {
 
 // TableName 指定表名
 func (ActionLibrary) TableName() string {
-	return "action_library"
+	return "embodied_action_library"
 }
 
 // BeforeCreate 创建前自动生成 UUID
