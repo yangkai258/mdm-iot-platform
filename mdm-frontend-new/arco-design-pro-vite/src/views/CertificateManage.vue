@@ -24,9 +24,9 @@
         </a-col>
         <a-col :span="6">
           <a-card>
-            <a-statistic title="已过期" :value="stats.expired" :value-style="{ color: '#F56C6C' }" />
+            <a-statistic title="已过�? :value="stats.expired" :value-style="{ color: '#F56C6C' }" />
           </a-card>
-        </col>
+        </a-col>
       </a-row>
 
       <a-table :columns="columns" :data="certificates">
@@ -55,7 +55,7 @@ const columns = [
   { title: '证书ID', dataIndex: 'id' },
   { title: '证书名称', dataIndex: 'name' },
   { title: '设备', dataIndex: 'deviceId' },
-  { title: '状态', slotName: 'status', width: 120 },
+  { title: '状�?, slotName: 'status', width: 120 },
   { title: '过期时间', slotName: 'expiry', width: 180 },
   { title: '操作', slotName: 'actions', width: 180 }
 ]
@@ -65,7 +65,7 @@ const certificates = ref([
 ])
 
 const getStatusColor = (s) => ({ valid: 'green', expiring: 'orange', expired: 'red' }[s] || 'gray')
-const getStatusLabel = (s) => ({ valid: '有效', expiring: '即将过期', expired: '已过期' }[s] || s)
+const getStatusLabel = (s) => ({ valid: '有效', expiring: '即将过期', expired: '已过�? }[s] || s)
 
 const handleCreate = () => { }
 const handleView = (r) => { }

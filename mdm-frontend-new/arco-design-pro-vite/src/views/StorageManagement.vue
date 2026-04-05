@@ -5,7 +5,7 @@
       <a-row :gutter="16">
         <a-col :span="6"><a-card><a-statistic title="已用" :value="stats.used" suffix="GB" /></a-card></a-col>
         <a-col :span="6"><a-card><a-statistic title="总计" :value="stats.total" suffix="GB" /></a-card></a-col>
-      </row>
+      </a-row>
       <a-progress :percent="stats.used / stats.total * 100" :show-text="true" style="margin-top: 16px" />
     </a-card>
   </div>
