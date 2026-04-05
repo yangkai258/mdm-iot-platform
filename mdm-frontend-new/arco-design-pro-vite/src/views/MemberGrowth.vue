@@ -6,7 +6,7 @@
         <a-col :span="6"><a-card><a-statistic title="当前成长值" :value="stats.currentGrowth" /></a-card></a-col>
         <a-col :span="6"><a-card><a-statistic title="本月增长" :value="stats.monthlyGrowth" /></a-card></a-col>
       </a-row>
-      <a-chart :option="chartOption" style="height: 300px; margin-top: 16px" />
+      <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
     </a-card>
   </div>
 </template>

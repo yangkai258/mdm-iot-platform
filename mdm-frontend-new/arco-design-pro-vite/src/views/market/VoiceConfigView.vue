@@ -20,7 +20,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/breadcrumb'
+import Breadcrumb from '@/components/breadcrumb/index.vue'
 
 const form = reactive({ default_voice: '', speed: 1, pitch: 1, volume: 80 })
 const handleSave = () => Message.success('保存成功')

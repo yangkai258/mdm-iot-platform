@@ -6,7 +6,7 @@
         <a-col :span="6"><a-card><a-statistic title="今日步数" :value="stats.steps" /></a-card></a-col>
         <a-col :span="6"><a-card><a-statistic title="睡眠时长" :value="stats.sleep" suffix="小时" /></a-card></a-col>
       </a-row>
-      <a-chart :option="chartOption" style="height: 250px; margin-top: 16px" />
+      <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
     </a-card>
   </div>
 </template>

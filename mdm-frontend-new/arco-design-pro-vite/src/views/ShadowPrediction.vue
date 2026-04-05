@@ -2,7 +2,7 @@
   <div class="container">
     <a-card>
       <template #title>
-        <a-space><icon-mind-mapping /> 设备状态预测</a-space>
+        <a-space><icon-mind-mapping /> 设备状态预�?/a-space>
       </template>
       <template #extra>
         <a-button @click="handleRefresh">
@@ -14,7 +14,7 @@
       <a-row :gutter="16" style="margin-bottom: 16px">
         <a-col :span="4">
           <a-card size="small">
-            <a-statistic title="预测置信度" :value="confidence" suffix="%" />
+            <a-statistic title="预测置信�? :value="confidence" suffix="%" />
           </a-card>
         </a-col>
         <a-col :span="20">
@@ -32,7 +32,7 @@
       </a-row>
 
       <a-card title="预测趋势">
-        <a-chart :option="predictChart" style="height: 350px" />
+        <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999">Chart</div>
       </a-card>
 
       <a-row :gutter="16" style="margin-top: 16px">
@@ -67,12 +67,12 @@ const predictRange = ref('6h')
 
 const predictChart = reactive({
   tooltip: { trigger: 'axis' },
-  legend: { data: ['实际值', '预测值', '置信区间'] },
+  legend: { data: ['实际�?, '预测�?, '置信区间'] },
   xAxis: { type: 'category', data: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'] },
-  yAxis: { type: 'value', name: '状态值' },
+  yAxis: { type: 'value', name: '状态�? },
   series: [
-    { name: '实际值', type: 'line', data: [85, 82, 88, null, null, null, null], smooth: true },
-    { name: '预测值', type: 'line', data: [null, null, 88, 86, 84, 82, 80], smooth: true, linestyle: { type: 'dashed' } },
+    { name: '实际�?, type: 'line', data: [85, 82, 88, null, null, null, null], smooth: true },
+    { name: '预测�?, type: 'line', data: [null, null, 88, 86, 84, 82, 80], smooth: true, linestyle: { type: 'dashed' } },
     { name: '置信区间', type: 'area', data: [null, null, 88, 89, 87, 85, 83], itemStyle: { opacity: 0.2 } }
   ]
 })
@@ -81,17 +81,17 @@ const anomalyColumns = [
   { title: '时间', dataIndex: 'time' },
   { title: '类型', dataIndex: 'type' },
   { title: '严重程度', slotName: 'severity' },
-  { title: '预测值', dataIndex: 'predicted' },
-  { title: '实际值', dataIndex: 'actual' }
+  { title: '预测�?, dataIndex: 'predicted' },
+  { title: '实际�?, dataIndex: 'actual' }
 ]
 const anomalies = ref([
   { time: '2026-03-28 12:00', type: '温度异常', severity: 'warning', predicted: 45, actual: 52 },
-  { time: '2026-03-28 13:00', type: '电量消耗过快', severity: 'info', predicted: 80, actual: 75 }
+  { time: '2026-03-28 13:00', type: '电量消耗过�?, severity: 'info', predicted: 80, actual: 75 }
 ])
 
 const suggestions = ref([
-  { id: 1, title: '建议充电', desc: '电量低于20%，建议在2小时内充电' },
-  { id: 2, title: '温度关注', desc: '预测显示温度将升高，建议减少高负载操作' }
+  { id: 1, title: '建议充电', desc: '电量低于20%，建议在2小时内充�? },
+  { id: 2, title: '温度关注', desc: '预测显示温度将升高，建议减少高负载操�? }
 ])
 
 const getSeverityColor = (s) => ({ warning: 'orange', error: 'red', info: 'blue' }[s] || 'gray')

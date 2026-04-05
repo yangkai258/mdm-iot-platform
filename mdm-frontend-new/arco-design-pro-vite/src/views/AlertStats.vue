@@ -35,12 +35,12 @@
               </a-radio-group>
             </a-space>
           </template>
-          <a-chart :option="trendChart" style="height: 250px" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
       <a-col :span="8">
         <a-card title="告警类型分布">
-          <a-chart :option="pieChart" style="height: 250px" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
     </a-row>

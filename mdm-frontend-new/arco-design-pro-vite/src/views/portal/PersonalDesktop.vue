@@ -30,7 +30,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import Breadcrumb from '@/components/breadcrumb'
+import Breadcrumb from '@/components/breadcrumb/index.vue'
 
 const shortcuts = ref([
   { label: '设备列表', path: '/devices' },

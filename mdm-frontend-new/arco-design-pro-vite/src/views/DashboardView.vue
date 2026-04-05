@@ -7,7 +7,7 @@
         <a-col :span="6"><a-card><a-statistic title="总设备" :value="stats.devices" /></a-card></a-col>
         <a-col :span="6"><a-card><a-statistic title="今日活跃" :value="stats.active" /></a-card></a-col>
       </a-row>
-      <a-chart :option="chartOption" style="height: 300px; margin-top: 16px" />
+      <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
     </a-card>
   </div>
 </template>

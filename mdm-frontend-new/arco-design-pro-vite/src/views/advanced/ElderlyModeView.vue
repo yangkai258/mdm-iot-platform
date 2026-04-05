@@ -1,49 +1,49 @@
-ï»¿<template>
+<template>
     <Breadcrumb :items="['Home','Console','']" />
 
 
   <div class="pro-page-container">
-    <!-- é¢åŒ…å±‘ -->
+    <!-- Ãæ°üĞ¼ -->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>é¦–é¡µ</a-breadcrumb-item>
-      <a-breadcrumb-item>é«˜çº§åŠŸèƒ½</a-breadcrumb-item>
-      <a-breadcrumb-item>è€äººé™ªä¼´æ¨¡å¼</a-breadcrumb-item>
+      <a-breadcrumb-item>Ê×Ò³</a-breadcrumb-item>
+      <a-breadcrumb-item>¸ß¼¶¹¦ÄÜ</a-breadcrumb-item>
+      <a-breadcrumb-item>ÀÏÈËÅã°éÄ£Ê½</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- é¡µé¢æ ‡é¢˜ -->
+    <!-- Ò³Ãæ±êÌâ -->
     <div class="pro-page-header">
-      <h2 class="pro-page-title">è€äººé™ªä¼´æ¨¡å¼</h2>
-      <p class="pro-page-desc">ä¸ºè€å¹´ç”¨æˆ·é…ç½®ç®€åŒ–ç•Œé¢ã€ä¸»åŠ¨é—®å€™ä¸ç´§æ€¥æ±‚åŠ©åŠŸèƒ½</p>
+      <h2 class="pro-page-title">ÀÏÈËÅã°éÄ£Ê½</h2>
+      <p class="pro-page-desc">ÎªÀÏÄêÓÃ»§ÅäÖÃ¼ò»¯½çÃæ¡¢Ö÷¶¯ÎÊºòÓë½ô¼±ÇóÖú¹¦ÄÜ</p>
     </div>
 
-    <!-- æœç´¢ç­›é€‰åŒº -->
+    <!-- ËÑË÷É¸Ñ¡Çø -->
     <div class="pro-search-bar">
       <a-space>
-        <a-select v-model="elderFilter" placeholder="é€‰æ‹©è€äººè´¦å·" allow-clear style="width: 200px" @change="loadElderModes">
+        <a-select v-model="elderFilter" placeholder="Ñ¡ÔñÀÏÈËÕËºÅ" allow-clear style="width: 200px" @change="loadElderModes">
           <a-option v-for="e in elders" :key="e.id" :value="e.id">{{ e.name }}</a-option>
         </a-select>
-        <a-select v-model="statusFilter" placeholder="æ¨¡å¼çŠ¶æ€" allow-clear style="width: 140px" @change="loadElderModes">
-          <a-option value="enabled">å·²å¯ç”¨</a-option>
-          <a-option value="disabled">å·²ç¦ç”¨</a-option>
+        <a-select v-model="statusFilter" placeholder="Ä£Ê½×´Ì¬" allow-clear style="width: 140px" @change="loadElderModes">
+          <a-option value="enabled">ÒÑÆôÓÃ</a-option>
+          <a-option value="disabled">ÒÑ½ûÓÃ</a-option>
         </a-select>
       </a-space>
     </div>
 
-    <!-- æ“ä½œæŒ‰é’®åŒº -->
+    <!-- ²Ù×÷°´Å¥Çø -->
     <div class="pro-action-bar">
       <a-space>
         <a-button type="primary" @click="showConfigModal(null)">
           <template #icon><icon-settings /></template>
-          æ–°å¢é…ç½®
+          ĞÂÔöÅäÖÃ
         </a-button>
         <a-button @click="loadElderModes">
           <template #icon><icon-refresh /></template>
-          åˆ·æ–°
+          Ë¢ĞÂ
         </a-button>
       </a-space>
     </div>
 
-    <!-- æ•°æ®å†…å®¹åŒº -->
+    <!-- Êı¾İÄÚÈİÇø -->
     <div class="pro-content-area">
       <a-table
         :columns="columns"
@@ -64,7 +64,7 @@
         </template>
         <template #simplified_ui="{ record }">
           <a-tag :color="record.simplified_ui ? 'green' : 'gray'">
-            {{ record.simplified_ui ? 'å·²å¯ç”¨' : 'å·²ç¦ç”¨' }}
+            {{ record.simplified_ui ? 'ÒÑÆôÓÃ' : 'ÒÑ½ûÓÃ' }}
           </a-tag>
         </template>
         <template #font_size="{ record }">
@@ -72,27 +72,27 @@
         </template>
         <template #high_contrast="{ record }">
           <a-tag :color="record.high_contrast ? 'green' : 'gray'">
-            {{ record.high_contrast ? 'å·²å¯ç”¨' : 'å·²ç¦ç”¨' }}
+            {{ record.high_contrast ? 'ÒÑÆôÓÃ' : 'ÒÑ½ûÓÃ' }}
           </a-tag>
         </template>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="text" size="small" @click="showConfigModal(record)">é…ç½®</a-button>
-            <a-button type="text" size="small" @click="showHealthData(record)">å¥åº·æ•°æ®</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">åˆ é™¤</a-button>
+            <a-button type="text" size="small" @click="showConfigModal(record)">ÅäÖÃ</a-button>
+            <a-button type="text" size="small" @click="showHealthData(record)">½¡¿µÊı¾İ</a-button>
+            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">É¾³ı</a-button>
           </a-space>
         </template>
       </a-table>
     </div>
 
-    <!-- å¥åº·æ•°æ®æŠ½å±‰ -->
-    <a-drawer v-model:visible="healthDrawerVisible" :width="720" :title="`å¥åº·æ•°æ® - ${healthElderName}`" @close="healthDrawerVisible = false">
+    <!-- ½¡¿µÊı¾İ³éÌë -->
+    <a-drawer v-model:visible="healthDrawerVisible" :width="720" :title="`½¡¿µÊı¾İ - ${healthElderName}`" @close="healthDrawerVisible = false">
       <a-row :gutter="12" style="margin-bottom: 16px">
         <a-col :span="8">
           <a-card class="stat-card" hoverable>
             <a-statistic :value="healthData.heart_rate" :precision="0" suffix="bpm">
               <template #prefix><icon-heart :size="20" style="color:#f53f3f"/></template>
-              <template #title>å¿ƒç‡</template>
+              <template #title>ĞÄÂÊ</template>
             </a-statistic>
           </a-card>
         </a-col>
@@ -100,15 +100,15 @@
           <a-card class="stat-card" hoverable>
             <a-statistic :value="healthData.blood_pressure_systolic" suffix="/" :precision="0" :value-from="0">
               <template #prefix><icon-activity :size="20" style="color:#f53f3f"/></template>
-              <template #title>è¡€å‹</template>
+              <template #title>ÑªÑ¹</template>
             </a-statistic>
           </a-card>
         </a-col>
         <a-col :span="8">
           <a-card class="stat-card" hoverable>
-            <a-statistic :value="healthData.sleep_hours" :precision="1" suffix="å°æ—¶">
+            <a-statistic :value="healthData.sleep_hours" :precision="1" suffix="Ğ¡Ê±">
               <template #prefix><icon-moon :size="20" style="color:#722ed1"/></template>
-              <template #title>ç¡çœ æ—¶é•¿</template>
+              <template #title>Ë¯ÃßÊ±³¤</template>
             </a-statistic>
           </a-card>
         </a-col>
@@ -117,9 +117,9 @@
       <a-row :gutter="12" style="margin-bottom: 16px">
         <a-col :span="8">
           <a-card class="stat-card" hoverable>
-            <a-statistic :value="healthData.step_count" :precision="0" suffix="æ­¥">
+            <a-statistic :value="healthData.step_count" :precision="0" suffix="²½">
               <template #prefix><icon-fire :size="20" style="color:#ff6700"/></template>
-              <template #title>æ—¥è¡Œèµ°æ­¥æ•°</template>
+              <template #title>ÈÕĞĞ×ß²½Êı</template>
             </a-statistic>
           </a-card>
         </a-col>
@@ -127,7 +127,7 @@
           <a-card class="stat-card" hoverable>
             <a-statistic :value="healthData.calories_burned" :precision="0" suffix="kcal">
               <template #prefix><icon-thumb-up :size="20" style="color:#0fc6c2"/></template>
-              <template #title>æ¶ˆè€—å¡è·¯é‡Œ</template>
+              <template #title>ÏûºÄ¿¨Â·Àï</template>
             </a-statistic>
           </a-card>
         </a-col>
@@ -135,82 +135,82 @@
           <a-card class="stat-card" hoverable>
             <a-statistic :value="healthData.oxygen_saturation" :precision="0" suffix="%">
               <template #prefix><icon-air :size="20" style="color:#1659f5"/></template>
-              <template #title>è¡€æ°§é¥±å’Œåº¦</template>
+              <template #title>ÑªÑõ±¥ºÍ¶È</template>
             </a-statistic>
           </a-card>
         </a-col>
       </a-row>
 
-      <a-card title="è¿‘7å¤©æ´»åŠ¨è¶‹åŠ¿">
+      <a-card title="½ü7Ìì»î¶¯Ç÷ÊÆ">
         <div ref="healthChartRef" style="height: 200px"></div>
       </a-card>
     </a-drawer>
 
-    <!-- é…ç½®å¼¹çª— -->
-    <a-modal v-model:visible="configModalVisible" :title="isEdit ? 'ç¼–è¾‘è€äººé™ªä¼´æ¨¡å¼é…ç½®' : 'æ–°å¢è€äººé™ªä¼´æ¨¡å¼é…ç½®'" @ok="handleSave" :width="600" @close="resetForm">
+    <!-- ÅäÖÃµ¯´° -->
+    <a-modal v-model:visible="configModalVisible" :title="isEdit ? '±à¼­ÀÏÈËÅã°éÄ£Ê½ÅäÖÃ' : 'ĞÂÔöÀÏÈËÅã°éÄ£Ê½ÅäÖÃ'" @ok="handleSave" :width="600" @close="resetForm">
       <a-form :model="form" layout="vertical">
 
-        <a-form-item label="è€äººè´¦å·" required>
-          <a-select v-model="form.elder_id" placeholder="è¯·é€‰æ‹©è€äººè´¦å·" :disabled="isEdit">
+        <a-form-item label="ÀÏÈËÕËºÅ" required>
+          <a-select v-model="form.elder_id" placeholder="ÇëÑ¡ÔñÀÏÈËÕËºÅ" :disabled="isEdit">
             <a-option v-for="e in elders" :key="e.id" :value="e.id">{{ e.name }} ({{ e.phone }})</a-option>
           </a-select>
         </a-form-item>
 
-        <a-divider>ç®€åŒ–ç•Œé¢è®¾ç½®</a-divider>
+        <a-divider>¼ò»¯½çÃæÉèÖÃ</a-divider>
 
-        <a-form-item label="å¯ç”¨ç®€åŒ–ç•Œé¢">
+        <a-form-item label="ÆôÓÃ¼ò»¯½çÃæ">
           <a-switch v-model="form.simplified_ui" />
         </a-form-item>
-        <a-form-item label="å­—ä½“å¤§å°" v-if="form.simplified_ui">
+        <a-form-item label="×ÖÌå´óĞ¡" v-if="form.simplified_ui">
           <a-radio-group v-model="form.font_size">
-            <a-radio value="large">å¤§ï¼ˆ18pxï¼‰</a-radio>
-            <a-radio value="extra_large">ç‰¹å¤§ï¼ˆ22pxï¼‰</a-radio>
-            <a-radio value="jumbo">è¶…å¤§ï¼ˆ26pxï¼‰</a-radio>
+            <a-radio value="large">´ó£¨18px£©</a-radio>
+            <a-radio value="extra_large">ÌØ´ó£¨22px£©</a-radio>
+            <a-radio value="jumbo">³¬´ó£¨26px£©</a-radio>
           </a-radio-group>
         </a-form-item>
-        <a-form-item label="é«˜å¯¹æ¯”åº¦æ¨¡å¼" v-if="form.simplified_ui">
+        <a-form-item label="¸ß¶Ô±È¶ÈÄ£Ê½" v-if="form.simplified_ui">
           <a-switch v-model="form.high_contrast" />
         </a-form-item>
 
-        <a-divider>ä¸»åŠ¨é—®å€™è®¾ç½®</a-divider>
+        <a-divider>Ö÷¶¯ÎÊºòÉèÖÃ</a-divider>
 
-        <a-form-item label="å¯ç”¨ä¸»åŠ¨é—®å€™">
+        <a-form-item label="ÆôÓÃÖ÷¶¯ÎÊºò">
           <a-switch v-model="form.greeting_enabled" />
         </a-form-item>
-        <a-form-item label="é—®å€™æ—¶é—´" v-if="form.greeting_enabled">
+        <a-form-item label="ÎÊºòÊ±¼ä" v-if="form.greeting_enabled">
           <a-space direction="vertical">
-            <a-time-picker-range v-model="form.greeting_time_range" format="HH:mm" style="width: 280px" placeholder="é€‰æ‹©é—®å€™æ—¶æ®µ" />
+            <a-range-picker v-model="form.greeting_time_range" format="HH:mm" style="width: 280px" placeholder="Ñ¡ÔñÎÊºòÊ±¶Î" />
           </a-space>
         </a-form-item>
-        <a-form-item label="é—®å€™è¯­é£æ ¼" v-if="form.greeting_enabled">
-          <a-select v-model="form.greeting_style" placeholder="é€‰æ‹©é—®å€™è¯­é£æ ¼">
-            <a-option value="warm">æ¸©é¦¨å…³æ€€å‹</a-option>
-            <a-option value="humorous">è½»æ¾å¹½é»˜å‹</a-option>
-            <a-option value="formal">æ­£å¼ç¤¼è²Œå‹</a-option>
+        <a-form-item label="ÎÊºòÓï·ç¸ñ" v-if="form.greeting_enabled">
+          <a-select v-model="form.greeting_style" placeholder="Ñ¡ÔñÎÊºòÓï·ç¸ñ">
+            <a-option value="warm">ÎÂÜ°¹Ø»³ĞÍ</a-option>
+            <a-option value="humorous">ÇáËÉÓÄÄ¬ĞÍ</a-option>
+            <a-option value="formal">ÕıÊ½ÀñÃ²ĞÍ</a-option>
           </a-select>
         </a-form-item>
 
-        <a-divider>ç´§æ€¥æ±‚åŠ©é…ç½®</a-divider>
+        <a-divider>½ô¼±ÇóÖúÅäÖÃ</a-divider>
 
-        <a-form-item label="å¯ç”¨ç´§æ€¥æ±‚åŠ©">
+        <a-form-item label="ÆôÓÃ½ô¼±ÇóÖú">
           <a-switch v-model="form.emergency_enabled" />
         </a-form-item>
-        <a-form-item label="ç´§æ€¥è”ç³»ç”µè¯" v-if="form.emergency_enabled">
-          <a-input v-model="form.emergency_phone" placeholder="è¯·è¾“å…¥ç´§æ€¥è”ç³»ç”µè¯" style="width: 240px" />
+        <a-form-item label="½ô¼±ÁªÏµµç»°" v-if="form.emergency_enabled">
+          <a-input v-model="form.emergency_phone" placeholder="ÇëÊäÈë½ô¼±ÁªÏµµç»°" style="width: 240px" />
         </a-form-item>
-        <a-form-item label="ç´§æ€¥è”ç³»äººå…³ç³»" v-if="form.emergency_enabled">
-          <a-select v-model="form.emergency_relation" placeholder="é€‰æ‹©å…³ç³»" style="width: 160px">
-            <a-option value="son">å„¿å­</a-option>
-            <a-option value="daughter">å¥³å„¿</a-option>
-            <a-option value="spouse">é…å¶</a-option>
-            <a-option value="caregiver">æŠ¤å·¥</a-option>
+        <a-form-item label="½ô¼±ÁªÏµÈË¹ØÏµ" v-if="form.emergency_enabled">
+          <a-select v-model="form.emergency_relation" placeholder="Ñ¡Ôñ¹ØÏµ" style="width: 160px">
+            <a-option value="son">¶ù×Ó</a-option>
+            <a-option value="daughter">Å®¶ù</a-option>
+            <a-option value="spouse">ÅäÅ¼</a-option>
+            <a-option value="caregiver">»¤¹¤</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="SOS è§¦å‘æ–¹å¼" v-if="form.emergency_enabled">
+        <a-form-item label="SOS ´¥·¢·½Ê½" v-if="form.emergency_enabled">
           <a-checkbox-group v-model="form.emergency_trigger">
-            <a-checkbox value="button">ç‰©ç†æŒ‰é’®</a-checkbox>
-            <a-checkbox value="voice">è¯­éŸ³æŒ‡ä»¤</a-checkbox>
-            <a-checkbox value="gesture">æ‰‹åŠ¿è¯†åˆ«</a-checkbox>
+            <a-checkbox value="button">ÎïÀí°´Å¥</a-checkbox>
+            <a-checkbox value="voice">ÓïÒôÖ¸Áî</a-checkbox>
+            <a-checkbox value="gesture">ÊÖÊÆÊ¶±ğ</a-checkbox>
           </a-checkbox-group>
         </a-form-item>
 
@@ -259,12 +259,12 @@ const form = reactive({
 })
 
 const columns = [
-  { title: 'è€äººè´¦å·', dataIndex: 'elder_name', slotName: 'elder_name', width: 200 },
-  { title: 'æ¨¡å¼å¼€å…³', dataIndex: 'enabled', slotName: 'enabled', width: 120 },
-  { title: 'ç®€åŒ–ç•Œé¢', dataIndex: 'simplified_ui', slotName: 'simplified_ui', width: 120 },
-  { title: 'å­—ä½“å¤§å°', dataIndex: 'font_size', slotName: 'font_size', width: 120 },
-  { title: 'é«˜å¯¹æ¯”åº¦', dataIndex: 'high_contrast', slotName: 'high_contrast', width: 120 },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 280 }
+  { title: 'ÀÏÈËÕËºÅ', dataIndex: 'elder_name', slotName: 'elder_name', width: 200 },
+  { title: 'Ä£Ê½¿ª¹Ø', dataIndex: 'enabled', slotName: 'enabled', width: 120 },
+  { title: '¼ò»¯½çÃæ', dataIndex: 'simplified_ui', slotName: 'simplified_ui', width: 120 },
+  { title: '×ÖÌå´óĞ¡', dataIndex: 'font_size', slotName: 'font_size', width: 120 },
+  { title: '¸ß¶Ô±È¶È', dataIndex: 'high_contrast', slotName: 'high_contrast', width: 120 },
+  { title: '²Ù×÷', slotName: 'actions', width: 280 }
 ]
 
 const pagination = reactive({
@@ -274,7 +274,7 @@ const pagination = reactive({
 })
 
 function getFontLabel(size: string) {
-  const map: Record<string, string> = { large: 'å¤§', extra_large: 'ç‰¹å¤§', jumbo: 'è¶…å¤§' }
+  const map: Record<string, string> = { large: '´ó', extra_large: 'ÌØ´ó', jumbo: '³¬´ó' }
   return map[size] || size
 }
 
@@ -301,10 +301,10 @@ async function loadElderModes() {
       elderModes.value = data.data?.list || data.data || []
       pagination.total = data.data?.total || 0
     } else {
-      Message.error(data.message || 'åŠ è½½å¤±è´¥')
+      Message.error(data.message || '¼ÓÔØÊ§°Ü')
     }
   } catch {
-    Message.error('ç½‘ç»œé”™è¯¯')
+    Message.error('ÍøÂç´íÎó')
   } finally {
     loading.value = false
   }
@@ -354,7 +354,7 @@ function resetForm() {
 
 async function handleSave() {
   if (!isEdit.value && !form.elder_id) {
-    Message.warning('è¯·é€‰æ‹©è€äººè´¦å·')
+    Message.warning('ÇëÑ¡ÔñÀÏÈËÕËºÅ')
     return
   }
   try {
@@ -375,14 +375,14 @@ async function handleSave() {
     })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
-      Message.success(isEdit.value ? 'é…ç½®å·²æ›´æ–°' : 'é…ç½®å·²ä¿å­˜')
+      Message.success(isEdit.value ? 'ÅäÖÃÒÑ¸üĞÂ' : 'ÅäÖÃÒÑ±£´æ')
       configModalVisible.value = false
       loadElderModes()
     } else {
-      Message.error(data.message || 'ä¿å­˜å¤±è´¥')
+      Message.error(data.message || '±£´æÊ§°Ü')
     }
   } catch {
-    Message.error('ç½‘ç»œé”™è¯¯')
+    Message.error('ÍøÂç´íÎó')
   }
 }
 
@@ -397,14 +397,14 @@ async function toggleMode(record: any) {
     })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
-      Message.success(record.enabled ? 'å·²å¯ç”¨' : 'å·²ç¦ç”¨')
+      Message.success(record.enabled ? 'ÒÑÆôÓÃ' : 'ÒÑ½ûÓÃ')
     } else {
       record.enabled = !record.enabled
-      Message.error(data.message || 'æ“ä½œå¤±è´¥')
+      Message.error(data.message || '²Ù×÷Ê§°Ü')
     }
   } catch {
     record.enabled = !record.enabled
-    Message.error('ç½‘ç»œé”™è¯¯')
+    Message.error('ÍøÂç´íÎó')
   } finally {
     savingId.value = null
   }
@@ -418,13 +418,13 @@ async function handleDelete(record: any) {
     })
     const data = await res.json()
     if (data.code === 0 || data.code === 200) {
-      Message.success('å·²åˆ é™¤')
+      Message.success('ÒÑÉ¾³ı')
       loadElderModes()
     } else {
-      Message.error(data.message || 'åˆ é™¤å¤±è´¥')
+      Message.error(data.message || 'É¾³ıÊ§°Ü')
     }
   } catch {
-    Message.error('ç½‘ç»œé”™è¯¯')
+    Message.error('ÍøÂç´íÎó')
   }
 }
 

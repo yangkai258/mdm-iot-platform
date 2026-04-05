@@ -45,20 +45,20 @@
         <a-card title="实时生命体征">
           <a-tabs>
             <a-tab-pane key="heart" title="心率">
-              <a-chart :option="heartChart" style="height: 200px" />
+              <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
             </a-tab-pane>
             <a-tab-pane key="breathing" title="呼吸">
-              <a-chart :option="breathingChart" style="height: 200px" />
+              <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
             </a-tab-pane>
             <a-tab-pane key="temp" title="体温">
-              <a-chart :option="tempChart" style="height: 200px" />
+              <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
             </a-tab-pane>
           </a-tabs>
         </a-card>
       </a-col>
       <a-col :span="8">
         <a-card title="健康雷达">
-          <a-chart :option="radarChart" style="height: 250px" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
     </a-row>

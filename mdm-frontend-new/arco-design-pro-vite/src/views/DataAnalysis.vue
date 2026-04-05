@@ -26,12 +26,12 @@
     <a-row :gutter="16">
       <a-col :span="12">
         <a-card title="用户趋势">
-          <a-chart :option="userTrendChart" style="height: 300px;" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
       <a-col :span="12">
         <a-card title="设备状态分布">
-          <a-chart :option="deviceStatusChart" style="height: 300px;" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
     </a-row>
@@ -39,7 +39,7 @@
     <a-row :gutter="16" style="margin-top: 16px;">
       <a-col :span="12">
         <a-card title="订阅收入">
-          <a-chart :option="revenueChart" style="height: 300px;" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
       <a-col :span="12">

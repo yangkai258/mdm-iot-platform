@@ -47,7 +47,7 @@
       </a-row>
 
       <a-card title="测试结果" style="margin-top: 16px">
-        <a-chart :option="resultChart" style="height: 300px" />
+        <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
       </a-card>
     </a-card>
   </div>

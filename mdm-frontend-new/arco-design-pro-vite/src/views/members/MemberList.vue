@@ -48,7 +48,7 @@
 
 import { ref, reactive, computed, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/breadcrumb'
+import Breadcrumb from '@/components/breadcrumb/index.vue'
 import * as api from '@/api/member'
 
 const memberList = ref([])

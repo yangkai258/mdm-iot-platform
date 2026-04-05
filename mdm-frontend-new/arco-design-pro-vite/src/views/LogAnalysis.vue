@@ -6,7 +6,7 @@
         <a-form-item label="时间范围"><a-range-picker v-model="dateRange" /></a-form-item>
         <a-form-item><a-button type="primary">查询</a-button></a-form-item>
       </a-form>
-      <a-chart :option="chartOption" style="height: 300px" />
+      <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
     </a-card>
   </div>
 </template>

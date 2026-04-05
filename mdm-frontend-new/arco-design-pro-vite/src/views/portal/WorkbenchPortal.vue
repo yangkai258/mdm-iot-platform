@@ -46,7 +46,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import Breadcrumb from '@/components/breadcrumb'
+import Breadcrumb from '@/components/breadcrumb/index.vue'
 
 const stats = reactive({ totalDevices: 0, onlineDevices: 0, totalMembers: 0, todayNew: 0 })
 const shortcuts = ref([

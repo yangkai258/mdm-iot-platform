@@ -33,7 +33,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { Message } from '@arco-design/web-vue'
-import Breadcrumb from '@/components/breadcrumb'
+import Breadcrumb from '@/components/breadcrumb/index.vue'
 
 const loading = ref(false)
 const form = reactive({ keyword: '' })

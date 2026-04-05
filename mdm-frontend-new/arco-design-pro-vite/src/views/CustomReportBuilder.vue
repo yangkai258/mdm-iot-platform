@@ -35,7 +35,7 @@
                 </a-select>
               </a-space>
             </template>
-            <a-chart :option="previewChart" style="height: 350px" />
+            <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
           </a-card>
         </a-col>
 

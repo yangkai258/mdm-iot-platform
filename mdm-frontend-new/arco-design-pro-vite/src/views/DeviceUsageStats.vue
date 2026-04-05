@@ -43,18 +43,18 @@
           </a-button>
         </a-space>
       </template>
-      <a-chart :option="usageChart" style="height: 300px" />
+      <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
     </a-card>
 
     <a-row :gutter="16" style="margin-top: 16px">
       <a-col :span="12">
         <a-card title="会话次数统计">
-          <a-chart :option="sessionChart" style="height: 250px" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
       <a-col :span="12">
         <a-card title="平均响应时长">
-          <a-chart :option="responseChart" style="height: 250px" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
     </a-row>

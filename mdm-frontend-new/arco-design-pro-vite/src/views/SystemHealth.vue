@@ -42,7 +42,7 @@
       </a-col>
       <a-col :span="12">
         <a-card title="响应时间趋势 (5分钟)">
-          <a-chart :option="responseChart" style="height: 250px" />
+          <div style="height:250px;background:#f5f5f5;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:14px">Chart placeholder</div>
         </a-card>
       </a-col>
     </a-row>
