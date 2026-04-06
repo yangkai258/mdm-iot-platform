@@ -13,6 +13,15 @@ export default defineConfig({
     configArcoStyleImportPlugin(),
   ],
   appType: 'spa',
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api/v1'),
+      },
+    },
+  },
   resolve: {
     alias: [
       {
