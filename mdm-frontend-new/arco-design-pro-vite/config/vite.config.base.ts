@@ -12,6 +12,7 @@ export default defineConfig({
     svgLoader({ svgoConfig: {} }),
     configArcoStyleImportPlugin(),
   ],
+  appType: 'spa',
   resolve: {
     alias: [
       {
