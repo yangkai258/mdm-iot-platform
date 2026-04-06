@@ -5,12 +5,12 @@
       <transition name="fade" mode="out-in" appear>
         <component
           :is="Component"
-          v-if="route.meta.ignoreCache"
+          v-if="Component"
           :key="route.fullPath"
         />
-        <keep-alive v-else :include="cacheList">
-          <component :is="Component" :key="route.fullPath" />
-        </keep-alive>
+        <div v-else class="page-loading">
+          <a-spin size="large" tip="页面加载中..." />
+        </div>
       </transition>
     </router-view>
   </div>
@@ -25,8 +25,6 @@
   const route = useRoute();
   const tabBarStore = useTabBarStore();
 
-  const cacheList = computed(() => tabBarStore.getCacheList);
-
   const breadcrumbItems = computed(() => {
     const items: string[] = [];
     const matched = route.matched.filter(
@@ -35,7 +33,6 @@
     matched.forEach((r) => {
       if (r.meta.locale) items.push(r.meta.locale as string);
     });
-    // 最后一项用页面标题（locale 不存在时用 title）
     if (route.meta.title) {
       items.push(route.meta.title as string);
     } else if (items.length === 0) {
@@ -48,5 +45,11 @@
 <style scoped lang="less">
   .page-layout {
     padding: 0 16px 16px;
+  }
+  .page-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
   }
 </style>

@@ -25,4 +25,12 @@ app.use(i18n);
 app.use(globalComponents);
 app.use(directive);
 
+// Chunk 加载失败时自动重试
+window.addEventListener('error', (e) => {
+  if (e.message && e.message.includes('Loading chunk') || e.message.includes('Failed to fetch dynamically imported module')) {
+    console.warn('[chunk] Chunk load failed, reloading...', e.message);
+    setTimeout(() => window.location.reload(), 500);
+  }
+});
+
 app.mount('#app');
