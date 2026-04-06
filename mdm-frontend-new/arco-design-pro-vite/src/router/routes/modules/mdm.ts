@@ -58,10 +58,10 @@ const DeviceManage: AppRouteRecordRaw = {
     { path: 'pairing', name: 'DevicePairing', component: () => import('@/views/DevicePairing.vue'), meta: { roles: ['*'], locale: 'menu.devices.pairing', requiresAuth: true } },
     { path: 'groups', name: 'DeviceGroups', component: () => import('@/views/DeviceGroups.vue'), meta: { roles: ['*'], locale: 'menu.devices.groups', requiresAuth: true } },
     { path: 'commands', name: 'DeviceCommands', component: () => import('@/views/DeviceCommands.vue'), meta: { roles: ['*'], locale: 'menu.devices.commands', requiresAuth: true } },
-    { path: 'geofence', name: 'DeviceGeofence', component: () => import('@/views/DeviceGeofence.vue'), meta: { roles: ['*'], locale: 'menu.devices.geofence', requiresAuth: true } },
-    { path: 'certificates', name: 'DeviceCertificates', component: () => import('@/views/DeviceCertificates.vue'), meta: { roles: ['*'], locale: 'menu.deviceManage.certificates', requiresAuth: true } },
-    { path: 'monitor-panel', name: 'DeviceMonitorPanel', component: () => import('@/views/DeviceMonitorPanel.vue'), meta: { roles: ['*'], locale: 'menu.deviceManage.monitorPanel', requiresAuth: true } },
-    { path: 'remote-control', name: 'DeviceRemoteControl', component: () => import('@/views/DeviceRemoteControl.vue'), meta: { roles: ['*'], locale: 'menu.deviceManage.remoteControl', requiresAuth: true } },
+    { path: 'geofence', name: 'DeviceGeofence', component: () => import('@/views/devices/DeviceGeofence.vue'), meta: { roles: ['*'], locale: 'menu.devices.geofence', requiresAuth: true } },
+    { path: 'certificates', name: 'DeviceCertificates', component: () => import('@/views/devices/DeviceCertificates.vue'), meta: { roles: ['*'], locale: 'menu.deviceManage.certificates', requiresAuth: true } },
+    { path: 'monitor-panel', name: 'DeviceMonitorPanel', component: () => import('@/views/devices/DeviceMonitorPanel.vue'), meta: { roles: ['*'], locale: 'menu.deviceManage.monitorPanel', requiresAuth: true } },
+    { path: 'remote-control', name: 'DeviceRemoteControl', component: () => import('@/views/devices/DeviceRemoteControl.vue'), meta: { roles: ['*'], locale: 'menu.deviceManage.remoteControl', requiresAuth: true } },
   ],
 };
 
@@ -88,10 +88,10 @@ const Marketing: AppRouteRecordRaw = {
   redirect: '/marketing/redpacket',
   meta: { roles: ['*'], locale: 'menu.marketing', requiresAuth: true, order: 40 },
   children: [
-    { path: 'redpacket', name: 'RedpacketView', component: () => import('@/views/RedpacketView.vue'), meta: { roles: ['*'], locale: 'menu.marketing.redpacket', requiresAuth: true } },
-    { path: 'temp-coupon', name: 'TempCouponGrantView', component: () => import('@/views/TempCouponGrantView.vue'), meta: { roles: ['*'], locale: 'menu.marketing.tempCoupon', requiresAuth: true } },
-    { path: 'temp-coupons', name: 'TempCoupons', component: () => import('@/views/TempCoupons.vue'), meta: { roles: ['*'], locale: 'menu.marketing.tempCoupons', requiresAuth: true } },
-    { path: 'temp-redpacket', name: 'TempRedpacketView', component: () => import('@/views/TempRedpacketView.vue'), meta: { roles: ['*'], locale: 'menu.marketing.tempRedpacket', requiresAuth: true } },
+    { path: 'redpacket', name: 'RedpacketView', component: () => import('@/views/marketing/RedpacketView.vue'), meta: { roles: ['*'], locale: 'menu.marketing.redpacket', requiresAuth: true } },
+    { path: 'temp-coupon', name: 'TempCouponGrantView', component: () => import('@/views/marketing/TempCouponGrantView.vue'), meta: { roles: ['*'], locale: 'menu.marketing.tempCoupon', requiresAuth: true } },
+    { path: 'temp-coupons', name: 'TempCoupons', component: () => import('@/views/marketing/TempCoupons.vue'), meta: { roles: ['*'], locale: 'menu.marketing.tempCoupons', requiresAuth: true } },
+    { path: 'temp-redpacket', name: 'TempRedpacketView', component: () => import('@/views/marketing/TempRedpacketView.vue'), meta: { roles: ['*'], locale: 'menu.marketing.tempRedpacket', requiresAuth: true } },
   ],
 };
 
@@ -123,14 +123,14 @@ const CouponPool: AppRouteRecordRaw = {
   meta: { roles: ['*'], locale: 'menu.market.couponPool', requiresAuth: true, order: 53 },
 };
 
-// ========== 表情包市�?==========
+// ========== 表情包市�?==========
 const EmoticonMarket: AppRouteRecordRaw = {
   path: '/market/emoticon', name: 'MarketEmoticon',
   component: () => import('@/views/market/EmoticonMarketView.vue'),
   meta: { roles: ['*'], locale: 'menu.market.emoticon', requiresAuth: true, order: 54 },
 };
 
-// ========== 充值规�?==========
+// ========== 充值规�?==========
 const RechargeRules: AppRouteRecordRaw = {
   path: '/market/recharge', name: 'MarketRecharge',
   component: () => import('@/views/market/RechargeRulesView.vue'),
@@ -144,7 +144,7 @@ const VoiceConfig: AppRouteRecordRaw = {
   meta: { roles: ['*'], locale: 'menu.market.voice', requiresAuth: true, order: 56 },
 };
 
-// ========== 知识�?==========
+// ========== 知识�?==========
 const KnowledgeBase: AppRouteRecordRaw = {
   path: '/knowledge', name: 'KnowledgeBase',
   component: DEFAULT_LAYOUT, redirect: '/knowledge/base',
@@ -198,7 +198,7 @@ const StoreManage: AppRouteRecordRaw = {
   ],
 };
 
-// ========== 优惠�?==========
+// ========== 优惠�?==========
 const CouponManage: AppRouteRecordRaw = {
   path: '/coupon', name: 'CouponManage',
   component: DEFAULT_LAYOUT, redirect: '/coupon/coupon-view',
@@ -223,7 +223,7 @@ const VipExclusive: AppRouteRecordRaw = {
   meta: { roles: ['*'], locale: 'menu.vip.exclusive', requiresAuth: true, order: 110 },
 };
 
-// ========== 微信小程�?==========
+// ========== 微信小程�?==========
 const WechatManage: AppRouteRecordRaw = {
   path: '/wechat', name: 'WechatManage',
   component: DEFAULT_LAYOUT, redirect: '/wechat/settings',
@@ -234,7 +234,7 @@ const WechatManage: AppRouteRecordRaw = {
   ],
 };
 
-// ========== 打印�?==========
+// ========== 打印�?==========
 const PrinterManage: AppRouteRecordRaw = {
   path: '/printer/manage', name: 'PrinterManage',
   component: () => import('@/views/members/PrinterManageView.vue'),
@@ -258,10 +258,10 @@ const OtaManage: AppRouteRecordRaw = {
   component: DEFAULT_LAYOUT, redirect: '/ota/firmware',
   meta: { roles: ['*'], locale: 'menu.otaManage', requiresAuth: true, order: 150 },
   children: [
-    { path: 'firmware', name: 'OTAView', component: () => import('@/views/OTAView.vue'), meta: { roles: ['*'], locale: 'menu.otaManage.firmware', requiresAuth: true } },
-    { path: 'packages', name: 'OtaPackages', component: () => import('@/views/OtaPackages.vue'), meta: { roles: ['*'], locale: 'menu.otaManage.packages', requiresAuth: true } },
-    { path: 'deployments', name: 'OtaDeployments', component: () => import('@/views/OtaDeployments.vue'), meta: { roles: ['*'], locale: 'menu.otaManage.deployments', requiresAuth: true } },
-    { path: 'matrix', name: 'OtaMatrix', component: () => import('@/views/OtaMatrix.vue'), meta: { roles: ['*'], locale: 'menu.ota.matrix', requiresAuth: true } },
+    { path: 'firmware', name: 'OTAView', component: () => import('@/views/ota/OtaFirmwareView.vue'), meta: { roles: ['*'], locale: 'menu.otaManage.firmware', requiresAuth: true } },
+    { path: 'packages', name: 'OtaPackages', component: () => import('@/views/ota/OtaPackages.vue'), meta: { roles: ['*'], locale: 'menu.otaManage.packages', requiresAuth: true } },
+    { path: 'deployments', name: 'OtaDeployments', component: () => import('@/views/ota/OtaDeployments.vue'), meta: { roles: ['*'], locale: 'menu.otaManage.deployments', requiresAuth: true } },
+    { path: 'matrix', name: 'OtaMatrix', component: () => import('@/views/ota/OtaMatrix.vue'), meta: { roles: ['*'], locale: 'menu.ota.matrix', requiresAuth: true, hideInMenu: true } },
     { path: 'gray', name: 'OTAGrayDeploy', component: () => import('@/views/OTAGrayDeploy.vue'), meta: { roles: ['*'], locale: 'menu.ota.gray', requiresAuth: true } },
   ],
 };
