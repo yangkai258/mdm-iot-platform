@@ -8,9 +8,9 @@
         <a-tab-pane key="policies" title="区域策略">
           <div class="search-form">
             <a-form :model="policyForm" layout="inline">
-              <a-form-item label="策略名称"><a-input v-model="policyForm.name" placeholder="请输�? /></a-form-item>
-              <a-form-item label="状�?>
-                <a-select v-model="policyForm.status" placeholder="选择状�? allow-clear style="width: 120px">
+              <a-form-item label="策略名称"><a-input v-model="policyForm.name" placeholder="请输�? /></a-form-item>
+              <a-form-item label="状�?>
+                <a-select v-model="policyForm.status" placeholder="选择状�? allow-clear style="width: 120px">
                   <a-option value="active">启用</a-option>
                   <a-option value="inactive">停用</a-option>
                 </a-select>
@@ -31,7 +31,7 @@
         <a-tab-pane key="alerts" title="跨境告警">
           <div class="search-form">
             <a-form :model="alertForm" layout="inline">
-              <a-form-item label="设备ID"><a-input v-model="alertForm.device_id" placeholder="请输�? /></a-form-item>
+              <a-form-item label="设备ID"><a-input v-model="alertForm.device_id" placeholder="请输�? /></a-form-item>
               <a-form-item label="告警类型">
                 <a-select v-model="alertForm.alert_type" placeholder="选择类型" allow-clear style="width: 140px">
                   <a-option value="cross_in">跨境进入</a-option>
@@ -53,9 +53,9 @@
     </a-card>
     <a-modal v-model:visible="policyModalVisible" :title="isEditPolicy ? '编辑策略' : '新建策略'" @before-ok="handlePolicySubmit" :loading="submitting" :width="560">
       <a-form :model="policyFormData" layout="vertical">
-        <a-form-item label="策略名称" required><a-input v-model="policyFormData.name" placeholder="请输入策略名�? /></a-form-item>
-        <a-form-item label="源区�?>
-          <a-select v-model="policyFormData.source_region" placeholder="选择源区�?>
+        <a-form-item label="策略名称" required><a-input v-model="policyFormData.name" placeholder="请输入策略名�? /></a-form-item>
+        <a-form-item label="源区�?>
+          <a-select v-model="policyFormData.source_region" placeholder="选择源区�?>
             <a-option value="cn">中国大陆</a-option>
             <a-option value="us">美国</a-option>
             <a-option value="eu">欧盟</a-option>
@@ -77,7 +77,7 @@
             <a-option value="block">阻止</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="状�?><a-switch v-model="policyFormData.is_active" /></a-form-item>
+        <a-form-item label="状�?><a-switch v-model="policyFormData.is_active" /></a-form-item>
       </a-form>
     </a-modal>
   </div>
@@ -107,10 +107,10 @@ const alertPagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const policyColumns = [
   { title: 'ID', dataIndex: 'id', width: 70 },
   { title: '策略名称', dataIndex: 'name', width: 180 },
-  { title: '源区�?, dataIndex: 'source_region', width: 120 },
+  { title: '源区�?, dataIndex: 'source_region', width: 120 },
   { title: '目标区域', dataIndex: 'target_region', width: 120 },
   { title: '管控动作', dataIndex: 'action', width: 100 },
-  { title: '状�?, slotName: 'status', width: 80 },
+  { title: '状�?, slotName: 'status', width: 80 },
   { title: '创建时间', dataIndex: 'created_at', width: 170 },
   { title: '操作', slotName: 'actions', width: 120 }
 ]
@@ -120,7 +120,7 @@ const alertColumns = [
   { title: '设备ID', dataIndex: 'device_id', width: 120 },
   { title: '设备名称', dataIndex: 'device_name', width: 140 },
   { title: '告警类型', slotName: 'alert_type', width: 100 },
-  { title: '源区�?, dataIndex: 'source_region', width: 120 },
+  { title: '源区�?, dataIndex: 'source_region', width: 120 },
   { title: '目标区域', dataIndex: 'target_region', width: 120 },
   { title: '触发时间', dataIndex: 'created_at', width: 170 }
 ]
@@ -155,7 +155,7 @@ const openPolicyModal = () => { isEditPolicy.value = false; Object.assign(policy
 const editPolicy = (record) => { isEditPolicy.value = true; Object.assign(policyFormData, record); policyModalVisible.value = true }
 
 const handlePolicySubmit = async (done) => {
-  if (!policyFormData.name) { Message.warning('请输入策略名�?); done(false); return }
+  if (!policyFormData.name) { Message.warning('请输入策略名�?); done(false); return }
   submitting.value = true
   try {
     const token = localStorage.getItem('token')

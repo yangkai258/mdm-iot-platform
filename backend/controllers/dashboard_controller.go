@@ -48,6 +48,28 @@ type ActivitySummary struct {
 	TopActions   []TopActionStat `json:"top_actions"`
 }
 
+// GetDashboard 获取Dashboard概览
+// GET /api/v1/dashboard
+func (c *DashboardController) GetDashboard(ctx *gin.Context) {
+	var stats struct {
+		TotalDevices   int64 `json:"total_devices"`
+		OnlineDevices  int64 `json:"online_devices"`
+		TotalAlerts    int64 `json:"total_alerts"`
+		PendingAlerts  int64 `json:"pending_alerts"`
+		TotalMembers   int64 `json:"total_members"`
+		TodayLogins    int64 `json:"today_logins"`
+	}
+
+	c.DB.Model(&models.Device{}).Count(&stats.TotalDevices)
+	c.DB.Model(&models.DeviceShadow{}).Select("COUNT(*)").Where("is_online = ?", true).Scan(&stats.OnlineDevices)
+	c.DB.Model(&models.DeviceAlert{}).Count(&stats.TotalAlerts)
+	c.DB.Model(&models.DeviceAlert{}).Where("status = ?", 1).Count(&stats.PendingAlerts)
+	c.DB.Model(&models.Member{}).Count(&stats.TotalMembers)
+	c.DB.Model(&models.ActivityLog{}).Where("action = ? AND created_at >= CURRENT_DATE", "login").Count(&stats.TodayLogins)
+
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": stats})
+}
+
 // GetStats 获取Dashboard统计
 // GET /api/v1/dashboard/stats
 func (c *DashboardController) GetStats(ctx *gin.Context) {

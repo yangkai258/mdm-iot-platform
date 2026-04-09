@@ -40,7 +40,7 @@
               <a-option value="">全部规则</a-option>
               <a-option v-for="r in rules" :key="r.id" :value="r.id">{{ r.name }}</a-option>
             </a-select>
-            <a-select v-model="logFilter.status" placeholder="执行状�? allow-clear style="width: 120px" @change="loadLogs">
+            <a-select v-model="logFilter.status" placeholder="执行状�? allow-clear style="width: 120px" @change="loadLogs">
               <a-option value="success">成功</a-option>
               <a-option value="failed">失败</a-option>
               <a-option value="skip">跳过</a-option>
@@ -69,13 +69,13 @@
           <a-input v-model="ruleForm.name" placeholder="输入规则名称" />
         </a-form-item>
         <a-form-item label="规则描述">
-          <a-textarea v-model="ruleForm.description" placeholder="描述规则用�? :rows="2" />
+          <a-textarea v-model="ruleForm.description" placeholder="描述规则用�? :rows="2" />
         </a-form-item>
         <a-form-item label="触发条件类型" required>
           <a-select v-model="ruleForm.trigger_type" placeholder="选择触发类型" @change="onTriggerChange">
             <a-option value="time">定时触发</a-option>
             <a-option value="event">事件触发</a-option>
-            <a-option value="threshold">阈值触�?/a-option>
+            <a-option value="threshold">阈值触�?/a-option>
           </a-select>
         </a-form-item>
         <a-form-item label="触发条件配置" required>
@@ -119,7 +119,7 @@ const logPagination = reactive({ current: 1, pageSize: 10, total: 0 })
 
 const logFilter = reactive({ rule_id: '', status: '' })
 
-const triggerPlaceholder = '// 定时: {"cron":"0 8 * * *"} 事件: {"event":"device.temperature.high","threshold":30} 阈�? {"metric":"temperature","op":">","value":25}'
+const triggerPlaceholder = '// 定时: {"cron":"0 8 * * *"} 事件: {"event":"device.temperature.high","threshold":30} 阈�? {"metric":"temperature","op":">","value":25}'
 
 const ruleForm = reactive({
   id: 0, name: '', description: '', trigger_type: 'time',
@@ -138,7 +138,7 @@ const logColumns = [
   { title: '规则名称', dataIndex: 'rule_name', ellipsis: true },
   { title: '触发条件', dataIndex: 'trigger_summary', ellipsis: true },
   { title: '执行动作', dataIndex: 'action_summary', ellipsis: true },
-  { title: '状�?, dataIndex: 'status', slotName: 'status' },
+  { title: '状�?, dataIndex: 'status', slotName: 'status' },
   { title: '耗时', slotName: 'duration' },
   { title: '执行时间', dataIndex: 'created_at', slotName: 'created_at' },
 ]
@@ -151,8 +151,8 @@ const loadRules = async () => {
     pagination.total = res.data.total || 0
   } catch {
     rules.value = [
-      { id: 1, name: '�?点唤�?, description: '每天早上8点发送唤醒通知', trigger_type: 'time', trigger_config: '{"cron":"0 8 * * *"}', action_type: 'notify', action_config: '{"title":"早安"}', enabled: true },
-      { id: 2, name: '温度过高告警', description: '温度超过30度发送告�?, trigger_type: 'threshold', trigger_config: '{"metric":"temperature","op":">","value":30}', action_type: 'command', action_config: '{"device_id":"dev-001","command":"set_mode","params":{"mode":"cool"}}', enabled: true },
+      { id: 1, name: '�?点唤�?, description: '每天早上8点发送唤醒通知', trigger_type: 'time', trigger_config: '{"cron":"0 8 * * *"}', action_type: 'notify', action_config: '{"title":"早安"}', enabled: true },
+      { id: 2, name: '温度过高告警', description: '温度超过30度发送告�?, trigger_type: 'threshold', trigger_config: '{"metric":"temperature","op":">","value":30}', action_type: 'command', action_config: '{"device_id":"dev-001","command":"set_mode","params":{"mode":"cool"}}', enabled: true },
     ]
     pagination.total = 2
   } finally { loading.value = false }
@@ -168,7 +168,7 @@ const loadLogs = async () => {
     logPagination.total = res.data.total || 0
   } catch {
     logs.value = [
-      { id: 1, rule_name: '�?点唤�?, rule_id: 1, trigger_summary: 'cron:0 8 * * *', action_summary: 'notify:早安', status: 'success', duration_ms: 45, created_at: new Date().toISOString() },
+      { id: 1, rule_name: '�?点唤�?, rule_id: 1, trigger_summary: 'cron:0 8 * * *', action_summary: 'notify:早安', status: 'success', duration_ms: 45, created_at: new Date().toISOString() },
       { id: 2, rule_name: '温度过高告警', rule_id: 2, trigger_summary: 'temperature>30', action_summary: 'command:dev-001', status: 'success', duration_ms: 120, created_at: new Date(Date.now() - 600000).toISOString() },
     ]
     logPagination.total = 2
@@ -205,7 +205,7 @@ const submitRule = async () => {
 const toggleRule = async (record: any) => {
   try {
     await axios.put(`/api/v1/ai/behavior-rules/${record.id}`, { enabled: record.enabled })
-    Message.success(record.enabled ? '规则已启�? : '规则已禁�?)
+    Message.success(record.enabled ? '规则已启�? : '规则已禁�?)
   } catch { record.enabled = !record.enabled }
 }
 
@@ -227,7 +227,7 @@ const handlePageChange = (page: number) => { pagination.current = page; loadRule
 const handleLogPageChange = (page: number) => { logPagination.current = page; loadLogs() }
 
 const getTriggerColor = (type: string) => ({ time: 'arcoblue', event: 'orange', threshold: 'purple' }[type] || 'gray')
-const getTriggerText = (type: string) => ({ time: '定时', event: '事件', threshold: '阈�? }[type] || type)
+const getTriggerText = (type: string) => ({ time: '定时', event: '事件', threshold: '阈�? }[type] || type)
 const getStatusColor = (s: string) => ({ success: 'green', failed: 'red', skip: 'gray' }[s] || 'gray')
 const getStatusText = (s: string) => ({ success: '成功', failed: '失败', skip: '跳过' }[s] || s)
 const onTriggerChange = () => { ruleForm.trigger_config = '' }

@@ -1,33 +1,33 @@
-<template>
+ï»¿<template>
   <div class="pro-page-container">
-    <!-- Ãæ°üĞ¼ -->
+    <!-- é¢åŒ…å±‘ -->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>Ê×Ò³</a-breadcrumb-item>
-      <a-breadcrumb-item>Éè±¸¹ÜÀí</a-breadcrumb-item>
-      <a-breadcrumb-item>Åä¶Ô¹ÜÀí</a-breadcrumb-item>
+      <a-breadcrumb-item>é¦–é¡µ</a-breadcrumb-item>
+      <a-breadcrumb-item>è®¾å¤‡ç®¡ç†</a-breadcrumb-item>
+      <a-breadcrumb-item>é…å¯¹ç®¡ç†</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- ËÑË÷À¸ -->
+    <!-- æœç´¢æ  -->
     <div class="pro-search-bar">
       <a-space>
-        <a-input-search v-model="searchKeyword" placeholder="ËÑË÷Éè±¸ID/ÓÃ»§" style="width: 280px" @search="loadRequests" search-button />
-        <a-select v-model="filterStatus" placeholder="ÇëÇó×´Ì¬" allow-clear style="width: 130px" @change="loadRequests">
-          <a-option value="pending">´ıÉóÅú</a-option>
-          <a-option value="approved">ÒÑÅú×¼</a-option>
-          <a-option value="rejected">ÒÑ¾Ü¾ø</a-option>
-          <a-option value="expired">ÒÑ¹ıÆÚ</a-option>
+        <a-input-search v-model="searchKeyword" placeholder="æœç´¢è®¾å¤‡ID/ç”¨æˆ·" style="width: 280px" @search="loadRequests" search-button />
+        <a-select v-model="filterStatus" placeholder="è¯·æ±‚çŠ¶æ€" allow-clear style="width: 130px" @change="loadRequests">
+          <a-option value="pending">å¾…å®¡æ‰¹</a-option>
+          <a-option value="approved">å·²æ‰¹å‡†</a-option>
+          <a-option value="rejected">å·²æ‹’ç»</a-option>
+          <a-option value="expired">å·²è¿‡æœŸ</a-option>
         </a-select>
       </a-space>
     </div>
 
-    <!-- ²Ù×÷°´Å¥ -->
+    <!-- æ“ä½œæŒ‰é’® -->
     <div class="pro-action-bar">
       <a-space>
-        <a-button type="primary" @click="loadRequests">Ë¢ĞÂ</a-button>
+        <a-button type="primary" @click="loadRequests">åˆ·æ–°</a-button>
       </a-space>
     </div>
 
-    <!-- Åä¶ÔÇëÇóÁĞ±í -->
+    <!-- é…å¯¹è¯·æ±‚åˆ—è¡¨ -->
     <div class="pro-content-area">
       <a-table :columns="columns" :data="requests" :loading="loading" :pagination="pagination" row-key="id" @page-change="handlePageChange">
         <template #status="{ record }">
@@ -36,39 +36,40 @@
       </a-table>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="primary" size="small" :disabled="record.status !== 'pending'" @click="approveRequest(record)">Åú×¼</a-button>
-            <a-button type="primary" status="danger" size="small" :disabled="record.status !== 'pending'" @click="rejectRequest(record)">¾Ü¾ø</a-button>
+            <a-button type="primary" size="small" :disabled="record.status !== 'pending'" @click="approveRequest(record)">æ‰¹å‡†</a-button>
+            <a-button type="primary" status="danger" size="small" :disabled="record.status !== 'pending'" @click="rejectRequest(record)">æ‹’ç»</a-button>
           </a-space>
         </template>
       </a-table>
     </div>
 
-    <!-- Åä¶ÔÀúÊ· -->
-    <a-card class="history-card" title="Åä¶ÔÀúÊ·¼ÇÂ¼">
+    <!-- é…å¯¹å†å² -->
+    <a-card class="history-card" title="é…å¯¹å†å²è®°å½•">
       <a-table :columns="historyColumns" :data="history" :loading="historyLoading" :pagination="historyPagination" row-key="id" @page-change="handleHistoryPageChange">
         <template #action="{ record }">
-          <a-tag :color="record.action === 'approved' ? 'green' : 'red'">{{ record.action === 'approved' ? 'Åú×¼' : '¾Ü¾ø' }}</a-tag>
+          <a-tag :color="record.action === 'approved' ? 'green' : 'red'">{{ record.action === 'approved' ? 'æ‰¹å‡†' : 'æ‹’ç»' }}</a-tag>
         </template>
+      </a-table>
       </a-table>
     </a-card>
 
-    <!-- ¾Ü¾øÔ­Òòµ¯´° -->
-    <a-modal v-model:visible="rejectModalVisible" title="¾Ü¾øÅä¶ÔÇëÇó" @ok="handleReject" :width="480" :loading="submitting">
+    <!-- æ‹’ç»åŸå› å¼¹çª— -->
+    <a-modal v-model:visible="rejectModalVisible" title="æ‹’ç»é…å¯¹è¯·æ±‚" @ok="handleReject" :width="480" :loading="submitting">
       <a-form layout="vertical">
-        <a-form-item label="Ä¿±êÉè±¸">
+        <a-form-item label="ç›®æ ‡è®¾å¤‡">
           <a-input :value="selectedRequest?.device_name + ' (' + selectedRequest?.device_id + ')'" disabled />
         </a-form-item>
-        <a-form-item label="¾Ü¾øÔ­Òò" required>
-          <a-select v-model="rejectReason" placeholder="Ñ¡Ôñ»òÊäÈëÔ­Òò">
-            <a-option value="unauthorized">Î´¾­ÊÚÈ¨µÄÉè±¸</a-option>
-            <a-option value="duplicate">ÖØ¸´Åä¶Ô</a-option>
-            <a-option value="policy">Î¥·´Éè±¸²ßÂÔ</a-option>
-            <a-option value="user_cancel">ÓÃ»§È¡Ïû</a-option>
-            <a-option value="other">ÆäËûÔ­Òò</a-option>
+        <a-form-item label="æ‹’ç»åŸå› " required>
+          <a-select v-model="rejectReason" placeholder="é€‰æ‹©æˆ–è¾“å…¥åŸå› ">
+            <a-option value="unauthorized">æœªç»æˆæƒçš„è®¾å¤‡</a-option>
+            <a-option value="duplicate">é‡å¤é…å¯¹</a-option>
+            <a-option value="policy">è¿åè®¾å¤‡ç­–ç•¥</a-option>
+            <a-option value="user_cancel">ç”¨æˆ·å–æ¶ˆ</a-option>
+            <a-option value="other">å…¶ä»–åŸå› </a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="±¸×¢">
-          <a-textarea v-model="rejectNote" placeholder="²¹³äËµÃ÷" :rows="2" />
+        <a-form-item label="å¤‡æ³¨">
+          <a-textarea v-model="rejectNote" placeholder="è¡¥å……è¯´æ˜" :rows="2" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -95,27 +96,27 @@ const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
 const historyPagination = reactive({ current: 1, pageSize: 10, total: 0 })
 
 const columns = [
-  { title: 'ÇëÇóID', dataIndex: 'id', width: 80 },
-  { title: 'Éè±¸ID', dataIndex: 'device_id', ellipsis: true },
-  { title: 'Éè±¸Ãû³Æ', dataIndex: 'device_name' },
-  { title: 'ÉêÇëÓÃ»§', dataIndex: 'user_name', width: 120 },
-  { title: 'Éè±¸ĞÍºÅ', dataIndex: 'device_model', width: 120 },
-  { title: 'ÇëÇóÊ±¼ä', dataIndex: 'requested_at', width: 170 },
-  { title: '×´Ì¬', slotName: 'status', width: 90 },
-  { title: '²Ù×÷', slotName: 'actions', width: 160, fixed: 'right' }
+  { title: 'è¯·æ±‚ID', dataIndex: 'id', width: 80 },
+  { title: 'è®¾å¤‡ID', dataIndex: 'device_id', ellipsis: true },
+  { title: 'è®¾å¤‡åç§°', dataIndex: 'device_name' },
+  { title: 'ç”³è¯·ç”¨æˆ·', dataIndex: 'user_name', width: 120 },
+  { title: 'è®¾å¤‡å‹å·', dataIndex: 'device_model', width: 120 },
+  { title: 'è¯·æ±‚æ—¶é—´', dataIndex: 'requested_at', width: 170 },
+  { title: 'çŠ¶æ€', slotName: 'status', width: 90 },
+  { title: 'æ“ä½œ', slotName: 'actions', width: 160, fixed: 'right' }
 ]
 
 const historyColumns = [
   { title: 'ID', dataIndex: 'id', width: 70 },
-  { title: 'Éè±¸ID', dataIndex: 'device_id', width: 100 },
-  { title: 'Éè±¸Ãû³Æ', dataIndex: 'device_name', ellipsis: true },
-  { title: '²Ù×÷ÈË', dataIndex: 'operator' },
-  { title: '²Ù×÷', slotName: 'action', width: 80 },
-  { title: 'Ê±¼ä', dataIndex: 'operated_at', width: 170 }
+  { title: 'è®¾å¤‡ID', dataIndex: 'device_id', width: 100 },
+  { title: 'è®¾å¤‡åç§°', dataIndex: 'device_name', ellipsis: true },
+  { title: 'æ“ä½œäºº', dataIndex: 'operator' },
+  { title: 'æ“ä½œ', slotName: 'action', width: 80 },
+  { title: 'æ—¶é—´', dataIndex: 'operated_at', width: 170 }
 ]
 
 const getStatusColor = (s) => ({ pending: 'blue', approved: 'green', rejected: 'red', expired: 'gray' }[s] || 'gray')
-const getStatusText = (s) => ({ pending: '´ıÉóÅú', approved: 'ÒÑÅú×¼', rejected: 'ÒÑ¾Ü¾ø', expired: 'ÒÑ¹ıÆÚ' }[s] || s)
+const getStatusText = (s) => ({ pending: 'å¾…å®¡æ‰¹', approved: 'å·²æ‰¹å‡†', rejected: 'å·²æ‹’ç»', expired: 'å·²è¿‡æœŸ' }[s] || s)
 
 const loadRequests = async () => {
   loading.value = true
@@ -132,9 +133,9 @@ const loadRequests = async () => {
     }
   } catch (e) {
     requests.value = [
-      { id: 1, device_id: 'DEV-001', device_name: '²âÊÔÉè±¸A', user_name: 'ÕÅÈı', device_model: 'M5Stack', requested_at: '2026-03-24 10:00:00', status: 'pending' },
-      { id: 2, device_id: 'DEV-002', device_name: '²âÊÔÉè±¸B', user_name: 'ÀîËÄ', device_model: 'M5Stack', requested_at: '2026-03-24 09:30:00', status: 'approved' },
-      { id: 3, device_id: 'DEV-003', device_name: '²âÊÔÉè±¸C', user_name: 'ÍõÎå', device_model: 'M5Stack', requested_at: '2026-03-23 16:00:00', status: 'rejected' }
+      { id: 1, device_id: 'DEV-001', device_name: 'æµ‹è¯•è®¾å¤‡A', user_name: 'å¼ ä¸‰', device_model: 'M5Stack', requested_at: '2026-03-24 10:00:00', status: 'pending' },
+      { id: 2, device_id: 'DEV-002', device_name: 'æµ‹è¯•è®¾å¤‡B', user_name: 'æå››', device_model: 'M5Stack', requested_at: '2026-03-24 09:30:00', status: 'approved' },
+      { id: 3, device_id: 'DEV-003', device_name: 'æµ‹è¯•è®¾å¤‡C', user_name: 'ç‹äº”', device_model: 'M5Stack', requested_at: '2026-03-23 16:00:00', status: 'rejected' }
     ]
     pagination.total = 3
   } finally {
@@ -155,8 +156,8 @@ const loadHistory = async () => {
     }
   } catch (e) {
     history.value = [
-      { id: 1, device_id: 'DEV-002', device_name: '²âÊÔÉè±¸B', operator: '¹ÜÀíÔ±', action: 'approved', operated_at: '2026-03-24 09:35:00' },
-      { id: 2, device_id: 'DEV-003', device_name: '²âÊÔÉè±¸C', operator: '¹ÜÀíÔ±', action: 'rejected', operated_at: '2026-03-23 16:30:00' }
+      { id: 1, device_id: 'DEV-002', device_name: 'æµ‹è¯•è®¾å¤‡B', operator: 'ç®¡ç†å‘˜', action: 'approved', operated_at: '2026-03-24 09:35:00' },
+      { id: 2, device_id: 'DEV-003', device_name: 'æµ‹è¯•è®¾å¤‡C', operator: 'ç®¡ç†å‘˜', action: 'rejected', operated_at: '2026-03-23 16:30:00' }
     ]
     historyPagination.total = 2
   } finally {
@@ -173,11 +174,11 @@ const approveRequest = async (record) => {
     })
     const data = await res.json()
     if (data.code === 0) {
-      Message.success('Åä¶ÔÇëÇóÒÑÅú×¼')
+      Message.success('é…å¯¹è¯·æ±‚å·²æ‰¹å‡†')
       loadRequests()
       loadHistory()
-    } else { Message.error(data.message || 'Åú×¼Ê§°Ü') }
-  } catch (e) { Message.error('Åú×¼Ê§°Ü') }
+    } else { Message.error(data.message || 'æ‰¹å‡†å¤±è´¥') }
+  } catch (e) { Message.error('æ‰¹å‡†å¤±è´¥') }
 }
 
 const rejectRequest = (record) => {
@@ -188,7 +189,7 @@ const rejectRequest = (record) => {
 }
 
 const handleReject = async () => {
-  if (!rejectReason.value) { Message.warning('ÇëÑ¡Ôñ¾Ü¾øÔ­Òò'); return }
+  if (!rejectReason.value) { Message.warning('è¯·é€‰æ‹©æ‹’ç»åŸå› '); return }
   submitting.value = true
   try {
     const token = localStorage.getItem('token')
@@ -199,12 +200,12 @@ const handleReject = async () => {
     })
     const data = await res.json()
     if (data.code === 0) {
-      Message.success('Åä¶ÔÇëÇóÒÑ¾Ü¾ø')
+      Message.success('é…å¯¹è¯·æ±‚å·²æ‹’ç»')
       rejectModalVisible.value = false
       loadRequests()
       loadHistory()
-    } else { Message.error(data.message || '¾Ü¾øÊ§°Ü') }
-  } catch (e) { Message.error('¾Ü¾øÊ§°Ü') }
+    } else { Message.error(data.message || 'æ‹’ç»å¤±è´¥') }
+  } catch (e) { Message.error('æ‹’ç»å¤±è´¥') }
   finally { submitting.value = false }
 }
 

@@ -1,28 +1,29 @@
-<template>
+ï»¿<template>
   <div class="container">
-    <a-card class="general-card" title="³èÎï¹Ø×¢¹ÜÀí">
+    <a-card class="general-card" title="å® ç‰©å…³æ³¨ç®¡ç†">
       <template #extra>
-        <a-button @click="loadData"><icon-refresh />Ë¢ĞÂ</a-button>
+        <a-button @click="loadData"><icon-refresh />åˆ·æ–°</a-button>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="¹Ø¼ü´Ê">
-            <a-input v-model="form.keyword" placeholder="ÇëÊäÈë" @pressEnter="loadData" />
+          <a-form-item label="å…³é”®è¯">
+            <a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
-            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">ÖØÖÃ</a-button>
+            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">é‡ç½®</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-        <template #status="{ record }"><a-badge :color="record.status === 1 ? 'green' : 'gray'" :text="record.status === 1 ? 'ÒÑ¹Ø×¢' : 'ÒÑÈ¡Ïû'" /></template>
+        <template #status="{ record }"><a-badge :color="record.status === 1 ? 'green' : 'gray'" :text="record.status === 1 ? 'å·²å…³æ³¨' : 'å·²å–æ¶ˆ'" /></template>
         <template #actions="{ record }">
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">{{ record.status === 1 ? 'È¡Ïû¹Ø×¢' : 'É¾³ı' }}</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">{{ record.status === 1 ? 'å–æ¶ˆå…³æ³¨' : 'åˆ é™¤' }}</a-button>
         </template>
+      </a-table>
       </a-table>
     </a-card>
   </div>
@@ -38,11 +39,11 @@ const form = reactive({ keyword: '' })
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: 'ÓÃ»§ID', dataIndex: 'user_id', width: 100 },
-  { title: '±»¹Ø×¢³èÎïID', dataIndex: 'target_pet_id', width: 140 },
-  { title: '¹Ø×¢Ê±¼ä', dataIndex: 'created_at', width: 170 },
-  { title: '×´Ì¬', slotName: 'status', width: 100 },
-  { title: '²Ù×÷', slotName: 'actions', width: 100 }
+  { title: 'ç”¨æˆ·ID', dataIndex: 'user_id', width: 100 },
+  { title: 'è¢«å…³æ³¨å® ç‰©ID', dataIndex: 'target_pet_id', width: 140 },
+  { title: 'å…³æ³¨æ—¶é—´', dataIndex: 'created_at', width: 170 },
+  { title: 'çŠ¶æ€', slotName: 'status', width: 100 },
+  { title: 'æ“ä½œ', slotName: 'actions', width: 100 }
 ]
 
 const loadData = async () => {
@@ -56,7 +57,7 @@ const loadData = async () => {
   } catch { data.value = [] } finally { loading.value = false }
 }
 
-const handleDelete = () => { Message.success('²Ù×÷³É¹¦'); loadData() }
+const handleDelete = () => { Message.success('æ“ä½œæˆåŠŸ'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())

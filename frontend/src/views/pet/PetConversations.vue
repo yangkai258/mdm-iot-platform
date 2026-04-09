@@ -1,15 +1,16 @@
-<template>
+ï»¿<template>
   <div class="pet-conversations">
-    <a-card class="general-card" title="»á»°ÁĞ±í">
+    <a-card class="general-card" title="ä¼šè¯åˆ—è¡¨">
       <template #extra>
-        <a-button type="primary" @click="createConversation"><icon-plus />ĞÂ½¨»á»°</a-button>
+        <a-button type="primary" @click="createConversation"><icon-plus />æ–°å»ºä¼šè¯</a-button>
       </template>
       <a-table :columns="columns" :data="conversations" row-key="id">
         <template #status="{ record }">
           <a-tag :color="record.status === 'active' ? 'green' : 'gray'">
-            {{ record.status === 'active' ? '½øĞĞÖĞ' : 'ÒÑ½áÊø' }}
+            {{ record.status === 'active' ? 'è¿›è¡Œä¸­' : 'å·²ç»“æŸ' }}
           </a-tag>
         </template>
+      </a-table>
       </a-table>
     </a-card>
   </div>
@@ -22,16 +23,16 @@ import { IconPlus } from '@arco-design/web-vue/es/icon'
 
 const columns = [
   { title: 'ID', dataIndex: 'id' },
-  { title: 'Éè±¸ID', dataIndex: 'device_id' },
-  { title: 'Ö÷Ìâ', dataIndex: 'title' },
-  { title: '×´Ì¬', slotName: 'status' },
-  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at' }
+  { title: 'è®¾å¤‡ID', dataIndex: 'device_id' },
+  { title: 'ä¸»é¢˜', dataIndex: 'title' },
+  { title: 'çŠ¶æ€', slotName: 'status' },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at' }
 ]
 
 const conversations = ref([])
 
 const createConversation = () => {
-  Message.info('ĞÂ½¨»á»°¹¦ÄÜ')
+  Message.info('æ–°å»ºä¼šè¯åŠŸèƒ½')
 }
 </script>
 

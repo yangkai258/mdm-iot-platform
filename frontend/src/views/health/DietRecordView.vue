@@ -39,7 +39,7 @@
             <a-divider />
             <a-row :gutter="16">
               <a-col :span="8">
-                <a-statistic title="蛋白�? :value="nutrients.protein" suffix="g" />
+                <a-statistic title="蛋白�? :value="nutrients.protein" suffix="g" />
               </a-col>
               <a-col :span="8">
                 <a-statistic title="脂肪" :value="nutrients.fat" suffix="g" />
@@ -70,7 +70,7 @@
           </a-select>
         </a-form-item>
         <a-form-item label="食物">
-          <a-input v-model="dietForm.food" placeholder="请输入食物名�? />
+          <a-input v-model="dietForm.food" placeholder="请输入食物名�? />
         </a-form-item>
         <a-form-item label="热量(kcal)">
           <a-input-number v-model="dietForm.calories" :min="0" style="width: 100%" />
@@ -79,7 +79,7 @@
           <a-time-picker v-model="dietForm.time" format="HH:mm" style="width: 100%" />
         </a-form-item>
         <a-form-item label="备注">
-          <a-textarea v-model="dietForm.remark" :rows="2" placeholder="请输入备�? />
+          <a-textarea v-model="dietForm.remark" :rows="2" placeholder="请输入备�? />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -138,7 +138,7 @@ const loadMockData = () => {
   data.value = [
     { id: 1, time: '08:00', device_id: 'DEV001', pet_name: '豆豆', meal_type: 'breakfast', food: '狗粮 50g', calories: 150, remark: '' },
     { id: 2, time: '12:00', device_id: 'DEV001', pet_name: '豆豆', meal_type: 'lunch', food: '狗粮 80g', calories: 240, remark: '' },
-    { id: 3, time: '18:00', device_id: 'DEV001', pet_name: '豆豆', meal_type: 'dinner', food: '狗粮 60g + 鸡胸�?, calories: 320, remark: '加餐' },
+    { id: 3, time: '18:00', device_id: 'DEV001', pet_name: '豆豆', meal_type: 'dinner', food: '狗粮 60g + 鸡胸�?, calories: 320, remark: '加餐' },
     { id: 4, time: '10:00', device_id: 'DEV002', pet_name: '旺财', meal_type: 'snack', food: '零食', calories: 50, remark: '' },
     { id: 5, time: '08:00', device_id: 'DEV002', pet_name: '旺财', meal_type: 'breakfast', food: '狗粮 80g', calories: 200, remark: '' }
   ]

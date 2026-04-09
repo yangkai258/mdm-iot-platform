@@ -1,41 +1,42 @@
-<template>
+ï»¿<template>
   <div class="container">
-    <a-card class="general-card" title="»áÔ±ÁĞ±í">
+    <a-card class="general-card" title="ä¼šå‘˜åˆ—è¡¨">
       <template #extra>
         <a-space :size="12">
-          <a-button type="primary" @click="showCreateModal"><icon-plus />ĞÂ½¨</a-button>
-          <a-button @click="loadMembers"><icon-refresh />Ë¢ĞÂ</a-button>
+          <a-button type="primary" @click="showCreateModal"><icon-plus />æ–°å»º</a-button>
+          <a-button @click="loadMembers"><icon-refresh />åˆ·æ–°</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="¹Ø¼ü´Ê">
-            <a-input v-model="filters.keyword" placeholder="ĞÕÃû/ÊÖ»úºÅ" @pressEnter="loadMembers" />
+          <a-form-item label="å…³é”®è¯">
+            <a-input v-model="filters.keyword" placeholder="å§“å/æ‰‹æœºå·" @pressEnter="loadMembers" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadMembers">²éÑ¯</a-button>
-            <a-button @click="resetFilters">ÖØÖÃ</a-button>
+            <a-button type="primary" @click="loadMembers">æŸ¥è¯¢</a-button>
+            <a-button @click="resetFilters">é‡ç½®</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="memberList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id">
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showEdit(record)">±à¼­</a-button>
-          <a-button type="text" size="small" @click="handleDelete(record)">É¾³ı</a-button>
+          <a-button type="text" size="small" @click="showEdit(record)">ç¼–è¾‘</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">åˆ é™¤</a-button>
         </template>
       </a-table>
+      </a-table>
     </a-card>
-    <a-modal v-model:visible="formVisible" :title="isEdit ? '±à¼­»áÔ±' : 'ĞÂ½¨»áÔ±'">
+    <a-modal v-model:visible="formVisible" :title="isEdit ? 'ç¼–è¾‘ä¼šå‘˜' : 'æ–°å»ºä¼šå‘˜'">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="ĞÕÃû"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="ÊÖ»úºÅ"><a-input v-model="form.mobile" /></a-form-item>
+        <a-form-item label="å§“å"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="æ‰‹æœºå·"><a-input v-model="form.mobile" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">È¡Ïû</a-button>
-        <a-button type="primary" @click="handleFormSubmit(() => {})">È·¶¨</a-button>
+        <a-button @click="formVisible = false">å–æ¶ˆ</a-button>
+        <a-button type="primary" @click="handleFormSubmit(() => {})">ç¡®å®š</a-button>
       </template>
     </a-modal>
   </div>
@@ -107,17 +108,17 @@ const levelForm = reactive({
 })
 
 const columns = [
-  { title: 'Í·Ïñ', slotName: 'avatar', width: 70, fixed: 'left' },
-  { title: '»áÔ±±àºÅ', dataIndex: 'memberNo', width: 170 },
-  { title: 'ĞÕÃû', dataIndex: 'name', width: 100 },
-  { title: 'ÊÖ»úºÅ', dataIndex: 'mobile', width: 130 },
-  { title: 'µÈ¼¶', slotName: 'level', width: 100 },
-  { title: '×´Ì¬', slotName: 'status', width: 80 },
-  { title: '»ı·Ö', slotName: 'totalPoints', width: 100 },
-  { title: 'ÀÛ¼ÆÏû·Ñ', slotName: 'totalConsume', width: 110 },
-  { title: '¶©µ¥Êı', dataIndex: 'totalOrderCount', width: 80 },
-  { title: '×¢²áÊ±¼ä', dataIndex: 'createdAt', width: 170 },
-  { title: '²Ù×÷', slotName: 'actions', width: 200, fixed: 'right' }
+  { title: 'å¤´åƒ', slotName: 'avatar', width: 70, fixed: 'left' },
+  { title: 'ä¼šå‘˜ç¼–å·', dataIndex: 'memberNo', width: 170 },
+  { title: 'å§“å', dataIndex: 'name', width: 100 },
+  { title: 'æ‰‹æœºå·', dataIndex: 'mobile', width: 130 },
+  { title: 'ç­‰çº§', slotName: 'level', width: 100 },
+  { title: 'çŠ¶æ€', slotName: 'status', width: 80 },
+  { title: 'ç§¯åˆ†', slotName: 'totalPoints', width: 100 },
+  { title: 'ç´¯è®¡æ¶ˆè´¹', slotName: 'totalConsume', width: 110 },
+  { title: 'è®¢å•æ•°', dataIndex: 'totalOrderCount', width: 80 },
+  { title: 'æ³¨å†Œæ—¶é—´', dataIndex: 'createdAt', width: 170 },
+  { title: 'æ“ä½œ', slotName: 'actions', width: 200, fixed: 'right' }
 ]
 
 const getLevelColor = (id) => {
@@ -126,8 +127,8 @@ const getLevelColor = (id) => {
 }
 
 const getStatusColor = (s) => ({ 1: 'green', 2: 'orange', 3: 'red' }[s] || 'gray')
-const getStatusText = (s) => ({ 1: 'Õı³£', 2: '¶³½á', 3: '½ûÓÃ' }[s] || 'Î´Öª')
-const getGenderText = (g) => ({ 0: 'Î´Öª', 1: 'ÄĞ', 2: 'Å®' }[g] || 'Î´Öª')
+const getStatusText = (s) => ({ 1: 'æ­£å¸¸', 2: 'å†»ç»“', 3: 'ç¦ç”¨' }[s] || 'æœªçŸ¥')
+const getGenderText = (g) => ({ 0: 'æœªçŸ¥', 1: 'ç”·', 2: 'å¥³' }[g] || 'æœªçŸ¥')
 
 const loadMembers = async () => {
   loading.value = true
@@ -145,7 +146,7 @@ const loadMembers = async () => {
     memberList.value = d.list || []
     pagination.total = d.total || 0
   } catch (err) {
-    Message.error('¼ÓÔØ»áÔ±ÁĞ±íÊ§°Ü: ' + err.message)
+    Message.error('åŠ è½½ä¼šå‘˜åˆ—è¡¨å¤±è´¥: ' + err.message)
   } finally {
     loading.value = false
   }
@@ -233,16 +234,16 @@ const handleFormSubmit = async (done) => {
     const payload = { ...form }
     if (isEdit.value) {
       await api.updateMember(currentId.value, payload)
-      Message.success('¸üĞÂ³É¹¦')
+      Message.success('æ›´æ–°æˆåŠŸ')
     } else {
       await api.createMember(payload)
-      Message.success('´´½¨³É¹¦')
+      Message.success('åˆ›å»ºæˆåŠŸ')
     }
     formVisible.value = false
     loadMembers()
     done(true)
   } catch (err) {
-    Message.error(err.message || '²Ù×÷Ê§°Ü')
+    Message.error(err.message || 'æ“ä½œå¤±è´¥')
     done(false)
   } finally {
     formLoading.value = false
@@ -252,10 +253,10 @@ const handleFormSubmit = async (done) => {
 const handleDelete = async (record) => {
   try {
     await api.deleteMember(record.id)
-    Message.success('É¾³ı³É¹¦')
+    Message.success('åˆ é™¤æˆåŠŸ')
     loadMembers()
   } catch (err) {
-    Message.error(err.message || 'É¾³ıÊ§°Ü')
+    Message.error(err.message || 'åˆ é™¤å¤±è´¥')
   }
 }
 
@@ -267,29 +268,29 @@ const showAdjustLevel = (record) => {
 
 const handleLevelSubmit = async (done) => {
   if (!levelForm.levelId || !levelForm.reason) {
-    Message.warning('ÇëÌîĞ´ÍêÕûĞÅÏ¢')
+    Message.warning('è¯·å¡«å†™å®Œæ•´ä¿¡æ¯')
     done(false)
     return
   }
   try {
     await api.updateMemberLevel(currentMember.value.id, levelForm)
-    Message.success('µÈ¼¶µ÷Õû³É¹¦')
+    Message.success('ç­‰çº§è°ƒæ•´æˆåŠŸ')
     levelModalVisible.value = false
     loadMembers()
     done(true)
   } catch (err) {
-    Message.error(err.message || 'µ÷ÕûÊ§°Ü')
+    Message.error(err.message || 'è°ƒæ•´å¤±è´¥')
     done(false)
   }
 }
 
 const showStatusModal = async (record) => {
   try {
-    await api.updateMemberStatus(record.id, { status: 3, reason: 'ºóÌ¨½ûÓÃ' })
-    Message.success('»áÔ±ÒÑ½ûÓÃ')
+    await api.updateMemberStatus(record.id, { status: 3, reason: 'åå°ç¦ç”¨' })
+    Message.success('ä¼šå‘˜å·²ç¦ç”¨')
     loadMembers()
   } catch (err) {
-    Message.error(err.message || '²Ù×÷Ê§°Ü')
+    Message.error(err.message || 'æ“ä½œå¤±è´¥')
   }
 }
 
@@ -301,16 +302,16 @@ const showPointsAdjust = (record) => {
 
 const handlePointsSubmit = async () => {
   if (!pointsForm.points || !pointsForm.reason) {
-    Message.warning('ÇëÌîĞ´ÍêÕûĞÅÏ¢')
+    Message.warning('è¯·å¡«å†™å®Œæ•´ä¿¡æ¯')
     return
   }
   try {
     await api.adjustPoints({ memberId: currentMember.value.id, ...pointsForm })
-    Message.success('»ı·Öµ÷Õû³É¹¦')
+    Message.success('ç§¯åˆ†è°ƒæ•´æˆåŠŸ')
     pointsVisible.value = false
     loadMembers()
   } catch (err) {
-    Message.error(err.message || 'µ÷ÕûÊ§°Ü')
+    Message.error(err.message || 'è°ƒæ•´å¤±è´¥')
   }
 }
 

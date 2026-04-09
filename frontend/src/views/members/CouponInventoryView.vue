@@ -1,40 +1,41 @@
-<template>
+Ôªø<template>
   <div class="container">
-    <a-card class="general-card" title="”≈ª›»Øø‚¥Ê">
+    <a-card class="general-card" title="‰ºòÊÉ†Âà∏Â∫ìÂ≠ò">
       <template #extra>
         <a-space :size="12">
-          <a-button type="primary" @click="showRechargeDrawer(null)"><icon-plus />≥‰÷µø‚¥Ê</a-button>
-          <a-button @click="loadData"><icon-refresh />À¢–¬</a-button>
+          <a-button type="primary" @click="showRechargeDrawer(null)"><icon-plus />ÂÖÖÂÄºÂ∫ìÂ≠ò</a-button>
+          <a-button @click="loadData"><icon-refresh />Âà∑Êñ∞</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="πÿº¸¥ ">
-            <a-input v-model="filters.keyword" placeholder="«Î ‰»Î" @pressEnter="loadData" />
+          <a-form-item label="ÂÖ≥ÈîÆËØç">
+            <a-input v-model="filters.keyword" placeholder="ËØ∑ËæìÂÖ•" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
-            <a-button @click="filters.keyword = ''; loadData()">÷ÿ÷√</a-button>
+            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
+            <a-button @click="filters.keyword = ''; loadData()">ÈáçÁΩÆ</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id">
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showRechargeDrawer(record)">≥‰÷µ</a-button>
+          <a-button type="text" size="small" @click="showRechargeDrawer(record)">ÂÖÖÂÄº</a-button>
         </template>
       </a-table>
+      </a-table>
     </a-card>
-    <a-modal v-model:visible="rechargeVisible" title="≥‰÷µø‚¥Ê">
+    <a-modal v-model:visible="rechargeVisible" title="ÂÖÖÂÄºÂ∫ìÂ≠ò">
       <a-form :model="rechargeForm" label-col-flex="100px">
-        <a-form-item label="”≈ª›»Ø"><a-input :value="selectedCouponName" readonly /></a-form-item>
-        <a-form-item label="≥‰÷µ ˝¡ø"><a-input-number v-model="rechargeForm.addCount" :min="1" style="width: 100%" /></a-form-item>
+        <a-form-item label="‰ºòÊÉ†Âà∏"><a-input :value="selectedCouponName" readonly /></a-form-item>
+        <a-form-item label="ÂÖÖÂÄºÊï∞Èáè"><a-input-number v-model="rechargeForm.addCount" :min="1" style="width: 100%" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="rechargeVisible = false">»°œ˚</a-button>
-        <a-button type="primary" @click="handleRecharge">»∑∂®</a-button>
+        <a-button @click="rechargeVisible = false">ÂèñÊ∂à</a-button>
+        <a-button type="primary" @click="handleRecharge">Á°ÆÂÆö</a-button>
       </template>
     </a-modal>
   </div>
@@ -54,12 +55,12 @@ const rechargeForm = reactive({ couponId: undefined, addCount: 1 })
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
 const columns = [
-  { title: '”≈ª›»Ø√˚≥∆', dataIndex: 'couponName', width: 200 },
-  { title: '¿‡–Õ', dataIndex: 'type', width: 100 },
-  { title: '◊‹ ˝¡ø', dataIndex: 'totalCount', width: 110 },
-  { title: '“— π”√', slotName: 'usage', width: 110 },
-  { title: ' £”‡ø‚¥Ê', slotName: 'remaining', width: 110 },
-  { title: '≤Ÿ◊˜', slotName: 'actions', width: 100 }
+  { title: '‰ºòÊÉ†Âà∏ÂêçÁß∞', dataIndex: 'couponName', width: 200 },
+  { title: 'Á±ªÂûã', dataIndex: 'type', width: 100 },
+  { title: 'ÊÄªÊï∞Èáè', dataIndex: 'totalCount', width: 110 },
+  { title: 'Â∑≤‰ΩøÁî®', slotName: 'usage', width: 110 },
+  { title: 'Ââ©‰ΩôÂ∫ìÂ≠ò', slotName: 'remaining', width: 110 },
+  { title: 'Êìç‰Ωú', slotName: 'actions', width: 100 }
 ]
 
 const loadData = async () => {
@@ -74,7 +75,7 @@ const loadData = async () => {
 }
 
 const showRechargeDrawer = (record) => { rechargeForm.couponId = record?.id; rechargeForm.addCount = 1; rechargeVisible.value = true }
-const handleRecharge = () => { rechargeVisible.value = false; Message.success('≥‰÷µ≥…π¶'); loadData() }
+const handleRecharge = () => { rechargeVisible.value = false; Message.success('ÂÖÖÂÄºÊàêÂäü'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())

@@ -1,12 +1,12 @@
 <template>
   <div class="page-container">
-    <a-card class="general-card" title="传感器事�?>
+    <a-card class="general-card" title="传感器事�?>
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="设备ID"><a-input v-model="form.device_id" placeholder="请输�? /></a-form-item>
+          <a-form-item label="设备ID"><a-input v-model="form.device_id" placeholder="请输�? /></a-form-item>
           <a-form-item label="事件类型">
             <a-select v-model="form.event_type" placeholder="选择类型" allow-clear style="width: 140px">
               <a-option value="temperature">温度</a-option>
@@ -27,7 +27,7 @@
         <a-descriptions-item label="事件ID">{{ currentEvent?.id }}</a-descriptions-item>
         <a-descriptions-item label="设备ID">{{ currentEvent?.device_id }}</a-descriptions-item>
         <a-descriptions-item label="事件类型">{{ currentEvent?.event_type }}</a-descriptions-item>
-        <a-descriptions-item label="传感器数�?>{{ currentEvent?.sensor_data }}</a-descriptions-item>
+        <a-descriptions-item label="传感器数�?>{{ currentEvent?.sensor_data }}</a-descriptions-item>
         <a-descriptions-item label="触发时间">{{ currentEvent?.created_at }}</a-descriptions-item>
       </a-descriptions>
     </a-modal>
@@ -50,7 +50,7 @@ const columns = [
   { title: '设备ID', dataIndex: 'device_id', width: 120 },
   { title: '设备名称', dataIndex: 'device_name', width: 140 },
   { title: '事件类型', dataIndex: 'event_type', width: 100 },
-  { title: '传感器数�?, dataIndex: 'sensor_data', ellipsis: true },
+  { title: '传感器数�?, dataIndex: 'sensor_data', ellipsis: true },
   { title: '触发时间', dataIndex: 'created_at', width: 170 }
 ]
 

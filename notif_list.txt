@@ -1,0 +1,86 @@
+<template>
+  <div class="page-container">
+    <!-- 闈㈠寘灞� -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>棣栭〉</a-breadcrumb-item>
+      <a-breadcrumb-item>娑堟伅涓�蹇�</a-breadcrumb-item>
+      <a-breadcrumb-item>鎺ㄩ�侀�氱煡</a-breadcrumb-item>
+    </a-breadcrumb>
+
+    <!-- 缁熻�″崱鐗� -->
+    <a-row :gutter="16" class="stats-row">
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="浠婃棩鍙戦��" :value="stats.todaySent" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="閫佽揪鐜�" :value="stats.deliveryRate" suffix="%" :value-style="{ color: deliveryRateColor }" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="宸茶�荤巼" :value="stats.readRate" suffix="%" :value-style="{ color: readRateColor }" />
+        </a-card>
+      </a-col>
+      <a-col :span="6">
+        <a-card>
+          <a-statistic title="寰呭彂閫�" :value="stats.pending" />
+        </a-card>
+      </a-col>
+    </a-row>
+
+    <!-- 鎼滅储绛涢�夊尯 -->
+    <div class="search-form">
+      <a-form :model="searchForm" layout="inline">
+        <a-form-item label="閫氱煡绫诲瀷">
+          <a-select v-model="searchForm.type" placeholder="閫夋嫨绫诲瀷" allow-clear style="width: 140px">
+            <a-option value="push">鎺ㄩ�侀�氱煡</a-option>
+            <a-option value="announcement">鍏�鍛�</a-option>
+            <a-option value="command_response">鍛戒护鍙嶉��</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="鐘舵��">
+          <a-select v-model="searchForm.status" placeholder="閫夋嫨鐘舵��" allow-clear style="width: 120px">
+            <a-option value="pending">寰呭彂閫�</a-option>
+            <a-option value="sent">宸插彂閫�</a-option>
+            <a-option value="failed">澶辫触</a-option>
+            <a-option value="read">宸茶��</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item>
+          <a-space>
+            <a-button type="primary" @click="handleSearch">鎼滅储</a-button>
+            <a-button @click="handleReset">閲嶇疆</a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </div>
+
+    <!-- 鎿嶄綔鏍� -->
+    <div class="toolbar">
+      <a-button type="primary" @click="showSendDrawer">鍙戦�侀�氱煡</a-button>
+    </div>
+
+    <!-- 琛ㄦ牸 -->
+    <a-table
+      :columns="columns"
+      :data="notifications"
+      :loading="loading"
+      :pagination="paginationConfig"
+      row-key="id"
+      @page-change="handlePageChange"
+      @page-size-change="handlePageSizeChange"
+    >
+      <template #notification_type="{ record }">
+        <a-tag :color="typeColor(record.notification_type)">{{ typeLabel(record.notification_type) }}</a-tag>
+      </template>
+      <template #target_type="{ record }">
+        {{ targetLabel(record.target_type) }}
+      </template>
+      <template #status="{ record }">
+        <a-tag :color="statusColor(record.status)">{{ statusLabel(record.status) }}</a-tag>
+      </template>
+      <template #sent_at="{ record }">
+        {{ formatTime

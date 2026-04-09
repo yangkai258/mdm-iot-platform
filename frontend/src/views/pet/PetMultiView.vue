@@ -1,12 +1,12 @@
 <template>
   <div class="page-container">
-    <a-card class="general-card" title="多宠物管�?>
+    <a-card class="general-card" title="多宠物管�?>
       <template #extra>
         <a-button type="primary" @click="openAddPet"><icon-plus />添加宠物</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="宠物名称"><a-input v-model="form.pet_name" placeholder="请输�? /></a-form-item>
+          <a-form-item label="宠物名称"><a-input v-model="form.pet_name" placeholder="请输�? /></a-form-item>
           <a-form-item><a-button type="primary" @click="loadData">查询</a-button><a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">重置</a-button></a-form-item>
         </a-form>
       </div>
@@ -38,7 +38,7 @@
             <div class="pet-info">
               <div class="pet-name">{{ pet.pet_name }}</div>
               <div class="pet-type">{{ pet.pet_type }} / {{ pet.breed || '-' }}</div>
-              <div class="pet-device">设备: {{ pet.device_id || '未绑�? }}</div>
+              <div class="pet-device">设备: {{ pet.device_id || '未绑�? }}</div>
               <a-space style="margin-top: 8px">
                 <a-button type="text" size="small" @click.stop="viewProfile(pet)">档案</a-button>
                 <a-button type="text" size="small" @click.stop="bindDevice(pet)">绑定设备</a-button>
@@ -53,20 +53,20 @@
     </a-card>
     <a-modal v-model:visible="addVisible" title="添加宠物" @before-ok="handleAdd" :loading="submitting" :width="560">
       <a-form :model="addForm" layout="vertical">
-        <a-form-item label="宠物名称" required><a-input v-model="addForm.pet_name" placeholder="请输�? /></a-form-item>
+        <a-form-item label="宠物名称" required><a-input v-model="addForm.pet_name" placeholder="请输�? /></a-form-item>
         <a-form-item label="宠物类型" required>
           <a-select v-model="addForm.pet_type" placeholder="选择类型">
-            <a-option value="dog">�?/a-option>
-            <a-option value="cat">�?/a-option>
-            <a-option value="bird">�?/a-option>
+            <a-option value="dog">�?/a-option>
+            <a-option value="cat">�?/a-option>
+            <a-option value="bird">�?/a-option>
             <a-option value="other">其他</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="品种"><a-input v-model="addForm.breed" placeholder="请输入品�? /></a-form-item>
+        <a-form-item label="品种"><a-input v-model="addForm.breed" placeholder="请输入品�? /></a-form-item>
         <a-form-item label="性别">
           <a-select v-model="addForm.gender" placeholder="选择性别">
-            <a-option value="male">�?/a-option>
-            <a-option value="female">�?/a-option>
+            <a-option value="male">�?/a-option>
+            <a-option value="female">�?/a-option>
           </a-select>
         </a-form-item>
       </a-form>
@@ -87,7 +87,7 @@
         <a-descriptions-item label="类型">{{ selectedPet?.pet_type }}</a-descriptions-item>
         <a-descriptions-item label="品种">{{ selectedPet?.breed }}</a-descriptions-item>
         <a-descriptions-item label="性别">{{ selectedPet?.gender }}</a-descriptions-item>
-        <a-descriptions-item label="绑定设备">{{ selectedPet?.device_id || '未绑�? }}</a-descriptions-item>
+        <a-descriptions-item label="绑定设备">{{ selectedPet?.device_id || '未绑�? }}</a-descriptions-item>
         <a-descriptions-item label="添加时间" :span="2">{{ selectedPet?.created_at }}</a-descriptions-item>
       </a-descriptions>
     </a-modal>

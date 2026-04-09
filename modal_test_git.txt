@@ -1,0 +1,326 @@
+<template>
+  <div class="page-container">
+    <!-- 闈㈠寘灞� -->
+    <a-breadcrumb class="breadcrumb">
+      <a-breadcrumb-item>棣栭〉</a-breadcrumb-item>
+      <a-breadcrumb-item>寮�鍙戝伐鍏�</a-breadcrumb-item>
+      <a-breadcrumb-item>寮圭獥椋庢牸娴嬭瘯</a-breadcrumb-item>
+    </a-breadcrumb>
+
+    <!-- 璇存槑鍖哄煙 -->
+    <a-card class="intro-card">
+      <template #title>寮圭獥/椤甸潰椋庢牸娴嬭瘯</template>
+      <a-space direction="vertical" :size="16">
+        <p>鐐瑰嚮涓嬫柟鎸夐挳棰勮�堜笉鍚岄�庢牸锛岄�夋嫨浣犲枩娆㈢殑涓�绉�</p>
+        <a-alert type="info">
+          褰撳墠椤甸潰閲囩敤鏍囧噯 page-container 缁撴瀯锛岀偣鍑绘寜閽�鍚庝細寮瑰嚭涓嶅悓椋庢牸鐨勬ā鎬佹��/椤甸潰
+        </a-alert>
+      </a-space>
+    </a-card>
+
+    <!-- 椋庢牸閫夐」 -->
+    <a-card class="style-card">
+      <template #title>椋庢牸閫夐」</template>
+      <a-row :gutter="[24, 24]">
+        <!-- 椋庢牸A: 鍏ㄥ睆椤甸潰 -->
+        <a-col :span="12" :xs="24" :sm="12">
+          <div class="style-option">
+            <h3>A. 鍏ㄥ睆椤甸潰</h3>
+            <p>鐐瑰嚮鍚庤繘鍏ユ柊椤甸潰锛屾棤渚ц竟鏍忥紝閫傚悎澶嶆潅琛ㄥ崟</p>
+            <a-button type="primary" @click="showStyleA">棰勮�堥�庢牸A</a-button>
+          </div>
+        </a-col>
+
+        <!-- 椋庢牸B: 灞呬腑妯℃�佹�� -->
+        <a-col :span="12" :xs="24" :sm="12">
+          <div class="style-option">
+            <h3>B. 灞呬腑妯℃�佹��</h3>
+            <p>鍗婇�忔槑閬�缃� + 灞呬腑瀵硅瘽妗嗭紝鐐瑰嚮閬�缃╁彲鍏抽棴</p>
+            <a-button type="primary" @click="showStyleB">棰勮�堥�庢牸B</a-button>
+          </div>
+        </a-col>
+
+        <!-- 椋庢牸C: 鍙充晶鎶藉眽 -->
+        <a-col :span="12" :xs="24" :sm="12">
+          <div class="style-option">
+            <h3>C. 鍙充晶鎶藉眽</h3>
+            <p>浠庡彸渚ф粦鍏ョ殑鎶藉眽闈㈡澘锛屼笉閬�鎸′富鍐呭��</p>
+            <a-button type="primary" @click="showStyleC">棰勮�堥�庢牸C</a-button>
+          </div>
+        </a-col>
+
+        <!-- 椋庢牸D: 鍏ㄥ睆妯℃�� -->
+        <a-col :span="12" :xs="24" :sm="12">
+          <div class="style-option">
+            <h3>D. 鍏ㄥ睆妯℃��</h3>
+            <p>绫讳技椋庢牸A浣嗘槸鐢ㄩ伄缃╁疄鐜帮紝鐐瑰嚮閬�缃╁叧闂�</p>
+            <a-button type="primary" @click="showStyleD">棰勮�堥�庢牸D</a-button>
+          </div>
+        </a-col>
+      </a-row>
+    </a-card>
+
+    <!-- 椋庢牸A: 鍏ㄥ睆椤甸潰 -->
+    <a-modal 
+      v-model:visible="styleAVisible" 
+      :footer="false" 
+      :mask-closable="true"
+      title="鍒涘缓璁惧�� - 鍏ㄥ睆椤甸潰"
+      :width="900"
+    >
+      <div class="full-page-form">
+        <a-card title="鍩烘湰淇℃伅" class="form-section">
+          <a-form :model="formA" layout="vertical">
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="璁惧�囧悕绉�">
+                  <a-input v-model="formA.name" placeholder="璇疯緭鍏ヨ�惧�囧悕绉�" />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="璁惧�囩被鍨�">
+                  <a-select v-model="formA.type" placeholder="璇烽�夋嫨">
+                    <a-option value="sensor">浼犳劅鍣�</a-option>
+                    <a-option value="controller">鎺у埗鍣�</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="鍥轰欢鐗堟湰">
+                  <a-input v-model="formA.firmware" placeholder="璇疯緭鍏ュ浐浠剁増鏈�" />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="璁惧�嘔D">
+                  <a-input v-model="formA.deviceId" placeholder="鑷�鍔ㄧ敓鎴�" disabled />
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
+        </a-card>
+
+        <a-card title="閰嶇疆淇℃伅" class="form-section">
+          <a-form :model="formA" layout="vertical">
+            <a-form-item label="澶囨敞">
+              <a-textarea v-model="formA.remark" placeholder="璇疯緭鍏ュ�囨敞" :rows="3" />
+            </a-form-item>
+          </a-form>
+        </a-card>
+
+        <div class="form-actions">
+          <a-button @click="styleAVisible = false">鍙栨秷</a-button>
+          <a-button type="primary">纭�瀹氬垱寤�</a-button>
+        </div>
+      </div>
+    </a-modal>
+
+    <!-- 椋庢牸B: 灞呬腑妯℃�佹�� -->
+    <a-modal 
+      v-model:visible="styleBVisible" 
+      title="鍒涘缓璁惧�� - 灞呬腑寮圭獥" 
+      :width="520"
+      @ok="styleBVisible = false"
+      @cancel="styleBVisible = false"
+    >
+      <a-form :model="formB" layout="vertical">
+        <a-form-item label="璁惧�囧悕绉�" required>
+          <a-input v-model="formB.name" placeholder="璇疯緭鍏ヨ�惧�囧悕绉�" />
+        </a-form-item>
+        <a-form-item label="璁惧�囩被鍨�" required>
+          <a-select v-model="formB.type" placeholder="璇烽�夋嫨">
+            <a-option value="sensor">浼犳劅鍣�</a-option>
+            <a-option value="controller">鎺у埗鍣�</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="鍥轰欢鐗堟湰">
+          <a-input v-model="formB.firmware" placeholder="璇疯緭鍏ュ浐浠剁増鏈�" />
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
+    <!-- 椋庢牸C: 鍙充晶鎶藉眽 -->
+    <a-drawer 
+      v-model:visible="styleCVisible" 
+      title="鍒涘缓璁惧�� - 鍙充晶鎶藉眽" 
+      width="480px"
+      @before-ok="styleCVisible = false"
+    >
+      <a-form :model="formC" layout="vertical">
+        <a-form-item label="璁惧�囧悕绉�" required>
+          <a-input v-model="formC.name" placeholder="璇疯緭鍏ヨ�惧�囧悕绉�" />
+        </a-form-item>
+        <a-form-item label="璁惧�囩被鍨�" required>
+          <a-select v-model="formC.type" placeholder="璇烽�夋嫨">
+            <a-option value="sensor">浼犳劅鍣�</a-option>
+            <a-option value="controller">鎺у埗鍣�</a-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="鍥轰欢鐗堟湰">
+          <a-input v-model="formC.firmware" placeholder="璇疯緭鍏ュ浐浠剁増鏈�" />
+        </a-form-item>
+        <a-form-item label="澶囨敞">
+          <a-textarea v-model="formC.remark" placeholder="璇疯緭鍏ュ�囨敞" :rows="3" />
+        </a-form-item>
+      </a-form>
+    </a-drawer>
+
+    <!-- 椋庢牸D: 鍏ㄥ睆妯℃�� -->
+    <a-modal 
+      v-model:visible="styleDVisible" 
+      :footer="false" 
+      :mask-closable="true"
+      title="鍒涘缓璁惧�� - 鍏ㄥ睆妯℃��"
+      :width="900"
+    >
+      <div class="full-page-form">
+        <a-card title="鍩烘湰淇℃伅" class="form-section">
+          <a-form :model="formD" layout="vertical">
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="璁惧�囧悕绉�">
+                  <a-input v-model="formD.name" placeholder="璇疯緭鍏ヨ�惧�囧悕绉�" />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="璁惧�囩被鍨�">
+                  <a-select v-model="formD.type" placeholder="璇烽�夋嫨">
+                    <a-option value="sensor">浼犳劅鍣�</a-option>
+                    <a-option value="controller">鎺у埗鍣�</a-option>
+                  </a-select>
+                </a-form-item>
+              </a-col>
+            </a-row>
+            <a-row :gutter="16">
+              <a-col :span="12">
+                <a-form-item label="鍥轰欢鐗堟湰">
+                  <a-input v-model="formD.firmware" placeholder="璇疯緭鍏ュ浐浠剁増鏈�" />
+                </a-form-item>
+              </a-col>
+              <a-col :span="12">
+                <a-form-item label="璁惧�嘔D">
+                  <a-input v-model="formD.deviceId" placeholder="鑷�鍔ㄧ敓鎴�" disabled />
+                </a-form-item>
+              </a-col>
+            </a-row>
+          </a-form>
+        </a-card>
+
+        <div class="form-actions">
+          <a-button @click="styleDVisible = false">鍙栨秷</a-button>
+          <a-button type="primary">纭�瀹氬垱寤�</a-button>
+        </div>
+      </div>
+    </a-modal>
+  </div>
+</template>
+
+<script setup>
+import { ref, reactive } from 'vue'
+
+const styleAVisible = ref(false)
+const styleBVisible = ref(false)
+const styleCVisible = ref(false)
+const styleDVisible = ref(false)
+
+const formA = reactive({
+  name: '',
+  type: '',
+  firmware: '',
+  deviceId: '鑷�鍔ㄧ敓鎴�',
+  remark: ''
+})
+
+const formB = reactive({
+  name: '',
+  type: '',
+  firmware: ''
+})
+
+const formC = reactive({
+  name: '',
+  type: '',
+  firmware: '',
+  remark: ''
+})
+
+const formD = reactive({
+  name: '',
+  type: '',
+  firmware: '',
+  deviceId: '鑷�鍔ㄧ敓鎴�'
+})
+
+const showStyleA = () => {
+  styleAVisible.value = true
+}
+
+const showStyleB = () => {
+  styleBVisible.value = true
+}
+
+const showStyleC = () => {
+  styleCVisible.value = true
+}
+
+const showStyleD = () => {
+  styleDVisible.value = true
+}
+</script>
+
+<style scoped>
+.page-container {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.breadcrumb {
+  margin-bottom: 16px;
+}
+
+.intro-card {
+  margin-bottom: 16px;
+}
+
+.style-card {
+  margin-bottom: 16px;
+}
+
+.style-option {
+  padding: 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  height: 100%;
+}
+
+.style-option h3 {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.style-option p {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.full-page-form {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.form-section {
+  margin-bottom: 16px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e5e5;
+}
+</style>

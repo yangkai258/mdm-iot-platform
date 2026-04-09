@@ -1,28 +1,29 @@
-<template>
+О╩©<template>
   <div class="container">
-    <a-card class="general-card" title="╡©це╧эюМ">
+    <a-card class="general-card" title="И┐╗И≈╗Г╝║Г░├">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate(null)"><icon-plus />пб╫╗╡©це</a-button>
-          <a-button @click="loadData"><icon-refresh />к╒пб</a-button>
+          <a-button type="primary" @click="openCreate(null)"><icon-plus />Ф√╟Е╩╨И┐╗И≈╗</a-button>
+          <a-button @click="loadData"><icon-refresh />Е┬╥Ф√╟</a-button>
         </a-space>
       </template>
       <a-spin :loading="loading">
         <a-table :columns="columns" :data="data" :loading="loading" row-key="id">
           <template #actions="{ record }">
-            <a-button type="text" size="small" @click="openCreate(record)">пбтЖвс╡©це</a-button>
-            <a-button type="text" size="small" @click="openEdit(record)">╠Ю╪╜</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">и╬ЁЩ</a-button>
+            <a-button type="text" size="small" @click="openCreate(record)">Ф√╟Е╒·Е╜░И┐╗И≈╗</a-button>
+            <a-button type="text" size="small" @click="openEdit(record)">Г╪√Х╬▒</a-button>
+            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">Е┬═И≥╓</a-button>
           </template>
       </a-table>
+        </a-table>
       </a-spin>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '╠Ю╪╜╡©це' : 'пб╫╗╡©це'" @ok="handleSubmit">
+    <a-modal v-model="formVisible" :title="isEdit ? 'Г╪√Х╬▒И┐╗И≈╗' : 'Ф√╟Е╩╨И┐╗И≈╗'" @ok="handleSubmit">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="╡©цецШЁф" required><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="ио╪╤╡©це"><a-input :value="parentDeptName" readonly /></a-form-item>
-        <a-form-item label="╡©це╠ЮбК"><a-input v-model="form.code" /></a-form-item>
-        <a-form-item label="еепР"><a-input-number v-model="form.sort" /></a-form-item>
+        <a-form-item label="И┐╗И≈╗Е░█Г╖╟" required><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="Д╦┼Г╨╖И┐╗И≈╗"><a-input :value="parentDeptName" readonly /></a-form-item>
+        <a-form-item label="И┐╗И≈╗Г╪√Г═│"><a-input v-model="form.code" /></a-form-item>
+        <a-form-item label="Ф▌▓Е╨▐"><a-input-number v-model="form.sort" /></a-form-item>
       </a-form>
     </a-modal>
   </div>
@@ -40,10 +41,10 @@ const parentDeptName = ref('-')
 const form = reactive({ name: '', code: '', sort: 0, parent_id: null })
 const data = ref([])
 const columns = [
-  { title: '╡©цецШЁф', dataIndex: 'name', width: 220 },
-  { title: '╡©це╠ЮбК', dataIndex: 'code', width: 140 },
-  { title: 'еепР', dataIndex: 'sort', width: 80 },
-  { title: '╡ывВ', slotName: 'actions', width: 200 }
+  { title: 'И┐╗И≈╗Е░█Г╖╟', dataIndex: 'name', width: 220 },
+  { title: 'И┐╗И≈╗Г╪√Г═│', dataIndex: 'code', width: 140 },
+  { title: 'Ф▌▓Е╨▐', dataIndex: 'sort', width: 80 },
+  { title: 'Ф⌠█Д╫°', slotName: 'actions', width: 200 }
 ]
 
 const loadData = async () => {
@@ -58,8 +59,8 @@ const loadData = async () => {
 
 const openCreate = (parent) => { isEdit.value = false; Object.assign(form, { name: '', code: '', sort: 0, parent_id: parent?.id || null }); parentDeptName.value = parent?.name || '-'; formVisible.value = true }
 const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); parentDeptName.value = '-'; formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '╦ЭпбЁи╧╕' : '╢╢╫╗Ёи╧╕'); loadData() }
-const handleDelete = () => { Message.success('и╬ЁЩЁи╧╕'); loadData() }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? 'Ф⌡╢Ф√╟Ф┬░Е┼÷' : 'Е┬⌡Е╩╨Ф┬░Е┼÷'); loadData() }
+const handleDelete = () => { Message.success('Е┬═И≥╓Ф┬░Е┼÷'); loadData() }
 
 onMounted(() => loadData())
 </script>

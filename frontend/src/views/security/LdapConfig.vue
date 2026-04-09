@@ -7,9 +7,9 @@
     </a-breadcrumb>
 
     <a-tabs v-model:active-key="activeTab" class="pro-content-area">
-      <!-- 服务器配�?-->
-      <a-tab-pane key="config" title="服务器配�?>
-        <a-card title="LDAP服务器配�?>
+      <!-- 服务器配�?-->
+      <a-tab-pane key="config" title="服务器配�?>
+        <a-card title="LDAP服务器配�?>
           <a-form :model="ldapConfig" layout="vertical" ref="configFormRef">
             <a-row :gutter="16">
               <a-col :span="12">
@@ -63,9 +63,9 @@
               <a-col :span="12">
                 <a-form-item label="同步周期">
                   <a-select v-model="ldapConfig.sync_interval" placeholder="选择同步周期">
-                    <a-option value="1h">每小�?/a-option>
-                    <a-option value="6h">�?小时</a-option>
-                    <a-option value="12h">�?2小时</a-option>
+                    <a-option value="1h">每小�?/a-option>
+                    <a-option value="6h">�?小时</a-option>
+                    <a-option value="12h">�?2小时</a-option>
                     <a-option value="24h">每天</a-option>
                   </a-select>
                 </a-form-item>
@@ -113,11 +113,11 @@
 
       <!-- 同步日志详情 -->
       <a-tab-pane key="log-detail" title="同步日志详情">
-        <a-result v-if="!selectedSyncLog" status="info" title="请从同步日志中选择一条记录查看详�? />
+        <a-result v-if="!selectedSyncLog" status="info" title="请从同步日志中选择一条记录查看详�? />
         <a-card v-else :title="`同步日志详情 - ${selectedSyncLog.user_dn}`">
           <a-descriptions :column="2" bordered>
             <a-descriptions-item label="用户DN">{{ selectedSyncLog.user_dn }}</a-descriptions-item>
-            <a-descriptions-item label="状�?>
+            <a-descriptions-item label="状�?>
               <a-tag :color="selectedSyncLog.status === 'success' ? 'green' : 'red'">
                 {{ selectedSyncLog.status === 'success' ? '成功' : '失败' }}
               </a-tag>
@@ -133,7 +133,7 @@
             <template #title>字段变更</template>
             <pre style="margin: 0; white-space: pre-wrap">{{ JSON.stringify(JSON.parse(selectedSyncLog.changes), null, 2) }}</pre>
           </a-alert>
-          <a-alert v-else type="info" message="无变�? />
+          <a-alert v-else type="info" message="无变�? />
         </a-card>
       </a-tab-pane>
     </a-tabs>
@@ -171,7 +171,7 @@ const syncLogs = ref<any[]>([])
 const syncLogColumns = [
   { title: '用户DN', dataIndex: 'user_dn', ellipsis: true },
   { title: '操作', dataIndex: 'action', slotName: 'type' },
-  { title: '状�?, dataIndex: 'status', slotName: 'status' },
+  { title: '状�?, dataIndex: 'status', slotName: 'status' },
   { title: '同步时间', dataIndex: 'created_at', slotName: 'created_at' },
   {
     title: '操作',
@@ -221,7 +221,7 @@ const triggerSync = async () => {
   syncing.value = true
   try {
     await axios.post('/api/v1/ldap/sync')
-    Message.success('同步任务已触�?)
+    Message.success('同步任务已触�?)
     loadSyncLogs()
     lastSyncTime.value = new Date().toLocaleString()
   } catch (e) {
@@ -244,7 +244,7 @@ const loadSyncLogs = async () => {
     syncLogs.value = [
       { id: 1, user_dn: 'cn=user1,ou=users,dc=example,dc=com', action: 'create', status: 'success', created_at: new Date().toISOString() },
       { id: 2, user_dn: 'cn=user2,ou=users,dc=example,dc=com', action: 'update', status: 'success', created_at: new Date().toISOString() },
-      { id: 3, user_dn: 'cn=user3,ou=users,dc=example,dc=com', action: 'skip', status: 'fail', error_msg: '用户已存�?, created_at: new Date().toISOString() },
+      { id: 3, user_dn: 'cn=user3,ou=users,dc=example,dc=com', action: 'skip', status: 'fail', error_msg: '用户已存�?, created_at: new Date().toISOString() },
     ]
     pagination.total = 3
   } finally {

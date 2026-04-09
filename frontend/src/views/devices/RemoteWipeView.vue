@@ -6,12 +6,12 @@
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="设备ID"><a-input v-model="form.device_id" placeholder="请输�? /></a-form-item>
-          <a-form-item label="状�?>
-            <a-select v-model="form.status" placeholder="选择状�? allow-clear style="width: 140px">
-              <a-option value="pending">待处�?/a-option>
-              <a-option value="wiping">擦除�?/a-option>
-              <a-option value="completed">已完�?/a-option>
+          <a-form-item label="设备ID"><a-input v-model="form.device_id" placeholder="请输�? /></a-form-item>
+          <a-form-item label="状�?>
+            <a-select v-model="form.status" placeholder="选择状�? allow-clear style="width: 140px">
+              <a-option value="pending">待处�?/a-option>
+              <a-option value="wiping">擦除�?/a-option>
+              <a-option value="completed">已完�?/a-option>
               <a-option value="failed">失败</a-option>
             </a-select>
           </a-form-item>
@@ -53,9 +53,9 @@
     <a-modal v-model:visible="progressVisible" title="擦除进度" :footer="null" :width="560">
       <a-descriptions :column="1" bordered>
         <a-descriptions-item label="设备ID">{{ selectedDevice?.device_id }}</a-descriptions-item>
-        <a-descriptions-item label="当前状�?><a-tag :color="getStatusColor(selectedDevice?.status)">{{ getStatusText(selectedDevice?.status) }}</a-tag></a-descriptions-item>
+        <a-descriptions-item label="当前状�?><a-tag :color="getStatusColor(selectedDevice?.status)">{{ getStatusText(selectedDevice?.status) }}</a-tag></a-descriptions-item>
         <a-descriptions-item label="擦除进度"><a-progress :percent="selectedDevice?.progress || 0" size="large" /></a-descriptions-item>
-        <a-descriptions-item label="开始时�?>{{ selectedDevice?.started_at }}</a-descriptions-item>
+        <a-descriptions-item label="开始时�?>{{ selectedDevice?.started_at }}</a-descriptions-item>
         <a-descriptions-item label="预计完成">{{ selectedDevice?.estimated_time }}</a-descriptions-item>
       </a-descriptions>
     </a-modal>
@@ -80,15 +80,15 @@ const columns = [
   { title: 'ID', dataIndex: 'id', width: 70 },
   { title: '设备ID', dataIndex: 'device_id', width: 120 },
   { title: '设备名称', dataIndex: 'device_name', width: 140 },
-  { title: '擦除状�?, slotName: 'status', width: 100 },
+  { title: '擦除状�?, slotName: 'status', width: 100 },
   { title: '擦除进度', slotName: 'progress', width: 160 },
-  { title: '发起�?, dataIndex: 'initiator', width: 100 },
+  { title: '发起�?, dataIndex: 'initiator', width: 100 },
   { title: '发起时间', dataIndex: 'created_at', width: 170 },
   { title: '操作', slotName: 'actions', width: 120 }
 ]
 
 const getStatusColor = (status) => ({ pending: 'orange', wiping: 'arcoblue', completed: 'green', failed: 'red' }[status] || 'gray')
-const getStatusText = (status) => ({ pending: '待处�?, wiping: '擦除�?, completed: '已完�?, failed: '失败' }[status] || status)
+const getStatusText = (status) => ({ pending: '待处�?, wiping: '擦除�?, completed: '已完�?, failed: '失败' }[status] || status)
 
 const loadData = async () => {
   loading.value = true
@@ -114,7 +114,7 @@ const executeWipe = async (done) => {
   try {
     const token = localStorage.getItem('token')
     const res = await fetch(`/api/v1/device/remote-wipe/${selectedDevice.value.id}/execute`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: wipeMode.value }) }).then(r => r.json())
-    if (res.code === 0) { Message.success('擦除任务已下�?); confirmVisible.value = false; loadData() }
+    if (res.code === 0) { Message.success('擦除任务已下�?); confirmVisible.value = false; loadData() }
     else { Message.error(res.message || '操作失败') }
     done(true)
   } catch (e) { Message.error('操作失败'); done(false) } finally { submitting.value = false }

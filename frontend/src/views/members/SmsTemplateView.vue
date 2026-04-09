@@ -1,40 +1,41 @@
-<template>
+Ôªø<template>
   <div class="container">
-    <a-card class="general-card" title="∂Ã–≈ƒ£∞Â">
+    <a-card class="general-card" title="Áü≠‰ø°Ê®°Êùø">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate"><icon-plus />–¬Ω®</a-button>
-          <a-button @click="loadData"><icon-refresh />À¢–¬</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />Êñ∞Âª∫</a-button>
+          <a-button @click="loadData"><icon-refresh />Âà∑Êñ∞</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="πÿº¸¥ "><a-input v-model="form.keyword" placeholder="«Î ‰»Î" @pressEnter="loadData" /></a-form-item>
+          <a-form-item label="ÂÖ≥ÈîÆËØç"><a-input v-model="form.keyword" placeholder="ËØ∑ËæìÂÖ•" @pressEnter="loadData" /></a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
-            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">÷ÿ÷√</a-button>
+            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">ÈáçÁΩÆ</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-        <template #status="{ record }"><a-badge :color="record.status === 'approved' ? 'green' : record.status === 'pending' ? 'orange' : 'red'" :text="record.status === 'approved' ? '“—Õ®π˝' : record.status === 'pending' ? '¥˝…Û∫À' : '“—æ‹æ¯'" /></template>
+        <template #status="{ record }"><a-badge :color="record.status === 'approved' ? 'green' : record.status === 'pending' ? 'orange' : 'red'" :text="record.status === 'approved' ? 'Â∑≤ÈÄöËøá' : record.status === 'pending' ? 'ÂæÖÂÆ°Ê†∏' : 'Â∑≤ÊãíÁªù'" /></template>
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="openEdit(record)">±‡º≠</a-button>
-          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">…æ≥˝</a-button>
+          <a-button type="text" size="small" @click="openEdit(record)">ÁºñËæë</a-button>
+          <a-button type="text" size="small" status="danger" @click="handleDelete(record)">Âà†Èô§</a-button>
         </template>
       </a-table>
+      </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '±‡º≠' : '–¬Ω®'" :width="600">
+    <a-modal v-model="formVisible" :title="isEdit ? 'ÁºñËæë' : 'Êñ∞Âª∫'" :width="600">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="ƒ£∞Â√˚≥∆"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="ƒ£∞Âƒ⁄»›"><a-textarea v-model="form.content" :rows="4" /></a-form-item>
+        <a-form-item label="Ê®°ÊùøÂêçÁß∞"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="Ê®°ÊùøÂÜÖÂÆπ"><a-textarea v-model="form.content" :rows="4" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">»°œ˚</a-button>
-        <a-button type="primary" @click="handleSubmit">»∑∂®</a-button>
+        <a-button @click="formVisible = false">ÂèñÊ∂à</a-button>
+        <a-button type="primary" @click="handleSubmit">Á°ÆÂÆö</a-button>
       </template>
     </a-modal>
   </div>
@@ -52,10 +53,10 @@ const form = reactive({ keyword: '', name: '', content: '' })
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: 'ƒ£∞Â√˚≥∆', dataIndex: 'name', width: 180 },
-  { title: 'ƒ£∞Âƒ⁄»›', dataIndex: 'content', ellipsis: true },
-  { title: '◊¥Ã¨', slotName: 'status', width: 100 },
-  { title: '≤Ÿ◊˜', slotName: 'actions', width: 120 }
+  { title: 'Ê®°ÊùøÂêçÁß∞', dataIndex: 'name', width: 180 },
+  { title: 'Ê®°ÊùøÂÜÖÂÆπ', dataIndex: 'content', ellipsis: true },
+  { title: 'Áä∂ÊÄÅ', slotName: 'status', width: 100 },
+  { title: 'Êìç‰Ωú', slotName: 'actions', width: 120 }
 ]
 
 const loadData = async () => {
@@ -68,8 +69,8 @@ const loadData = async () => {
 }
 const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', content: '' }); formVisible.value = true }
 const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '∏¸–¬≥…π¶' : '¥¥Ω®≥…π¶'); loadData() }
-const handleDelete = () => { Message.success('…æ≥˝≥…π¶'); loadData() }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? 'Êõ¥Êñ∞ÊàêÂäü' : 'ÂàõÂª∫ÊàêÂäü'); loadData() }
+const handleDelete = () => { Message.success('Âà†Èô§ÊàêÂäü'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>

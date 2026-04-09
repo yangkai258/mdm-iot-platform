@@ -1,27 +1,28 @@
-<template>
+ï»¿<template>
   <div class="container">
-    <a-card class="general-card" title="ÄÚÈÝÉóºË">
+    <a-card class="general-card" title="å†…å®¹å®¡æ ¸">
       <template #extra>
-        <a-button @click="loadData"><icon-refresh />Ë¢ÐÂ</a-button>
+        <a-button @click="loadData"><icon-refresh />åˆ·æ–°</a-button>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="ÄÚÈÝID"><a-input v-model="form.keyword" placeholder="ÇëÊäÈë" @pressEnter="loadData" /></a-form-item>
+          <a-form-item label="å†…å®¹ID"><a-input v-model="form.keyword" placeholder="è¯·è¾“å…¥" @pressEnter="loadData" /></a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">²éÑ¯</a-button>
-            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">ÖØÖÃ</a-button>
+            <a-button type="primary" @click="loadData">æŸ¥è¯¢</a-button>
+            <a-button @click="Object.keys(form).forEach(k => form[k] = ''); loadData()">é‡ç½®</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
-        <template #status="{ record }"><a-badge :color="record.status === 'approved' ? 'green' : record.status === 'rejected' ? 'red' : 'orange'" :text="record.status === 'approved' ? 'Í¨¹ý' : record.status === 'rejected' ? '¾Ü¾ø' : '´ýÉóºË'" /></template>
+        <template #status="{ record }"><a-badge :color="record.status === 'approved' ? 'green' : record.status === 'rejected' ? 'red' : 'orange'" :text="record.status === 'approved' ? 'é€šè¿‡' : record.status === 'rejected' ? 'æ‹’ç»' : 'å¾…å®¡æ ¸'" /></template>
         <template #actions="{ record }">
-          <a-button v-if="record.status === 'pending'" type="text" size="small" @click="handleApprove(record)">Í¨¹ý</a-button>
-          <a-button v-if="record.status === 'pending'" type="text" size="small" status="danger" @click="handleReject(record)">¾Ü¾ø</a-button>
+          <a-button v-if="record.status === 'pending'" type="text" size="small" @click="handleApprove(record)">é€šè¿‡</a-button>
+          <a-button v-if="record.status === 'pending'" type="text" size="small" status="danger" @click="handleReject(record)">æ‹’ç»</a-button>
         </template>
+      </a-table>
       </a-table>
     </a-card>
   </div>
@@ -37,12 +38,12 @@ const form = reactive({ keyword: '' })
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: 'ÄÚÈÝID', dataIndex: 'id', width: 80 },
-  { title: 'ÄÚÈÝÀàÐÍ', dataIndex: 'content_type', width: 120 },
-  { title: 'ÄÚÈÝÕªÒª', dataIndex: 'summary', ellipsis: true },
-  { title: '×´Ì¬', slotName: 'status', width: 100 },
-  { title: 'Ìá½»Ê±¼ä', dataIndex: 'created_at', width: 170 },
-  { title: '²Ù×÷', slotName: 'actions', width: 160 }
+  { title: 'å†…å®¹ID', dataIndex: 'id', width: 80 },
+  { title: 'å†…å®¹ç±»åž‹', dataIndex: 'content_type', width: 120 },
+  { title: 'å†…å®¹æ‘˜è¦', dataIndex: 'summary', ellipsis: true },
+  { title: 'çŠ¶æ€', slotName: 'status', width: 100 },
+  { title: 'æäº¤æ—¶é—´', dataIndex: 'created_at', width: 170 },
+  { title: 'æ“ä½œ', slotName: 'actions', width: 160 }
 ]
 
 const loadData = async () => {
@@ -53,8 +54,8 @@ const loadData = async () => {
     pagination.total = data.value.length
   } catch { data.value = [] } finally { loading.value = false }
 }
-const handleApprove = (record) => { record.status = 'approved'; Message.success('ÒÑÍ¨¹ý') }
-const handleReject = (record) => { record.status = 'rejected'; Message.success('ÒÑ¾Ü¾ø') }
+const handleApprove = (record) => { record.status = 'approved'; Message.success('å·²é€šè¿‡') }
+const handleReject = (record) => { record.status = 'rejected'; Message.success('å·²æ‹’ç»') }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>

@@ -65,7 +65,7 @@
           <a-date-picker v-model="weightForm.date" style="width: 100%" />
         </a-form-item>
         <a-form-item label="备注">
-          <a-textarea v-model="weightForm.remark" :rows="2" placeholder="请输入备�? />
+          <a-textarea v-model="weightForm.remark" :rows="2" placeholder="请输入备�? />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -114,7 +114,7 @@ const loadMockData = () => {
   data.value = [
     { id: 1, device_id: 'DEV001', pet_name: '豆豆', weight: 5.2, change: '+0.1', record_date: '2026-04-09', remark: '正常' },
     { id: 2, device_id: 'DEV001', pet_name: '豆豆', weight: 5.1, change: '0', record_date: '2026-04-08', remark: '' },
-    { id: 3, device_id: 'DEV001', pet_name: '豆豆', weight: 5.1, change: '-0.1', record_date: '2026-04-07', remark: '节食�? },
+    { id: 3, device_id: 'DEV001', pet_name: '豆豆', weight: 5.1, change: '-0.1', record_date: '2026-04-07', remark: '节食�? },
     { id: 4, device_id: 'DEV002', pet_name: '旺财', weight: 6.8, change: '+0.2', record_date: '2026-04-09', remark: '正常' },
     { id: 5, device_id: 'DEV002', pet_name: '旺财', weight: 6.6, change: '0', record_date: '2026-04-08', remark: '' }
   ]
@@ -158,7 +158,7 @@ const handleSubmit = () => {
 }
 
 const handleSaveTarget = () => {
-  Message.success('目标体重已保�?)
+  Message.success('目标体重已保�?)
 }
 
 const onPageChange = (page) => {

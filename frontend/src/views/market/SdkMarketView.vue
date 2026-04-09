@@ -1,13 +1,13 @@
 <template>
   <div class="page-container">
-    <a-card class="general-card" title="SDK发布�?>
+    <a-card class="general-card" title="SDK发布�?>
       <template #extra>
         <a-button type="primary"><icon-plus />发布SDK</a-button>
       </template>
       <a-tabs v-model:active-tab="activeTab" @change="loadData">
         <a-tab-pane key="all" tab="全部版本" />
-        <a-tab-pane key="latest" tab="最新版�? />
-        <a-tab-pane key="deprecated" tab="已废�? />
+        <a-tab-pane key="latest" tab="最新版�? />
+        <a-tab-pane key="deprecated" tab="已废�? />
       </a-tabs>
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id">
         <template #status="{ record }">
@@ -37,9 +37,9 @@ const columns = [
   { title: '版本', dataIndex: 'version', width: 100 },
   { title: '语言', dataIndex: 'language', width: 80 },
   { title: '发布说明', dataIndex: 'changelog', ellipsis: true },
-  { title: '下载�?, dataIndex: 'downloads', width: 100 },
+  { title: '下载�?, dataIndex: 'downloads', width: 100 },
   { title: '发布日期', dataIndex: 'release_date', width: 120 },
-  { title: '状�?, slotName: 'status', width: 100 },
+  { title: '状�?, slotName: 'status', width: 100 },
   { title: '操作', slotName: 'actions', width: 160 }
 ]
 
@@ -49,7 +49,7 @@ const getStatusColor = (status) => {
 }
 
 const getStatusText = (status) => {
-  const texts = { latest: '最�?, stable: '稳定', deprecated: '已废�? }
+  const texts = { latest: '最�?, stable: '稳定', deprecated: '已废�? }
   return texts[status] || status
 }
 

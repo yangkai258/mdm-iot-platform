@@ -9,7 +9,7 @@
     <div class="pro-search-bar">
       <a-space>
         <a-input-search v-model="searchKeyword" placeholder="搜索设备ID" style="width: 280px" @search="loadShadows" search-button />
-        <a-select v-model="filterStatus" placeholder="状�? allow-clear style="width: 120px" @change="loadShadows">
+        <a-select v-model="filterStatus" placeholder="状�? allow-clear style="width: 120px" @change="loadShadows">
           <a-option value="online">在线</a-option>
           <a-option value="offline">离线</a-option>
         </a-select>
@@ -27,12 +27,12 @@
       <a-table :columns="columns" :data="shadows" :loading="loading" :pagination="pagination" row-key="device_id" @page-change="handlePageChange" :scroll="{ x: 1200 }">
         <template #desired="{ record }">
           <a-tag :color="record.desired_updated ? 'green' : 'gray'">
-            {{ record.desired_updated ? '已更�? : '未变�? }}
+            {{ record.desired_updated ? '已更�? : '未变�? }}
           </a-tag>
         </template>
         <template #reported="{ record }">
           <a-tag :color="record.reported_updated ? 'arcoblue' : 'gray'">
-            {{ record.reported_updated ? '已上�? : '未上�? }}
+            {{ record.reported_updated ? '已上�? : '未上�? }}
           </a-tag>
         </template>
         <template #version="{ record }">
@@ -56,41 +56,41 @@
         <a-descriptions-item label="设备ID">{{ currentShadow?.device_id }}</a-descriptions-item>
         <a-descriptions-item label="设备名称">{{ currentShadow?.device_name || '-' }}</a-descriptions-item>
         <a-descriptions-item label="版本">{{ currentShadow?.version }}</a-descriptions-item>
-        <a-descriptions-item label="最后更�?>{{ formatDate(currentShadow?.updated_at) }}</a-descriptions-item>
+        <a-descriptions-item label="最后更�?>{{ formatDate(currentShadow?.updated_at) }}</a-descriptions-item>
       </a-descriptions>
 
       <a-tabs>
-        <a-tab-pane key="desired" title="Desired状�?>
+        <a-tab-pane key="desired" title="Desired状�?>
           <a-alert type="info" style="margin-bottom: 12px">
             <template #title>说明</template>
-            Desired状态是由云端下发的期望状态，设备端会同步此状�?          </a-alert>
+            Desired状态是由云端下发的期望状态，设备端会同步此状�?          </a-alert>
           <pre class="json-viewer">{{ JSON.stringify(currentShadow?.desired || {}, null, 2) }}</pre>
         </a-tab-pane>
-        <a-tab-pane key="reported" title="Reported状�?>
+        <a-tab-pane key="reported" title="Reported状�?>
           <a-alert type="info" style="margin-bottom: 12px">
             <template #title>说明</template>
-            Reported状态是设备端实际上报的当前状�?          </a-alert>
+            Reported状态是设备端实际上报的当前状�?          </a-alert>
           <pre class="json-viewer">{{ JSON.stringify(currentShadow?.reported || {}, null, 2) }}</pre>
         </a-tab-pane>
         <a-tab-pane key="delta" title="差异(Delta)">
           <a-alert type="warning" style="margin-bottom: 12px">
             <template #title>说明</template>
-            Delta是Desired与Reported之间的差异，设备需要同步这些差�?          </a-alert>
+            Delta是Desired与Reported之间的差异，设备需要同步这些差�?          </a-alert>
           <pre class="json-viewer">{{ JSON.stringify(currentShadow?.delta || {}, null, 2) }}</pre>
         </a-tab-pane>
       </a-tabs>
     </a-modal>
 
     <!-- 更新Desired弹窗 -->
-    <a-modal v-model:visible="updateVisible" title="更新Desired状�? @ok="submitDesired" :width="600" :loading="submitting">
+    <a-modal v-model:visible="updateVisible" title="更新Desired状�? @ok="submitDesired" :width="600" :loading="submitting">
       <a-form :model="desiredForm" layout="vertical">
         <a-form-item label="设备ID">
           <a-input v-model="desiredForm.device_id" readonly />
         </a-form-item>
-        <a-form-item label="Desired状�?(JSON)">
+        <a-form-item label="Desired状�?(JSON)">
           <a-textarea v-model="desiredForm.json_str" :rows="10" placeholder='{"temperature": 25, "mode": "auto"}' />
         </a-form-item>
-        <a-alert type="warning" message="请确保JSON格式正确，这将直接覆盖设备的Desired状�? />
+        <a-alert type="warning" message="请确保JSON格式正确，这将直接覆盖设备的Desired状�? />
       </a-form>
     </a-modal>
   </div>
@@ -134,8 +134,8 @@ const loadShadows = async () => {
     pagination.total = res.data.total || 0
   } catch (e) {
     shadows.value = [
-      { device_id: 'dev-001', device_name: '宠物�?1�?, desired: { temperature: 25 }, reported: { temperature: 24 }, version: 5, updated_at: new Date().toISOString(), desired_updated: true, reported_updated: true, delta: { temperature: 1 } },
-      { device_id: 'dev-002', device_name: '宠物�?2�?, desired: { temperature: 26 }, reported: { temperature: 26 }, version: 3, updated_at: new Date(Date.now() - 3600000).toISOString(), desired_updated: false, reported_updated: true, delta: {} },
+      { device_id: 'dev-001', device_name: '宠物�?1�?, desired: { temperature: 25 }, reported: { temperature: 24 }, version: 5, updated_at: new Date().toISOString(), desired_updated: true, reported_updated: true, delta: { temperature: 1 } },
+      { device_id: 'dev-002', device_name: '宠物�?2�?, desired: { temperature: 26 }, reported: { temperature: 26 }, version: 3, updated_at: new Date(Date.now() - 3600000).toISOString(), desired_updated: false, reported_updated: true, delta: {} },
     ]
     pagination.total = 2
   } finally {
@@ -146,7 +146,7 @@ const loadShadows = async () => {
 const refreshAll = async () => {
   try {
     await axios.post('/api/v1/devices/shadows/refresh')
-    Message.success('已触发全量刷�?)
+    Message.success('已触发全量刷�?)
     loadShadows()
   } catch (e) {
     Message.error('刷新失败')
@@ -174,7 +174,7 @@ const submitDesired = async () => {
     updateVisible.value = false
     loadShadows()
   } catch (e: any) {
-    Message.error('JSON格式错误或更新失�? ' + (e.response?.data?.message || e.message))
+    Message.error('JSON格式错误或更新失�? ' + (e.response?.data?.message || e.message))
   } finally {
     submitting.value = false
   }

@@ -1,39 +1,39 @@
-<template>
+ï»¿<template>
   <div class="pro-page-container">
 
-    <!-- É¸Ñ¡Çø -->
+    <!-- ç­›é€‰åŒº -->
     <div class="pro-filter-bar">
       <a-card class="filter-card">
         <a-space wrap>
-          <a-input v-model="filterDeviceId" placeholder="Éè±¸ID" style="width: 160px" @change="loadPlaybacks" allow-clear />
-          <a-select v-model="filterRecordType" placeholder="Â¼ÖÆÀàĞÍ" allow-clear style="width: 120px" @change="loadPlaybacks">
-            <a-option value="auto">×Ô¶¯</a-option>
-            <a-option value="manual">ÊÖ¶¯</a-option>
+          <a-input v-model="filterDeviceId" placeholder="è®¾å¤‡ID" style="width: 160px" @change="loadPlaybacks" allow-clear />
+          <a-select v-model="filterRecordType" placeholder="å½•åˆ¶ç±»å‹" allow-clear style="width: 120px" @change="loadPlaybacks">
+            <a-option value="auto">è‡ªåŠ¨</a-option>
+            <a-option value="manual">æ‰‹åŠ¨</a-option>
           </a-select>
-          <a-select v-model="filterStatus" placeholder="×´Ì¬" allow-clear style="width: 120px" @change="loadPlaybacks">
-            <a-option value="recording">Â¼ÖÆÖĞ</a-option>
-            <a-option value="completed">ÒÑÍê³É</a-option>
-            <a-option value="playing">²¥·ÅÖĞ</a-option>
+          <a-select v-model="filterStatus" placeholder="çŠ¶æ€" allow-clear style="width: 120px" @change="loadPlaybacks">
+            <a-option value="recording">å½•åˆ¶ä¸­</a-option>
+            <a-option value="completed">å·²å®Œæˆ</a-option>
+            <a-option value="playing">æ’­æ”¾ä¸­</a-option>
           </a-select>
           <a-range-picker v-model="dateRange" style="width: 260px" @change="loadPlaybacks" />
         </a-space>
       </a-card>
     </div>
 
-    <!-- ²Ù×÷À¸ -->
+    <!-- æ“ä½œæ  -->
     <div class="pro-action-bar">
       <a-space>
-        <a-button type="primary" @click="handleStartRecording">¿ªÊ¼Â¼ÖÆ</a-button>
-        <a-button @click="loadPlaybacks">Ë¢ĞÂ</a-button>
+        <a-button type="primary" @click="handleStartRecording">å¼€å§‹å½•åˆ¶</a-button>
+        <a-button @click="loadPlaybacks">åˆ·æ–°</a-button>
       </a-space>
     </div>
 
-    <!-- »Ø·ÅÁĞ±í -->
+    <!-- å›æ”¾åˆ—è¡¨ -->
     <div class="pro-content-area">
       <a-table :columns="columns" :data="playbacks" :loading="loading" :pagination="{ pageSize: 10 }" row-key="id" @page-change="onPageChange">
         <template #record_type="{ record }">
           <a-tag :color="record.record_type === 'auto' ? 'arcoblue' : 'green'">
-            {{ record.record_type === 'auto' ? '×Ô¶¯' : 'ÊÖ¶¯' }}
+            {{ record.record_type === 'auto' ? 'è‡ªåŠ¨' : 'æ‰‹åŠ¨' }}
           </a-tag>
         </template>
       </a-table>
@@ -45,10 +45,10 @@
         </template>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="text" size="small" :disabled="record.status === 'recording'" @click="handlePlay(record)">²¥·Å</a-button>
-            <a-button type="text" size="small" :disabled="record.status === 'playing'" @click="handleStopPlayback(record)">Í£Ö¹</a-button>
-            <a-button type="text" size="small" @click="openCompareDrawer(record)">¶Ô±È</a-button>
-            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">É¾³ı</a-button>
+            <a-button type="text" size="small" :disabled="record.status === 'recording'" @click="handlePlay(record)">æ’­æ”¾</a-button>
+            <a-button type="text" size="small" :disabled="record.status === 'playing'" @click="handleStopPlayback(record)">åœæ­¢</a-button>
+            <a-button type="text" size="small" @click="openCompareDrawer(record)">å¯¹æ¯”</a-button>
+            <a-button type="text" size="small" status="danger" @click="handleDelete(record)">åˆ é™¤</a-button>
           </a-space>
         </template>
       </a-table>
@@ -58,27 +58,27 @@
       </div>
     </div>
 
-    <!-- ²¥·Å³éÌë -->
-    <a-drawer v-model:visible="playerDrawerVisible" title="»Ø·Å²¥·Å" :width="680" @close="handleClosePlayer">
+    <!-- æ’­æ”¾æŠ½å±‰ -->
+    <a-drawer v-model:visible="playerDrawerVisible" title="å›æ”¾æ’­æ”¾" :width="680" @close="handleClosePlayer">
       <div v-if="currentPlayback" class="player-content">
         <a-card class="player-info-card">
           <a-descriptions :column="2" size="small">
-            <a-descriptions-item label="»Ø·ÅID">{{ currentPlayback.id }}</a-descriptions-item>
-            <a-descriptions-item label="Éè±¸ID">{{ currentPlayback.device_id }}</a-descriptions-item>
-            <a-descriptions-item label="Â¼ÖÆÀàĞÍ">
+            <a-descriptions-item label="å›æ”¾ID">{{ currentPlayback.id }}</a-descriptions-item>
+            <a-descriptions-item label="è®¾å¤‡ID">{{ currentPlayback.device_id }}</a-descriptions-item>
+            <a-descriptions-item label="å½•åˆ¶ç±»å‹">
               <a-tag :color="currentPlayback.record_type === 'auto' ? 'arcoblue' : 'green'" size="small">
-                {{ currentPlayback.record_type === 'auto' ? '×Ô¶¯' : 'ÊÖ¶¯' }}
+                {{ currentPlayback.record_type === 'auto' ? 'è‡ªåŠ¨' : 'æ‰‹åŠ¨' }}
               </a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="×´Ì¬">
+            <a-descriptions-item label="çŠ¶æ€">
               <a-tag :color="getStatusColor(playerStatus)" size="small">{{ getStatusName(playerStatus) }}</a-tag>
             </a-descriptions-item>
-            <a-descriptions-item label="¿ªÊ¼Ê±¼ä">{{ currentPlayback.start_time }}</a-descriptions-item>
-            <a-descriptions-item label="Ê±³¤">{{ formatDuration(currentPlayback.duration_ms) }}</a-descriptions-item>
+            <a-descriptions-item label="å¼€å§‹æ—¶é—´">{{ currentPlayback.start_time }}</a-descriptions-item>
+            <a-descriptions-item label="æ—¶é•¿">{{ formatDuration(currentPlayback.duration_ms) }}</a-descriptions-item>
           </a-descriptions>
         </a-card>
 
-        <a-divider>²¥·Å¿ØÖÆ</a-divider>
+        <a-divider>æ’­æ”¾æ§åˆ¶</a-divider>
         <div class="player-controls">
           <a-space wrap>
             <a-button-group>
@@ -97,11 +97,11 @@
               </a-button>
             </a-button-group>
             <a-input-number v-model="playbackSpeed" :min="0.1" :max="5" :step="0.1" style="width: 100px" />
-            <span>±¶ËÙ</span>
+            <span>å€é€Ÿ</span>
           </a-space>
         </div>
 
-        <a-divider>»Ø·Å½ø¶È</a-divider>
+        <a-divider>å›æ”¾è¿›åº¦</a-divider>
         <div class="player-progress">
           <a-progress :percent="playbackProgress" :color="getStatusColor(playerStatus)" size="large" />
           <div class="progress-time">
@@ -110,53 +110,53 @@
           </div>
         </div>
 
-        <a-divider>»Ø·ÅÊı¾İ</a-divider>
+        <a-divider>å›æ”¾æ•°æ®</a-divider>
         <a-card size="small" class="player-data-card">
           <a-descriptions :column="1" size="small">
-            <a-descriptions-item label="´«¸ĞÆ÷Êı¾İ">
+            <a-descriptions-item label="ä¼ æ„Ÿå™¨æ•°æ®">
               <a-tag v-for="(val, key) in (currentPlayback.sensor_data || {})" :key="key" style="margin: 2px">
                 {{ key }}: {{ typeof val === 'number' ? val.toFixed(2) : val }}
               </a-tag>
-              <span v-if="!currentPlayback.sensor_data" class="text-muted">ÔİÎŞ</span>
+              <span v-if="!currentPlayback.sensor_data" class="text-muted">æš‚æ— </span>
             </a-descriptions-item>
-            <a-descriptions-item label="ÓÃ»§²Ù×÷">
+            <a-descriptions-item label="ç”¨æˆ·æ“ä½œ">
               <span v-if="currentPlayback.user_actions?.length">
-                {{ currentPlayback.user_actions.length }} ´Î²Ù×÷
+                {{ currentPlayback.user_actions.length }} æ¬¡æ“ä½œ
               </span>
-              <span v-else class="text-muted">ÔİÎŞ</span>
+              <span v-else class="text-muted">æš‚æ— </span>
             </a-descriptions-item>
-            <a-descriptions-item label="ÊÂ¼şÊı">
-              <span v-if="currentPlayback.events?.length">{{ currentPlayback.events.length }} ¸öÊÂ¼ş</span>
-              <span v-else class="text-muted">ÔİÎŞ</span>
+            <a-descriptions-item label="äº‹ä»¶æ•°">
+              <span v-if="currentPlayback.events?.length">{{ currentPlayback.events.length }} ä¸ªäº‹ä»¶</span>
+              <span v-else class="text-muted">æš‚æ— </span>
             </a-descriptions-item>
           </a-descriptions>
         </a-card>
       </div>
     </a-drawer>
 
-    <!-- ¶Ô±È³éÌë -->
-    <a-drawer v-model:visible="compareDrawerVisible" title="»Ø·Å¶Ô±È" :width="720">
+    <!-- å¯¹æ¯”æŠ½å±‰ -->
+    <a-drawer v-model:visible="compareDrawerVisible" title="å›æ”¾å¯¹æ¯”" :width="720">
       <div v-if="compareResult" class="compare-content">
         <a-alert>
-          <template #title>¶Ô±È·ÖÎö</template>
-          ÒÔÏÂÊÇÁ½´Î»Ø·ÅµÄ²îÒì¶Ô±È½á¹û¡£
+          <template #title>å¯¹æ¯”åˆ†æ</template>
+          ä»¥ä¸‹æ˜¯ä¸¤æ¬¡å›æ”¾çš„å·®å¼‚å¯¹æ¯”ç»“æœã€‚
         </a-alert>
 
-        <a-divider>Ö¸±ê¶Ô±È</a-divider>
+        <a-divider>æŒ‡æ ‡å¯¹æ¯”</a-divider>
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-card title="»Ø·Å 1" size="small">
-              <a-statistic title="Æ½¾ùÏìÓ¦Ê±¼ä" :value="compareResult.metrics?.response_time?.playback_1_avg || 0" suffix="ms" />
+            <a-card title="å›æ”¾ 1" size="small">
+              <a-statistic title="å¹³å‡å“åº”æ—¶é—´" :value="compareResult.metrics?.response_time?.playback_1_avg || 0" suffix="ms" />
             </a-card>
           </a-col>
           <a-col :span="12">
-            <a-card title="»Ø·Å 2" size="small">
-              <a-statistic title="Æ½¾ùÏìÓ¦Ê±¼ä" :value="compareResult.metrics?.response_time?.playback_2_avg || 0" suffix="ms" />
+            <a-card title="å›æ”¾ 2" size="small">
+              <a-statistic title="å¹³å‡å“åº”æ—¶é—´" :value="compareResult.metrics?.response_time?.playback_2_avg || 0" suffix="ms" />
             </a-card>
           </a-col>
         </a-row>
 
-        <a-divider>²îÒìÏêÇé</a-divider>
+        <a-divider>å·®å¼‚è¯¦æƒ…</a-divider>
         <a-table :columns="compareColumns" :data="compareMetrics" size="small">
           <template #diff="{ record }">
             <span :class="record.diff > 0 ? 'text-success' : record.diff < 0 ? 'text-danger' : ''">
@@ -164,32 +164,33 @@
             </span>
           </template>
       </a-table>
+        </a-table>
       </div>
-      <a-empty v-else description="ÔİÎŞ¶Ô±ÈÊı¾İ" />
+      <a-empty v-else description="æš‚æ— å¯¹æ¯”æ•°æ®" />
     </a-drawer>
 
-    <!-- ¿ªÊ¼Â¼ÖÆ¶Ô»°¿ò -->
-    <a-modal v-model="recordDialogVisible" title="¿ªÊ¼Â¼ÖÆ" @before-ok="confirmStartRecording">
+    <!-- å¼€å§‹å½•åˆ¶å¯¹è¯æ¡† -->
+    <a-modal v-model="recordDialogVisible" title="å¼€å§‹å½•åˆ¶" @before-ok="confirmStartRecording">
       <a-form :model="recordForm" layout="vertical">
-        <a-form-item label="Éè±¸ID" required>
-          <a-input v-model="recordForm.device_id" placeholder="ÇëÊäÈëÉè±¸ID" />
+        <a-form-item label="è®¾å¤‡ID" required>
+          <a-input v-model="recordForm.device_id" placeholder="è¯·è¾“å…¥è®¾å¤‡ID" />
         </a-form-item>
-        <a-form-item label="Ñ¡Ôñ³èÎï">
-          <a-select v-model="recordForm.pet_id" placeholder="ÇëÑ¡ÔñĞéÄâ³èÎï" allow-clear>
+        <a-form-item label="é€‰æ‹©å® ç‰©">
+          <a-select v-model="recordForm.pet_id" placeholder="è¯·é€‰æ‹©è™šæ‹Ÿå® ç‰©" allow-clear>
             <a-option v-for="pet in availablePets" :key="pet.id" :value="pet.id">{{ pet.pet_name }}</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="Â¼ÖÆÀàĞÍ">
+        <a-form-item label="å½•åˆ¶ç±»å‹">
           <a-select v-model="recordForm.record_type">
-            <a-option value="auto">×Ô¶¯Â¼ÖÆ</a-option>
-            <a-option value="manual">ÊÖ¶¯Â¼ÖÆ</a-option>
+            <a-option value="auto">è‡ªåŠ¨å½•åˆ¶</a-option>
+            <a-option value="manual">æ‰‹åŠ¨å½•åˆ¶</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="³¡¾°Ãû³Æ">
-          <a-input v-model="recordForm.metadata.scenario" placeholder="Èç£º¿ÍÌüÈÕ³£" />
+        <a-form-item label="åœºæ™¯åç§°">
+          <a-input v-model="recordForm.metadata.scenario" placeholder="å¦‚ï¼šå®¢å…æ—¥å¸¸" />
         </a-form-item>
-        <a-form-item label="±¸×¢">
-          <a-textarea v-model="recordForm.metadata.notes" placeholder="ÇëÊäÈë±¸×¢ĞÅÏ¢" :auto-size="{ minRows: 2, maxRows: 4 }" />
+        <a-form-item label="å¤‡æ³¨">
+          <a-textarea v-model="recordForm.metadata.notes" placeholder="è¯·è¾“å…¥å¤‡æ³¨ä¿¡æ¯" :auto-size="{ minRows: 2, maxRows: 4 }" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -212,14 +213,14 @@ const filterStatus = ref('')
 const dateRange = ref([])
 
 const columns = [
-  { title: 'ĞòºÅ', width: 60, render: ({ rowIndex }) => (page.value - 1) * pageSize.value + rowIndex + 1 },
-  { title: '»Ø·ÅID', dataIndex: 'id', width: 80 },
-  { title: 'Éè±¸ID', dataIndex: 'device_id', width: 140, ellipsis: true },
-  { title: 'Â¼ÖÆÀàĞÍ', dataIndex: 'record_type', slotName: 'record_type', width: 100 },
-  { title: 'Ê±³¤', dataIndex: 'duration_ms', slotName: 'duration', width: 100 },
-  { title: '×´Ì¬', dataIndex: 'status', slotName: 'status', width: 100 },
-  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at', width: 180 },
-  { title: '²Ù×÷', slotName: 'actions', width: 180, fixed: 'right' }
+  { title: 'åºå·', width: 60, render: ({ rowIndex }) => (page.value - 1) * pageSize.value + rowIndex + 1 },
+  { title: 'å›æ”¾ID', dataIndex: 'id', width: 80 },
+  { title: 'è®¾å¤‡ID', dataIndex: 'device_id', width: 140, ellipsis: true },
+  { title: 'å½•åˆ¶ç±»å‹', dataIndex: 'record_type', slotName: 'record_type', width: 100 },
+  { title: 'æ—¶é•¿', dataIndex: 'duration_ms', slotName: 'duration', width: 100 },
+  { title: 'çŠ¶æ€', dataIndex: 'status', slotName: 'status', width: 100 },
+  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 180 },
+  { title: 'æ“ä½œ', slotName: 'actions', width: 180, fixed: 'right' }
 ]
 
 const playerDrawerVisible = ref(false)
@@ -232,10 +233,10 @@ const playbackSpeed = ref(1.0)
 const compareDrawerVisible = ref(false)
 const compareResult = ref(null)
 const compareColumns = [
-  { title: 'Ö¸±ê', dataIndex: 'metric' },
-  { title: '»Ø·Å 1', dataIndex: 'playback_1' },
-  { title: '»Ø·Å 2', dataIndex: 'playback_2' },
-  { title: '²îÒì', dataIndex: 'diff', slotName: 'diff' }
+  { title: 'æŒ‡æ ‡', dataIndex: 'metric' },
+  { title: 'å›æ”¾ 1', dataIndex: 'playback_1' },
+  { title: 'å›æ”¾ 2', dataIndex: 'playback_2' },
+  { title: 'å·®å¼‚', dataIndex: 'diff', slotName: 'diff' }
 ]
 const compareMetrics = ref([])
 
@@ -269,7 +270,7 @@ async function loadPlaybacks() {
 }
 
 async function handleStartRecording() {
-  // ¼ÓÔØ¿ÉÓÃ³èÎï
+  // åŠ è½½å¯ç”¨å® ç‰©
   try {
     const res = await getSimulationPets({ page: 1, page_size: 100 })
     availablePets.value = res.data?.items || res.data || []
@@ -282,18 +283,18 @@ async function handleStartRecording() {
 
 async function confirmStartRecording(done) {
   if (!recordForm.device_id) {
-    Message.error('ÇëÊäÈëÉè±¸ID')
+    Message.error('è¯·è¾“å…¥è®¾å¤‡ID')
     done(false)
     return
   }
   try {
     await createPlayback(recordForm)
-    Message.success('¿ªÊ¼Â¼ÖÆ')
+    Message.success('å¼€å§‹å½•åˆ¶')
     recordDialogVisible.value = false
     loadPlaybacks()
     done(true)
   } catch {
-    Message.error('´´½¨Ê§°Ü')
+    Message.error('åˆ›å»ºå¤±è´¥')
     done(false)
   }
 }
@@ -310,7 +311,7 @@ async function handlePlay(record) {
     startPlaybackTimer()
   } catch {
     playerStatus.value = 'idle'
-    Message.error('²¥·ÅÊ§°Ü')
+    Message.error('æ’­æ”¾å¤±è´¥')
   }
 }
 
@@ -327,7 +328,7 @@ async function handleResume() {
     playerStatus.value = 'playing'
     startPlaybackTimer()
   } catch {
-    Message.error('»Ö¸´Ê§°Ü')
+    Message.error('æ¢å¤å¤±è´¥')
   }
 }
 
@@ -338,7 +339,7 @@ async function handlePause() {
     playerStatus.value = 'paused'
     stopPlaybackTimer()
   } catch {
-    Message.error('ÔİÍ£Ê§°Ü')
+    Message.error('æš‚åœå¤±è´¥')
   }
 }
 
@@ -350,10 +351,10 @@ async function handleStopPlayback(record) {
     if (playerDrawerVisible.value) {
       playerDrawerVisible.value = false
     }
-    Message.success('ÒÑÍ£Ö¹')
+    Message.success('å·²åœæ­¢')
     loadPlaybacks()
   } catch {
-    Message.error('Í£Ö¹Ê§°Ü')
+    Message.error('åœæ­¢å¤±è´¥')
   }
 }
 
@@ -388,10 +389,10 @@ function handleClosePlayer() {
 }
 
 async function openCompareDrawer(record) {
-  // »ñÈ¡¿É¶Ô±ÈµÄ»Ø·ÅÁĞ±í
+  // è·å–å¯å¯¹æ¯”çš„å›æ”¾åˆ—è¡¨
   const others = playbacks.value.filter(p => p.id !== record.id && p.status === 'completed')
   if (others.length === 0) {
-    // Ä£Äâ¶Ô±ÈÊı¾İ
+    // æ¨¡æ‹Ÿå¯¹æ¯”æ•°æ®
     compareResult.value = {
       metrics: {
         response_time: { playback_1_avg: 120, playback_2_avg: 115, difference_pct: -4.2 }
@@ -399,9 +400,9 @@ async function openCompareDrawer(record) {
       significant_differences: []
     }
     compareMetrics.value = [
-      { metric: 'ÏìÓ¦Ê±¼ä (ms)', playback_1: 120, playback_2: 115, diff: -5 },
-      { metric: '×¼È·ÂÊ', playback_1: '0.95', playback_2: '0.97', diff: 0.02 },
-      { metric: 'ÓÃ»§²ÎÓë¶È', playback_1: '0.78', playback_2: '0.82', diff: 0.04 }
+      { metric: 'å“åº”æ—¶é—´ (ms)', playback_1: 120, playback_2: 115, diff: -5 },
+      { metric: 'å‡†ç¡®ç‡', playback_1: '0.95', playback_2: '0.97', diff: 0.02 },
+      { metric: 'ç”¨æˆ·å‚ä¸åº¦', playback_1: '0.78', playback_2: '0.82', diff: 0.04 }
     ]
   } else {
     try {
@@ -417,7 +418,7 @@ async function openCompareDrawer(record) {
       }
     } catch {
       compareResult.value = null
-      Message.error('¼ÓÔØ¶Ô±ÈÊı¾İÊ§°Ü')
+      Message.error('åŠ è½½å¯¹æ¯”æ•°æ®å¤±è´¥')
     }
   }
   compareDrawerVisible.value = true
@@ -426,10 +427,10 @@ async function openCompareDrawer(record) {
 async function handleDelete(record) {
   try {
     await deletePlayback(record.id)
-    Message.success('É¾³ı³É¹¦')
+    Message.success('åˆ é™¤æˆåŠŸ')
     loadPlaybacks()
   } catch {
-    Message.error('É¾³ıÊ§°Ü')
+    Message.error('åˆ é™¤å¤±è´¥')
   }
 }
 
@@ -439,7 +440,7 @@ function getStatusColor(status) {
 }
 
 function getStatusName(status) {
-  const names = { recording: 'Â¼ÖÆÖĞ', completed: 'ÒÑÍê³É', playing: '²¥·ÅÖĞ', paused: 'ÒÑÔİÍ£' }
+  const names = { recording: 'å½•åˆ¶ä¸­', completed: 'å·²å®Œæˆ', playing: 'æ’­æ”¾ä¸­', paused: 'å·²æš‚åœ' }
   return names[status] || status
 }
 

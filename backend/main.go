@@ -508,6 +508,7 @@ func main() {
 
 		// Dashboard 统计（使用独立的 DashboardController）
 		dashboardCtrl := &controllers.DashboardController{DB: db}
+		sys.GET("/dashboard", dashboardCtrl.GetDashboard)
 		sys.GET("/dashboard/stats", dashboardCtrl.GetStats)
 		sys.GET("/dashboard/stats/simple", dashboardCtrl.GetStatsSimple)
 		sys.GET("/dashboard/activity-summary", dashboardCtrl.GetActivitySummary)

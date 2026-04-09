@@ -18,11 +18,11 @@
                 </a-list-item>
               </template>
               <template #empty>
-                <a-empty description="暂无绑定的社交账�? />
+                <a-empty description="暂无绑定的社交账�? />
               </template>
             </a-list>
             <div style="margin-top: 16px">
-              <a-button type="primary" @click="showBindModal = true"><icon-plus />绑定新账�?/a-button>
+              <a-button type="primary" @click="showBindModal = true"><icon-plus />绑定新账�?/a-button>
             </div>
           </a-card>
         </a-col>
@@ -30,10 +30,10 @@
           <a-card title="分享模板配置" size="small">
             <a-form :model="templateForm" layout="vertical">
               <a-form-item label="默认分享标题">
-                <a-input v-model="templateForm.title" placeholder="请输入分享标�? />
+                <a-input v-model="templateForm.title" placeholder="请输入分享标�? />
               </a-form-item>
               <a-form-item label="默认分享文案">
-                <a-textarea v-model="templateForm.content" :rows="3" placeholder="请输入分享文�? />
+                <a-textarea v-model="templateForm.content" :rows="3" placeholder="请输入分享文�? />
               </a-form-item>
               <a-form-item label="分享配图">
                 <a-upload action="/api/v1/upload" :show-upload-list="false" @success="handleUploadSuccess">
@@ -57,11 +57,11 @@
             <a-option value="wechat">微信</a-option>
             <a-option value="weibo">微博</a-option>
             <a-option value="douyin">抖音</a-option>
-            <a-option value="xiaohongshu">小红�?/a-option>
+            <a-option value="xiaohongshu">小红�?/a-option>
           </a-select>
         </a-form-item>
         <a-form-item label="账号">
-          <a-input v-model="bindForm.account" placeholder="请输入账�? />
+          <a-input v-model="bindForm.account" placeholder="请输入账�? />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -100,19 +100,19 @@ const loadMockData = () => {
 
 const handleUnbind = (item) => {
   boundAccounts.value = boundAccounts.value.filter(a => a.id !== item.id)
-  Message.success(`已解�? ${item.platform}`)
+  Message.success(`已解�? ${item.platform}`)
 }
 
 const handleBind = () => {
   if (!bindForm.platform || !bindForm.account) {
-    Message.warning('请填写完整信�?)
+    Message.warning('请填写完整信�?)
     return
   }
   const colors = { wechat: '#07c160', weibo: '#e6162d', douyin: '#fe2c55', xiaohongshu: '#fe2c55' }
   const icons = { wechat: 'W', weibo: 'W', douyin: 'D', xiaohongshu: 'X' }
   boundAccounts.value.push({
     id: Date.now(),
-    platform: bindForm.platform === 'wechat' ? '微信' : bindForm.platform === 'weibo' ? '微博' : bindForm.platform === 'douyin' ? '抖音' : '小红�?,
+    platform: bindForm.platform === 'wechat' ? '微信' : bindForm.platform === 'weibo' ? '微博' : bindForm.platform === 'douyin' ? '抖音' : '小红�?,
     account: bindForm.account,
     icon: icons[bindForm.platform],
     color: colors[bindForm.platform]
@@ -129,7 +129,7 @@ const handleUploadSuccess = (file) => {
 }
 
 const handleSaveTemplate = () => {
-  Message.success('分享模板已保�?)
+  Message.success('分享模板已保�?)
 }
 
 onMounted(() => loadData())

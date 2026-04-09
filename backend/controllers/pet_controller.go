@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"mdm-backend/models"
@@ -30,6 +31,45 @@ func (p *PetController) RegisterRoutes(r *gin.RouterGroup) {
 	r.POST("/pets/:device_id/boost", p.MoodBoost)
 	r.GET("/conversations", p.ListConversations)
 	r.GET("/conversations/:id/messages", p.ListMessages)
+
+	// Sprint 32: 宠物列表
+	r.GET("/pets", p.ListPets)
+}
+
+// ListPets 获取宠物列表
+// GET /api/v1/pets
+func (p *PetController) ListPets(c *gin.Context) {
+	var pets []models.Pet
+	total := int64(0)
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	pageSize, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	offset := (page - 1) * pageSize
+
+	query := p.DB.Model(&models.Pet{})
+
+	// 按名称搜索
+	if name := c.Query("name"); name != "" {
+		query = query.Where("pet_name LIKE ?", "%"+name+"%")
+	}
+	// 按物种筛选
+	if species := c.Query("species"); species != "" {
+		query = query.Where("species = ?", species)
+	}
+	// 按状态筛选
+	if status := c.Query("status"); status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	query.Count(&total)
+	query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&pets)
+
+	c.JSON(http.StatusOK, gin.H{
+		"pets":     pets,
+		"total":    total,
+		"page":     page,
+		"page_size": pageSize,
+	})
 }
 
 // GetPetStatus 获取宠物状态

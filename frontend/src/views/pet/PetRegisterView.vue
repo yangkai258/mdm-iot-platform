@@ -6,12 +6,12 @@
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="宠物名称"><a-input v-model="form.pet_name" placeholder="请输�? /></a-form-item>
+          <a-form-item label="宠物名称"><a-input v-model="form.pet_name" placeholder="请输�? /></a-form-item>
           <a-form-item label="宠物类型">
             <a-select v-model="form.pet_type" placeholder="选择类型" allow-clear style="width: 120px">
-              <a-option value="dog">�?/a-option>
-              <a-option value="cat">�?/a-option>
-              <a-option value="bird">�?/a-option>
+              <a-option value="dog">�?/a-option>
+              <a-option value="cat">�?/a-option>
+              <a-option value="bird">�?/a-option>
               <a-option value="other">其他</a-option>
             </a-select>
           </a-form-item>
@@ -24,7 +24,7 @@
           <a-avatar v-else size="large">{{ record.pet_name?.[0] || '?' }}</a-avatar>
         </template>
         <template #status="{ record }">
-          <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '已激�? : '未激�? }}</a-tag>
+          <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? '已激�? : '未激�? }}</a-tag>
         </template>
         <template #actions="{ record }">
           <a-button type="text" size="small" @click="viewDetail(record)">详情</a-button>
@@ -36,14 +36,14 @@
       <a-form :model="petForm" layout="vertical">
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="宠物名称" required><a-input v-model="petForm.pet_name" placeholder="请输入宠物名�? /></a-form-item>
+            <a-form-item label="宠物名称" required><a-input v-model="petForm.pet_name" placeholder="请输入宠物名�? /></a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item label="宠物类型" required>
               <a-select v-model="petForm.pet_type" placeholder="选择类型">
-                <a-option value="dog">�?/a-option>
-                <a-option value="cat">�?/a-option>
-                <a-option value="bird">�?/a-option>
+                <a-option value="dog">�?/a-option>
+                <a-option value="cat">�?/a-option>
+                <a-option value="bird">�?/a-option>
                 <a-option value="other">其他</a-option>
               </a-select>
             </a-form-item>
@@ -51,13 +51,13 @@
         </a-row>
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="品种"><a-input v-model="petForm.breed" placeholder="请输入品�? /></a-form-item>
+            <a-form-item label="品种"><a-input v-model="petForm.breed" placeholder="请输入品�? /></a-form-item>
           </a-col>
           <a-col :span="12">
             <a-form-item label="性别">
               <a-select v-model="petForm.gender" placeholder="选择性别">
-                <a-option value="male">�?/a-option>
-                <a-option value="female">�?/a-option>
+                <a-option value="male">�?/a-option>
+                <a-option value="female">�?/a-option>
                 <a-option value="unknown">未知</a-option>
               </a-select>
             </a-form-item>
@@ -74,10 +74,10 @@
         <a-divider>主人信息</a-divider>
         <a-row :gutter="16">
           <a-col :span="12">
-            <a-form-item label="主人姓名" required><a-input v-model="petForm.owner_name" placeholder="请输入主人姓�? /></a-form-item>
+            <a-form-item label="主人姓名" required><a-input v-model="petForm.owner_name" placeholder="请输入主人姓�? /></a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item label="联系电话" required><a-input v-model="petForm.owner_phone" placeholder="请输入联系电�? /></a-form-item>
+            <a-form-item label="联系电话" required><a-input v-model="petForm.owner_phone" placeholder="请输入联系电�? /></a-form-item>
           </a-col>
         </a-row>
         <a-form-item label="联系地址"><a-input v-model="petForm.owner_address" placeholder="请输入联系地址" /></a-form-item>
@@ -127,7 +127,7 @@ const columns = [
   { title: '品种', dataIndex: 'breed', width: 100 },
   { title: '主人', dataIndex: 'owner_name', width: 100 },
   { title: '电话', dataIndex: 'owner_phone', width: 130 },
-  { title: '状�?, slotName: 'status', width: 80 },
+  { title: '状�?, slotName: 'status', width: 80 },
   { title: '登记时间', dataIndex: 'created_at', width: 170 },
   { title: '操作', slotName: 'actions', width: 120 }
 ]
