@@ -750,6 +750,10 @@ func main() {
 	researchCtrl := &controllers.ResearchPlatformController{DB: db}
 	researchCtrl.RegisterRoutes(apiV1)
 
+	// Sprint 32: AI研究实验路由
+	experimentCtrl := &controllers.ExperimentController{DB: db}
+	experimentCtrl.RegisterRoutes(apiV1)
+
 	// Sprint 32: 高级安全功能路由
 	securityEvoCtrl := &controllers.SecurityEvoController{DB: db}
 	securityEvoCtrl.RegisterSecurityEvoRoutes(apiV1)

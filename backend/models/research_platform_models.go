@@ -72,3 +72,56 @@ type ResearchCollaboration struct {
     InvitedAt   time.Time `json:"invited_at"`
     RespondedAt *time.Time `json:"responded_at"`
 }
+
+// ResearchPlatform AI研究平台
+type ResearchPlatform struct {
+    ID            uint      `gorm:"primaryKey" json:"id"`
+    Name          string    `json:"name"`
+    Description   string    `json:"description"`
+    PlatformType  string    `json:"platform_type"` // openai, anthropic, local, custom
+    WebsiteURL    string    `json:"website_url"`
+    Documentation string    `json:"documentation"`
+    PricingInfo   string    `json:"pricing_info"`
+    OwnerID       uint      `gorm:"index" json:"owner_id"`
+    Status        string    `json:"status"` // active, inactive, deprecated
+    APIKey        string    `json:"api_key"`
+    CreatedAt     time.Time `json:"created_at"`
+    UpdatedAt     time.Time `json:"updated_at"`
+}
+
+// ResearchExperiment AI研究实验
+type ResearchExperiment struct {
+    ID           uint       `gorm:"primaryKey" json:"id"`
+    PlatformID   uint       `gorm:"index" json:"platform_id"`
+    Name         string     `json:"name"`
+    Description  string     `json:"description"`
+    Config       string     `json:"config"` // JSON 实验配置
+    Status       string     `json:"status"` // draft, running, completed, failed, stopped
+    CreatedBy    uint       `gorm:"index" json:"created_by"`
+    StartedAt    *time.Time `json:"started_at"`
+    CompletedAt  *time.Time `json:"completed_at"`
+    CreatedAt    time.Time  `json:"created_at"`
+    UpdatedAt    time.Time  `json:"updated_at"`
+}
+
+// ResearchCollaborator 实验协作者
+type ResearchCollaborator struct {
+    ID            uint      `gorm:"primaryKey" json:"id"`
+    ExperimentID  uint      `gorm:"index" json:"experiment_id"`
+    UserID        uint      `gorm:"index" json:"user_id"`
+    Role          string    `json:"role"` // owner, researcher, viewer
+    InvitedAt     time.Time `json:"invited_at"`
+    RespondedAt   *time.Time `json:"responded_at"`
+    Status        string    `json:"status"` // pending, accepted, rejected
+}
+
+// ResearchExperimentResult 实验结果
+type ResearchExperimentResult struct {
+    ID           uint      `gorm:"primaryKey" json:"id"`
+    ExperimentID uint      `gorm:"index" json:"experiment_id"`
+    ResultData   string    `json:"result_data"` // JSON 实验结果数据
+    Metrics      string    `json:"metrics"` // JSON 评估指标
+    Summary      string    `json:"summary"` // 结果摘要
+    LogURL       string    `json:"log_url"`
+    CreatedAt    time.Time `json:"created_at"`
+}
