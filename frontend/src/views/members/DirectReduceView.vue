@@ -1,43 +1,42 @@
-Ôªø<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="Áõ¥Êé•ÂáèÂÖç">
+    <a-card class="general-card" title="÷±Ω”ºı√‚">
       <template #extra>
         <a-space :size="12">
-          <a-button type="primary" @click="showCreateDrawer"><icon-plus />Êñ∞Âª∫</a-button>
-          <a-button @click="loadData"><icon-refresh />Âà∑Êñ∞</a-button>
+          <a-button type="primary" @click="showCreateDrawer"><icon-plus />–¬Ω®</a-button>
+          <a-button @click="loadData"><icon-refresh />À¢–¬</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="ÂÖ≥ÈîÆËØç">
-            <a-input v-model="filters.keyword" placeholder="ËØ∑ËæìÂÖ•" @pressEnter="loadData" />
+          <a-form-item label="πÿº¸¥ ">
+            <a-input v-model="filters.keyword" placeholder="«Î ‰»Î" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
-            <a-button type="primary" @click="loadData">Êü•ËØ¢</a-button>
-            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadData()">ÈáçÁΩÆ</a-button>
+            <a-button type="primary" @click="loadData">≤È—Ø</a-button>
+            <a-button @click="Object.keys(filters).forEach(k => filters[k] = ''); loadData()">÷ÿ÷√</a-button>
           </a-space>
         </a-col>
       </a-row>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="dataList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id">
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showEdit(record)">ÁºñËæë</a-button>
-          <a-button type="text" size="small" @click="handleDelete(record)">Âà†Èô§</a-button>
+          <a-button type="text" size="small" @click="showEdit(record)">±‡º≠</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">…æ≥˝</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
-    <a-modal v-model:visible="formVisible" :title="isEdit ? 'ÁºñËæëÊ¥ªÂä®' : 'Êñ∞Âª∫Ê¥ªÂä®'">
+    <a-modal v-model:visible="formVisible" :title="isEdit ? '±‡º≠ªÓ∂Ø' : '–¬Ω®ªÓ∂Ø'">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="Ê¥ªÂä®ÂêçÁß∞"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="ÂáèÂÖçÈáëÈ¢ù"><a-input-number v-model="form.reduceAmount" :min="0" style="width: 100%" /></a-form-item>
-        <a-form-item label="ÊúÄ‰ΩéÊ∂àË¥π"><a-input-number v-model="form.minConsume" :min="0" style="width: 100%" /></a-form-item>
+        <a-form-item label="ªÓ∂Ø√˚≥∆"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="ºı√‚Ω∂Ó"><a-input-number v-model="form.reduceAmount" :min="0" style="width: 100%" /></a-form-item>
+        <a-form-item label="◊ÓµÕœ˚∑—"><a-input-number v-model="form.minConsume" :min="0" style="width: 100%" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">ÂèñÊ∂à</a-button>
-        <a-button type="primary" @click="handleFormSubmit">Á°ÆÂÆö</a-button>
+        <a-button @click="formVisible = false">»°œ˚</a-button>
+        <a-button type="primary" @click="handleFormSubmit">»∑∂®</a-button>
       </template>
     </a-modal>
   </div>
@@ -58,25 +57,25 @@ const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
 const form = reactive({ name: '', reduceAmount: 0, minConsume: 0, perLimit: 0, productIds: [], dateRange: [], description: '' })
 const columns = [
-  { title: 'Ê¥ªÂä®ÂêçÁß∞', dataIndex: 'name', width: 200 },
-  { title: 'ÂáèÂÖçÈáëÈ¢ù', slotName: 'reduceAmount', width: 120 },
-  { title: 'ÊúÄ‰ΩéÊ∂àË¥π', dataIndex: 'minConsume', width: 120 },
-  { title: 'ÈÄÇÁî®ÂïÜÂìÅ', dataIndex: 'productName', width: 160, ellipsis: true },
-  { title: 'Êó∂Èó¥ËåÉÂõ¥', dataIndex: 'dateRange', width: 220 },
-  { title: 'Áä∂ÊÄÅ', slotName: 'status', width: 90 },
-  { title: 'Êìç‰Ωú', slotName: 'actions', width: 150 }
+  { title: 'ªÓ∂Ø√˚≥∆', dataIndex: 'name', width: 200 },
+  { title: 'ºı√‚Ω∂Ó', slotName: 'reduceAmount', width: 120 },
+  { title: '◊ÓµÕœ˚∑—', dataIndex: 'minConsume', width: 120 },
+  { title: '  ”√…Ã∆∑', dataIndex: 'productName', width: 160, ellipsis: true },
+  { title: ' ±º‰∑∂Œß', dataIndex: 'dateRange', width: 220 },
+  { title: '◊¥Ã¨', slotName: 'status', width: 90 },
+  { title: '≤Ÿ◊˜', slotName: 'actions', width: 150 }
 ]
 
 const loadData = async () => {
   loading.value = true
-  try { dataList.value = [{ id: 1, name: 'Êñ∞ÂìÅÁõ¥Èôç', reduceAmount: 30, minConsume: 100, productName: 'Êñ∞ÂìÅ‰∏ìÂå∫', dateRange: '2026-03-01 Ëá≥ 2026-04-30', status: 'active' }]; pagination.total = 1 }
+  try { dataList.value = [{ id: 1, name: '–¬∆∑÷±Ωµ', reduceAmount: 30, minConsume: 100, productName: '–¬∆∑◊®«¯', dateRange: '2026-03-01 ÷¡ 2026-04-30', status: 'active' }]; pagination.total = 1 }
   catch { dataList.value = [] } finally { loading.value = false }
 }
 
 const showCreateDrawer = () => { isEdit.value = false; Object.assign(form, { name: '', reduceAmount: 0, minConsume: 0 }); formVisible.value = true }
 const showEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleFormSubmit = () => { if (!form.name) { Message.warning('ËØ∑Â°´ÂÜôÊ¥ªÂä®ÂêçÁß∞'); return }; formLoading.value = true; formVisible.value = false; Message.success(isEdit.value ? 'Êõ¥Êñ∞ÊàêÂäü' : 'ÂàõÂª∫ÊàêÂäü'); loadData() }
-const handleDelete = () => { Message.success('Âà†Èô§ÊàêÂäü'); loadData() }
+const handleFormSubmit = () => { if (!form.name) { Message.warning('«ÎÃÓ–¥ªÓ∂Ø√˚≥∆'); return }; formLoading.value = true; formVisible.value = false; Message.success(isEdit.value ? '∏¸–¬≥…π¶' : '¥¥Ω®≥…π¶'); loadData() }
+const handleDelete = () => { Message.success('…æ≥˝≥…π¶'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())

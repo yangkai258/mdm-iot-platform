@@ -1,51 +1,51 @@
-ï»¿<template>
+<template>
   <div class="pro-page-container">
-    <!-- é¢åŒ…å±‘ -->
+    <!-- Ãæ°üĞ¼ -->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>é¦–é¡µ</a-breadcrumb-item>
-      <a-breadcrumb-item>æ•°æ®åˆ†æ</a-breadcrumb-item>
-      <a-breadcrumb-item>åˆ†æä»ªè¡¨æ¿</a-breadcrumb-item>
+      <a-breadcrumb-item>Ê×Ò³</a-breadcrumb-item>
+      <a-breadcrumb-item>Êı¾İ·ÖÎö</a-breadcrumb-item>
+      <a-breadcrumb-item>·ÖÎöÒÇ±í°å</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- Tab åˆ‡æ¢åŒº -->
+    <!-- Tab ÇĞ»»Çø -->
     <div class="pro-tabs-bar">
       <a-tabs v-model:active-tab="activeTab" @change="onTabChange">
         <a-tab-pane key="dashboard" title="Dashboard" />
-        <a-tab-pane key="devices" title="è®¾å¤‡ç»Ÿè®¡" />
-        <a-tab-pane key="ota" title="OTAç»Ÿè®¡" />
-        <a-tab-pane key="members" title="ä¼šå‘˜åˆ†æ" />
-        <a-tab-pane key="alerts" title="å‘Šè­¦ç»Ÿè®¡" />
+        <a-tab-pane key="devices" title="Éè±¸Í³¼Æ" />
+        <a-tab-pane key="ota" title="OTAÍ³¼Æ" />
+        <a-tab-pane key="members" title="»áÔ±·ÖÎö" />
+        <a-tab-pane key="alerts" title="¸æ¾¯Í³¼Æ" />
       </a-tabs>
     </div>
 
-    <!-- ç­›é€‰åŒº -->
+    <!-- É¸Ñ¡Çø -->
     <div class="pro-filter-bar">
       <a-card class="filter-card">
         <a-space wrap>
-          <a-select v-model="timeRange" placeholder="æ—¶é—´èŒƒå›´" style="width: 120px" @change="loadData">
-            <a-option value="today">ä»Šæ—¥</a-option>
-            <a-option value="week">è¿‘7å¤©</a-option>
-            <a-option value="month">è¿‘30å¤©</a-option>
+          <a-select v-model="timeRange" placeholder="Ê±¼ä·¶Î§" style="width: 120px" @change="loadData">
+            <a-option value="today">½ñÈÕ</a-option>
+            <a-option value="week">½ü7Ìì</a-option>
+            <a-option value="month">½ü30Ìì</a-option>
           </a-select>
           <a-range-picker v-model="customRange" style="width: 260px" @change="onCustomRangeChange" />
-          <a-button @click="loadData">åˆ·æ–°</a-button>
+          <a-button @click="loadData">Ë¢ĞÂ</a-button>
         </a-space>
       </a-card>
     </div>
 
     <!-- Dashboard Tab -->
     <div v-show="activeTab === 'dashboard'">
-      <!-- æ ¸å¿ƒæŒ‡æ ‡å¡ç‰‡ -->
+      <!-- ºËĞÄÖ¸±ê¿¨Æ¬ -->
       <a-row :gutter="[16, 16]" class="stat-cards-row">
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="è®¾å¤‡æ€»é‡" :value="stats.devices?.total || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="Éè±¸×ÜÁ¿" :value="stats.devices?.total || 0" :value-from="0" :animation-duration="800">
               <template #extra>
-                <a-tag color="arcoblue" size="small">è®¾å¤‡</a-tag>
+                <a-tag color="arcoblue" size="small">Éè±¸</a-tag>
               </template>
             </a-statistic>
             <div class="stat-trend" v-if="deviceTrend.length >= 2">
-              <span class="trend-label">è¾ƒä¸ŠæœŸ:</span>
+              <span class="trend-label">½ÏÉÏÆÚ:</span>
               <span :class="deviceTrendDelta >= 0 ? 'trend-up' : 'trend-down'">
                 {{ deviceTrendDelta >= 0 ? '+' : '' }}{{ deviceTrendDelta }}
               </span>
@@ -54,64 +54,64 @@
         </a-col>
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="åœ¨çº¿è®¾å¤‡" :value="stats.devices?.online || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="ÔÚÏßÉè±¸" :value="stats.devices?.online || 0" :value-from="0" :animation-duration="800">
               <template #extra>
-                <a-tag color="green" size="small">åœ¨çº¿</a-tag>
+                <a-tag color="green" size="small">ÔÚÏß</a-tag>
               </template>
             </a-statistic>
             <div class="online-rate">
-              <span class="rate-label">åœ¨çº¿ç‡</span>
+              <span class="rate-label">ÔÚÏßÂÊ</span>
               <a-progress :percent="stats.devices?.online_rate || 0" :show-text="true" :stroke-width="6" size="small" />
             </div>
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="ç¦»çº¿è®¾å¤‡" :value="stats.devices?.offline || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="ÀëÏßÉè±¸" :value="stats.devices?.offline || 0" :value-from="0" :animation-duration="800">
               <template #extra>
-                <a-tag color="red" size="small">ç¦»çº¿</a-tag>
+                <a-tag color="red" size="small">ÀëÏß</a-tag>
               </template>
             </a-statistic>
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="ä»Šæ—¥å‘Šè­¦" :value="stats.alerts?.total_today || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="½ñÈÕ¸æ¾¯" :value="stats.alerts?.total_today || 0" :value-from="0" :animation-duration="800">
               <template #extra>
-                <a-tag color="orangered" size="small">å‘Šè­¦</a-tag>
+                <a-tag color="orangered" size="small">¸æ¾¯</a-tag>
               </template>
             </a-statistic>
             <div class="stat-trend">
-              <span class="trend-label">å¾…å¤„ç†:</span>
+              <span class="trend-label">´ı´¦Àí:</span>
               <span class="trend-warning">{{ stats.alerts?.pending || 0 }}</span>
             </div>
           </a-card>
         </a-col>
       </a-row>
 
-      <!-- ä¼šå‘˜ & OTA æŒ‡æ ‡ -->
+      <!-- »áÔ± & OTA Ö¸±ê -->
       <a-row :gutter="[16, 16]" class="stat-cards-row">
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="ä¼šå‘˜æ€»é‡" :value="stats.members?.total || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="»áÔ±×ÜÁ¿" :value="stats.members?.total || 0" :value-from="0" :animation-duration="800">
               <template #extra>
-                <a-tag color="purple" size="small">ä¼šå‘˜</a-tag>
+                <a-tag color="purple" size="small">»áÔ±</a-tag>
               </template>
             </a-statistic>
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="ä»Šæ—¥æ´»è·ƒ" :value="stats.members?.active_today || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="½ñÈÕ»îÔ¾" :value="stats.members?.active_today || 0" :value-from="0" :animation-duration="800">
               <template #extra>
-                <a-tag color="cyan" size="small">æ´»è·ƒ</a-tag>
+                <a-tag color="cyan" size="small">»îÔ¾</a-tag>
               </template>
             </a-statistic>
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="OTAæˆåŠŸç‡" :value="stats.ota?.avg_success_rate || 0" suffix="%" :value-from="0" :animation-duration="800" :precision="1">
+            <a-statistic title="OTA³É¹¦ÂÊ" :value="stats.ota?.avg_success_rate || 0" suffix="%" :value-from="0" :animation-duration="800" :precision="1">
               <template #extra>
                 <a-tag color="green" size="small">OTA</a-tag>
               </template>
@@ -120,7 +120,7 @@
         </a-col>
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="è¿›è¡Œä¸­ä»»åŠ¡" :value="stats.ota?.running_tasks || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="½øĞĞÖĞÈÎÎñ" :value="stats.ota?.running_tasks || 0" :value-from="0" :animation-duration="800">
               <template #extra>
                 <a-tag color="arcoblue" size="small">OTA</a-tag>
               </template>
@@ -129,22 +129,22 @@
         </a-col>
       </a-row>
 
-      <!-- å›¾è¡¨åŒº -->
+      <!-- Í¼±íÇø -->
       <a-row :gutter="[16, 16]" class="charts-row">
         <a-col :xs="24" :lg="12">
-          <a-card title="è®¾å¤‡åœ¨çº¿è¶‹åŠ¿" class="chart-card">
+          <a-card title="Éè±¸ÔÚÏßÇ÷ÊÆ" class="chart-card">
             <template #extra>
               <a-select v-model="deviceGranularity" style="width: 100px" @change="loadDeviceTrend">
-                <a-option value="day">æŒ‰å¤©</a-option>
-                <a-option value="week">æŒ‰å‘¨</a-option>
-                <a-option value="month">æŒ‰æœˆ</a-option>
+                <a-option value="day">°´Ìì</a-option>
+                <a-option value="week">°´ÖÜ</a-option>
+                <a-option value="month">°´ÔÂ</a-option>
               </a-select>
             </template>
             <div ref="deviceTrendChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
         <a-col :xs="24" :lg="12">
-          <a-card title="è®¾å¤‡åˆ†å¸ƒ" class="chart-card">
+          <a-card title="Éè±¸·Ö²¼" class="chart-card">
             <div ref="deviceDistChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
@@ -152,149 +152,148 @@
 
       <a-row :gutter="[16, 16]" class="charts-row">
         <a-col :xs="24" :lg="12">
-          <a-card title="ä¼šå‘˜æ´»è·ƒè¶‹åŠ¿" class="chart-card">
+          <a-card title="»áÔ±»îÔ¾Ç÷ÊÆ" class="chart-card">
             <div ref="memberTrendChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
         <a-col :xs="24" :lg="12">
-          <a-card title="OTAå‡çº§æˆåŠŸç‡è¶‹åŠ¿" class="chart-card">
+          <a-card title="OTAÉı¼¶³É¹¦ÂÊÇ÷ÊÆ" class="chart-card">
             <div ref="otaTrendChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
       </a-row>
     </div>
 
-    <!-- è®¾å¤‡ç»Ÿè®¡ Tab -->
+    <!-- Éè±¸Í³¼Æ Tab -->
     <div v-show="activeTab === 'devices'">
       <a-row :gutter="[16, 16]">
         <a-col :xs="24" :md="8">
-          <a-card title="è®¾å¤‡æ¦‚è§ˆ" class="overview-card">
+          <a-card title="Éè±¸¸ÅÀÀ" class="overview-card">
             <a-descriptions :column="1" size="small">
-              <a-descriptions-item label="æ€»è®¾å¤‡æ•°">{{ deviceOverview.summary?.total || 0 }}</a-descriptions-item>
-              <a-descriptions-item label="åœ¨çº¿è®¾å¤‡">{{ deviceOverview.summary?.online || 0 }}</a-descriptions-item>
-              <a-descriptions-item label="ç¦»çº¿è®¾å¤‡">{{ deviceOverview.summary?.offline || 0 }}</a-descriptions-item>
-              <a-descriptions-item label="åœ¨çº¿ç‡">{{ (deviceOverview.summary?.online_rate || 0).toFixed(1) }}%</a-descriptions-item>
+              <a-descriptions-item label="×ÜÉè±¸Êı">{{ deviceOverview.summary?.total || 0 }}</a-descriptions-item>
+              <a-descriptions-item label="ÔÚÏßÉè±¸">{{ deviceOverview.summary?.online || 0 }}</a-descriptions-item>
+              <a-descriptions-item label="ÀëÏßÉè±¸">{{ deviceOverview.summary?.offline || 0 }}</a-descriptions-item>
+              <a-descriptions-item label="ÔÚÏßÂÊ">{{ (deviceOverview.summary?.online_rate || 0).toFixed(1) }}%</a-descriptions-item>
             </a-descriptions>
           </a-card>
         </a-col>
         <a-col :xs="24" :md="16">
-          <a-card title="è®¾å¤‡ç”Ÿå‘½å‘¨æœŸåˆ†å¸ƒ" class="chart-card">
+          <a-card title="Éè±¸ÉúÃüÖÜÆÚ·Ö²¼" class="chart-card">
             <div ref="lifecycleChartRef" class="chart-container-sm"></div>
           </a-card>
         </a-col>
       </a-row>
       <a-row :gutter="[16, 16]" class="charts-row">
         <a-col :xs="24" :lg="12">
-          <a-card title="è®¾å¤‡è¶‹åŠ¿" class="chart-card">
+          <a-card title="Éè±¸Ç÷ÊÆ" class="chart-card">
             <div ref="deviceTrendTabChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
         <a-col :xs="24" :lg="12">
-          <a-card title="ç¡¬ä»¶å‹å·åˆ†å¸ƒ" class="chart-card">
+          <a-card title="Ó²¼şĞÍºÅ·Ö²¼" class="chart-card">
             <div ref="hardwareModelChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
       </a-row>
     </div>
 
-    <!-- OTAç»Ÿè®¡ Tab -->
+    <!-- OTAÍ³¼Æ Tab -->
     <div v-show="activeTab === 'ota'">
       <a-row :gutter="[16, 16]">
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="æ€»ä»»åŠ¡æ•°" :value="otaOverview.total_tasks || 0" />
+            <a-statistic title="×ÜÈÎÎñÊı" :value="otaOverview.total_tasks || 0" />
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="è¿›è¡Œä¸­" :value="otaOverview.running_tasks || 0" />
+            <a-statistic title="½øĞĞÖĞ" :value="otaOverview.running_tasks || 0" />
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="æˆåŠŸç‡" :value="otaOverview.avg_success_rate || 0" suffix="%" :precision="1" />
+            <a-statistic title="³É¹¦ÂÊ" :value="otaOverview.avg_success_rate || 0" suffix="%" :precision="1" />
           </a-card>
         </a-col>
       </a-row>
       <a-row :gutter="[16, 16]" class="charts-row">
         <a-col :xs="24" :lg="12">
-          <a-card title="OTAç‰ˆæœ¬åˆ†å¸ƒ" class="chart-card">
+          <a-card title="OTA°æ±¾·Ö²¼" class="chart-card">
             <div ref="otaVersionChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
         <a-col :xs="24" :lg="12">
-          <a-card title="OTAä»»åŠ¡åˆ—è¡¨" class="chart-card">
+          <a-card title="OTAÈÎÎñÁĞ±í" class="chart-card">
             <a-table :columns="otaTaskColumns" :data="otaTasks" :loading="otaLoading" :pagination="{ pageSize: 5 }" row-key="id" size="small">
               <template #status="{ record }">
                 <a-tag :color="getOtaStatusColor(record.status)">{{ record.status }}</a-tag>
               </template>
       </a-table>
-            </a-table>
           </a-card>
         </a-col>
       </a-row>
     </div>
 
-    <!-- ä¼šå‘˜åˆ†æ Tab -->
+    <!-- »áÔ±·ÖÎö Tab -->
     <div v-show="activeTab === 'members'">
       <a-row :gutter="[16, 16]">
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="ä¼šå‘˜æ€»é‡" :value="memberOverview.total || 0" />
+            <a-statistic title="»áÔ±×ÜÁ¿" :value="memberOverview.total || 0" />
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="ä»Šæ—¥æ–°å¢" :value="memberOverview.new_today || 0" />
+            <a-statistic title="½ñÈÕĞÂÔö" :value="memberOverview.new_today || 0" />
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="ä»Šæ—¥æ´»è·ƒ" :value="memberOverview.active_today || 0" />
+            <a-statistic title="½ñÈÕ»îÔ¾" :value="memberOverview.active_today || 0" />
           </a-card>
         </a-col>
       </a-row>
       <a-row :gutter="[16, 16]" class="charts-row">
         <a-col :xs="24" :lg="12">
-          <a-card title="ä¼šå‘˜ç­‰çº§åˆ†å¸ƒ" class="chart-card">
+          <a-card title="»áÔ±µÈ¼¶·Ö²¼" class="chart-card">
             <div ref="memberLevelChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
         <a-col :xs="24" :lg="12">
-          <a-card title="ä¼šå‘˜æ¶ˆè´¹è¶‹åŠ¿" class="chart-card">
+          <a-card title="»áÔ±Ïû·ÑÇ÷ÊÆ" class="chart-card">
             <div ref="memberConsumptionChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
       </a-row>
     </div>
 
-    <!-- å‘Šè­¦ç»Ÿè®¡ Tab -->
+    <!-- ¸æ¾¯Í³¼Æ Tab -->
     <div v-show="activeTab === 'alerts'">
       <a-row :gutter="[16, 16]">
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="ä»Šæ—¥å‘Šè­¦" :value="alertOverview.total_today || 0" />
+            <a-statistic title="½ñÈÕ¸æ¾¯" :value="alertOverview.total_today || 0" />
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="å¾…å¤„ç†" :value="alertOverview.pending || 0" />
+            <a-statistic title="´ı´¦Àí" :value="alertOverview.pending || 0" />
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="è§£å†³ç‡" :value="alertOverview.resolution_rate || 0" suffix="%" :precision="1" />
+            <a-statistic title="½â¾öÂÊ" :value="alertOverview.resolution_rate || 0" suffix="%" :precision="1" />
           </a-card>
         </a-col>
       </a-row>
       <a-row :gutter="[16, 16]" class="charts-row">
         <a-col :xs="24" :lg="12">
-          <a-card title="å‘Šè­¦è¶‹åŠ¿" class="chart-card">
+          <a-card title="¸æ¾¯Ç÷ÊÆ" class="chart-card">
             <div ref="alertTrendChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
         <a-col :xs="24" :lg="12">
-          <a-card title="å‘Šè­¦åˆ†å¸ƒ" class="chart-card">
+          <a-card title="¸æ¾¯·Ö²¼" class="chart-card">
             <div ref="alertDistChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
@@ -308,7 +307,7 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import * as analytics from '@/api/analytics'
 import * as echarts from 'echarts'
 
-// çŠ¶æ€
+// ×´Ì¬
 const activeTab = ref('dashboard')
 const timeRange = ref('week')
 const customRange = ref([])
@@ -329,7 +328,7 @@ const otaLoading = ref(false)
 const memberOverview = ref({})
 const alertOverview = ref({})
 
-// å›¾è¡¨ ref
+// Í¼±í ref
 const deviceTrendChartRef = ref(null)
 const deviceDistChartRef = ref(null)
 const memberTrendChartRef = ref(null)
@@ -344,13 +343,13 @@ const alertTrendChartRef = ref(null)
 const alertDistChartRef = ref(null)
 
 const otaTaskColumns = [
-  { title: 'ä»»åŠ¡ID', dataIndex: 'id', width: 80 },
-  { title: 'å›ºä»¶ç‰ˆæœ¬', dataIndex: 'firmware_version', width: 120 },
-  { title: 'çŠ¶æ€', slotName: 'status' },
-  { title: 'æˆåŠŸç‡', dataIndex: 'success_rate', width: 80 }
+  { title: 'ÈÎÎñID', dataIndex: 'id', width: 80 },
+  { title: '¹Ì¼ş°æ±¾', dataIndex: 'firmware_version', width: 120 },
+  { title: '×´Ì¬', slotName: 'status' },
+  { title: '³É¹¦ÂÊ', dataIndex: 'success_rate', width: 80 }
 ]
 
-// åŠ è½½æ•°æ®
+// ¼ÓÔØÊı¾İ
 async function loadData() {
   if (activeTab.value === 'dashboard') {
     await loadDashboard()
@@ -434,7 +433,7 @@ function getOtaStatusColor(status) {
   return map[status] || 'gray'
 }
 
-// ========== å›¾è¡¨æ¸²æŸ“ ==========
+// ========== Í¼±íäÖÈ¾ ==========
 
 function renderDashboardCharts() {
   if (deviceTrendChartRef.value) {
@@ -444,12 +443,12 @@ function renderDashboardCharts() {
     const onlineAvgs = deviceTrend.value.map(d => d.online_avg)
     chart.setOption({
       tooltip: { trigger: 'axis' },
-      legend: { data: ['æ€»è®¾å¤‡', 'åœ¨çº¿å¹³å‡'] },
+      legend: { data: ['×ÜÉè±¸', 'ÔÚÏßÆ½¾ù'] },
       xAxis: { type: 'category', data: dates },
       yAxis: { type: 'value' },
       series: [
-        { name: 'æ€»è®¾å¤‡', type: 'line', data: totals, smooth: true },
-        { name: 'åœ¨çº¿å¹³å‡', type: 'line', data: onlineAvgs, smooth: true }
+        { name: '×ÜÉè±¸', type: 'line', data: totals, smooth: true },
+        { name: 'ÔÚÏßÆ½¾ù', type: 'line', data: onlineAvgs, smooth: true }
       ]
     })
   }
@@ -466,7 +465,7 @@ function renderDashboardCharts() {
     const chart = echarts.init(memberTrendChartRef.value)
     chart.setOption({
       tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: ['å‘¨ä¸€', 'å‘¨äºŒ', 'å‘¨ä¸‰', 'å‘¨å››', 'å‘¨äº”', 'å‘¨å…­', 'å‘¨æ—¥'] },
+      xAxis: { type: 'category', data: ['ÖÜÒ»', 'ÖÜ¶ş', 'ÖÜÈı', 'ÖÜËÄ', 'ÖÜÎå', 'ÖÜÁù', 'ÖÜÈÕ'] },
       yAxis: { type: 'value' },
       series: [{ type: 'line', data: [120, 200, 150, 80, 70, 110, 130], smooth: true }]
     })
@@ -475,7 +474,7 @@ function renderDashboardCharts() {
     const chart = echarts.init(otaTrendChartRef.value)
     chart.setOption({
       tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: ['å‘¨ä¸€', 'å‘¨äºŒ', 'å‘¨ä¸‰', 'å‘¨å››', 'å‘¨äº”', 'å‘¨å…­', 'å‘¨æ—¥'] },
+      xAxis: { type: 'category', data: ['ÖÜÒ»', 'ÖÜ¶ş', 'ÖÜÈı', 'ÖÜËÄ', 'ÖÜÎå', 'ÖÜÁù', 'ÖÜÈÕ'] },
       yAxis: { type: 'value', min: 0, max: 100 },
       series: [{ type: 'line', data: [90, 95, 88, 92, 97, 85, 91], smooth: true }]
     })

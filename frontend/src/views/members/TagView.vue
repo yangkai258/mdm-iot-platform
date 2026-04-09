@@ -27,7 +27,6 @@
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑标签' : '新建标签'">
       <a-form :model="form" label-col-flex="100px">

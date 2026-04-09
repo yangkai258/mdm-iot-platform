@@ -83,6 +83,36 @@ const routes = [
     name: 'AiEmotion',
     component: () => import('../views/ai/AIEmotionView.vue')
   },
+  {
+    path: 'ai/monitor',
+    name: 'AiMonitor',
+    component: () => import('../views/ai/AIMonitorView.vue')
+  },
+  {
+    path: 'ai/logs',
+    name: 'AiDecisionLogs',
+    component: () => import('../views/ai/AIDecisionLogsView.vue')
+  },
+  {
+    path: 'ai/versions',
+    name: 'ModelVersion',
+    component: () => import('../views/ai/ModelVersionView.vue')
+  },
+  {
+    path: 'ai/rollback',
+    name: 'ModelRollback',
+    component: () => import('../views/ai/ModelRollbackView.vue')
+  },
+  {
+    path: 'ai/sandbox',
+    name: 'AiSandbox',
+    component: () => import('../views/ai/AISandboxView.vue')
+  },
+  {
+    path: 'ai/quality',
+    name: 'AiQuality',
+    component: () => import('../views/ai/AIQualityView.vue')
+  },
       {
     path: 'pet',
     name: 'Pet',
@@ -593,3 +623,149 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
+
+// Phase 4 新增路由
+router.addRoute('layout', {
+  path: 'market/apps',
+  name: 'AppMarket',
+  component: () => import('../views/market/AppMarketView.vue')
+});
+router.addRoute('layout', {
+  path: 'market/webhooks',
+  name: 'WebhookMarket',
+  component: () => import('../views/market/WebhookMarketView.vue')
+});
+router.addRoute('layout', {
+  path: 'market/sdk',
+  name: 'SdkMarket',
+  component: () => import('../views/market/SdkMarketView.vue')
+});
+router.addRoute('layout', {
+  path: 'integration/social',
+  name: 'SocialShare',
+  component: () => import('../views/integration/SocialShareView.vue')
+});
+router.addRoute('layout', {
+  path: 'device/locate',
+  name: 'DeviceLocate',
+  component: () => import('../views/devices/DeviceLocateView.vue')
+});
+router.addRoute('layout', {
+  path: 'health/weight',
+  name: 'WeightTrend',
+  component: () => import('../views/health/WeightTrendView.vue')
+});
+router.addRoute('layout', {
+  path: 'health/diet',
+  name: 'DietRecord',
+  component: () => import('../views/health/DietRecordView.vue')
+});
+router.addRoute('layout', {
+  path: 'system/i18n',
+  name: 'I18nConfig',
+  component: () => import('../views/system/I18nConfigView.vue')
+});
+router.addRoute('layout', {
+  path: 'system/security',
+  name: 'AdvancedSecurity',
+  component: () => import('../views/system/AdvancedSecurityView.vue')
+});
+
+// Phase 2 Sprint 11-16 新增路由
+router.addRoute('layout', {
+  path: 'ai/sensor-events',
+  name: 'SensorEvents',
+  component: () => import('../views/ai/SensorEventsView.vue')
+});
+router.addRoute('layout', {
+  path: 'ai/action-library',
+  name: 'AIActionLibrary',
+  component: () => import('../views/ai/ActionLibraryView.vue')
+});
+router.addRoute('layout', {
+  path: 'ai/training',
+  name: 'AITraining',
+  component: () => import('../views/ai/AITrainingView.vue')
+});
+router.addRoute('layout', {
+  path: 'ai/ab-test',
+  name: 'ABTest',
+  component: () => import('../views/ai/ABTestView.vue')
+});
+router.addRoute('layout', {
+  path: 'devices/remote-wipe',
+  name: 'DeviceRemoteWipe',
+  component: () => import('../views/devices/RemoteWipeView.vue')
+});
+router.addRoute('layout', {
+  path: 'devices/cross-border',
+  name: 'CrossBorder',
+  component: () => import('../views/devices/CrossBorderView.vue')
+});
+router.addRoute('layout', {
+  path: 'pet/register',
+  name: 'PetRegister',
+  component: () => import('../views/pet/PetRegisterView.vue')
+});
+router.addRoute('layout', {
+  path: 'pet/rescue',
+  name: 'PetRescue',
+  component: () => import('../views/pet/PetRescueView.vue')
+});
+router.addRoute('layout', {
+  path: 'pet/multi',
+  name: 'PetMulti',
+  component: () => import('../views/pet/PetMultiView.vue')
+});
+router.addRoute('layout', {
+  path: 'subscription/plans',
+  name: 'SubscriptionPlans',
+  component: () => import('../views/subscription/PlansView.vue')
+});
+router.addRoute('layout', {
+  path: 'billing/usage',
+  name: 'BillingUsage',
+  component: () => import('../views/billing/UsageView.vue')
+});
+router.addRoute('layout', {
+  path: 'billing/invoices',
+  name: 'BillingInvoices',
+  component: () => import('../views/billing/InvoicesView.vue')
+});
+
+// Sprint 9-10 Phase 1 前端新增路由
+router.addRoute('layout', {
+  path: 'security/ldap',
+  name: 'LdapConfig',
+  component: () => import('../views/security/LdapConfig.vue')
+});
+router.addRoute('layout', {
+  path: 'devices/shadow',
+  name: 'DeviceShadow',
+  component: () => import('../views/devices/DeviceShadow.vue')
+});
+router.addRoute('layout', {
+  path: 'ai/behavior-engine',
+  name: 'BehaviorEngine',
+  component: () => import('../views/ai/BehaviorEngine.vue')
+});
+router.addRoute('layout', {
+  path: 'ota/worker',
+  name: 'OtaWorker',
+  component: () => import('../views/ai/OtaWorker.vue')
+});
+router.addRoute('layout', {
+  path: 'ota/compatibility',
+  name: 'OtaCompatibility',
+  component: () => import('../views/ota/OtaCompatibility.vue')
+});
+router.addRoute('layout', {
+  path: 'knowledge/qa',
+  name: 'KnowledgeQA',
+  component: () => import('../views/knowledge/KnowledgeQA.vue')
+});
+router.addRoute('layout', {
+  path: 'knowledge/weather',
+  name: 'WeatherService',
+  component: () => import('../views/knowledge/WeatherService.vue')
+});

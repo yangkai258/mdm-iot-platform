@@ -1,31 +1,30 @@
-ï»¿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="ä¼šå‘˜å¡ç®¡ç†">
+    <a-card class="general-card" title="»áÔ±¿¨¹ÜÀí">
       <template #extra>
         <a-space :size="12">
-          <a-button type="primary" @click="showCreate"><icon-plus />æ–°å»º</a-button>
-          <a-button @click="loadData"><icon-refresh />åˆ·æ–°</a-button>
+          <a-button type="primary" @click="showCreate"><icon-plus />ÐÂ½¨</a-button>
+          <a-button @click="loadData"><icon-refresh />Ë¢ÐÂ</a-button>
         </a-space>
       </template>
       <a-divider style="margin: 0 0 16px 0" />
       <a-table :columns="columns" :data="cardTypeList" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id">
         <template #actions="{ record }">
-          <a-button type="text" size="small" @click="showEdit(record)">ç¼–è¾‘</a-button>
-          <a-button type="text" size="small" @click="handleDelete(record)">åˆ é™¤</a-button>
+          <a-button type="text" size="small" @click="showEdit(record)">±à¼­</a-button>
+          <a-button type="text" size="small" @click="handleDelete(record)">É¾³ý</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
-    <a-modal v-model:visible="formVisible" :title="isEdit ? 'ç¼–è¾‘å¡ç±»åž‹' : 'æ–°å»ºå¡ç±»åž‹'">
+    <a-modal v-model:visible="formVisible" :title="isEdit ? '±à¼­¿¨ÀàÐÍ' : 'ÐÂ½¨¿¨ÀàÐÍ'">
       <a-form :model="form" label-col-flex="100px">
-        <a-form-item label="åç§°"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="ç¼–ç "><a-input v-model="form.code" /></a-form-item>
-        <a-form-item label="æŠ˜æ‰£çŽ‡"><a-input-number v-model="form.discountRate" :min="0" :max="1" :precision="2" style="width: 100%" /></a-form-item>
-        <a-form-item label="ç§¯åˆ†å€çŽ‡"><a-input-number v-model="form.pointsRate" :min="1" style="width: 100%" /></a-form-item>
+        <a-form-item label="Ãû³Æ"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="±àÂë"><a-input v-model="form.code" /></a-form-item>
+        <a-form-item label="ÕÛ¿ÛÂÊ"><a-input-number v-model="form.discountRate" :min="0" :max="1" :precision="2" style="width: 100%" /></a-form-item>
+        <a-form-item label="»ý·Ö±¶ÂÊ"><a-input-number v-model="form.pointsRate" :min="1" style="width: 100%" /></a-form-item>
       </a-form>
       <template #footer>
-        <a-button @click="formVisible = false">å–æ¶ˆ</a-button>
-        <a-button type="primary" @click="handleSubmit">ç¡®å®š</a-button>
+        <a-button @click="formVisible = false">È¡Ïû</a-button>
+        <a-button type="primary" @click="handleSubmit">È·¶¨</a-button>
       </template>
     </a-modal>
   </div>
@@ -44,11 +43,11 @@ const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const paginationConfig = computed(() => ({ current: pagination.current, pageSize: pagination.pageSize, total: pagination.total, showTotal: true }))
 const form = reactive({ name: '', code: '', discountRate: 1, pointsRate: 1 })
 const columns = [
-  { title: 'å¡ç±»åž‹åç§°', dataIndex: 'name', width: 180 },
-  { title: 'ç¼–ç ', dataIndex: 'code', width: 120 },
-  { title: 'æŠ˜æ‰£çŽ‡', dataIndex: 'discountRate', width: 100 },
-  { title: 'ç§¯åˆ†å€çŽ‡', dataIndex: 'pointsRate', width: 110 },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 180 }
+  { title: '¿¨ÀàÐÍÃû³Æ', dataIndex: 'name', width: 180 },
+  { title: '±àÂë', dataIndex: 'code', width: 120 },
+  { title: 'ÕÛ¿ÛÂÊ', dataIndex: 'discountRate', width: 100 },
+  { title: '»ý·Ö±¶ÂÊ', dataIndex: 'pointsRate', width: 110 },
+  { title: '²Ù×÷', slotName: 'actions', width: 180 }
 ]
 
 const loadData = async () => {
@@ -64,8 +63,8 @@ const loadData = async () => {
 
 const showCreate = () => { isEdit.value = false; Object.assign(form, { name: '', code: '', discountRate: 1, pointsRate: 1 }); formVisible.value = true }
 const showEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? 'æ›´æ–°æˆåŠŸ' : 'åˆ›å»ºæˆåŠŸ'); loadData() }
-const handleDelete = () => { Message.success('åˆ é™¤æˆåŠŸ'); loadData() }
+const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '¸üÐÂ³É¹¦' : '´´½¨³É¹¦'); loadData() }
+const handleDelete = () => { Message.success('É¾³ý³É¹¦'); loadData() }
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())

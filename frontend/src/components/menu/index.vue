@@ -36,6 +36,7 @@
         <a-menu-item key="devices-geofence" @click="navigate('devices-geofence')">地理围栏</a-menu-item>
         <a-menu-item key="devices-monitor" @click="navigate('devices-monitor')">监控面板</a-menu-item>
         <a-menu-item key="devices-pairing" @click="navigate('devices-pairing')">配对管理</a-menu-item>
+        <a-menu-item key="devices-shadow" @click="navigate('devices-shadow')">设备影子</a-menu-item>
       </a-sub-menu>
 
       <!-- OTA升级 -->
@@ -44,6 +45,8 @@
         <template #title>OTA升级</template>
         <a-menu-item key="ota-packages" @click="navigate('ota-packages')">固件包管理</a-menu-item>
         <a-menu-item key="ota-deployments" @click="navigate('ota-deployments')">部署任务</a-menu-item>
+        <a-menu-item key="ota-worker" @click="navigate('ota-worker')">Worker监控</a-menu-item>
+        <a-menu-item key="ota-compatibility" @click="navigate('ota-compatibility')">兼容性矩阵</a-menu-item>
       </a-sub-menu>
 
       <a-menu-item key="miniclaw-firmwares" @click="navigate('miniclaw-firmwares')">
@@ -83,10 +86,14 @@
         <a-menu-item key="members-promotions" @click="navigate('members-promotions')">促销活动</a-menu-item>
       </a-sub-menu>
 
-      <a-menu-item key="knowledge" @click="navigate('knowledge')">
+      <!-- 知识库 -->
+      <a-sub-menu key="knowledge">
         <template #icon><icon-book /></template>
-        <span>知识库</span>
-      </a-menu-item>
+        <template #title>知识库</template>
+        <a-menu-item key="knowledge" @click="navigate('knowledge')">知识库列表</a-menu-item>
+        <a-menu-item key="knowledge-qa" @click="navigate('knowledge-qa')">问答管理</a-menu-item>
+        <a-menu-item key="knowledge-weather" @click="navigate('knowledge-weather')">天气服务</a-menu-item>
+      </a-sub-menu>
 
       <a-menu-item key="owner-profile" @click="navigate('owner-profile')">
         <template #icon><icon-user /></template>
@@ -109,6 +116,13 @@
         <template #title>AI 功能</template>
         <a-menu-item key="ai-behavior" @click="navigate('ai-behavior')">行为分析</a-menu-item>
         <a-menu-item key="ai-emotion" @click="navigate('ai-emotion')">情感识别</a-menu-item>
+        <a-menu-item key="ai-monitor" @click="navigate('ai-monitor')">模型监控</a-menu-item>
+        <a-menu-item key="ai-decision-logs" @click="navigate('ai-decision-logs')">决策日志</a-menu-item>
+        <a-menu-item key="ai-versions" @click="navigate('ai-versions')">版本管理</a-menu-item>
+        <a-menu-item key="ai-rollback" @click="navigate('ai-rollback')">热回滚</a-menu-item>
+        <a-menu-item key="ai-sandbox" @click="navigate('ai-sandbox')">沙箱测试</a-menu-item>
+        <a-menu-item key="ai-quality" @click="navigate('ai-quality')">质量报告</a-menu-item>
+        <a-menu-item key="ai-behavior-engine" @click="navigate('ai-behavior-engine')">行为引擎</a-menu-item>
       </a-sub-menu>
 
       <!-- 情感计算 -->
@@ -168,6 +182,7 @@
         <a-menu-item key="policies-list" @click="navigate('policies-list')">策略列表</a-menu-item>
         <a-menu-item key="policies-configs" @click="navigate('policies-configs')">策略配置</a-menu-item>
         <a-menu-item key="compliance-rules" @click="navigate('compliance-rules')">合规规则</a-menu-item>
+        <a-menu-item key="security-ldap" @click="navigate('security-ldap')">LDAP配置</a-menu-item>
       </a-sub-menu>
 
       <!-- 租户管理 -->
@@ -335,6 +350,12 @@ const routeNameToMenuKey: Record<string, string> = {
   'PetHospitals': 'integration-pet-hospitals',
   'AiBehavior': 'ai-behavior',
   'AiEmotion': 'ai-emotion',
+  'AiMonitor': 'ai-monitor',
+  'AiDecisionLogs': 'ai-decision-logs',
+  'ModelVersion': 'ai-versions',
+  'ModelRollback': 'ai-rollback',
+  'AiSandbox': 'ai-sandbox',
+  'AiQuality': 'ai-quality',
   'EmotionRecognition': 'emotion-recognition',
   'EmotionResponse': 'emotion-response',
   'EmotionLogs': 'emotion-logs',
@@ -354,6 +375,7 @@ const routeNameToMenuKey: Record<string, string> = {
   'DeviceGeofence': 'devices-geofence',
   'DeviceMonitorPanel': 'devices-monitor',
   'DevicePairing': 'devices-pairing',
+  'DeviceShadow': 'devices-shadow',
   'DigitalTwinVitals': 'digital-twin-vitals',
   'DigitalTwinPrediction': 'digital-twin-prediction',
   'DigitalTwinPlayback': 'digital-twin-playback',
@@ -365,6 +387,12 @@ const routeNameToMenuKey: Record<string, string> = {
   'SimulationPet': 'simulation-pet',
   'SimulationTest': 'simulation-test',
   'SimulationReplay': 'simulation-replay',
+  'LdapConfig': 'security-ldap',
+  'BehaviorEngine': 'ai-behavior-engine',
+  'OtaWorker': 'ota-worker',
+  'OtaCompatibility': 'ota-compatibility',
+  'KnowledgeQA': 'knowledge-qa',
+  'WeatherService': 'knowledge-weather',
 };
 
 // 菜单 key → 路由 path 映射
@@ -396,6 +424,12 @@ const menuKeyToPath: Record<string, string> = {
   'health-sleep': '/health/sleep',
   'ai-behavior': '/ai/behavior',
   'ai-emotion': '/ai/emotion',
+  'ai-monitor': '/ai/monitor',
+  'ai-decision-logs': '/ai/logs',
+  'ai-versions': '/ai/versions',
+  'ai-rollback': '/ai/rollback',
+  'ai-sandbox': '/ai/sandbox',
+  'ai-quality': '/ai/quality',
   'emotion-recognition': '/emotion/recognition',
   'emotion-response': '/emotion/response',
   'emotion-logs': '/emotion/logs',

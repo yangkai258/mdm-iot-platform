@@ -1,41 +1,41 @@
-ï»¿<template>
+<template>
   <div class="pro-page-container">
-    <!-- é¢åŒ…å±‘ -->
+    <!-- Ãæ°üĞ¼ -->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>é¦–é¡µ</a-breadcrumb-item>
-      <a-breadcrumb-item>è®¾å¤‡ç®¡ç†</a-breadcrumb-item>
-      <a-breadcrumb-item>ç›‘æ§é¢æ¿</a-breadcrumb-item>
+      <a-breadcrumb-item>Ê×Ò³</a-breadcrumb-item>
+      <a-breadcrumb-item>Éè±¸¹ÜÀí</a-breadcrumb-item>
+      <a-breadcrumb-item>¼à¿ØÃæ°å</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- ç­›é€‰æ¡ä»¶ -->
+    <!-- É¸Ñ¡Ìõ¼ş -->
     <div class="pro-search-bar">
       <a-space>
-        <a-select v-model="filterModel" placeholder="è®¾å¤‡å‹å·" allow-clear style="width: 160px" @change="loadDashboard">
+        <a-select v-model="filterModel" placeholder="Éè±¸ĞÍºÅ" allow-clear style="width: 160px" @change="loadDashboard">
           <a-option value="M5Stack">M5Stack</a-option>
           <a-option value="ESP32">ESP32</a-option>
           <a-option value="Raspberry Pi">Raspberry Pi</a-option>
         </a-select>
-        <a-select v-model="timeRange" placeholder="æ—¶é—´èŒƒå›´" style="width: 130px" @change="loadMetrics">
-          <a-option value="24h">è¿‘24å°æ—¶</a-option>
-          <a-option value="7d">è¿‘7å¤©</a-option>
-          <a-option value="30d">è¿‘30å¤©</a-option>
+        <a-select v-model="timeRange" placeholder="Ê±¼ä·¶Î§" style="width: 130px" @change="loadMetrics">
+          <a-option value="24h">½ü24Ğ¡Ê±</a-option>
+          <a-option value="7d">½ü7Ìì</a-option>
+          <a-option value="30d">½ü30Ìì</a-option>
         </a-select>
-        <a-button @click="loadDashboard">åˆ·æ–°</a-button>
+        <a-button @click="loadDashboard">Ë¢ĞÂ</a-button>
       </a-space>
     </div>
 
-    <!-- ç»Ÿè®¡å¡ç‰‡ -->
+    <!-- Í³¼Æ¿¨Æ¬ -->
     <a-row :gutter="16" class="stat-row">
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
-          <a-statistic :value="summary.total_devices" title="è®¾å¤‡æ€»æ•°">
+          <a-statistic :value="summary.total_devices" title="Éè±¸×ÜÊı">
             <template #icon><icon-mobile style="font-size: 28px; color: #1650d8" /></template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
-          <a-statistic :value="summary.online_devices" title="åœ¨çº¿è®¾å¤‡" :value-from="0" :animation="true">
+          <a-statistic :value="summary.online_devices" title="ÔÚÏßÉè±¸" :value-from="0" :animation="true">
             <template #icon><icon-check-circle style="font-size: 28px; color: #00b42a" /></template>
           </a-statistic>
         </a-card>
@@ -44,7 +44,7 @@
         <a-card class="stat-card" hoverable>
           <a-statistic
             :value="summary.online_rate"
-            title="åœ¨çº¿ç‡"
+            title="ÔÚÏßÂÊ"
             :precision="1"
             suffix="%"
             :value-from="0"
@@ -55,19 +55,19 @@
       </a-col>
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
-          <a-statistic :value="summary.active_alerts" title="æ´»è·ƒå‘Šè­¦">
+          <a-statistic :value="summary.active_alerts" title="»îÔ¾¸æ¾¯">
             <template #icon><icon-exclamation-circle style="font-size: 28px; color: #ff4d4f" /></template>
           </a-statistic>
         </a-card>
       </a-col>
     </a-row>
 
-    <!-- å›¾è¡¨åŒº -->
+    <!-- Í¼±íÇø -->
     <a-row :gutter="16" class="chart-row">
       <a-col :span="12">
-        <a-card title="åœ¨çº¿è®¾å¤‡åˆ—è¡¨" class="chart-card">
+        <a-card title="ÔÚÏßÉè±¸ÁĞ±í" class="chart-card">
           <template #extra>
-            <a-button size="mini" @click="loadDashboard">åˆ·æ–°</a-button>
+            <a-button size="mini" @click="loadDashboard">Ë¢ĞÂ</a-button>
           </template>
           <a-table
             :columns="onlineColumns"
@@ -79,7 +79,7 @@
           >
             <template #is_online="{ record }">
               <span class="online-dot" :class="record.is_online ? 'online' : 'offline'"></span>
-              {{ record.is_online ? 'åœ¨çº¿' : 'ç¦»çº¿' }}
+              {{ record.is_online ? 'ÔÚÏß' : 'ÀëÏß' }}
             </template>
             <template #battery_level="{ record }">
               <a-progress :percent="record.battery_level" :stroke-width="6" :show-text="true" size="small"
@@ -90,12 +90,12 @@
         </a-card>
       </a-col>
       <a-col :span="12">
-        <a-card title="å‘Šè­¦è¶‹åŠ¿ï¼ˆ7å¤©ï¼‰" class="chart-card">
+        <a-card title="¸æ¾¯Ç÷ÊÆ£¨7Ìì£©" class="chart-card">
           <div class="chart-container">
-            <div v-if="alertTrend.length === 0" class="no-data">æš‚æ— æ•°æ®</div>
+            <div v-if="alertTrend.length === 0" class="no-data">ÔİÎŞÊı¾İ</div>
             <div v-else class="bar-chart">
               <div v-for="item in alertTrend" :key="item.date" class="bar-item">
-                <div class="bar" :style="{ height: getBarHeight(item.count) + 'px' }" :title="item.count + 'æ¡å‘Šè­¦'"></div>
+                <div class="bar" :style="{ height: getBarHeight(item.count) + 'px' }" :title="item.count + 'Ìõ¸æ¾¯'"></div>
                 <div class="bar-label">{{ formatDateLabel(item.date) }}</div>
               </div>
             </div>
@@ -104,12 +104,12 @@
       </a-col>
     </a-row>
 
-    <!-- åˆ†å¸ƒå›¾åŒº -->
+    <!-- ·Ö²¼Í¼Çø -->
     <a-row :gutter="16" class="dist-row">
       <a-col :span="8">
-        <a-card title="è®¾å¤‡å‹å·åˆ†å¸ƒ" class="dist-card">
+        <a-card title="Éè±¸ĞÍºÅ·Ö²¼" class="dist-card">
           <div class="pie-container">
-            <div v-if="modelDistribution.length === 0" class="no-data">æš‚æ— æ•°æ®</div>
+            <div v-if="modelDistribution.length === 0" class="no-data">ÔİÎŞÊı¾İ</div>
             <div v-else class="pie-chart">
               <div v-for="(item, idx) in modelDistribution" :key="item.model" class="pie-item">
                 <span class="pie-dot" :style="{ background: pieColors[idx % pieColors.length] }"></span>
@@ -122,9 +122,9 @@
         </a-card>
       </a-col>
       <a-col :span="8">
-        <a-card title="è®¾å¤‡çŠ¶æ€åˆ†å¸ƒ" class="dist-card">
+        <a-card title="Éè±¸×´Ì¬·Ö²¼" class="dist-card">
           <div class="pie-container">
-            <div v-if="statusDistribution.length === 0" class="no-data">æš‚æ— æ•°æ®</div>
+            <div v-if="statusDistribution.length === 0" class="no-data">ÔİÎŞÊı¾İ</div>
             <div v-else class="pie-chart">
               <div v-for="(item, idx) in statusDistribution" :key="item.status" class="pie-item">
                 <span class="pie-dot" :style="{ background: pieColors[idx % pieColors.length] }"></span>
@@ -136,9 +136,9 @@
         </a-card>
       </a-col>
       <a-col :span="8">
-        <a-card title="å‘Šè­¦ç±»å‹åˆ†å¸ƒ" class="dist-card">
+        <a-card title="¸æ¾¯ÀàĞÍ·Ö²¼" class="dist-card">
           <div class="pie-container">
-            <div v-if="alertTypeDistribution.length === 0" class="no-data">æš‚æ— æ•°æ®</div>
+            <div v-if="alertTypeDistribution.length === 0" class="no-data">ÔİÎŞÊı¾İ</div>
             <div v-else class="pie-chart">
               <div v-for="(item, idx) in alertTypeDistribution" :key="item.alert_type" class="pie-item">
                 <span class="pie-dot" :style="{ background: pieColors[idx % pieColors.length] }"></span>
@@ -151,26 +151,24 @@
       </a-col>
     </a-row>
 
-    <!-- æŒ‡æ ‡è¯¦æƒ… -->
+    <!-- Ö¸±êÏêÇé -->
     <a-row :gutter="16" class="metrics-row">
       <a-col :span="12">
-        <a-card title="è®¾å¤‡å›ºä»¶ç‰ˆæœ¬åˆ†å¸ƒ" class="dist-card">
+        <a-card title="Éè±¸¹Ì¼ş°æ±¾·Ö²¼" class="dist-card">
           <a-table :columns="firmwareColumns" :data="firmwareDistribution" size="small" :pagination="false" row-key="version">
             <template #version="{ record }">
               <a-tag color="blue">{{ record.version }}</a-tag>
             </template>
       </a-table>
-          </a-table>
         </a-card>
       </a-col>
       <a-col :span="12">
-        <a-card title="è¿è¡Œæ—¶é•¿åˆ†å¸ƒ" class="dist-card">
+        <a-card title="ÔËĞĞÊ±³¤·Ö²¼" class="dist-card">
           <a-table :columns="uptimeColumns" :data="uptimeDistribution" size="small" :pagination="false" row-key="bucket">
             <template #count="{ record }">
               <a-progress :percent="getUptimePercent(record.count)" :stroke-width="8" :show-text="true" size="small" />
             </template>
       </a-table>
-          </a-table>
         </a-card>
       </a-col>
     </a-row>
@@ -206,21 +204,21 @@ const uptimeDistribution = ref([])
 const pieColors = ['#1650d8', '#00b42a', '#ff7d00', '#f53f3f', '#722ed1', '#3491fa']
 
 const onlineColumns = [
-  { title: 'è®¾å¤‡ID', dataIndex: 'device_id', width: 130, ellipsis: true },
-  { title: 'åœ¨çº¿', slotName: 'is_online', width: 80 },
-  { title: 'æœ€åå¿ƒè·³', dataIndex: 'last_seen', width: 160, ellipsis: true },
-  { title: 'ç”µé‡', slotName: 'battery_level', width: 120 },
-  { title: 'å½“å‰æ¨¡å¼', dataIndex: 'current_mode', width: 90 }
+  { title: 'Éè±¸ID', dataIndex: 'device_id', width: 130, ellipsis: true },
+  { title: 'ÔÚÏß', slotName: 'is_online', width: 80 },
+  { title: '×îºóĞÄÌø', dataIndex: 'last_seen', width: 160, ellipsis: true },
+  { title: 'µçÁ¿', slotName: 'battery_level', width: 120 },
+  { title: 'µ±Ç°Ä£Ê½', dataIndex: 'current_mode', width: 90 }
 ]
 
 const firmwareColumns = [
-  { title: 'å›ºä»¶ç‰ˆæœ¬', slotName: 'version' },
-  { title: 'è®¾å¤‡æ•°é‡', dataIndex: 'count' }
+  { title: '¹Ì¼ş°æ±¾', slotName: 'version' },
+  { title: 'Éè±¸ÊıÁ¿', dataIndex: 'count' }
 ]
 
 const uptimeColumns = [
-  { title: 'è¿è¡Œæ—¶é•¿', dataIndex: 'bucket' },
-  { title: 'è®¾å¤‡æ•°é‡', slotName: 'count' }
+  { title: 'ÔËĞĞÊ±³¤', dataIndex: 'bucket' },
+  { title: 'Éè±¸ÊıÁ¿', slotName: 'count' }
 ]
 
 const getToken = () => localStorage.getItem('token')
@@ -245,7 +243,7 @@ const getUptimePercent = (count) => {
   return total > 0 ? Math.round((count / total) * 100) : 0
 }
 
-const getStatusText = (s) => ({ 1: 'ç¦»çº¿', 2: 'åœ¨çº¿' }[s] || s)
+const getStatusText = (s) => ({ 1: 'ÀëÏß', 2: 'ÔÚÏß' }[s] || s)
 
 const loadDashboard = async () => {
   loading.value = true
@@ -266,7 +264,7 @@ const loadDashboard = async () => {
       statusDistribution.value = d.status_distribution || []
     }
   } catch (e) {
-    Message.error('åŠ è½½ç›‘æ§é¢æ¿å¤±è´¥')
+    Message.error('¼ÓÔØ¼à¿ØÃæ°åÊ§°Ü')
   } finally {
     loading.value = false
   }

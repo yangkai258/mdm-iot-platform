@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="pro-page-container">
     <!-- 统计卡片 -->
     <a-row :gutter="16" class="stat-row">
@@ -135,7 +135,6 @@
             <template #emotion_type="{ record }">
               <a-tag :color="getEmotionColor(record.emotion)">{{ getEmotionText(record.emotion) }}</a-tag>
             </template>
-      </a-table>
             <template #action="{ record }">
               <a-select v-model="record.action" style="width: 120px">
                 <a-option value="comfort">安慰</a-option>

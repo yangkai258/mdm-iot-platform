@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
     "@arco-design/web-vue": "^2.55.0",
+    "ant-design-vue": "^4.2.6",
     "arco-design-pro-vue": "^2.7.3",
     "axios": "^1.6.0",
     "dayjs": "^1.11.10",

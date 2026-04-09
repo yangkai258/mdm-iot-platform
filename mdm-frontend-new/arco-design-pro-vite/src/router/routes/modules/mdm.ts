@@ -266,6 +266,26 @@ const OtaManage: AppRouteRecordRaw = {
   ],
 };
 
+// ========== 宠物管理 ==========
+const PetManage: AppRouteRecordRaw = {
+  path: '/pet', name: 'PetManage',
+  component: DEFAULT_LAYOUT, redirect: '/pet/config',
+  meta: { roles: ['*'], locale: 'menu.petManage', requiresAuth: true, order: 155 },
+  children: [
+    { path: 'config', name: 'PetConfig', component: () => import('@/views/pet/PetConfigView.vue'), meta: { roles: ['*'], locale: 'menu.petManage.config', requiresAuth: true } },
+  ],
+};
+
+// ========== 告警管理 ==========
+const AlertManage: AppRouteRecordRaw = {
+  path: '/alert', name: 'AlertManage',
+  component: DEFAULT_LAYOUT, redirect: '/alert/overview',
+  meta: { roles: ['*'], locale: 'menu.alertManage', requiresAuth: true, order: 156 },
+  children: [
+    { path: 'overview', name: 'AlertOverview', component: () => import('@/views/alert/AlertView.vue'), meta: { roles: ['*'], locale: 'menu.alertManage.overview', requiresAuth: true } },
+  ],
+};
+
 // ========== 租户管理 ==========
 const TenantManage: AppRouteRecordRaw = {
   path: '/tenant', name: 'TenantManage',
@@ -323,6 +343,8 @@ export default [
   PrinterManage,
   SmsManage,
   OtaManage,
+  PetManage,
+  AlertManage,
   TenantManage,
   SystemManage,
   SubscriptionManage,

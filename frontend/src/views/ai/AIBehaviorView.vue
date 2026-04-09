@@ -1,13 +1,11 @@
-﻿<template>
+<template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
       <a-breadcrumb-item>AI 功能</a-breadcrumb-item>
       <a-breadcrumb-item>行为分析</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- 统计卡片 -->
     <a-row :gutter="16" class="stat-row">
       <a-col :span="6">
         <a-statistic title="今日行为总数" :value="stats.today_total" :value-from="0" :animation="true">
@@ -19,7 +17,7 @@
       </a-col>
       <a-col :span="6">
         <a-statistic title="异常行为数" :value="stats.anomaly_count" :value-from="0" :animation="true">
-          <template #prefix><icon-exclamation-circle style="margin-right: 4px" /></template>
+          <template #prefix><icon-warning style="margin-right: 4px" /></template>
         </a-statistic>
       </a-col>
       <a-col :span="6">
@@ -29,7 +27,6 @@
       </a-col>
     </a-row>
 
-    <!-- 搜索表单 -->
     <div class="pro-search-bar">
       <a-form :model="searchForm" layout="inline">
         <a-form-item label="设备/用户">
@@ -68,7 +65,6 @@
       </a-form>
     </div>
 
-    <!-- 操作栏 -->
     <div class="pro-action-bar">
       <a-space>
         <a-button type="primary" @click="handleExport">导出报告</a-button>
@@ -76,7 +72,6 @@
       </a-space>
     </div>
 
-    <!-- 行为统计图表 -->
     <div class="chart-panel">
       <a-tabs type="rounded" size="large">
         <a-tab-pane title="行为趋势">
@@ -88,8 +83,7 @@
       </a-tabs>
     </div>
 
-    <!-- 数据表格 -->
-    <div class="pro-content-area general-card">
+    <div class="pro-content-area">
       <a-table
         :columns="columns"
         :data="dataList"
@@ -119,7 +113,6 @@
       </a-table>
     </div>
 
-    <!-- 详情弹窗 -->
     <a-modal v-model:visible="detailVisible" title="行为详情" :width="640" footer="null">
       <a-descriptions :column="2" bordered size="large">
         <a-descriptions-item label="行为ID">{{ currentRecord?.id }}</a-descriptions-item>
@@ -237,7 +230,6 @@ const viewDetail = (record) => {
 }
 
 const initCharts = () => {
-  // 趋势图
   trendChart = echarts.init(trendChartRef.value)
   trendChart.setOption({
     tooltip: { trigger: 'axis' },
@@ -252,7 +244,6 @@ const initCharts = () => {
     ]
   })
 
-  // 饼图
   pieChart = echarts.init(pieChartRef.value)
   pieChart.setOption({
     tooltip: { trigger: 'item' },
@@ -274,7 +265,6 @@ const initCharts = () => {
 const loadData = async () => {
   loading.value = true
   try {
-    // Mock data
     dataList.value = Array.from({ length: 20 }, (_, i) => ({
       id: `beh_${Date.now()}_${i}`,
       created_at: new Date(Date.now() - i * 3600000).toLocaleString('zh-CN'),
@@ -318,18 +308,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="less">
-.stat-row {
-  margin-bottom: 16px;
-}
-.chart-panel {
-  background: #fff;
-  border-radius: 4px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.general-card {
-  border-radius: 8px;
-}
+.stat-row { margin-bottom: 16px; }
+.chart-panel { background: #fff; border-radius: 4px; padding: 16px; margin-bottom: 16px; }
 </style>
-

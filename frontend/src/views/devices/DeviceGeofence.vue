@@ -1,36 +1,36 @@
-ï»¿<template>
+<template>
   <div class="pro-page-container">
-    <!-- é¢åŒ…å±‘ -->
+    <!-- Ãæ°üĞ¼ -->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>é¦–é¡µ</a-breadcrumb-item>
-      <a-breadcrumb-item>è®¾å¤‡ç®¡ç†</a-breadcrumb-item>
-      <a-breadcrumb-item>åœ°ç†å›´æ </a-breadcrumb-item>
+      <a-breadcrumb-item>Ê×Ò³</a-breadcrumb-item>
+      <a-breadcrumb-item>Éè±¸¹ÜÀí</a-breadcrumb-item>
+      <a-breadcrumb-item>µØÀíÎ§À¸</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- æœç´¢æ  -->
+    <!-- ËÑË÷À¸ -->
     <div class="pro-search-bar">
       <a-space>
-        <a-input-search v-model="searchKeyword" placeholder="æœç´¢å›´æ åç§°" style="width: 260px" @search="loadGeofences" search-button />
-        <a-select v-model="filterStatus" placeholder="å›´æ çŠ¶æ€" allow-clear style="width: 120px" @change="loadGeofences">
-          <a-option value="active">å¯ç”¨</a-option>
-          <a-option value="inactive">åœç”¨</a-option>
+        <a-input-search v-model="searchKeyword" placeholder="ËÑË÷Î§À¸Ãû³Æ" style="width: 260px" @search="loadGeofences" search-button />
+        <a-select v-model="filterStatus" placeholder="Î§À¸×´Ì¬" allow-clear style="width: 120px" @change="loadGeofences">
+          <a-option value="active">ÆôÓÃ</a-option>
+          <a-option value="inactive">Í£ÓÃ</a-option>
         </a-select>
       </a-space>
     </div>
 
-    <!-- æ“ä½œæŒ‰é’® -->
+    <!-- ²Ù×÷°´Å¥ -->
     <div class="pro-action-bar">
       <a-space>
-        <a-button type="primary" @click="showCreateModal">æ–°å»ºå›´æ </a-button>
-        <a-button @click="loadGeofences">åˆ·æ–°</a-button>
+        <a-button type="primary" @click="showCreateModal">ĞÂ½¨Î§À¸</a-button>
+        <a-button @click="loadGeofences">Ë¢ĞÂ</a-button>
       </a-space>
     </div>
 
-    <!-- å›´æ åˆ—è¡¨ -->
+    <!-- Î§À¸ÁĞ±í -->
     <div class="pro-content-area">
       <a-table :columns="columns" :data="geofences" :loading="loading" :pagination="pagination" row-key="id" @page-change="handlePageChange">
         <template #status="{ record }">
-          <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? 'å¯ç”¨' : 'åœç”¨' }}</a-tag>
+          <a-tag :color="record.status === 'active' ? 'green' : 'gray'">{{ record.status === 'active' ? 'ÆôÓÃ' : 'Í£ÓÃ' }}</a-tag>
         </template>
       </a-table>
         <template #device_count="{ record }">
@@ -38,70 +38,69 @@
         </template>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="text" size="small" @click="showBindModal(record)">ç»‘å®šè®¾å¤‡</a-button>
-            <a-button type="text" size="small" @click="viewAlerts(record)">å‘Šè­¦è®°å½•</a-button>
-            <a-button type="text" size="small" @click="editGeofence(record)">ç¼–è¾‘</a-button>
-            <a-button type="text" size="small" status="danger" @click="deleteGeofence(record)">åˆ é™¤</a-button>
+            <a-button type="text" size="small" @click="showBindModal(record)">°ó¶¨Éè±¸</a-button>
+            <a-button type="text" size="small" @click="viewAlerts(record)">¸æ¾¯¼ÇÂ¼</a-button>
+            <a-button type="text" size="small" @click="editGeofence(record)">±à¼­</a-button>
+            <a-button type="text" size="small" status="danger" @click="deleteGeofence(record)">É¾³ı</a-button>
           </a-space>
         </template>
       </a-table>
     </div>
 
-    <!-- æ–°å»º/ç¼–è¾‘å›´æ å¼¹çª— -->
-    <a-modal v-model:visible="createModalVisible" :title="isEdit ? 'ç¼–è¾‘å›´æ ' : 'æ–°å»ºå›´æ '" @ok="handleSubmit" :width="580" :loading="submitting">
+    <!-- ĞÂ½¨/±à¼­Î§À¸µ¯´° -->
+    <a-modal v-model:visible="createModalVisible" :title="isEdit ? '±à¼­Î§À¸' : 'ĞÂ½¨Î§À¸'" @ok="handleSubmit" :width="580" :loading="submitting">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="å›´æ åç§°" required>
-          <a-input v-model="form.name" placeholder="è¯·è¾“å…¥å›´æ åç§°" />
+        <a-form-item label="Î§À¸Ãû³Æ" required>
+          <a-input v-model="form.name" placeholder="ÇëÊäÈëÎ§À¸Ãû³Æ" />
         </a-form-item>
-        <a-form-item label="å›´æ ç±»å‹" required>
-          <a-select v-model="form.geofence_type" placeholder="é€‰æ‹©å›´æ ç±»å‹">
-            <a-option value="circle">åœ†å½¢åŒºåŸŸ</a-option>
-            <a-option value="polygon">å¤šè¾¹å½¢åŒºåŸŸ</a-option>
+        <a-form-item label="Î§À¸ÀàĞÍ" required>
+          <a-select v-model="form.geofence_type" placeholder="Ñ¡ÔñÎ§À¸ÀàĞÍ">
+            <a-option value="circle">Ô²ĞÎÇøÓò</a-option>
+            <a-option value="polygon">¶à±ßĞÎÇøÓò</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="ä¸­å¿ƒåæ ‡">
+        <a-form-item label="ÖĞĞÄ×ø±ê">
           <a-space>
-            <a-input-number v-model="form.latitude" placeholder="çº¬åº¦" style="width: 140px" />
-            <a-input-number v-model="form.longitude" placeholder="ç»åº¦" style="width: 140px" />
+            <a-input-number v-model="form.latitude" placeholder="Î³¶È" style="width: 140px" />
+            <a-input-number v-model="form.longitude" placeholder="¾­¶È" style="width: 140px" />
           </a-space>
         </a-form-item>
-        <a-form-item label="åŠå¾„(ç±³)">
-          <a-input-number v-model="form.radius" placeholder="åœ†å½¢å›´æ åŠå¾„" :min="10" :max="10000" style="width: 200px" />
+        <a-form-item label="°ë¾¶(Ã×)">
+          <a-input-number v-model="form.radius" placeholder="Ô²ĞÎÎ§À¸°ë¾¶" :min="10" :max="10000" style="width: 200px" />
         </a-form-item>
-        <a-form-item label="å‘Šè­¦è§¦å‘">
+        <a-form-item label="¸æ¾¯´¥·¢">
           <a-checkbox-group v-model="form.alarm_types">
-            <a-checkbox value="enter">è¿›å…¥å‘Šè­¦</a-checkbox>
-            <a-checkbox value="exit">ç¦»å¼€å‘Šè­¦</a-checkbox>
+            <a-checkbox value="enter">½øÈë¸æ¾¯</a-checkbox>
+            <a-checkbox value="exit">Àë¿ª¸æ¾¯</a-checkbox>
           </a-checkbox-group>
         </a-form-item>
-        <a-form-item label="çŠ¶æ€">
+        <a-form-item label="×´Ì¬">
           <a-switch v-model="form.is_active" />
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <!-- ç»‘å®šè®¾å¤‡å¼¹çª— -->
-    <a-modal v-model:visible="bindModalVisible" title="ç»‘å®šè®¾å¤‡åˆ°å›´æ " @ok="handleBind" :width="620" :loading="submitting">
+    <!-- °ó¶¨Éè±¸µ¯´° -->
+    <a-modal v-model:visible="bindModalVisible" title="°ó¶¨Éè±¸µ½Î§À¸" @ok="handleBind" :width="620" :loading="submitting">
       <a-form layout="vertical">
-        <a-form-item label="å½“å‰å›´æ ">
+        <a-form-item label="µ±Ç°Î§À¸">
           <a-tag color="arcoblue">{{ selectedGeofence?.name }}</a-tag>
         </a-form-item>
-        <a-form-item label="é€‰æ‹©è®¾å¤‡">
-          <a-select v-model="selectedDeviceIds" multiple placeholder="é€‰æ‹©è¦ç»‘å®šçš„è®¾å¤‡" style="width: 100%">
+        <a-form-item label="Ñ¡ÔñÉè±¸">
+          <a-select v-model="selectedDeviceIds" multiple placeholder="Ñ¡ÔñÒª°ó¶¨µÄÉè±¸" style="width: 100%">
             <a-option v-for="d in allDevices" :key="d.id" :value="d.id">{{ d.name }} ({{ d.id }})</a-option>
           </a-select>
         </a-form-item>
-        <div style="color: #8a8a8a; font-size: 12px">å·²é€‰æ‹© <strong>{{ selectedDeviceIds.length }}</strong> å°è®¾å¤‡</div>
+        <div style="color: #8a8a8a; font-size: 12px">ÒÑÑ¡Ôñ <strong>{{ selectedDeviceIds.length }}</strong> Ì¨Éè±¸</div>
       </a-form>
     </a-modal>
 
-    <!-- å›´æ å‘Šè­¦è®°å½• -->
-    <a-modal v-model:visible="alertsModalVisible" title="å›´æ å‘Šè­¦è®°å½•" :width="800" :footer="null">
+    <!-- Î§À¸¸æ¾¯¼ÇÂ¼ -->
+    <a-modal v-model:visible="alertsModalVisible" title="Î§À¸¸æ¾¯¼ÇÂ¼" :width="800" :footer="null">
       <a-table :columns="alertColumns" :data="alerts" :loading="alertsLoading" :pagination="alertPagination" row-key="id" @page-change="handleAlertPageChange">
         <template #alert_type="{ record }">
-          <a-tag :color="record.alert_type === 'enter' ? 'green' : 'orange'">{{ record.alert_type === 'enter' ? 'è¿›å…¥' : 'ç¦»å¼€' }}</a-tag>
+          <a-tag :color="record.alert_type === 'enter' ? 'green' : 'orange'">{{ record.alert_type === 'enter' ? '½øÈë' : 'Àë¿ª' }}</a-tag>
         </template>
-      </a-table>
       </a-table>
     </a-modal>
   </div>
@@ -135,21 +134,21 @@ const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
 const alertPagination = reactive({ current: 1, pageSize: 10, total: 0 })
 
 const columns = [
-  { title: 'å›´æ ID', dataIndex: 'id', width: 80 },
-  { title: 'å›´æ åç§°', dataIndex: 'name' },
-  { title: 'å›´æ ç±»å‹', dataIndex: 'geofence_type', width: 100 },
-  { title: 'ç»‘å®šè®¾å¤‡æ•°', slotName: 'device_count', width: 100 },
-  { title: 'çŠ¶æ€', slotName: 'status', width: 80 },
-  { title: 'åˆ›å»ºæ—¶é—´', dataIndex: 'created_at', width: 170 },
-  { title: 'æ“ä½œ', slotName: 'actions', width: 220, fixed: 'right' }
+  { title: 'Î§À¸ID', dataIndex: 'id', width: 80 },
+  { title: 'Î§À¸Ãû³Æ', dataIndex: 'name' },
+  { title: 'Î§À¸ÀàĞÍ', dataIndex: 'geofence_type', width: 100 },
+  { title: '°ó¶¨Éè±¸Êı', slotName: 'device_count', width: 100 },
+  { title: '×´Ì¬', slotName: 'status', width: 80 },
+  { title: '´´½¨Ê±¼ä', dataIndex: 'created_at', width: 170 },
+  { title: '²Ù×÷', slotName: 'actions', width: 220, fixed: 'right' }
 ]
 
 const alertColumns = [
-  { title: 'å‘Šè­¦ID', dataIndex: 'id', width: 80 },
-  { title: 'è®¾å¤‡ID', dataIndex: 'device_id', width: 100 },
-  { title: 'å›´æ åç§°', dataIndex: 'geofence_name' },
-  { title: 'å‘Šè­¦ç±»å‹', slotName: 'alert_type', width: 90 },
-  { title: 'è§¦å‘æ—¶é—´', dataIndex: 'created_at', width: 170 }
+  { title: '¸æ¾¯ID', dataIndex: 'id', width: 80 },
+  { title: 'Éè±¸ID', dataIndex: 'device_id', width: 100 },
+  { title: 'Î§À¸Ãû³Æ', dataIndex: 'geofence_name' },
+  { title: '¸æ¾¯ÀàĞÍ', slotName: 'alert_type', width: 90 },
+  { title: '´¥·¢Ê±¼ä', dataIndex: 'created_at', width: 170 }
 ]
 
 const loadGeofences = async () => {
@@ -165,7 +164,7 @@ const loadGeofences = async () => {
       geofences.value = data.data.list || []
       pagination.total = data.data.total || 0
     }
-  } catch (e) { Message.error('åŠ è½½å›´æ åˆ—è¡¨å¤±è´¥') }
+  } catch (e) { Message.error('¼ÓÔØÎ§À¸ÁĞ±íÊ§°Ü') }
   finally { loading.value = false }
 }
 
@@ -175,7 +174,7 @@ const loadDevices = async () => {
     const res = await fetch('/api/v1/devices?page_size=200', { headers: { 'Authorization': `Bearer ${token}` } })
     const data = await res.json()
     if (data.code === 0) allDevices.value = data.data.list || []
-  } catch (e) { console.error('åŠ è½½è®¾å¤‡å¤±è´¥', e) }
+  } catch (e) { console.error('¼ÓÔØÉè±¸Ê§°Ü', e) }
 }
 
 const loadAlerts = async (geofenceId) => {
@@ -189,7 +188,7 @@ const loadAlerts = async (geofenceId) => {
       alerts.value = data.data.list || []
       alertPagination.total = data.data.total || 0
     }
-  } catch (e) { Message.error('åŠ è½½å‘Šè­¦è®°å½•å¤±è´¥') }
+  } catch (e) { Message.error('¼ÓÔØ¸æ¾¯¼ÇÂ¼Ê§°Ü') }
   finally { alertsLoading.value = false }
 }
 
@@ -206,7 +205,7 @@ const editGeofence = (record) => {
 }
 
 const handleSubmit = async () => {
-  if (!form.name) { Message.warning('è¯·è¾“å…¥å›´æ åç§°'); return }
+  if (!form.name) { Message.warning('ÇëÊäÈëÎ§À¸Ãû³Æ'); return }
   submitting.value = true
   try {
     const token = localStorage.getItem('token')
@@ -218,11 +217,11 @@ const handleSubmit = async () => {
     })
     const data = await res.json()
     if (data.code === 0) {
-      Message.success(isEdit.value ? 'å›´æ æ›´æ–°æˆåŠŸ' : 'å›´æ åˆ›å»ºæˆåŠŸ')
+      Message.success(isEdit.value ? 'Î§À¸¸üĞÂ³É¹¦' : 'Î§À¸´´½¨³É¹¦')
       createModalVisible.value = false
       loadGeofences()
-    } else { Message.error(data.message || 'æ“ä½œå¤±è´¥') }
-  } catch (e) { Message.error('æ“ä½œå¤±è´¥') }
+    } else { Message.error(data.message || '²Ù×÷Ê§°Ü') }
+  } catch (e) { Message.error('²Ù×÷Ê§°Ü') }
   finally { submitting.value = false }
 }
 
@@ -248,11 +247,11 @@ const handleBind = async () => {
     })
     const data = await res.json()
     if (data.code === 0) {
-      Message.success('è®¾å¤‡ç»‘å®šæˆåŠŸ')
+      Message.success('Éè±¸°ó¶¨³É¹¦')
       bindModalVisible.value = false
       loadGeofences()
-    } else { Message.error(data.message || 'ç»‘å®šå¤±è´¥') }
-  } catch (e) { Message.error('ç»‘å®šå¤±è´¥') }
+    } else { Message.error(data.message || '°ó¶¨Ê§°Ü') }
+  } catch (e) { Message.error('°ó¶¨Ê§°Ü') }
   finally { submitting.value = false }
 }
 
@@ -269,10 +268,10 @@ const deleteGeofence = async (record) => {
     const res = await fetch(`/api/v1/device/geofences/${record.id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } })
     const data = await res.json()
     if (data.code === 0) {
-      Message.success('åˆ é™¤æˆåŠŸ')
+      Message.success('É¾³ı³É¹¦')
       loadGeofences()
     }
-  } catch (e) { Message.error('åˆ é™¤å¤±è´¥') }
+  } catch (e) { Message.error('É¾³ıÊ§°Ü') }
 }
 
 const handlePageChange = (page) => { pagination.current = page; loadGeofences() }

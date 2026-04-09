@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">

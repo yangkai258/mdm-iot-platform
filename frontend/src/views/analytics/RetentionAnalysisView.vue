@@ -1,42 +1,42 @@
-ï»¿<template>
+<template>
   <div class="pro-page-container">
-    <!-- é¢åŒ…å±‘ -->
+    <!-- Ãæ°üÐ¼ -->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>é¦–é¡µ</a-breadcrumb-item>
-      <a-breadcrumb-item>æ•°æ®åˆ†æž</a-breadcrumb-item>
-      <a-breadcrumb-item>ç•™å­˜åˆ†æž</a-breadcrumb-item>
+      <a-breadcrumb-item>Ê×Ò³</a-breadcrumb-item>
+      <a-breadcrumb-item>Êý¾Ý·ÖÎö</a-breadcrumb-item>
+      <a-breadcrumb-item>Áô´æ·ÖÎö</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- ç­›é€‰åŒº -->
+    <!-- É¸Ñ¡Çø -->
     <div class="pro-filter-bar">
       <a-card class="filter-card">
         <a-space wrap>
-          <a-select v-model="retentionType" placeholder="ç•™å­˜ç±»åž‹" style="width: 140px" @change="loadRetentionData">
-            <a-option value="daily">æ—¥ç•™å­˜</a-option>
-            <a-option value="weekly">å‘¨ç•™å­˜</a-option>
-            <a-option value="monthly">æœˆç•™å­˜</a-option>
+          <a-select v-model="retentionType" placeholder="Áô´æÀàÐÍ" style="width: 140px" @change="loadRetentionData">
+            <a-option value="daily">ÈÕÁô´æ</a-option>
+            <a-option value="weekly">ÖÜÁô´æ</a-option>
+            <a-option value="monthly">ÔÂÁô´æ</a-option>
           </a-select>
-          <a-select v-model="segmentType" placeholder="ç”¨æˆ·ç¾¤" style="width: 140px" @change="loadRetentionData">
-            <a-option value="all">å…¨éƒ¨ç”¨æˆ·</a-option>
-            <a-option value="new">æ–°ç”¨æˆ·</a-option>
-            <a-option value="active">æ´»è·ƒç”¨æˆ·</a-option>
+          <a-select v-model="segmentType" placeholder="ÓÃ»§Èº" style="width: 140px" @change="loadRetentionData">
+            <a-option value="all">È«²¿ÓÃ»§</a-option>
+            <a-option value="new">ÐÂÓÃ»§</a-option>
+            <a-option value="active">»îÔ¾ÓÃ»§</a-option>
           </a-select>
-          <a-select v-model="timeRange" placeholder="æ—¶é—´èŒƒå›´" style="width: 120px" @change="loadRetentionData">
-            <a-option value="7">è¿‘7å¤©</a-option>
-            <a-option value="14">è¿‘14å¤©</a-option>
-            <a-option value="30">è¿‘30å¤©</a-option>
-            <a-option value="60">è¿‘60å¤©</a-option>
+          <a-select v-model="timeRange" placeholder="Ê±¼ä·¶Î§" style="width: 120px" @change="loadRetentionData">
+            <a-option value="7">½ü7Ìì</a-option>
+            <a-option value="14">½ü14Ìì</a-option>
+            <a-option value="30">½ü30Ìì</a-option>
+            <a-option value="60">½ü60Ìì</a-option>
           </a-select>
-          <a-button @click="loadRetentionData">åˆ·æ–°</a-button>
+          <a-button @click="loadRetentionData">Ë¢ÐÂ</a-button>
         </a-space>
       </a-card>
     </div>
 
-    <!-- æ ¸å¿ƒæŒ‡æ ‡ -->
+    <!-- ºËÐÄÖ¸±ê -->
     <a-row :gutter="[16, 16]" class="stat-cards-row">
       <a-col :xs="24" :sm="8">
         <a-card class="stat-card">
-          <a-statistic title="æ¬¡æ—¥ç•™å­˜çŽ‡" :value="overviewData.day1_retention || 0" suffix="%" :precision="2" :value-from="0" :animation-duration="800">
+          <a-statistic title="´ÎÈÕÁô´æÂÊ" :value="overviewData.day1_retention || 0" suffix="%" :precision="2" :value-from="0" :animation-duration="800">
             <template #extra>
               <a-tag color="arcoblue" size="small">D+1</a-tag>
             </template>
@@ -45,7 +45,7 @@
       </a-col>
       <a-col :xs="24" :sm="8">
         <a-card class="stat-card">
-          <a-statistic title="7æ—¥ç•™å­˜çŽ‡" :value="overviewData.day7_retention || 0" suffix="%" :precision="2" :value-from="0" :animation-duration="800">
+          <a-statistic title="7ÈÕÁô´æÂÊ" :value="overviewData.day7_retention || 0" suffix="%" :precision="2" :value-from="0" :animation-duration="800">
             <template #extra>
               <a-tag color="green" size="small">D+7</a-tag>
             </template>
@@ -54,7 +54,7 @@
       </a-col>
       <a-col :xs="24" :sm="8">
         <a-card class="stat-card">
-          <a-statistic title="30æ—¥ç•™å­˜çŽ‡" :value="overviewData.day30_retention || 0" suffix="%" :precision="2" :value-from="0" :animation-duration="800">
+          <a-statistic title="30ÈÕÁô´æÂÊ" :value="overviewData.day30_retention || 0" suffix="%" :precision="2" :value-from="0" :animation-duration="800">
             <template #extra>
               <a-tag color="purple" size="small">D+30</a-tag>
             </template>
@@ -63,13 +63,13 @@
       </a-col>
     </a-row>
 
-    <!-- ç•™å­˜æ›²çº¿å›¾ -->
+    <!-- Áô´æÇúÏßÍ¼ -->
     <a-row :gutter="[16, 16]" class="charts-row">
       <a-col :span="24">
-        <a-card title="ç•™å­˜æ›²çº¿" class="chart-card">
+        <a-card title="Áô´æÇúÏß" class="chart-card">
           <template #extra>
             <a-space>
-              <a-checkbox v-model="showBenchmark">æ˜¾ç¤ºåŸºå‡†çº¿</a-checkbox>
+              <a-checkbox v-model="showBenchmark">ÏÔÊ¾»ù×¼Ïß</a-checkbox>
             </a-space>
           </template>
           <div ref="retentionCurveRef" class="chart-container-lg"></div>
@@ -77,10 +77,10 @@
       </a-col>
     </a-row>
 
-    <!-- ç•™å­˜æŠ¥è¡¨ -->
+    <!-- Áô´æ±¨±í -->
     <a-row :gutter="[16, 16]" class="charts-row">
       <a-col :xs="24" :lg="12">
-        <a-card title="ç•™å­˜æŠ¥è¡¨" class="chart-card">
+        <a-card title="Áô´æ±¨±í" class="chart-card">
           <a-table :columns="reportColumns" :data="reportData" :loading="loading" :pagination="{ pageSize: 10 }" row-key="cohort_date" size="small">
             <template #retention="{ record, column }">
               <span :style="{ color: getRetentionColor(record[column.dataIndex]) }">
@@ -88,36 +88,35 @@
               </span>
             </template>
       </a-table>
-          </a-table>
         </a-card>
       </a-col>
       <a-col :xs="24" :lg="12">
-        <a-card title="ç•™å­˜åˆ†å¸ƒ" class="chart-card">
+        <a-card title="Áô´æ·Ö²¼" class="chart-card">
           <div ref="retentionDistRef" class="chart-container"></div>
         </a-card>
       </a-col>
     </a-row>
 
-    <!-- è‡ªå®šä¹‰ç•™å­˜ -->
+    <!-- ×Ô¶¨ÒåÁô´æ -->
     <a-row :gutter="[16, 16]" class="charts-row">
       <a-col :span="24">
-        <a-card title="è‡ªå®šä¹‰ç•™å­˜åˆ†æž">
+        <a-card title="×Ô¶¨ÒåÁô´æ·ÖÎö">
           <template #extra>
             <a-space>
-              <a-button size="small" @click="loadCustomRetention">åˆ·æ–°</a-button>
+              <a-button size="small" @click="loadCustomRetention">Ë¢ÐÂ</a-button>
             </a-space>
           </template>
           <div class="custom-filter">
             <a-space wrap>
-              <a-select v-model="customEventType" placeholder="äº‹ä»¶ç±»åž‹" style="width: 140px" @change="loadCustomRetention">
-                <a-option value="login">ç™»å½•</a-option>
-                <a-option value="purchase">ä»˜è´¹</a-option>
-                <a-option value="share">åˆ†äº«</a-option>
+              <a-select v-model="customEventType" placeholder="ÊÂ¼þÀàÐÍ" style="width: 140px" @change="loadCustomRetention">
+                <a-option value="login">µÇÂ¼</a-option>
+                <a-option value="purchase">¸¶·Ñ</a-option>
+                <a-option value="share">·ÖÏí</a-option>
               </a-select>
-              <a-select v-model="customPeriod" placeholder="å‘¨æœŸ" style="width: 120px" @change="loadCustomRetention">
-                <a-option value="7">7å¤©</a-option>
-                <a-option value="14">14å¤©</a-option>
-                <a-option value="30">30å¤©</a-option>
+              <a-select v-model="customPeriod" placeholder="ÖÜÆÚ" style="width: 120px" @change="loadCustomRetention">
+                <a-option value="7">7Ìì</a-option>
+                <a-option value="14">14Ìì</a-option>
+                <a-option value="30">30Ìì</a-option>
               </a-select>
             </a-space>
           </div>
@@ -133,7 +132,7 @@ import { ref, reactive, onMounted, nextTick } from 'vue'
 import * as analytics from '@/api/analytics'
 import * as echarts from 'echarts'
 
-// çŠ¶æ€
+// ×´Ì¬
 const retentionType = ref('daily')
 const segmentType = ref('all')
 const timeRange = ref('30')
@@ -150,7 +149,7 @@ const overviewData = ref({
 const reportData = ref([])
 const retentionCurve = ref([])
 
-// å›¾è¡¨ ref
+// Í¼±í ref
 const retentionCurveRef = ref(null)
 const retentionDistRef = ref(null)
 const customRetentionChartRef = ref(null)
@@ -220,11 +219,11 @@ function renderRetentionCurve() {
   const rates = retentionCurve.value.map(d => d.rate)
   const options = {
     tooltip: { trigger: 'axis', formatter: (params) => `${params[0].name}: ${params[0].value}%` },
-    xAxis: { type: 'category', data: days, name: 'å¤©æ•°' },
-    yAxis: { type: 'value', name: 'ç•™å­˜çŽ‡(%)', min: 0, max: 100 },
+    xAxis: { type: 'category', data: days, name: 'ÌìÊý' },
+    yAxis: { type: 'value', name: 'Áô´æÂÊ(%)', min: 0, max: 100 },
     series: [
       {
-        name: 'ç•™å­˜çŽ‡',
+        name: 'Áô´æÂÊ',
         type: 'line',
         data: rates,
         smooth: true,
@@ -236,7 +235,7 @@ function renderRetentionCurve() {
   }
   if (showBenchmark.value) {
     options.series.push({
-      name: 'åŸºå‡†',
+      name: '»ù×¼',
       type: 'line',
       data: days.map(() => 30),
       smooth: true,
