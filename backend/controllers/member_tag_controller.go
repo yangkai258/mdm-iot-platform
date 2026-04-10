@@ -23,6 +23,7 @@ func NewMemberTagController(db *gorm.DB) *MemberTagController {
 // RegisterRoutes 注册会员标签路由
 func (ctrl *MemberTagController) RegisterRoutes(rg *gin.RouterGroup) {
 	rg.GET("/tags", ctrl.ListTags)
+	rg.POST("/tags", ctrl.CreateTag)
 	rg.GET("/members/:id/tags", ctrl.GetMemberTags)
 	rg.POST("/members/:id/tags", ctrl.AddMemberTag)
 	rg.DELETE("/members/:id/tags/:tag_id", ctrl.RemoveMemberTag)
@@ -61,6 +62,41 @@ func (ctrl *MemberTagController) ListTags(c *gin.Context) {
 			"page_size": pageSize,
 		},
 	})
+}
+
+// CreateTag 创建标签定义
+// POST /api/v1/tags
+func (ctrl *MemberTagController) CreateTag(c *gin.Context) {
+	tenantID := middleware.GetTenantID(c)
+
+	var req struct {
+		TagName     string `json:"tag_name" binding:"required"`
+		Description string `json:"description"`
+		Color       string `json:"color"`
+		Sort        int    `json:"sort"`
+		Status      int    `json:"status"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	tag := models.MemberTagDef{
+		TagName:     req.TagName,
+		TagColor:    req.Color,
+		Description: req.Description,
+		Sort:        req.Sort,
+		Status:      req.Status,
+		TenantID:    tenantID,
+	}
+
+	if err := ctrl.DB.Create(&tag).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "创建失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": tag})
 }
 
 // GetMemberTags 获取会员的标签
