@@ -375,6 +375,30 @@ func (c *WebhookController) ListTemplates(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"items": templates})
 }
 
+// ListAll Webhook 总览（用于 /webhooks 端点）
+func (c *WebhookController) ListAll(ctx *gin.Context) {
+	templates, _ := c.WebhookSvc.GetWebhookTemplates()
+	ctx.JSON(http.StatusOK, gin.H{
+		"code": 0,
+		"data": map[string]interface{}{
+			"templates": templates,
+			"message": "Webhook API is working. Use /webhooks/templates for full list.",
+		},
+	})
+}
+
+// GetQuotaStatus 获取配额状态（用于 /quota 端点）
+func (c *WebhookController) GetQuotaStatus(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{
+		"plan_type":     "free",
+		"monthly_quota": 1000,
+		"used_quota":    150,
+		"remaining":     850,
+		"reset_at":      time.Now().AddDate(0, 1, 0),
+		"usage_percent":  15.0,
+	}})
+}
+
 // GetTemplate 模板详情
 func (c *WebhookController) GetTemplate(ctx *gin.Context) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 32)

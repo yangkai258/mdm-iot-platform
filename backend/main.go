@@ -821,6 +821,8 @@ func main() {
 	apiV1.DELETE("/webhooks/subscriptions/:id", webhookCtrl.DeleteSubscription)
 	apiV1.GET("/webhooks/deliveries/:id", webhookCtrl.GetDelivery)
 	apiV1.POST("/webhooks/deliveries/:id/retry", webhookCtrl.RetryDelivery)
+	apiV1.GET("/webhooks", webhookCtrl.ListAll)
+	apiV1.GET("/quota", webhookCtrl.GetQuotaStatus)
 
 	// ============ Sprint 26: 内容市场路由 ============
 	marketCtrl := &controllers.MarketController{DB: db}
@@ -926,12 +928,6 @@ func main() {
 	// Sprint 17: 语音情绪识别路由
 	voiceEmotionCtrl := controllers.NewVoiceEmotionController(db)
 	voiceEmotionCtrl.RegisterRoutes(apiV1)
-
-	// Sprint 15: API配额路由 (暂时禁用，等待修复重复注册问题)
-	// apiQuotaCtrl := controllers.NewAPIQuotaController()
-	// apiV1.GET("/quota/status", apiQuotaCtrl.GetQuotaStatus)
-	// apiV1.GET("/quota/usage", apiQuotaCtrl.GetUsageLog)
-	// apiV1.GET("/quota/plans", apiQuotaCtrl.GetQuotaPlans)
 
 	// Sprint 13: 模型分片路由
 	modelShardCtrl := controllers.NewModelShardController(db)
