@@ -209,6 +209,13 @@ func main() {
 		log.Printf("FlowProcess table ready")
 	}
 
+	// Sprint 14 Phase 3: 数字孪生模型迁移
+	if err := db.AutoMigrate(&models.VitalRecord{}, &models.HealthAlert{}, &models.BehaviorEvent{}); err != nil {
+		log.Printf("Warning: Failed to migrate DigitalTwin models: %v", err)
+	} else {
+		log.Printf("DigitalTwin models ready")
+	}
+
 	// 注册租户隔离 GORM 插件
 	tenantPlugin := &plugins.TenantScopePlugin{}
 	if err := tenantPlugin.Initialize(db); err != nil {
