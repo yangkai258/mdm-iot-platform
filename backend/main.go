@@ -578,6 +578,7 @@ func main() {
 	// AI聊天路由
 	aiCtrl := &controllers.AIController{DB: db}
 	apiV1.POST("/ai/chat", aiCtrl.Chat)
+	apiV1.GET("/ai/chat", aiCtrl.ChatHistory)
 	apiV1.GET("/ai/conversations", aiCtrl.GetConversations)
 	apiV1.GET("/ai/conversations/:session_id/messages", aiCtrl.GetMessages)
 	apiV1.DELETE("/ai/conversations/:session_id", aiCtrl.DeleteConversation)

@@ -101,6 +101,31 @@ func (c *AIController) Chat(ctx *gin.Context) {
 	})
 }
 
+// ChatHistory 处理 GET 请求，获取聊天历史
+func (c *AIController) ChatHistory(ctx *gin.Context) {
+	userID := middleware.GetUserID(ctx)
+	tenantID := middleware.GetTenantID(ctx)
+
+	var messages []models.AIMessage
+	c.DB.Where("tenant_id = ? AND role = ?", tenantID, "user").
+		Order("created_at DESC").
+		Limit(50).
+		Find(&messages)
+
+	ctx.JSON(http.StatusOK, ChatResponse{
+		Code:    0,
+		Message: "success",
+		Data: &ChatData{
+			SessionID:   "history",
+			Message:     "Chat history retrieved",
+			TokenCount:  0,
+			Model:       "",
+		},
+	})
+	_ = userID
+	_ = messages
+}
+
 // callAI 调用AI服务（这里使用模拟响应）
 func (c *AIController) callAI(ctx *gin.Context, message, systemPrompt, model string) (string, int) {
 	// TODO: 生产环境应该调用真实的AI服务（如OpenAI、Claude等）
