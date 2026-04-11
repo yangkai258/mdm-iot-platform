@@ -27,6 +27,7 @@ func (ctrl *FlowProcessController) RegisterRoutes(rg *gin.RouterGroup) {
 		processes.GET("", ctrl.List)
 		processes.POST("", ctrl.Create)
 		processes.GET("/:id", ctrl.GetByID)
+		processes.PUT("/:id", ctrl.Update)
 	}
 }
 
@@ -126,6 +127,60 @@ func (ctrl *FlowProcessController) GetByID(c *gin.Context) {
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"code": 0, "message": "success", "data": process})
+}
+
+// Update 更新流程
+// PUT /api/v1/flow/processes/:id
+func (ctrl *FlowProcessController) Update(c *gin.Context) {
+	id := c.Param("id")
+	tenantID := middleware.GetTenantID(c)
+
+	var process models.FlowProcess
+	if err := ctrl.DB.Where("id = ? AND tenant_id = ?", id, tenantID).First(&process).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": "流程不存在"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "查询失败"})
+		return
+	}
+
+	var req struct {
+		ProcessName string `json:"process_name"`
+		BpmnXML     string `json:"bpmn_xml"`
+		Status      int    `json:"status"`
+		Description string `json:"description"`
+		Category    string `json:"category"`
+	}
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	updates := map[string]interface{}{}
+	if req.ProcessName != "" {
+		updates["process_name"] = req.ProcessName
+	}
+	if req.BpmnXML != "" {
+		updates["bpmn_xml"] = req.BpmnXML
+	}
+	if req.Status != 0 {
+		updates["status"] = req.Status
+	}
+	if req.Description != "" {
+		updates["description"] = req.Description
+	}
+	if req.Category != "" {
+		updates["category"] = req.Category
+	}
+
+	if err := ctrl.DB.Model(&process).Updates(updates).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败"})
 		return
 	}
 
