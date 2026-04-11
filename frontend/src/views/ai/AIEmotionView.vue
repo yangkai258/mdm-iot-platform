@@ -147,7 +147,7 @@
             <template #enabled="{ record }">
               <a-switch v-model="record.enabled" />
             </template>
-          </a-table>
+          
         </a-form-item>
       </a-form>
       <template #footer>

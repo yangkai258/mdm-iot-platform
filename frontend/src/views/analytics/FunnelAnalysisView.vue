@@ -82,8 +82,7 @@
               <span v-if="rowIndex === 0">—</span>
               <span v-else>{{ record.conversion_rate }}%</span>
             </template>
-      </a-table>
-          </a-table>
+      
         </a-card>
 
         <!-- 时间筛选 -->

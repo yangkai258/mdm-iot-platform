@@ -1,17 +1,17 @@
 <template>
   <div class="page-container">
-    <a-card class="general-card" title="AI训练流水�?>
+    <a-card class="general-card" title="AI训练任务流水">
       <template #extra>
         <a-button type="primary" @click="openCreateModal"><icon-plus />新建训练任务</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="任务名称"><a-input v-model="form.task_name" placeholder="请输�? /></a-form-item>
-          <a-form-item label="状�?>
-            <a-select v-model="form.status" placeholder="选择状�? allow-clear style="width: 140px">
-              <a-option value="pending">排队�?/a-option>
-              <a-option value="running">训练�?/a-option>
-              <a-option value="completed">已完�?/a-option>
+          <a-form-item label="任务名称"><a-input v-model="form.task_name" placeholder="请输入" /></a-form-item>
+          <a-form-item label="状态">
+            <a-select v-model="form.status" placeholder="选择状态" allow-clear style="width: 140px">
+              <a-option value="pending">排队中</a-option>
+              <a-option value="running">训练中</a-option>
+              <a-option value="completed">已完成</a-option>
               <a-option value="failed">失败</a-option>
             </a-select>
           </a-form-item>
@@ -33,9 +33,9 @@
     </a-card>
     <a-modal v-model:visible="createModalVisible" title="新建训练任务" @before-ok="handleCreate" :loading="submitting" :width="600">
       <a-form :model="trainForm" layout="vertical">
-        <a-form-item label="任务名称" required><a-input v-model="trainForm.task_name" placeholder="请输入任务名�? /></a-form-item>
-        <a-form-item label="选择数据�? required>
-          <a-select v-model="trainForm.dataset_id" placeholder="选择数据�?>
+        <a-form-item label="任务名称" required><a-input v-model="trainForm.task_name" placeholder="请输入任务名称" /></a-form-item>
+        <a-form-item label="选择数据集" required>
+          <a-select v-model="trainForm.dataset_id" placeholder="选择数据集">
             <a-option v-for="d in datasets" :key="d.id" :value="d.id">{{ d.name }} ({{ d.sample_count }}样本)</a-option>
           </a-select>
         </a-form-item>
@@ -47,7 +47,7 @@
         <a-form-item label="训练轮次">
           <a-input-number v-model="trainForm.epochs" :min="1" :max="1000" placeholder="默认10" style="width: 200px" />
         </a-form-item>
-        <a-form-item label="学习�?>
+        <a-form-item label="学习率">
           <a-input-number v-model="trainForm.learning_rate" :min="0" :max="1" :step="0.001" placeholder="默认0.001" style="width: 200px" />
         </a-form-item>
         <a-form-item label="备注"><a-textarea v-model="trainForm.description" :rows="2" placeholder="训练任务描述" /></a-form-item>
@@ -84,17 +84,17 @@ const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
   { title: '任务ID', dataIndex: 'id', width: 80 },
   { title: '任务名称', dataIndex: 'task_name', width: 180 },
-  { title: '数据�?, dataIndex: 'dataset_name', width: 140 },
+  { title: '数据集', dataIndex: 'dataset_name', width: 140 },
   { title: '基础模型', dataIndex: 'model_name', width: 120 },
-  { title: '状�?, slotName: 'status', width: 90 },
+  { title: '状态', slotName: 'status', width: 90 },
   { title: '进度', slotName: 'progress', width: 160 },
-  { title: '开始时�?, dataIndex: 'started_at', width: 170 },
+  { title: '开始时间', dataIndex: 'started_at', width: 170 },
   { title: '耗时', dataIndex: 'duration', width: 100 },
   { title: '操作', slotName: 'actions', width: 100 }
 ]
 
 const getStatusColor = (s) => ({ pending: 'orange', running: 'arcoblue', completed: 'green', failed: 'red' }[s] || 'gray')
-const getStatusText = (s) => ({ pending: '排队�?, running: '训练�?, completed: '已完�?, failed: '失败' }[s] || s)
+const getStatusText = (s) => ({ pending: '排队中', running: '训练中', completed: '已完成', failed: '失败' }[s] || s)
 
 const loadData = async () => {
   loading.value = true
@@ -114,7 +114,7 @@ const loadDatasets = async () => {
     const token = localStorage.getItem('token')
     const res = await fetch('/api/v1/ai/datasets?page_size=100', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
     datasets.value = res.data?.list || []
-  } catch (e) { console.error('加载数据集失�?, e) }
+  } catch (e) { console.error('加载数据集失败', e) }
 }
 
 const loadModels = async () => {
@@ -133,7 +133,7 @@ const handleCreate = async (done) => {
   try {
     const token = localStorage.getItem('token')
     const res = await fetch('/api/v1/ai/training/tasks', { method: 'POST', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(trainForm) }).then(r => r.json())
-    if (res.code === 0) { Message.success('训练任务已创�?); createModalVisible.value = false; loadData() }
+    if (res.code === 0) { Message.success('训练��务已创建'); createModalVisible.value = false; loadData() }
     else { Message.error(res.message || '创建失败') }
     done(true)
   } catch (e) { Message.error('创建失败'); done(false) } finally { submitting.value = false }
@@ -155,7 +155,7 @@ const retryTask = async (record) => {
   try {
     const token = localStorage.getItem('token')
     const res = await fetch(`/api/v1/ai/training/tasks/${record.id}/retry`, { method: 'POST', headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.json())
-    if (res.code === 0) { Message.success('任务已重新提�?); loadData() }
+    if (res.code === 0) { Message.success('任务已重新提交'); loadData() }
     else Message.error('重试失败')
   } catch (e) { Message.error('重试失败') }
 }

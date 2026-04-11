@@ -77,7 +77,7 @@ const handleLogin = async () => {
     })
     const data = await res.json()
     
-    if (data.code === 0) {
+    if (data.code === 0 || data.code === 20000) {
       localStorage.setItem('token', data.data.token)
       const userData = {
         id: data.data.user_id,

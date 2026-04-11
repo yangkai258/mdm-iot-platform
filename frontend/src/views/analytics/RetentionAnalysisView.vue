@@ -1,9 +1,9 @@
-﻿<template>
+<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>数据分析</a-breadcrumb-item>
+      <a-breadcrumb-item>数据统计</a-breadcrumb-item>
       <a-breadcrumb-item>留存分析</a-breadcrumb-item>
     </a-breadcrumb>
 
@@ -12,13 +12,13 @@
       <a-card class="filter-card">
         <a-space wrap>
           <a-select v-model="retentionType" placeholder="留存类型" style="width: 140px" @change="loadRetentionData">
-            <a-option value="daily">日留存</a-option>
-            <a-option value="weekly">周留存</a-option>
-            <a-option value="monthly">月留存</a-option>
+            <a-option value="daily">日报</a-option>
+            <a-option value="weekly">周报</a-option>
+            <a-option value="monthly">月报</a-option>
           </a-select>
-          <a-select v-model="segmentType" placeholder="用户群" style="width: 140px" @change="loadRetentionData">
+          <a-select v-model="segmentType" placeholder="用户群体" style="width: 140px" @change="loadRetentionData">
             <a-option value="all">全部用户</a-option>
-            <a-option value="new">新用户</a-option>
+            <a-option value="new">新增用户</a-option>
             <a-option value="active">活跃用户</a-option>
           </a-select>
           <a-select v-model="timeRange" placeholder="时间范围" style="width: 120px" @change="loadRetentionData">
@@ -32,7 +32,7 @@
       </a-card>
     </div>
 
-    <!-- 核心指标 -->
+    <!-- 统计指标 -->
     <a-row :gutter="[16, 16]" class="stat-cards-row">
       <a-col :xs="24" :sm="8">
         <a-card class="stat-card">
@@ -69,7 +69,7 @@
         <a-card title="留存曲线" class="chart-card">
           <template #extra>
             <a-space>
-              <a-checkbox v-model="showBenchmark">显示基准线</a-checkbox>
+              <a-checkbox v-model="showBenchmark">显示基准</a-checkbox>
             </a-space>
           </template>
           <div ref="retentionCurveRef" class="chart-container-lg"></div>
@@ -77,17 +77,16 @@
       </a-col>
     </a-row>
 
-    <!-- 留存报表 -->
+    <!-- 留存明细表 -->
     <a-row :gutter="[16, 16]" class="charts-row">
       <a-col :xs="24" :lg="12">
-        <a-card title="留存报表" class="chart-card">
+        <a-card title="留存明细" class="chart-card">
           <a-table :columns="reportColumns" :data="reportData" :loading="loading" :pagination="{ pageSize: 10 }" row-key="cohort_date" size="small">
             <template #retention="{ record, column }">
               <span :style="{ color: getRetentionColor(record[column.dataIndex]) }">
                 {{ record[column.dataIndex] !== null ? record[column.dataIndex] + '%' : '-' }}
               </span>
             </template>
-      </a-table>
           </a-table>
         </a-card>
       </a-col>
@@ -98,7 +97,7 @@
       </a-col>
     </a-row>
 
-    <!-- 自定义留存 -->
+    <!-- 自定义留存分析 -->
     <a-row :gutter="[16, 16]" class="charts-row">
       <a-col :span="24">
         <a-card title="自定义留存分析">
@@ -111,7 +110,7 @@
             <a-space wrap>
               <a-select v-model="customEventType" placeholder="事件类型" style="width: 140px" @change="loadCustomRetention">
                 <a-option value="login">登录</a-option>
-                <a-option value="purchase">付费</a-option>
+                <a-option value="purchase">购买</a-option>
                 <a-option value="share">分享</a-option>
               </a-select>
               <a-select v-model="customPeriod" placeholder="周期" style="width: 120px" @change="loadCustomRetention">

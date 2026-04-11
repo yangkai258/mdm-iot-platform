@@ -163,8 +163,7 @@
               {{ record.diff > 0 ? '+' : '' }}{{ record.diff?.toFixed(2) || 0 }}
             </span>
           </template>
-      </a-table>
-        </a-table>
+      
       </div>
       <a-empty v-else description="暂无对比数据" />
     </a-drawer>

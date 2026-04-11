@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="会员等级">
       <template #extra>
@@ -13,7 +13,6 @@
           <a-button type="text" size="small" @click="showEdit(record)">编辑</a-button>
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
-      </a-table>
       </a-table>
     </a-card>
     <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑等级' : '新建等级'">

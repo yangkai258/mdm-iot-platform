@@ -1,6 +1,5 @@
-﻿<template>
+<template>
   <div class="alert-list-container">
-
     <a-card class="general-card">
       <template #title><span class="card-title">告警查询</span></template>
       <a-row :gutter="16">
@@ -9,7 +8,7 @@
             <a-row :gutter="16">
               <a-col :span="8">
                 <a-form-item label="关键词">
-                  <a-input v-model="searchForm.keyword" placeholder="搜索告警内容" allow-clear />
+                  <a-input v-model="searchForm.keyword" placeholder="输入告警关键词" allow-clear />
                 </a-form-item>
               </a-col>
               <a-col :span="8">
@@ -21,7 +20,7 @@
                 <a-form-item label="状态">
                   <a-select v-model="searchForm.status" placeholder="全部" allow-clear>
                     <a-option :value="1">未处理</a-option>
-                    <a-option :value="0">已解决</a-option>
+                    <a-option :value="0">已处理</a-option>
                   </a-select>
                 </a-form-item>
               </a-col>
@@ -52,14 +51,20 @@
           新建
         </a-button>
       </template>
-      <a-table :columns="columns" :data="data" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id" />
+      <a-table :columns="columns" :data="data" :loading="loading" :pagination="paginationConfig" @page-change="onPageChange" row-key="id">
+        <template #severity="{ record }">
+          <a-tag :color="getSeverityColor(record.severity)">{{ getSeverityText(record.severity) }}</a-tag>
+        </template>
+        <template #status="{ record }">
+          <a-tag :color="record.status === 1 ? 'blue' : 'green'">{{ record.status === 1 ? '未处理' : '已处理' }}</a-tag>
+        </template>
+      </a-table>
     </a-card>
 
-      </a-table>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @ok="handleSubmit" :width="520">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="名称">
-          <a-input v-model="form.name" placeholder="请输入名称" />
+        <a-form-item label="告警名称">
+          <a-input v-model="form.name" placeholder="输入告警名称" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -73,7 +78,7 @@ import { Message } from '@arco-design/web-vue'
 const loading = ref(false)
 const modalVisible = ref(false)
 const isEdit = ref(false)
-const modalTitle = computed(() => isEdit.value ? '编辑' : '新建')
+const modalTitle = computed(() => isEdit.value ? '编辑告警' : '新建告警')
 
 const searchForm = reactive({ keyword: '', device_id: '', status: undefined })
 const form = reactive({ id: null, name: '' })
@@ -84,28 +89,43 @@ const paginationConfig = computed(() => ({ current: pagination.current, pageSize
 const columns = [
   { title: 'ID', dataIndex: 'id', width: 80 },
   { title: '设备ID', dataIndex: 'device_id', width: 160 },
-  { title: '告警内容', dataIndex: 'message', ellipsis: true },
+  { title: '告警消息', dataIndex: 'message', ellipsis: true },
   { title: '级别', slotName: 'severity', width: 100 },
   { title: '状态', slotName: 'status', width: 100 },
   { title: '时间', dataIndex: 'created_at', width: 170 }
 ]
 
+const getSeverityColor = (s) => ({ warning: 'orange', error: 'red', info: 'blue' }[s] || 'gray')
+const getSeverityText = (s) => ({ warning: '警告', error: '错误', info: '提示' }[s] || s)
+
 const getMockData = () => [
   { id: 1, device_id: 'DEV001', message: '设备电量低于20%', severity: 'warning', status: 1, created_at: '2026-03-29 10:00:00' },
-  { id: 2, device_id: 'DEV002', message: '设备离线超过5分钟', severity: 'error', status: 0, created_at: '2026-03-29 09:30:00' }
+  { id: 2, device_id: 'DEV002', message: '设备离线超过5分钟', severity: 'error', status: 0, created_at: '2026-03-29 09:30:00' },
+  { id: 3, device_id: 'DEV003', message: '温度异常', severity: 'warning', status: 1, created_at: '2026-03-29 08:00:00' }
 ]
 
 const loadData = async () => {
   loading.value = true
   try {
     const token = localStorage.getItem('token')
-    const res = await fetch(`${'/api/v1'}/alerts?page=${pagination.current}&page_size=${pagination.pageSize}`, {
+    const params = new URLSearchParams({ page: pagination.current, page_size: pagination.pageSize })
+    if (searchForm.keyword) params.append('keyword', searchForm.keyword)
+    if (searchForm.device_id) params.append('device_id', searchForm.device_id)
+    if (searchForm.status !== undefined) params.append('status', searchForm.status)
+    const res = await fetch(`/api/v1/alerts?${params}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
     const resData = await res.json()
-    if (resData.code === 0) { data.value = resData.data?.list || []; pagination.total = resData.data?.total || 0 }
-  } catch (e) { data.value = getMockData(); pagination.total = data.value.length }
-  finally { loading.value = false }
+    if (resData.code === 0) {
+      data.value = resData.data?.list || []
+      pagination.total = resData.data?.total || 0
+    }
+  } catch (e) {
+    data.value = getMockData()
+    pagination.total = data.value.length
+  } finally {
+    loading.value = false
+  }
 }
 
 const handleSearch = () => { pagination.current = 1; loadData() }
@@ -116,9 +136,11 @@ const handleSubmit = async () => {
   try {
     const token = localStorage.getItem('token')
     const method = isEdit.value ? 'PUT' : 'POST'
-    const url = isEdit.value ? `${'/api/v1'}/alerts/${form.id}` : `${'/api/v1'}/alerts`
+    const url = isEdit.value ? `/api/v1/alerts/${form.id}` : '/api/v1/alerts'
     await fetch(url, { method, headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
-    Message.success('保存成功'); modalVisible.value = false; loadData()
+    Message.success('操作成功')
+    modalVisible.value = false
+    loadData()
   } catch (e) { Message.error('操作失败') }
 }
 

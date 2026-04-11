@@ -72,7 +72,7 @@
                 <a-button type="text" size="small" @click="openCheckDetail(record)">详情</a-button>
               </a-space>
             </template>
-          </a-table>
+          
         </a-tab>
 
         <!-- 合规报告 -->
@@ -98,7 +98,7 @@
                 <a-button type="text" size="small" @click="openReportDetail(record)">详情</a-button>
               </a-space>
             </template>
-          </a-table>
+          
         </a-tab>
 
         <!-- 法规清单 -->
@@ -122,7 +122,7 @@
                 <a-button type="text" size="small" status="danger" @click="handleDeleteRegulation(record)">删除</a-button>
               </a-space>
             </template>
-          </a-table>
+          
         </a-tab>
       </a-tabs>
     </a-card>

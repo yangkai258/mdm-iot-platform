@@ -62,7 +62,7 @@
             <a-button type="text" size="small" @click="openDistribute(record)">分发</a-button>
           </a-space>
         </template>
-      </a-table>
+      
     </div>
 
     <!-- 创建应用抽屉 -->

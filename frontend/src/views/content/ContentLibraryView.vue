@@ -27,7 +27,7 @@
             <a-button size="small" type="text" @click="distribute(record)">分发</a-button>
             <a-button size="small" type="text" status="danger" @click="remove(record)">删除</a-button>
           </template>
-        </a-table>
+        
       </a-spin>
     </a-card>
   </div>

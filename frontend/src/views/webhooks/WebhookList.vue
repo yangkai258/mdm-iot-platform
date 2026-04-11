@@ -52,7 +52,7 @@
         <a-button type="text" size="small" @click="handleTest(record)">测试</a-button>
         <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
       </template>
-    </a-table>
+    
 
     <!-- 新建/编辑弹窗 -->
     <a-modal v-model:visible="modalVisible" :title="modalTitle" :width="520" @before-ok="handleSubmit" @cancel="modalVisible = false">

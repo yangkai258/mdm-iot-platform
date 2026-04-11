@@ -1,12 +1,12 @@
-﻿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="宠物朋友圈">
+    <a-card class="general-card" title="宠物动态">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="内容关键词">
+          <a-form-item label="关键词">
             <a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
@@ -23,7 +23,6 @@
         <template #actions="{ record }">
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
-      </a-table>
       </a-table>
     </a-card>
   </div>

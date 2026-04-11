@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="时区设置">
       <template #extra>
@@ -27,16 +27,15 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'">
       <a-form :model="form" layout="vertical">
         <a-form-item label="时区名称"><a-input v-model="form.timezone_name" /></a-form-item>
-        <a-form-item label="时区编码"><a-input v-model="form.timezone_code" /></a-form-item>
+        <a-form-item label="时区代码"><a-input v-model="form.timezone_code" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -55,7 +54,7 @@ const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
   { title: '时区名称', dataIndex: 'timezone_name', width: 200 },
-  { title: '时区编码', dataIndex: 'timezone_code', width: 200 },
+  { title: '时区代码', dataIndex: 'timezone_code', width: 200 },
   { title: 'GMT偏移', dataIndex: 'gmt_offset', width: 120 },
   { title: '操作', slotName: 'actions', width: 120 }
 ]

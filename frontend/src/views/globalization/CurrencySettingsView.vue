@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="货币设置">
       <template #extra>
@@ -27,17 +27,16 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'">
       <a-form :model="form" layout="vertical">
         <a-form-item label="货币名称"><a-input v-model="form.currency_name" /></a-form-item>
-        <a-form-item label="货币符号"><a-input v-model="form.currency_symbol" placeholder="如 $, ¥, €" /></a-form-item>
+        <a-form-item label="货币符号"><a-input v-model="form.currency_symbol" placeholder="如 $, €, ¥" /></a-form-item>
         <a-form-item label="货币代码"><a-input v-model="form.currency_code" placeholder="如 USD, CNY" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>

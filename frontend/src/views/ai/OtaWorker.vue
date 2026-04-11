@@ -78,7 +78,7 @@
       </a-table>
     </a-card>
 
-    <!-- 手动触发任务弹窗 -->
+    <!-- 手动触发任务对话框 -->
     <a-modal v-model:visible="triggerVisible" title="手动触发OTA任务" @ok="submitTrigger" :width="520" :loading="submitting">
       <a-form :model="triggerForm" layout="vertical">
         <a-form-item label="设备" required>

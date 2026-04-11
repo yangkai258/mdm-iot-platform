@@ -1,44 +1,44 @@
-<template>
+﻿<template>
   <div class="feature-config">
     <div class="page-header">
       <a-breadcrumb>
-        <a-breadcrumb-item>系统管理</a-breadcrumb-item>
-        <a-breadcrumb-item>功能配置</a-breadcrumb-item>
+        <a-breadcrumb-item>绯荤粺绠＄悊</a-breadcrumb-item>
+        <a-breadcrumb-item>鍔熻兘閰嶇疆</a-breadcrumb-item>
       </a-breadcrumb>
-      <h2>功能配置管理</h2>
-      <p class="subtitle">拖拽调整分组和功能的顺序，支持跨分组拖拽</p>
+      <h2>鍔熻兘閰嶇疆绠＄悊</h2>
+      <p class="subtitle">鎷栨嫿璋冩暣鍒嗙粍鍜屽姛鑳界殑椤哄簭锛屾敮鎸佽法鍒嗙粍鎷栨嫿</p>
     </div>
 
     <div class="content-wrapper">
-      <!-- 操作栏 -->
+      <!-- 鎿嶄綔鏍?-->
       <div class="toolbar">
         <a-space>
           <a-button type="primary" @click="showGroupModal()">
             <template #icon><PlusOutlined /></template>
-            新增分组
+            鏂板鍒嗙粍
           </a-button>
           <a-button @click="showFeatureModal()">
             <template #icon><AppstoreAddOutlined /></template>
-            新增功能
+            鏂板鍔熻兘
           </a-button>
           <a-divider type="vertical" />
           <a-button @click="loadData">
             <template #icon><ReloadOutlined /></template>
-            刷新
+            鍒锋柊
           </a-button>
         </a-space>
         <a-space>
-          <a-switch v-model:checked="showDisabled" checked-children="显示禁用" un-checked-children="隐藏禁用" />
+          <a-switch v-model:checked="showDisabled" checked-children="鏄剧ず绂佺敤" un-checked-children="闅愯棌绂佺敤" />
         </a-space>
       </div>
 
-      <!-- 拖拽区域 -->
+      <!-- 鎷栨嫿鍖哄煙 -->
       <div class="drag-container">
         <a-row :gutter="16">
-          <!-- 分组列表 -->
+          <!-- 鍒嗙粍鍒楄〃 -->
           <a-col :span="8">
             <div class="section-title">
-              <FolderOutlined /> 分组列表
+              <FolderOutlined /> 鍒嗙粍鍒楄〃
               <span class="count">({{ groups.length }})</span>
             </div>
             <draggable
@@ -61,8 +61,8 @@
                   <div class="group-info">
                     <div class="group-name">{{ element.group_name }}</div>
                     <div class="group-meta">
-                      <Tag v-if="element.status === 0" color="default">已禁用</Tag>
-                      <span class="feature-count">{{ element.features?.length || 0 }} 个功能</span>
+                      <Tag v-if="element.status === 0" color="default">宸茬鐢?/Tag>
+                      <span class="feature-count">{{ element.features?.length || 0 }} 涓姛鑳?/span>
                     </div>
                   </div>
                   <div class="group-actions" @click.stop>
@@ -71,7 +71,7 @@
                         <EditOutlined />
                       </a-button>
                       <a-popconfirm
-                        title="删除分组将同时删除组内所有功能，确定删除？"
+                        title="鍒犻櫎鍒嗙粍灏嗗悓鏃跺垹闄ょ粍鍐呮墍鏈夊姛鑳斤紝纭畾鍒犻櫎锛?
                         @confirm="deleteGroup(element.id)"
                       >
                         <a-button type="text" danger size="small">
@@ -88,17 +88,17 @@
             </draggable>
           </a-col>
 
-          <!-- 功能列表 -->
+          <!-- 鍔熻兘鍒楄〃 -->
           <a-col :span="16">
             <div class="section-title">
-              <AppstoreOutlined /> 功能列表
+              <AppstoreOutlined /> 鍔熻兘鍒楄〃
               <span class="count">({{ currentFeatures.length }})</span>
               <span v-if="selectedGroup" class="current-group">- {{ selectedGroup.group_name }}</span>
             </div>
 
             <div v-if="!selectedGroup" class="empty-hint">
               <InfoCircleOutlined />
-              请从左侧选择一个分组，或直接拖拽功能到分组卡片上
+              璇蜂粠宸︿晶閫夋嫨涓€涓垎缁勶紝鎴栫洿鎺ユ嫋鎷藉姛鑳藉埌鍒嗙粍鍗＄墖涓?
             </div>
 
             <draggable
@@ -123,11 +123,11 @@
                     <div class="feature-name">
                       {{ element.feature_name }}
                       <a-tag v-if="element.badge" color="processing" size="small">{{ element.badge }}</a-tag>
-                      <Tag v-if="element.is_default === 1" color="gold" size="small">默认</Tag>
-                      <Tag v-if="element.status === 0" color="default" size="small">禁用</Tag>
+                      <Tag v-if="element.is_default === 1" color="gold" size="small">榛樿</Tag>
+                      <Tag v-if="element.status === 0" color="default" size="small">绂佺敤</Tag>
                     </div>
                     <div class="feature-meta">
-                      <span class="route">{{ element.route_path || '无路由' }}</span>
+                      <span class="route">{{ element.route_path || '鏃犺矾鐢? }}</span>
                       <span v-if="element.permission" class="permission">{{ element.permission }}</span>
                     </div>
                   </div>
@@ -142,7 +142,7 @@
                         <EditOutlined />
                       </a-button>
                       <a-popconfirm
-                        title="确定删除此功能？"
+                        title="纭畾鍒犻櫎姝ゅ姛鑳斤紵"
                         @confirm="deleteFeature(element.id)"
                       >
                         <a-button type="text" danger size="small">
@@ -158,10 +158,10 @@
               </template>
             </draggable>
 
-            <!-- 未分组功能 -->
+            <!-- 鏈垎缁勫姛鑳?-->
             <div v-if="ungroupedFeatures.length > 0" class="ungrouped-section">
               <div class="section-title">
-                <UnorderedListOutlined /> 未分组功能
+                <UnorderedListOutlined /> 鏈垎缁勫姛鑳?
                 <span class="count">({{ ungroupedFeatures.length }})</span>
               </div>
               <draggable
@@ -185,7 +185,7 @@
                         <a-tag v-if="element.badge" color="processing" size="small">{{ element.badge }}</a-tag>
                       </div>
                       <div class="feature-meta">
-                        <span class="route">{{ element.route_path || '无路由' }}</span>
+                        <span class="route">{{ element.route_path || '鏃犺矾鐢? }}</span>
                       </div>
                     </div>
                     <div class="feature-actions" @click.stop>
@@ -193,7 +193,7 @@
                         <EditOutlined />
                       </a-button>
                       <a-popconfirm
-                        title="确定删除此功能？"
+                        title="纭畾鍒犻櫎姝ゅ姛鑳斤紵"
                         @confirm="deleteFeature(element.id)"
                       >
                         <a-button type="text" danger size="small">
@@ -213,22 +213,22 @@
       </div>
     </div>
 
-    <!-- 分组编辑弹窗 -->
+    <!-- 鍒嗙粍缂栬緫寮圭獥 -->
     <a-modal
       v-model:open="groupModalVisible"
-      :title="editingGroup ? '编辑分组' : '新增分组'"
+      :title="editingGroup ? '缂栬緫鍒嗙粍' : '鏂板鍒嗙粍'"
       @ok="saveGroup"
       width="500px"
     >
       <a-form :model="groupForm" layout="vertical">
-        <a-form-item label="分组名称" required>
-          <a-input v-model:value="groupForm.group_name" placeholder="请输入分组名称" />
+        <a-form-item label="鍒嗙粍鍚嶇О" required>
+          <a-input v-model:value="groupForm.group_name" placeholder="璇疯緭鍏ュ垎缁勫悕绉" />
         </a-form-item>
-        <a-form-item label="分组编码">
-          <a-input v-model:value="groupForm.group_code" placeholder="唯一编码，不填自动生成" />
+        <a-form-item label="鍒嗙粍缂栫爜">
+          <a-input v-model:value="groupForm.group_code" placeholder="鍞竴缂栫爜锛屼笉濉嚜鍔ㄧ敓鎴" />
         </a-form-item>
-        <a-form-item label="图标">
-          <a-select v-model:value="groupForm.icon" placeholder="选择图标" allow-clear>
+        <a-form-item label="鍥炬爣">
+          <a-select v-model:value="groupForm.icon" placeholder="閫夋嫨鍥炬爣" allow-clear>
             <a-select-option value="Folder">Folder</a-select-option>
             <a-select-option value="FolderOpen">FolderOpen</a-select-option>
             <a-select-option value="Cpu">Cpu</a-select-option>
@@ -243,47 +243,47 @@
             <a-select-option value="Key">Key</a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="颜色">
+        <a-form-item label="棰滆壊">
           <color-picker v-model="groupForm.color" />
         </a-form-item>
-        <a-form-item label="描述">
+        <a-form-item label="鎻忚堪">
           <a-textarea v-model:value="groupForm.description" :rows="2" />
         </a-form-item>
-        <a-form-item label="状态">
+        <a-form-item label="鐘舵€?>
           <a-radio-group v-model:value="groupForm.status">
-            <a-radio :value="1">启用</a-radio>
-            <a-radio :value="0">禁用</a-radio>
+            <a-radio :value="1">鍚敤</a-radio>
+            <a-radio :value="0">绂佺敤</a-radio>
           </a-radio-group>
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <!-- 功能编辑弹窗 -->
+    <!-- 鍔熻兘缂栬緫寮圭獥 -->
     <a-modal
       v-model:open="featureModalVisible"
-      :title="editingFeature ? '编辑功能' : '新增功能'"
+      :title="editingFeature ? '缂栬緫鍔熻兘' : '鏂板鍔熻兘'"
       @ok="saveFeature"
       width="600px"
     >
       <a-form :model="featureForm" layout="vertical">
-        <a-form-item label="所属分组">
-          <a-select v-model:value="featureForm.group_id" placeholder="选择分组">
-            <a-select-option :value="undefined">无（未分组）</a-select-option>
+        <a-form-item label="鎵€灞炲垎缁?>
+          <a-select v-model:value="featureForm.group_id" placeholder="閫夋嫨鍒嗙粍">
+            <a-select-option :value="undefined">鏃狅紙鏈垎缁勶級</a-select-option>
             <a-select-option v-for="g in groups" :key="g.id" :value="g.id">
               {{ g.group_name }}
             </a-select-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="功能名称" required>
-          <a-input v-model:value="featureForm.feature_name" placeholder="请输入功能名称" />
+        <a-form-item label="鍔熻兘鍚嶇О" required>
+          <a-input v-model:value="featureForm.feature_name" placeholder="璇疯緭鍏ュ姛鑳藉悕绉" />
         </a-form-item>
-        <a-form-item label="功能编码">
-          <a-input v-model:value="featureForm.feature_code" placeholder="唯一编码" />
+        <a-form-item label="鍔熻兘缂栫爜">
+          <a-input v-model:value="featureForm.feature_code" placeholder="鍞竴缂栫爜" />
         </a-form-item>
         <a-row :gutter="8">
           <a-col :span="12">
-            <a-form-item label="图标">
-              <a-select v-model:value="featureForm.icon" placeholder="选择图标" allow-clear>
+            <a-form-item label="鍥炬爣">
+              <a-select v-model:value="featureForm.icon" placeholder="閫夋嫨鍥炬爣" allow-clear>
                 <a-select-option value="Home">Home</a-select-option>
                 <a-select-option value="User">User</a-select-option>
                 <a-select-option value="Setting">Setting</a-select-option>
@@ -300,37 +300,37 @@
             </a-form-item>
           </a-col>
           <a-col :span="12">
-            <a-form-item label="排序">
+            <a-form-item label="鎺掑簭">
               <a-input-number v-model:value="featureForm.sort" :min="0" />
             </a-form-item>
           </a-col>
         </a-row>
-        <a-form-item label="路由路径">
+        <a-form-item label="璺敱璺緞">
           <a-input v-model:value="featureForm.route_path" placeholder="/path/to/page" />
         </a-form-item>
-        <a-form-item label="组件路径">
+        <a-form-item label="缁勪欢璺緞">
           <a-input v-model:value="featureForm.component" placeholder="ComponentNameView" />
         </a-form-item>
-        <a-form-item label="权限编码">
+        <a-form-item label="鏉冮檺缂栫爜">
           <a-input v-model:value="featureForm.permission" placeholder="module:action" />
         </a-form-item>
-        <a-form-item label="徽章">
-          <a-input v-model:value="featureForm.badge" placeholder="如：新、Beta、Hot" />
+        <a-form-item label="寰界珷">
+          <a-input v-model:value="featureForm.badge" placeholder="濡傦細鏂般€丅eta銆丠ot" />
         </a-form-item>
-        <a-form-item label="描述">
+        <a-form-item label="鎻忚堪">
           <a-textarea v-model:value="featureForm.description" :rows="2" />
         </a-form-item>
         <a-row :gutter="8">
           <a-col :span="8">
-            <a-form-item label="状态">
+            <a-form-item label="鐘舵€?>
               <a-radio-group v-model:value="featureForm.status">
-                <a-radio :value="1">启用</a-radio>
-                <a-radio :value="0">禁用</a-radio>
+                <a-radio :value="1">鍚敤</a-radio>
+                <a-radio :value="0">绂佺敤</a-radio>
               </a-radio-group>
             </a-form-item>
           </a-col>
           <a-col :span="8">
-            <a-form-item label="默认选中">
+            <a-form-item label="榛樿閫変腑">
               <a-switch v-model:checked="featureForm.is_default" />
             </a-form-item>
           </a-col>
@@ -472,10 +472,10 @@ const loadData = async () => {
         selectedGroup.value = groups.value[0]
       }
     } else {
-      message.error(data.message || '加载数据失败')
+      message.error(data.message || '鍔犺浇鏁版嵁澶辫触')
     }
   } catch (err) {
-    message.error('加载数据失败: ' + err.message)
+    message.error('鍔犺浇鏁版嵁澶辫触: ' + err.message)
   } finally {
     loading.value = false
   }
@@ -511,7 +511,7 @@ const showGroupModal = (group = null) => {
 
 const saveGroup = async () => {
   if (!groupForm.group_name) {
-    message.warning('请输入分组名称')
+    message.warning('璇疯緭鍏ュ垎缁勫悕绉?)
     return
   }
 
@@ -532,14 +532,14 @@ const saveGroup = async () => {
     const data = await res.json()
 
     if (data.code === 0) {
-      message.success('保存成功')
+      message.success('淇濆瓨鎴愬姛')
       groupModalVisible.value = false
       loadData()
     } else {
-      message.error(data.message || '保存失败')
+      message.error(data.message || '淇濆瓨澶辫触')
     }
   } catch (err) {
-    message.error('保存失败: ' + err.message)
+    message.error('淇濆瓨澶辫触: ' + err.message)
   }
 }
 
@@ -551,16 +551,16 @@ const deleteGroup = async (id) => {
     })
     const data = await res.json()
     if (data.code === 0) {
-      message.success('删除成功')
+      message.success('鍒犻櫎鎴愬姛')
       if (selectedGroup.value?.id === id) {
         selectedGroup.value = null
       }
       loadData()
     } else {
-      message.error(data.message || '删除失败')
+      message.error(data.message || '鍒犻櫎澶辫触')
     }
   } catch (err) {
-    message.error('删除失败: ' + err.message)
+    message.error('鍒犻櫎澶辫触: ' + err.message)
   }
 }
 
@@ -602,7 +602,7 @@ const showFeatureModal = (feature = null) => {
 
 const saveFeature = async () => {
   if (!featureForm.feature_name) {
-    message.warning('请输入功能名称')
+    message.warning('璇疯緭鍏ュ姛鑳藉悕绉?)
     return
   }
 
@@ -628,14 +628,14 @@ const saveFeature = async () => {
     const data = await res.json()
 
     if (data.code === 0) {
-      message.success('保存成功')
+      message.success('淇濆瓨鎴愬姛')
       featureModalVisible.value = false
       loadData()
     } else {
-      message.error(data.message || '保存失败')
+      message.error(data.message || '淇濆瓨澶辫触')
     }
   } catch (err) {
-    message.error('保存失败: ' + err.message)
+    message.error('淇濆瓨澶辫触: ' + err.message)
   }
 }
 
@@ -647,13 +647,13 @@ const deleteFeature = async (id) => {
     })
     const data = await res.json()
     if (data.code === 0) {
-      message.success('删除成功')
+      message.success('鍒犻櫎鎴愬姛')
       loadData()
     } else {
-      message.error(data.message || '删除失败')
+      message.error(data.message || '鍒犻櫎澶辫触')
     }
   } catch (err) {
-    message.error('删除失败: ' + err.message)
+    message.error('鍒犻櫎澶辫触: ' + err.message)
   }
 }
 
@@ -670,11 +670,11 @@ const toggleFeatureStatus = async (feature, checked) => {
     })
     const data = await res.json()
     if (data.code !== 0) {
-      message.error('更新状态失败')
+      message.error('鏇存柊鐘舵€佸け璐?)
       feature.status = checked ? 0 : 1
     }
   } catch (err) {
-    message.error('更新状态失败: ' + err.message)
+    message.error('鏇存柊鐘舵€佸け璐? ' + err.message)
     feature.status = checked ? 0 : 1
   }
 }
@@ -703,7 +703,7 @@ const onGroupReorder = async () => {
       body: JSON.stringify({ items })
     })
   } catch (err) {
-    message.error('保存排序失败')
+    message.error('淇濆瓨鎺掑簭澶辫触')
   }
 }
 
@@ -732,7 +732,7 @@ const onFeatureReorder = async () => {
       body: JSON.stringify({ items })
     })
   } catch (err) {
-    message.error('保存排序失败')
+    message.error('淇濆瓨鎺掑簭澶辫触')
   }
 }
 

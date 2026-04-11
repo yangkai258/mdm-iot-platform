@@ -1,12 +1,12 @@
-﻿<template>
+<template>
   <div class="pro-page-container">
 
-    <!-- 搜索表单 -->
+    <!-- 搜索栏 -->
     <div class="pro-search-bar">
       <a-space wrap>
         <a-input-search v-model="form.user_id" placeholder="用户ID" style="width: 160px" @search="loadData" search-button />
         <a-select v-model="form.status" placeholder="订阅状态" allow-clear style="width: 150px" @change="loadData">
-          <a-option value="active">生效中</a-option>
+          <a-option value="active">有效</a-option>
           <a-option value="expired">已过期</a-option>
           <a-option value="cancelled">已取消</a-option>
           <a-option value="suspended">已暂停</a-option>
@@ -70,7 +70,7 @@
           <a-input-number v-model="createForm.user_id" :min="1" placeholder="请输入用户ID" style="width: 100%" />
         </a-form-item>
         <a-form-item label="计划名称" required>
-          <a-input v-model="createForm.plan_name" placeholder="例如：年度高级版" />
+          <a-input v-model="createForm.plan_name" placeholder="例如：高级套餐" />
         </a-form-item>
         <a-form-item label="计划类型" required>
           <a-select v-model="createForm.plan_type" placeholder="选择计划类型">
@@ -78,7 +78,7 @@
             <a-option value="yearly">年付</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="价格（元）" required>
+        <a-form-item label="价格(元)" required>
           <a-input-number v-model="createForm.price" :min="0" :precision="2" placeholder="例如：299.00" style="width: 100%" />
         </a-form-item>
         <a-form-item label="时长（天）">
@@ -93,7 +93,7 @@
         <a-form-item label="订阅ID">
           <a-input :value="String(selectedSub?.id)" disabled />
         </a-form-item>
-        <a-form-item label="当前到期日期">
+        <a-form-item label="当前到期日">
           <a-input :value="formatDate(selectedSub?.end_date)" disabled />
         </a-form-item>
         <a-form-item label="续费时长（天）" required>
@@ -122,7 +122,7 @@
           <a-switch :model-value="currentSub.auto_renew" disabled />
         </a-descriptions-item>
         <a-descriptions-item label="续费次数">{{ currentSub.renew_count || 0 }}</a-descriptions-item>
-        <a-descriptions-item label="最后续费时间">{{ formatDate(currentSub.last_renew_at) }}</a-descriptions-item>
+        <a-descriptions-item label="上次续费时间">{{ formatDate(currentSub.last_renew_at) }}</a-descriptions-item>
       </a-descriptions>
 
       <!-- 续费历史 -->
@@ -131,7 +131,6 @@
         <template #status="{ record }">
           <a-tag :color="record.status === 'success' ? 'green' : 'red'">{{ record.status === 'success' ? '成功' : '失败' }}</a-tag>
         </template>
-      </a-table>
       </a-table>
     </a-modal>
   </div>
@@ -178,7 +177,7 @@ const renewalLogColumns = [
 
 const getToken = () => localStorage.getItem('token')
 const getStatusColor = (s) => ({ active: 'green', expired: 'red', cancelled: 'gray', suspended: 'orange' }[s] || 'gray')
-const getStatusText = (s) => ({ active: '生效中', expired: '已过期', cancelled: '已取消', suspended: '已暂停' }[s] || s)
+const getStatusText = (s) => ({ active: '有效', expired: '已过期', cancelled: '已取消', suspended: '已暂停' }[s] || s)
 const formatDate = (d) => d ? new Date(d).toLocaleString('zh-CN') : '-'
 
 const loadData = async () => {

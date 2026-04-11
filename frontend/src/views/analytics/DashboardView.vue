@@ -1,19 +1,19 @@
-﻿<template>
+<template>
   <div class="pro-page-container">
     <!-- 面包屑 -->
     <a-breadcrumb class="pro-breadcrumb">
       <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>数据分析</a-breadcrumb-item>
-      <a-breadcrumb-item>分析仪表板</a-breadcrumb-item>
+      <a-breadcrumb-item>数据统计</a-breadcrumb-item>
+      <a-breadcrumb-item>数据大盘</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- Tab 切换区 -->
+    <!-- Tab 切换 -->
     <div class="pro-tabs-bar">
       <a-tabs v-model:active-tab="activeTab" @change="onTabChange">
         <a-tab-pane key="dashboard" title="Dashboard" />
         <a-tab-pane key="devices" title="设备统计" />
         <a-tab-pane key="ota" title="OTA统计" />
-        <a-tab-pane key="members" title="会员分析" />
+        <a-tab-pane key="members" title="会员统计" />
         <a-tab-pane key="alerts" title="告警统计" />
       </a-tabs>
     </div>
@@ -23,7 +23,7 @@
       <a-card class="filter-card">
         <a-space wrap>
           <a-select v-model="timeRange" placeholder="时间范围" style="width: 120px" @change="loadData">
-            <a-option value="today">今日</a-option>
+            <a-option value="today">今天</a-option>
             <a-option value="week">近7天</a-option>
             <a-option value="month">近30天</a-option>
           </a-select>
@@ -35,17 +35,17 @@
 
     <!-- Dashboard Tab -->
     <div v-show="activeTab === 'dashboard'">
-      <!-- 核心指标卡片 -->
+      <!-- 统计指标卡片 -->
       <a-row :gutter="[16, 16]" class="stat-cards-row">
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="设备总量" :value="stats.devices?.total || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="设备总数" :value="stats.devices?.total || 0" :value-from="0" :animation-duration="800">
               <template #extra>
                 <a-tag color="arcoblue" size="small">设备</a-tag>
               </template>
             </a-statistic>
             <div class="stat-trend" v-if="deviceTrend.length >= 2">
-              <span class="trend-label">较上期:</span>
+              <span class="trend-label">变化:</span>
               <span :class="deviceTrendDelta >= 0 ? 'trend-up' : 'trend-down'">
                 {{ deviceTrendDelta >= 0 ? '+' : '' }}{{ deviceTrendDelta }}
               </span>
@@ -76,7 +76,7 @@
         </a-col>
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="今日告警" :value="stats.alerts?.total_today || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="待处理告警" :value="stats.alerts?.total_today || 0" :value-from="0" :animation-duration="800">
               <template #extra>
                 <a-tag color="orangered" size="small">告警</a-tag>
               </template>
@@ -93,7 +93,7 @@
       <a-row :gutter="[16, 16]" class="stat-cards-row">
         <a-col :xs="24" :sm="12" :md="6">
           <a-card class="stat-card">
-            <a-statistic title="会员总量" :value="stats.members?.total || 0" :value-from="0" :animation-duration="800">
+            <a-statistic title="会员总数" :value="stats.members?.total || 0" :value-from="0" :animation-duration="800">
               <template #extra>
                 <a-tag color="purple" size="small">会员</a-tag>
               </template>
@@ -132,7 +132,7 @@
       <!-- 图表区 -->
       <a-row :gutter="[16, 16]" class="charts-row">
         <a-col :xs="24" :lg="12">
-          <a-card title="设备在线趋势" class="chart-card">
+          <a-card title="设备趋势统计" class="chart-card">
             <template #extra>
               <a-select v-model="deviceGranularity" style="width: 100px" @change="loadDeviceTrend">
                 <a-option value="day">按天</a-option>
@@ -157,7 +157,7 @@
           </a-card>
         </a-col>
         <a-col :xs="24" :lg="12">
-          <a-card title="OTA升级成功率趋势" class="chart-card">
+          <a-card title="OTA成功率趋势" class="chart-card">
             <div ref="otaTrendChartRef" class="chart-container"></div>
           </a-card>
         </a-col>
@@ -228,19 +228,18 @@
               <template #status="{ record }">
                 <a-tag :color="getOtaStatusColor(record.status)">{{ record.status }}</a-tag>
               </template>
-      </a-table>
             </a-table>
           </a-card>
         </a-col>
       </a-row>
     </div>
 
-    <!-- 会员分析 Tab -->
+    <!-- 会员统计 Tab -->
     <div v-show="activeTab === 'members'">
       <a-row :gutter="[16, 16]">
         <a-col :xs="24" :sm="8">
           <a-card class="stat-card">
-            <a-statistic title="会员总量" :value="memberOverview.total || 0" />
+            <a-statistic title="会员总数" :value="memberOverview.total || 0" />
           </a-card>
         </a-col>
         <a-col :xs="24" :sm="8">

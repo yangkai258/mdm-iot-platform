@@ -1,12 +1,12 @@
-﻿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="宠物关注管理">
+    <a-card class="general-card" title="关注列表">
       <template #extra>
         <a-button @click="loadData"><icon-refresh />刷新</a-button>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="关键词">
+          <a-form-item label="关键字">
             <a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
@@ -24,7 +24,6 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">{{ record.status === 1 ? '取消关注' : '删除' }}</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
   </div>
 </template>
@@ -40,7 +39,7 @@ const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
   { title: '用户ID', dataIndex: 'user_id', width: 100 },
-  { title: '被关注宠物ID', dataIndex: 'target_pet_id', width: 140 },
+  { title: '关注宠物ID', dataIndex: 'target_pet_id', width: 140 },
   { title: '关注时间', dataIndex: 'created_at', width: 170 },
   { title: '状态', slotName: 'status', width: 100 },
   { title: '操作', slotName: 'actions', width: 100 }

@@ -1,78 +1,78 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
-    <!-- 面包屑 -->
+    <!-- 闈㈠寘灞?-->
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>设备管理</a-breadcrumb-item>
-      <a-breadcrumb-item>证书管理</a-breadcrumb-item>
+      <a-breadcrumb-item>棣栭〉</a-breadcrumb-item>
+      <a-breadcrumb-item>璁惧绠＄悊</a-breadcrumb-item>
+      <a-breadcrumb-item>璇佷功绠＄悊</a-breadcrumb-item>
     </a-breadcrumb>
 
-    <!-- 统计卡片 -->
+    <!-- 缁熻鍗＄墖 -->
     <a-row :gutter="16" class="stat-row">
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
-          <a-statistic :value="stats.total" title="证书总数">
+          <a-statistic :value="stats.total" title="璇佷功鎬绘暟">
             <template #icon><icon-certificate style="font-size: 24px; color: #1650d8" /></template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
-          <a-statistic :value="stats.active" title="有效证书">
+          <a-statistic :value="stats.active" title="鏈夋晥璇佷功">
             <template #icon><icon-check-circle style="font-size: 24px; color: #00b42a" /></template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
-          <a-statistic :value="stats.expiring" title="即将到期">
+          <a-statistic :value="stats.expiring" title="鍗冲皢鍒版湡">
             <template #icon><icon-clock style="font-size: 24px; color: #ff7d00" /></template>
           </a-statistic>
         </a-card>
       </a-col>
       <a-col :span="6">
         <a-card class="stat-card" hoverable>
-          <a-statistic :value="stats.revoked" title="已吊销">
+          <a-statistic :value="stats.revoked" title="宸插悐閿€">
             <template #icon><icon-close-circle style="font-size: 24px; color: #f53f3f" /></template>
           </a-statistic>
         </a-card>
       </a-col>
     </a-row>
 
-    <!-- 搜索栏 -->
+    <!-- 鎼滅储鏍?-->
     <div class="pro-search-bar">
       <a-space wrap>
         <a-input-search
           v-model="searchKeyword"
-          placeholder="搜索证书名称/序列号/主题"
+          placeholder="鎼滅储璇佷功鍚嶇О/搴忓垪鍙?涓婚"
           style="width: 260px"
           @search="loadCertificates"
           search-button
         />
-        <a-select v-model="filterType" placeholder="证书类型" allow-clear style="width: 140px" @change="loadCertificates">
-          <a-option value="device">设备证书</a-option>
-          <a-option value="client">客户端证书</a-option>
-          <a-option value="server">服务器证书</a-option>
-          <a-option value="ca">CA证书</a-option>
+        <a-select v-model="filterType" placeholder="璇佷功绫诲瀷" allow-clear style="width: 140px" @change="loadCertificates">
+          <a-option value="device">璁惧璇佷功</a-option>
+          <a-option value="client">瀹㈡埛绔瘉涔?/a-option>
+          <a-option value="server">鏈嶅姟鍣ㄨ瘉涔?/a-option>
+          <a-option value="ca">CA璇佷功</a-option>
         </a-select>
-        <a-select v-model="filterStatus" placeholder="证书状态" allow-clear style="width: 130px" @change="loadCertificates">
-          <a-option value="active">有效</a-option>
-          <a-option value="expired">已过期</a-option>
-          <a-option value="revoked">已吊销</a-option>
-          <a-option value="pending">待激活</a-option>
+        <a-select v-model="filterStatus" placeholder="璇佷功鐘舵€" allow-clear style="width: 130px" @change="loadCertificates">
+          <a-option value="active">鏈夋晥</a-option>
+          <a-option value="expired">宸茶繃鏈?/a-option>
+          <a-option value="revoked">宸插悐閿€</a-option>
+          <a-option value="pending">寰呮縺娲?/a-option>
         </a-select>
       </a-space>
     </div>
 
-    <!-- 操作按钮组 -->
+    <!-- 鎿嶄綔鎸夐挳缁?-->
     <div class="pro-action-bar">
       <a-space>
-        <a-button type="primary" @click="showCreateModal">新建证书</a-button>
-        <a-button @click="loadCertificates">刷新</a-button>
+        <a-button type="primary" @click="showCreateModal">鏂板缓璇佷功</a-button>
+        <a-button @click="loadCertificates">鍒锋柊</a-button>
       </a-space>
     </div>
 
-    <!-- 证书列表 -->
+    <!-- 璇佷功鍒楄〃 -->
     <div class="pro-content-area">
       <a-table
         :columns="columns"
@@ -100,30 +100,30 @@
         </template>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="text" size="small" @click="showDetailModal(record)">详情</a-button>
-            <a-button type="text" size="small" @click="downloadCert(record)">下载</a-button>
-            <a-button type="text" size="small" status="danger" @click="revokeCert(record)" :disabled="record.status === 'revoked'">吊销</a-button>
-            <a-button type="text" size="small" status="danger" @click="deleteCert(record)">删除</a-button>
+            <a-button type="text" size="small" @click="showDetailModal(record)">璇︽儏</a-button>
+            <a-button type="text" size="small" @click="downloadCert(record)">涓嬭浇</a-button>
+            <a-button type="text" size="small" status="danger" @click="revokeCert(record)" :disabled="record.status === 'revoked'">鍚婇攢</a-button>
+            <a-button type="text" size="small" status="danger" @click="deleteCert(record)">鍒犻櫎</a-button>
           </a-space>
         </template>
       </a-table>
     </div>
 
-    <!-- 新建证书弹窗 -->
-    <a-modal v-model:visible="createModalVisible" title="新建证书" :width="560" :loading="submitting" @before-ok="handleCreate" @cancel="createModalVisible = false">
+    <!-- 鏂板缓璇佷功寮圭獥 -->
+    <a-modal v-model:visible="createModalVisible" title="鏂板缓璇佷功" :width="560" :loading="submitting" @before-ok="handleCreate" @cancel="createModalVisible = false">
       <a-form :model="createForm" layout="vertical">
-        <a-form-item label="证书名称" required>
-          <a-input v-model="createForm.cert_name" placeholder="请输入证书名称" />
+        <a-form-item label="璇佷功鍚嶇О" required>
+          <a-input v-model="createForm.cert_name" placeholder="璇疯緭鍏ヨ瘉涔﹀悕绉" />
         </a-form-item>
-        <a-form-item label="证书类型" required>
-          <a-select v-model="createForm.cert_type" placeholder="选择证书类型">
-            <a-option value="device">设备证书</a-option>
-            <a-option value="client">客户端证书</a-option>
-            <a-option value="server">服务器证书</a-option>
-            <a-option value="ca">CA证书</a-option>
+        <a-form-item label="璇佷功绫诲瀷" required>
+          <a-select v-model="createForm.cert_type" placeholder="閫夋嫨璇佷功绫诲瀷">
+            <a-option value="device">璁惧璇佷功</a-option>
+            <a-option value="client">瀹㈡埛绔瘉涔?/a-option>
+            <a-option value="server">鏈嶅姟鍣ㄨ瘉涔?/a-option>
+            <a-option value="ca">CA璇佷功</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="证书文件 (PEM)" required>
+        <a-form-item label="璇佷功鏂囦欢 (PEM)" required>
           <a-upload
             :limit="1"
             :auto-upload="false"
@@ -132,12 +132,12 @@
           >
             <template #upload-button>
               <div class="upload-trigger">
-                <icon-upload /> 点击上传 PEM 证书文件
+                <icon-upload /> 鐐瑰嚮涓婁紶 PEM 璇佷功鏂囦欢
               </div>
             </template>
           </a-upload>
         </a-form-item>
-        <a-form-item label="私钥文件 (PEM)" required>
+        <a-form-item label="绉侀挜鏂囦欢 (PEM)" required>
           <a-upload
             :limit="1"
             :auto-upload="false"
@@ -146,42 +146,42 @@
           >
             <template #upload-button>
               <div class="upload-trigger">
-                <icon-upload /> 点击上传 PEM 私钥文件
+                <icon-upload /> 鐐瑰嚮涓婁紶 PEM 绉侀挜鏂囦欢
               </div>
             </template>
           </a-upload>
         </a-form-item>
-        <a-form-item label="到期提醒天数">
-          <a-input-number v-model="createForm.notify_days" :min="1" :max="365" placeholder="默认30天" style="width: 200px" />
-          <span class="form-tip">证书到期前多少天发送提醒</span>
+        <a-form-item label="鍒版湡鎻愰啋澶╂暟">
+          <a-input-number v-model="createForm.notify_days" :min="1" :max="365" placeholder="榛樿30澶" style="width: 200px" />
+          <span class="form-tip">璇佷功鍒版湡鍓嶅灏戝ぉ鍙戦€佹彁閱?/span>
         </a-form-item>
-        <a-form-item label="描述">
-          <a-textarea v-model="createForm.description" placeholder="可选描述信息" :rows="2" />
+        <a-form-item label="鎻忚堪">
+          <a-textarea v-model="createForm.description" placeholder="鍙€夋弿杩颁俊鎭" :rows="2" />
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <!-- 证书详情弹窗 -->
-    <a-modal v-model:visible="detailModalVisible" title="证书详情" :width="600" :footer="null">
+    <!-- 璇佷功璇︽儏寮圭獥 -->
+    <a-modal v-model:visible="detailModalVisible" title="璇佷功璇︽儏" :width="600" :footer="null">
       <a-descriptions :column="2" bordered>
-        <a-descriptions-item label="证书名称">{{ currentCert?.cert_name }}</a-descriptions-item>
-        <a-descriptions-item label="证书类型">
+        <a-descriptions-item label="璇佷功鍚嶇О">{{ currentCert?.cert_name }}</a-descriptions-item>
+        <a-descriptions-item label="璇佷功绫诲瀷">
           <a-tag :color="getTypeColor(currentCert?.cert_type)">{{ getTypeText(currentCert?.cert_type) }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="序列号" :span="2">
+        <a-descriptions-item label="搴忓垪鍙? :span="2">
           <a-tooltip :content="currentCert?.serial_number">{{ currentCert?.serial_number }}</a-tooltip>
         </a-descriptions-item>
-        <a-descriptions-item label="主题 (Subject)" :span="2">{{ currentCert?.subject }}</a-descriptions-item>
-        <a-descriptions-item label="颁发者 (Issuer)" :span="2">{{ currentCert?.issuer }}</a-descriptions-item>
-        <a-descriptions-item label="SHA1指纹" :span="2">
+        <a-descriptions-item label="涓婚 (Subject)" :span="2">{{ currentCert?.subject }}</a-descriptions-item>
+        <a-descriptions-item label="棰佸彂鑰?(Issuer)" :span="2">{{ currentCert?.issuer }}</a-descriptions-item>
+        <a-descriptions-item label="SHA1鎸囩汗" :span="2">
           <a-tooltip :content="currentCert?.thumbprint">{{ currentCert?.thumbprint }}</a-tooltip>
         </a-descriptions-item>
-        <a-descriptions-item label="生效时间">{{ formatDate(currentCert?.not_before) }}</a-descriptions-item>
-        <a-descriptions-item label="到期时间">{{ formatDate(currentCert?.not_after) }}</a-descriptions-item>
-        <a-descriptions-item label="状态">
+        <a-descriptions-item label="鐢熸晥鏃堕棿">{{ formatDate(currentCert?.not_before) }}</a-descriptions-item>
+        <a-descriptions-item label="鍒版湡鏃堕棿">{{ formatDate(currentCert?.not_after) }}</a-descriptions-item>
+        <a-descriptions-item label="鐘舵€?>
           <a-tag :color="getStatusColor(currentCert?.status)">{{ getStatusText(currentCert?.status) }}</a-tag>
         </a-descriptions-item>
-        <a-descriptions-item label="描述" :span="2">{{ currentCert?.description || '-' }}</a-descriptions-item>
+        <a-descriptions-item label="鎻忚堪" :span="2">{{ currentCert?.description || '-' }}</a-descriptions-item>
       </a-descriptions>
     </a-modal>
   </div>
@@ -216,19 +216,19 @@ const createForm = reactive({
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 
 const columns = [
-  { title: '证书名称', slotName: 'cert_name', ellipsis: true },
-  { title: '证书类型', slotName: 'cert_type', width: 110 },
-  { title: '序列号', dataIndex: 'serial_number', ellipsis: true, width: 160 },
-  { title: '主题', dataIndex: 'subject', ellipsis: true, width: 140 },
-  { title: '有效期', slotName: 'validity', width: 220 },
-  { title: '状态', slotName: 'status', width: 90 },
-  { title: '操作', slotName: 'actions', width: 220, fixed: 'right' }
+  { title: '璇佷功鍚嶇О', slotName: 'cert_name', ellipsis: true },
+  { title: '璇佷功绫诲瀷', slotName: 'cert_type', width: 110 },
+  { title: '搴忓垪鍙?, dataIndex: 'serial_number', ellipsis: true, width: 160 },
+  { title: '涓婚', dataIndex: 'subject', ellipsis: true, width: 140 },
+  { title: '鏈夋晥鏈?, slotName: 'validity', width: 220 },
+  { title: '鐘舵€?, slotName: 'status', width: 90 },
+  { title: '鎿嶄綔', slotName: 'actions', width: 220, fixed: 'right' }
 ]
 
 const getTypeColor = (t) => ({ device: 'blue', client: 'green', server: 'orange', ca: 'purple' }[t] || 'gray')
-const getTypeText = (t) => ({ device: '设备证书', client: '客户端证书', server: '服务器证书', ca: 'CA证书' }[t] || t)
+const getTypeText = (t) => ({ device: '璁惧璇佷功', client: '瀹㈡埛绔瘉涔?, server: '鏈嶅姟鍣ㄨ瘉涔?, ca: 'CA璇佷功' }[t] || t)
 const getStatusColor = (s) => ({ active: 'green', expired: 'red', revoked: 'orange', pending: 'blue' }[s] || 'gray')
-const getStatusText = (s) => ({ active: '有效', expired: '已过期', revoked: '已吊销', pending: '待激活' }[s] || s)
+const getStatusText = (s) => ({ active: '鏈夋晥', expired: '宸茶繃鏈?, revoked: '宸插悐閿€', pending: '寰呮縺娲? }[s] || s)
 const isExpiringSoon = (dateStr) => {
   if (!dateStr) return false
   const expiry = new Date(dateStr)
@@ -255,10 +255,10 @@ const loadCertificates = async () => {
       certificates.value = json.data.list || []
       pagination.total = json.data.total || 0
     }
-    // 加载统计
+    // 鍔犺浇缁熻
     loadStats()
   } catch (e) {
-    Message.error('加载证书列表失败')
+    Message.error('鍔犺浇璇佷功鍒楄〃澶辫触')
   } finally {
     loading.value = false
   }
@@ -291,12 +291,12 @@ const handleFileChange = (files, type) => {
 
 const handleCreate = async (done) => {
   if (!createForm.cert_name || !createForm.cert_type) {
-    Message.warning('请填写证书名称和类型')
+    Message.warning('璇峰～鍐欒瘉涔﹀悕绉板拰绫诲瀷')
     done(false)
     return
   }
   if (!certFile.value || !keyFile.value) {
-    Message.warning('请上传证书文件和私钥文件')
+    Message.warning('璇蜂笂浼犺瘉涔︽枃浠跺拰绉侀挜鏂囦欢')
     done(false)
     return
   }
@@ -317,16 +317,16 @@ const handleCreate = async (done) => {
     })
     const json = await res.json()
     if (json.code === 0) {
-      Message.success('证书创建成功')
+      Message.success('璇佷功鍒涘缓鎴愬姛')
       createModalVisible.value = false
       loadCertificates()
       done(true)
     } else {
-      Message.error(json.message || '创建失败')
+      Message.error(json.message || '鍒涘缓澶辫触')
       done(false)
     }
   } catch (e) {
-    Message.error('创建失败')
+    Message.error('鍒涘缓澶辫触')
     done(false)
   } finally {
     submitting.value = false
@@ -369,28 +369,28 @@ const downloadCert = async (record) => {
     a.download = `certificate-${record.cert_name || record.id}.pem`
     a.click()
     URL.revokeObjectURL(url)
-    Message.success('下载成功')
+    Message.success('涓嬭浇鎴愬姛')
   } catch (e) {
-    Message.error('下载失败')
+    Message.error('涓嬭浇澶辫触')
   }
 }
 
 const revokeCert = async (record) => {
   Modal.warning({
-    title: '确认吊销证书',
-    content: `确定要吊销证书「${record.cert_name}」吗？此操作不可逆。`,
-    okText: '确认吊销',
+    title: '纭鍚婇攢璇佷功',
+    content: `纭畾瑕佸悐閿€璇佷功銆?{record.cert_name}銆嶅悧锛熸鎿嶄綔涓嶅彲閫嗐€俙,
+    okText: '纭鍚婇攢',
     onOk: async () => {
       try {
         const res = await revokeCertificate(record.id)
         if (res.code === 0) {
-          Message.success('证书已吊销')
+          Message.success('璇佷功宸插悐閿€')
           loadCertificates()
         } else {
-          Message.error(res.message || '吊销失败')
+          Message.error(res.message || '鍚婇攢澶辫触')
         }
       } catch (e) {
-        Message.error('吊销失败')
+        Message.error('鍚婇攢澶辫触')
       }
     }
   })
@@ -398,20 +398,20 @@ const revokeCert = async (record) => {
 
 const deleteCert = async (record) => {
   Modal.warning({
-    title: '确认删除证书',
-    content: `确定要删除证书「${record.cert_name}」吗？此操作不可逆。`,
-    okText: '确认删除',
+    title: '纭鍒犻櫎璇佷功',
+    content: `纭畾瑕佸垹闄よ瘉涔︺€?{record.cert_name}銆嶅悧锛熸鎿嶄綔涓嶅彲閫嗐€俙,
+    okText: '纭鍒犻櫎',
     onOk: async () => {
       try {
         const res = await deleteCertificate(record.id)
         if (res.code === 0) {
-          Message.success('证书已删除')
+          Message.success('璇佷功宸插垹闄?)
           loadCertificates()
         } else {
-          Message.error(res.message || '删除失败')
+          Message.error(res.message || '鍒犻櫎澶辫触')
         }
       } catch (e) {
-        Message.error('删除失败')
+        Message.error('鍒犻櫎澶辫触')
       }
     }
   })

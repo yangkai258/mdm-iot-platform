@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="宠物约会">
       <template #extra>
@@ -9,7 +9,7 @@
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
+          <a-form-item label="关键字"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
@@ -25,7 +25,6 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model="formVisible" title="新建约会" :width="560">
       <a-form :model="form" layout="vertical">
@@ -34,7 +33,7 @@
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>

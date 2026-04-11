@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="门店管理">
       <template #extra>
@@ -26,7 +26,6 @@
           <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
-      </a-table>
       </a-table>
     </a-card>
     <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑门店' : '新建门店'">

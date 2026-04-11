@@ -1,17 +1,17 @@
 <template>
   <div class="page-container">
-    <a-card class="general-card" title="动作�?>
+    <a-card class="general-card" title="动作库">
       <template #extra>
         <a-button type="primary" @click="handleCreate"><icon-plus />新建动作</a-button>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="动作名称"><a-input v-model="form.action_name" placeholder="请输�? /></a-form-item>
+          <a-form-item label="动作名称"><a-input v-model="form.action_name" placeholder="请输入" /></a-form-item>
           <a-form-item label="类型">
             <a-select v-model="form.action_type" placeholder="选择类型" allow-clear style="width: 120px">
               <a-option value="built-in">内置</a-option>
               <a-option value="learned">学习</a-option>
-              <a-option value="custom">自定�?/a-option>
+              <a-option value="custom">自定义</a-option>
             </a-select>
           </a-form-item>
           <a-form-item><a-button type="primary" @click="handleSearch">查询</a-button><a-button @click="handleReset">重置</a-button></a-form-item>
@@ -27,27 +27,27 @@
     </a-card>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleSubmit" :width="560">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="动作名称" required><a-input v-model="form.action_name" placeholder="请输入动作名�? /></a-form-item>
+        <a-form-item label="动作名称" required><a-input v-model="form.action_name" placeholder="请输入动作名称" /></a-form-item>
         <a-form-item label="描述"><a-textarea v-model="form.description" :rows="3" placeholder="动作描述" /></a-form-item>
-        <a-form-item label="触发条件"><a-input v-model="form.trigger_condition" placeholder="�? temperature > 30" /></a-form-item>
+        <a-form-item label="触发条件"><a-input v-model="form.trigger_condition" placeholder='"temperature > 30"' /></a-form-item>
         <a-form-item label="类型">
           <a-select v-model="form.action_type" placeholder="选择类型">
             <a-option value="built-in">内置</a-option>
             <a-option value="learned">学习</a-option>
-            <a-option value="custom">自定�?/a-option>
+            <a-option value="custom">自定义</a-option>
           </a-select>
         </a-form-item>
         <a-form-item label="难度">
           <a-select v-model="form.difficulty" placeholder="选择难度">
-            <a-option value="easy">简�?/a-option>
+            <a-option value="easy">简单</a-option>
             <a-option value="medium">中等</a-option>
             <a-option value="hard">困难</a-option>
           </a-select>
         </a-form-item>
         <a-form-item label="标签">
           <a-select v-model="form.tags" multiple placeholder="选择标签" allow-create>
-            <a-option value="dance">舞蹈</a-option>
-            <a-option value="greeting">问�?/a-option>
+            <a-option value="dance">跳舞</a-option>
+            <a-option value="greeting">打招呼</a-option>
             <a-option value="exercise">运动</a-option>
           </a-select>
         </a-form-item>

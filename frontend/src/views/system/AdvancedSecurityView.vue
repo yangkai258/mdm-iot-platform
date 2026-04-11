@@ -4,13 +4,13 @@
       <a-tabs>
         <a-tab-pane key="policy" tab="安全策略">
           <a-form :model="policyForm" layout="vertical" style="max-width: 600px">
-            <a-form-item label="密码复杂度要�?>
+            <a-form-item label="密码复杂度要求">
               <a-switch v-model="policyForm.passwordComplexity" />
             </a-form-item>
-            <a-form-item label="最小密码长�?>
+            <a-form-item label="最小密码长度">
               <a-input-number v-model="policyForm.minPasswordLength" :min="6" :max="32" style="width: 100%" />
             </a-form-item>
-            <a-form-item label="密码有效�?�?">
+            <a-form-item label="密码有效期(天)">
               <a-input-number v-model="policyForm.passwordExpireDays" :min="0" style="width: 100%" />
             </a-form-item>
             <a-form-item label="会话超时(分钟)">
@@ -22,7 +22,7 @@
             <a-form-item label="登录失败锁定">
               <a-switch v-model="policyForm.lockAfterFailed" />
             </a-form-item>
-            <a-form-item label="最大登录尝试次�?>
+            <a-form-item label="最大登录尝试次数">
               <a-input-number v-model="policyForm.maxLoginAttempts" :min="3" :max="10" style="width: 100%" />
             </a-form-item>
             <a-form-item>
@@ -33,7 +33,7 @@
         <a-tab-pane key="login" tab="登录日志">
           <div class="search-form">
             <a-form :model="logForm" layout="inline">
-              <a-form-item label="用户�?>
+              <a-form-item label="用户">
                 <a-input v-model="logForm.username" placeholder="请输入用户名" style="width: 140px" />
               </a-form-item>
               <a-form-item label="日期">
@@ -76,10 +76,10 @@ const policyForm = reactive({
 
 const logColumns = [
   { title: '时间', dataIndex: 'time', width: 180 },
-  { title: '用户�?, dataIndex: 'username', width: 140 },
+  { title: '用户', dataIndex: 'username', width: 140 },
   { title: 'IP地址', dataIndex: 'ip', width: 140 },
   { title: '登录方式', dataIndex: 'method', width: 100 },
-  { title: '状�?, slotName: 'status', width: 80 },
+  { title: '状态', slotName: 'status', width: 80 },
   { title: '备注', dataIndex: 'remark', ellipsis: true }
 ]
 
@@ -106,7 +106,7 @@ const loadMockLogs = () => {
 }
 
 const handleSavePolicy = () => {
-  Message.success('安全策略已保�?)
+  Message.success('安全策略已保存')
 }
 
 const onPageChange = (page) => {

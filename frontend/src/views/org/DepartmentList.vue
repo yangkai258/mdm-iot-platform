@@ -1,6 +1,6 @@
-﻿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="部门管理">
+    <a-card class="general-card" title="部门列表">
       <template #extra>
         <a-space>
           <a-button type="primary" @click="openCreate(null)"><icon-plus />新建部门</a-button>
@@ -10,11 +10,10 @@
       <a-spin :loading="loading">
         <a-table :columns="columns" :data="data" :loading="loading" row-key="id">
           <template #actions="{ record }">
-            <a-button type="text" size="small" @click="openCreate(record)">新增子部门</a-button>
+            <a-button type="text" size="small" @click="openCreate(record)">添加子部门</a-button>
             <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
             <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
           </template>
-      </a-table>
         </a-table>
       </a-spin>
     </a-card>
@@ -57,10 +56,27 @@ const loadData = async () => {
   } catch { data.value = [] } finally { loading.value = false }
 }
 
-const openCreate = (parent) => { isEdit.value = false; Object.assign(form, { name: '', code: '', sort: 0, parent_id: parent?.id || null }); parentDeptName.value = parent?.name || '-'; formVisible.value = true }
-const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); parentDeptName.value = '-'; formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
-const handleDelete = () => { Message.success('删除成功'); loadData() }
+const openCreate = (parent) => { 
+  isEdit.value = false; 
+  Object.assign(form, { name: '', code: '', sort: 0, parent_id: parent?.id || null }); 
+  parentDeptName.value = parent?.name || '-'; 
+  formVisible.value = true 
+}
+const openEdit = (record) => { 
+  isEdit.value = true; 
+  Object.assign(form, record); 
+  parentDeptName.value = '-'; 
+  formVisible.value = true 
+}
+const handleSubmit = () => { 
+  formVisible.value = false; 
+  Message.success(isEdit.value ? '更新成功' : '创建成功'); 
+  loadData() 
+}
+const handleDelete = () => { 
+  Message.success('删除成功'); 
+  loadData() 
+}
 
 onMounted(() => loadData())
 </script>

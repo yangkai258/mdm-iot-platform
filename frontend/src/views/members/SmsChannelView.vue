@@ -1,6 +1,6 @@
-﻿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="短信通道">
+    <a-card class="general-card" title="短信渠道">
       <template #extra>
         <a-space>
           <a-button type="primary" @click="openCreate"><icon-plus />新建</a-button>
@@ -26,17 +26,16 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'" :width="560">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="通道名称"><a-input v-model="form.name" /></a-form-item>
-        <a-form-item label="通道类型"><a-input v-model="form.channel_type" /></a-form-item>
+        <a-form-item label="渠道名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="渠道类型"><a-input v-model="form.channel_type" /></a-form-item>
         <a-form-item label="API Key"><a-input v-model="form.api_key" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -54,8 +53,8 @@ const form = reactive({ keyword: '', name: '', channel_type: '', api_key: '' })
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: '通道名称', dataIndex: 'name', width: 180 },
-  { title: '通道类型', dataIndex: 'channel_type', width: 120 },
+  { title: '渠道名称', dataIndex: 'name', width: 180 },
+  { title: '渠道类型', dataIndex: 'channel_type', width: 120 },
   { title: '状态', slotName: 'status', width: 90 },
   { title: '操作', slotName: 'actions', width: 120 }
 ]

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="内容审核">
       <template #extra>
@@ -22,7 +22,6 @@
           <a-button v-if="record.status === 'pending'" type="text" size="small" @click="handleApprove(record)">通过</a-button>
           <a-button v-if="record.status === 'pending'" type="text" size="small" status="danger" @click="handleReject(record)">拒绝</a-button>
         </template>
-      </a-table>
       </a-table>
     </a-card>
   </div>

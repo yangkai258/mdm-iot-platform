@@ -14,7 +14,7 @@
     </a-card>
   </div>
 </template>
-      </a-table>
+      
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'

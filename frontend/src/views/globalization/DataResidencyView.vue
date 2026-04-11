@@ -45,7 +45,7 @@
           <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
-      </a-table>
+      
     </a-card>
     <a-modal v-model:visible="formVisible" :title="editingRule ? '编辑规则' : '添加规则'" :width="520">
       <a-form :model="form" label-col-flex="100px">

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="区域节点">
       <template #extra>
@@ -27,12 +27,11 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'">
       <a-form :model="form" layout="vertical">
         <a-form-item label="区域名称"><a-input v-model="form.region_name" /></a-form-item>
-        <a-form-item label="区域编码"><a-input v-model="form.region_code" /></a-form-item>
+        <a-form-item label="区域代码"><a-input v-model="form.region_code" /></a-form-item>
         <a-form-item label="节点类型">
           <a-select v-model="form.node_type" style="width: 100%">
             <a-option value="primary">主节点</a-option>
@@ -44,7 +43,7 @@
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -63,7 +62,7 @@ const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
   { title: '区域名称', dataIndex: 'region_name', width: 200 },
-  { title: '区域编码', dataIndex: 'region_code', width: 140 },
+  { title: '区域代码', dataIndex: 'region_code', width: 140 },
   { title: '节点类型', dataIndex: 'node_type', width: 120 },
   { title: 'AI节点数', dataIndex: 'ai_node_count', width: 100 },
   { title: '状态', dataIndex: 'status', width: 90 },

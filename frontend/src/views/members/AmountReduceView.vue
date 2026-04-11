@@ -1,6 +1,6 @@
-﻿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="满额减">
+    <a-card class="general-card" title="满额减免">
       <template #extra>
         <a-space :size="12">
           <a-button type="primary" @click="showCreateDrawer"><icon-plus />新建</a-button>
@@ -27,7 +27,6 @@
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
@@ -35,7 +34,7 @@
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleFormSubmit">确定</a-button>
+        <a-button type="primary" @click="handleFormSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -58,7 +57,7 @@ const form = reactive({ name: '', threshold: 0, reduceAmount: 0, perLimit: 0 })
 const modalTitle = computed(() => isEdit.value ? '编辑' : '新建')
 const columns = [
   { title: '活动名称', dataIndex: 'name', width: 200 },
-  { title: '满额减规则', slotName: 'rule', width: 260 },
+  { title: '消费满', slotName: 'rule', width: 260 },
   { title: '适用商品', dataIndex: 'productName', width: 160, ellipsis: true },
   { title: '时间范围', dataIndex: 'dateRange', width: 220 },
   { title: '状态', slotName: 'status', width: 90 },

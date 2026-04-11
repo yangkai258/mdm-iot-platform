@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="买赠活动">
       <template #extra>
@@ -27,7 +27,6 @@
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model:visible="modalVisible" :title="modalTitle">
       <a-form :model="form" label-col-flex="100px">
@@ -35,7 +34,7 @@
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleFormSubmit">确定</a-button>
+        <a-button type="primary" @click="handleFormSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -58,7 +57,7 @@ const form = reactive({ name: '', buyCount: 1, giftCount: 1, giftName: '' })
 const modalTitle = computed(() => isEdit.value ? '编辑' : '新建')
 const columns = [
   { title: '活动名称', dataIndex: 'name', width: 200 },
-  { title: '买赠规则', slotName: 'rule', width: 280 },
+  { title: '购买数量', slotName: 'rule', width: 280 },
   { title: '适用商品', dataIndex: 'productName', width: 160, ellipsis: true },
   { title: '时间范围', dataIndex: 'dateRange', width: 220 },
   { title: '状态', slotName: 'status', width: 90 },
@@ -71,7 +70,7 @@ const loadData = async () => {
     const res = await fetch(`/api/v1/members/promotions/buy-gift?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${filters.keyword}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
-    dataList.value = res.data?.list || [{ id: 1, name: '买一送一', buyCount: 1, giftCount: 1, giftName: '同款商品', productName: '全场商品', dateRange: '2026-03-01 至 2026-06-30', status: 'active' }]
+    dataList.value = res.data?.list || [{ id: 1, name: '买一送一', buyCount: 1, giftCount: 1, giftName: '同款商品', productName: '全部商品', dateRange: '2026-03-01 至 2026-06-30', status: 'active' }]
     pagination.total = res.data?.total || 1
   } catch { dataList.value = [] } finally { loading.value = false }
 }

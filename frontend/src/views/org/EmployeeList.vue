@@ -1,6 +1,6 @@
-﻿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="员工管理">
+    <a-card class="general-card" title="员工列表">
       <template #extra>
         <a-space>
           <a-button type="primary" @click="openCreate"><icon-plus />新建员工</a-button>
@@ -25,12 +25,11 @@
       </a-row>
       <a-divider style="margin: 16px 0 0 0" />
       <a-table :columns="columns" :data="data" :loading="loading" :pagination="pagination" @page-change="onPageChange" row-key="id" style="margin-top: 16px">
-        <template #status="{ record }"><a-badge :color="record.status === 1 ? 'green' : 'red'" :text="record.status === 1 ? '正常' : '禁用'" /></template>
+        <template #status="{ record }"><a-badge :color="record.status === 1 ? 'green' : 'red'" :text="record.status === 1 ? '在职' : '离职'" /></template>
         <template #actions="{ record }">
           <a-button type="text" size="small" @click="openEdit(record)">编辑</a-button>
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
-      </a-table>
       </a-table>
     </a-card>
     <a-modal v-model="formVisible" :title="isEdit ? '编辑员工' : '新建员工'" :width="560" @ok="handleSubmit">
@@ -98,10 +97,25 @@ const loadPosts = async () => {
   postOptions.value = (res.data?.list || []).map(p => ({ label: p.name, value: p.id }))
 }
 
-const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', employee_no: '', phone: '', department_id: null, post_id: null, status: true }); formVisible.value = true }
-const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
-const handleDelete = () => { Message.success('删除成功'); loadData() }
+const openCreate = () => { 
+  isEdit.value = false; 
+  Object.assign(form, { name: '', employee_no: '', phone: '', department_id: null, post_id: null, status: true }); 
+  formVisible.value = true 
+}
+const openEdit = (record) => { 
+  isEdit.value = true; 
+  Object.assign(form, record); 
+  formVisible.value = true 
+}
+const handleSubmit = () => { 
+  formVisible.value = false; 
+  Message.success(isEdit.value ? '更新成功' : '创建成功'); 
+  loadData() 
+}
+const handleDelete = () => { 
+  Message.success('删除成功'); 
+  loadData() 
+}
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => { loadData(); loadDepts(); loadPosts() })

@@ -45,7 +45,7 @@
         <template #status="{ record }">
           <a-tag :color="getStatusColor(record.status)">{{ getStatusName(record.status) }}</a-tag>
         </template>
-      </a-table>
+      
     </a-card>
   </div>
 </template>

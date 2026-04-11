@@ -60,7 +60,7 @@
             <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
-      </a-table>
+      
     </div>
 
     <!-- 事件详情抽屉 -->

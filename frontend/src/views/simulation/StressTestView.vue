@@ -28,7 +28,7 @@
             <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
           </a-space>
         </template>
-      </a-table>
+      
 
       <div class="pro-pagination" v-if="total > 0">
         <a-pagination :total="total" :current="page" :page-size="pageSize" show-total @page-size-change="onPageSizeChange" @change="onPageChange" />

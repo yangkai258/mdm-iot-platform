@@ -19,7 +19,7 @@
         <a-select v-model="childFilter" placeholder="閫夋嫨鍎跨璐﹀彿" allow-clear style="width: 200px" @change="loadChildModes">
           <a-option v-for="c in children" :key="c.id" :value="c.id">{{ c.name }}</a-option>
         </a-select>
-        <a-select v-model="statusFilter" placeholder="妯″紡鐘舵€? allow-clear style="width: 140px" @change="loadChildModes">
+        <a-select v-model="statusFilter" placeholder="妯″紡鐘舵€" allow-clear style="width: 140px" @change="loadChildModes">
           <a-option value="enabled">宸插惎鐢?/a-option>
           <a-option value="disabled">宸茬鐢?/a-option>
         </a-select>

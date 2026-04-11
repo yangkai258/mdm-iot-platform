@@ -18,7 +18,7 @@
             <a-button type="text" size="small" status="danger" @click="handleDelete(record)">「删除」</a-button>
           </a-space>
         </template>
-      </a-table>
+      
     </a-card>
 
     <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑岗位' : '新建岗位'" @before-ok="submitForm">

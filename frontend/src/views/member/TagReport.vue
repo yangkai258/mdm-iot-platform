@@ -46,7 +46,7 @@
         <template #percentage="{ record }">
           <a-progress :percent="record.percentage || 0" :show-text="true" :format="(p) => p.toFixed(1) + '%'" size="small" />
         </template>
-      </a-table>
+      
     </a-card>
 
     <!-- 标签操作流水 -->
@@ -69,7 +69,7 @@
         <template #createTime="{ record }">
           {{ formatTime(record.createTime) }}
         </template>
-      </a-table>
+      
     </a-card>
   </div>
 </template>

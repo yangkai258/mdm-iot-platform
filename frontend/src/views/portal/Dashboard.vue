@@ -171,8 +171,7 @@
             <template #severity="{ record }">
               <a-tag :color="getSeverityColor(record.severity)">{{ record.severity_text }}</a-tag>
             </template>
-      </a-table>
-          </a-table>
+      
         </a-card>
       </a-col>
     </a-row>

@@ -22,7 +22,7 @@
           <a-button type="text" size="small" @click="openEditModal(record)">编辑</a-button>
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
-      </a-table>
+      
     </a-card>
     <a-drawer v-model="drawerVisible" :title="drawerTitle" :width="560" @before-ok="handleSubmit">
       <a-form :model="form" :rules="formRules" layout="vertical">

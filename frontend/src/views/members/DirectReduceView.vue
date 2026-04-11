@@ -1,6 +1,6 @@
-﻿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="直接减免">
+    <a-card class="general-card" title="直减优惠">
       <template #extra>
         <a-space :size="12">
           <a-button type="primary" @click="showCreateDrawer"><icon-plus />新建</a-button>
@@ -27,7 +27,6 @@
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model:visible="formVisible" :title="isEdit ? '编辑活动' : '新建活动'">
       <a-form :model="form" label-col-flex="100px">
@@ -37,7 +36,7 @@
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleFormSubmit">确定</a-button>
+        <a-button type="primary" @click="handleFormSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -69,7 +68,7 @@ const columns = [
 
 const loadData = async () => {
   loading.value = true
-  try { dataList.value = [{ id: 1, name: '新品直降', reduceAmount: 30, minConsume: 100, productName: '新品专区', dateRange: '2026-03-01 至 2026-04-30', status: 'active' }]; pagination.total = 1 }
+  try { dataList.value = [{ id: 1, name: '商品直减', reduceAmount: 30, minConsume: 100, productName: '商品专享', dateRange: '2026-03-01 至 2026-04-30', status: 'active' }]; pagination.total = 1 }
   catch { dataList.value = [] } finally { loading.value = false }
 }
 

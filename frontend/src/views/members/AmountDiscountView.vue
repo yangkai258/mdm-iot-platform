@@ -1,6 +1,6 @@
-﻿<template>
+<template>
   <div class="container">
-    <a-card class="general-card" title="满额折">
+    <a-card class="general-card" title="满减优惠">
       <template #extra>
         <a-space :size="12">
           <a-button type="primary" @click="showCreateDrawer"><icon-plus />新建</a-button>
@@ -27,7 +27,6 @@
           <a-button type="text" size="small" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model:visible="modalVisible" :title="modalTitle" @before-ok="handleFormSubmit" @cancel="modalVisible = false">
       <a-form :model="form" label-col-flex="100px">
@@ -35,7 +34,7 @@
       </a-form>
       <template #footer>
         <a-button @click="modalVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleFormSubmit">确定</a-button>
+        <a-button type="primary" @click="handleFormSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -58,7 +57,7 @@ const form = reactive({ name: '', threshold: 0, discountRate: 1, perLimit: 0, pr
 const modalTitle = computed(() => isEdit.value ? '编辑' : '新建')
 const columns = [
   { title: '活动名称', dataIndex: 'name', width: 200 },
-  { title: '满额折规则', slotName: 'rule', width: 260 },
+  { title: '消费满', slotName: 'rule', width: 260 },
   { title: '适用商品', dataIndex: 'productName', width: 160, ellipsis: true },
   { title: '时间范围', dataIndex: 'dateRange', width: 220 },
   { title: '状态', slotName: 'status', width: 90 },
@@ -71,7 +70,7 @@ const loadData = async () => {
     const res = await fetch(`/api/v1/members/promotions/amount-discount?page=${pagination.current}&page_size=${pagination.pageSize}&keyword=${filters.keyword}`, {
       headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
     }).then(r => r.json())
-    dataList.value = res.data?.list || [{ id: 1, name: '满200打8折', threshold: 200, discountRate: 0.8, productName: '全场商品', dateRange: '2026-01-01 至 2026-12-31', status: 'active' }]
+    dataList.value = res.data?.list || [{ id: 1, name: '满200享8折', threshold: 200, discountRate: 0.8, productName: '全部商品', dateRange: '2026-01-01 至 2026-12-31', status: 'active' }]
     pagination.total = res.data?.total || 1
   } catch { dataList.value = [] } finally { loading.value = false }
 }

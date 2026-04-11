@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="策略列表">
       <template #extra>
@@ -9,7 +9,7 @@
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="关键词"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
+          <a-form-item label="关键字"><a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" /></a-form-item>
         </a-col>
         <a-col :flex="'86px'" style="display: flex; align-items: flex-end">
           <a-space direction="vertical" :size="8">
@@ -26,7 +26,6 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
     <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建'" :width="560">
       <a-form :model="form" layout="vertical">
@@ -36,7 +35,7 @@
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -69,10 +68,25 @@ const loadData = async () => {
     pagination.total = data.value.length
   } catch { data.value = [] } finally { loading.value = false }
 }
-const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', policy_type: '', description: '' }); formVisible.value = true }
-const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
-const handleDelete = () => { Message.success('删除成功'); loadData() }
+const openCreate = () => { 
+  isEdit.value = false; 
+  Object.assign(form, { name: '', policy_type: '', description: '' }); 
+  formVisible.value = true 
+}
+const openEdit = (record) => { 
+  isEdit.value = true; 
+  Object.assign(form, record); 
+  formVisible.value = true 
+}
+const handleSubmit = () => { 
+  formVisible.value = false; 
+  Message.success(isEdit.value ? '更新成功' : '创建成功'); 
+  loadData() 
+}
+const handleDelete = () => { 
+  Message.success('删除成功'); 
+  loadData() 
+}
 const onPageChange = (page) => { pagination.current = page; loadData() }
 onMounted(() => loadData())
 </script>

@@ -61,7 +61,7 @@
             <a-button type="text" size="small" status="danger" @click="handleDelete(record)" v-if="record.status === 'pending'">删除</a-button>
           </a-space>
         </template>
-      </a-table>
+      
     </a-card>
 
     <!-- 发送通知抽屉 -->

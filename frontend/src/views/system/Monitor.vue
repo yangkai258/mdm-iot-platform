@@ -46,7 +46,7 @@
         </template>
       </a-table>
         <template #uptime="{ record }">{{ record.uptime || '-' }}</template>
-      </a-table>
+      
     </a-card>
 
     <a-card class="general-card" style="margin-top: 16px">

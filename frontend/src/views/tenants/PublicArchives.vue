@@ -16,7 +16,7 @@
             <a-button type="text" size="small" @click="edit(record)">编辑</a-button>
           </a-space>
         </template>
-      </a-table>
+      
     </a-card>
   </div>
 </template>

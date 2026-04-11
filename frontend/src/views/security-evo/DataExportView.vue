@@ -83,7 +83,7 @@
                 <a-button type="text" size="small" status="danger" @click="deleteTask(record)">删除</a-button>
               </a-space>
             </template>
-          </a-table>
+          
         </a-tab>
 
         <!-- 下载管理 -->
@@ -107,7 +107,7 @@
                 <a-button type="text" size="small" status="danger" @click="deleteTask(record)">删除</a-button>
               </a-space>
             </template>
-          </a-table>
+          
         </a-tab>
       </a-tabs>
     </a-card>

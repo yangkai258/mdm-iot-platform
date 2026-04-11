@@ -198,7 +198,7 @@
           </a-select>
         </a-form-item>
         <a-form-item label="椋熺墿鍚嶇О" required>
-          <a-input v-model="recordForm.food_name" placeholder="璇疯緭鍏ラ鐗╁悕绉? />
+          <a-input v-model="recordForm.food_name" placeholder="璇疯緭鍏ラ鐗╁悕绉" />
         </a-form-item>
         <a-form-item label="椋熺墿鍝佺墝">
           <a-input v-model="recordForm.food_brand" placeholder="璇疯緭鍏ラ鐗╁搧鐗岋紙鍙€夛級" />
@@ -241,7 +241,7 @@
           <a-input-number v-model="recordForm.calories" :min="0" :precision="0" style="width: 100%" placeholder="璇疯緭鍏ョ儹閲忓€硷紙鍙€夛級" />
         </a-form-item>
         <a-form-item label="澶囨敞">
-          <a-textarea v-model="recordForm.notes" placeholder="璇疯緭鍏ュ娉? :rows="2" />
+          <a-textarea v-model="recordForm.notes" placeholder="璇疯緭鍏ュ娉" :rows="2" />
         </a-form-item>
       </a-form>
     </a-modal>

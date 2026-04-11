@@ -42,7 +42,7 @@
         <template #actions="{ record }">
           <a-button type="text" size="small" @click="goToPromo(record.code)">查看活动</a-button>
         </template>
-      </a-table>
+      
     </a-card>
   </div>
 </template>

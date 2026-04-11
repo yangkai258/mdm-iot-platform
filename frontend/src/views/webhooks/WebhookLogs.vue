@@ -33,7 +33,7 @@
       <template #actions="{ record }">
         <a-button type="text" size="small" @click="handleViewDetail(record)">详情</a-button>
       </template>
-    </a-table>
+    
 
     <!-- 详情弹窗 -->
     <a-modal v-model:visible="detailVisible" title="调用详情" :width="700">

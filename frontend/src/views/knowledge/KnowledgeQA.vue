@@ -1,15 +1,15 @@
-<template>
+﻿<template>
   <div class="pro-page-container">
     <a-breadcrumb class="pro-breadcrumb">
-      <a-breadcrumb-item>首页</a-breadcrumb-item>
-      <a-breadcrumb-item>知识库</a-breadcrumb-item>
-      <a-breadcrumb-item>问答对管理</a-breadcrumb-item>
+      <a-breadcrumb-item>棣栭〉</a-breadcrumb-item>
+      <a-breadcrumb-item>鐭ヨ瘑搴?/a-breadcrumb-item>
+      <a-breadcrumb-item>闂瓟瀵圭鐞?/a-breadcrumb-item>
     </a-breadcrumb>
 
     <div class="pro-search-bar">
       <a-space>
-        <a-input-search v-model="searchKeyword" placeholder="搜索问题/答案" style="width: 280px" @search="loadQA" search-button />
-        <a-select v-model="filterTag" placeholder="标签" allow-clear style="width: 160px" @change="loadQA">
+        <a-input-search v-model="searchKeyword" placeholder="鎼滅储闂/绛旀" style="width: 280px" @search="loadQA" search-button />
+        <a-select v-model="filterTag" placeholder="鏍囩" allow-clear style="width: 160px" @change="loadQA">
           <a-option v-for="tag in tagOptions" :key="tag" :value="tag">{{ tag }}</a-option>
         </a-select>
       </a-space>
@@ -17,10 +17,10 @@
 
     <div class="pro-action-bar">
       <a-space>
-        <a-button type="primary" @click="showCreateModal">新建问答</a-button>
-        <a-button @click="handleExport">导出</a-button>
-        <a-button @click="showImportModal">导入</a-button>
-        <a-button @click="loadQA">刷新</a-button>
+        <a-button type="primary" @click="showCreateModal">鏂板缓闂瓟</a-button>
+        <a-button @click="handleExport">瀵煎嚭</a-button>
+        <a-button @click="showImportModal">瀵煎叆</a-button>
+        <a-button @click="loadQA">鍒锋柊</a-button>
       </a-space>
     </div>
 
@@ -34,66 +34,66 @@
         </template>
         <template #actions="{ record }">
           <a-space>
-            <a-button type="text" size="small" @click="editQA(record)">编辑</a-button>
-            <a-button type="text" size="small" @click="previewQA(record)">预览</a-button>
-            <a-button type="text" size="small" status="danger" @click="deleteQA(record)">删除</a-button>
+            <a-button type="text" size="small" @click="editQA(record)">缂栬緫</a-button>
+            <a-button type="text" size="small" @click="previewQA(record)">棰勮</a-button>
+            <a-button type="text" size="small" status="danger" @click="deleteQA(record)">鍒犻櫎</a-button>
           </a-space>
         </template>
       </a-table>
     </div>
 
-    <!-- 新建/编辑弹窗 -->
-    <a-modal v-model:visible="modalVisible" :title="isEdit ? '编辑问答' : '新建问答'" @ok="submitQA" :width="680" :loading="submitting">
+    <!-- 鏂板缓/缂栬緫寮圭獥 -->
+    <a-modal v-model:visible="modalVisible" :title="isEdit ? '缂栬緫闂瓟' : '鏂板缓闂瓟'" @ok="submitQA" :width="680" :loading="submitting">
       <a-form :model="qaForm" layout="vertical">
-        <a-form-item label="问题" required>
-          <a-textarea v-model="qaForm.question" placeholder="输入用户可能问的问题" :rows="2" />
+        <a-form-item label="闂" required>
+          <a-textarea v-model="qaForm.question" placeholder="杈撳叆鐢ㄦ埛鍙兘闂殑闂" :rows="2" />
         </a-form-item>
-        <a-form-item label="答案" required>
-          <a-textarea v-model="qaForm.answer" placeholder="输入标准答案" :rows="4" />
+        <a-form-item label="绛旀" required>
+          <a-textarea v-model="qaForm.answer" placeholder="杈撳叆鏍囧噯绛旀" :rows="4" />
         </a-form-item>
-        <a-form-item label="标签">
-          <a-select v-model="qaForm.tags" multiple placeholder="选择或输入标签" allow-create :style="{ width: '100%' }">
+        <a-form-item label="鏍囩">
+          <a-select v-model="qaForm.tags" multiple placeholder="閫夋嫨鎴栬緭鍏ユ爣绛" allow-create :style="{ width: '100%' }">
             <a-option v-for="tag in tagOptions" :key="tag" :value="tag">{{ tag }}</a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="相似问题（可选）">
-          <a-textarea v-model="qaForm.alternatives" placeholder="每行一条相似问题" :rows="3" />
+        <a-form-item label="鐩镐技闂锛堝彲閫夛級">
+          <a-textarea v-model="qaForm.alternatives" placeholder="姣忚涓€鏉＄浉浼奸棶棰" :rows="3" />
         </a-form-item>
-        <a-form-item label="启用">
+        <a-form-item label="鍚敤">
           <a-switch v-model="qaForm.enabled" />
         </a-form-item>
       </a-form>
     </a-modal>
 
-    <!-- 预览弹窗 -->
-    <a-modal v-model:visible="previewVisible" title="问答预览" :width="560" :footer="null">
-      <a-result v-if="!previewRecord" status="info" title="请选择一条记录" />
+    <!-- 棰勮寮圭獥 -->
+    <a-modal v-model:visible="previewVisible" title="闂瓟棰勮" :width="560" :footer="null">
+      <a-result v-if="!previewRecord" status="info" title="璇烽€夋嫨涓€鏉¤褰? />
       <template v-else>
         <a-alert type="info" style="margin-bottom: 12px">
-          <template #title>用户问</template>
+          <template #title>鐢ㄦ埛闂?/template>
           <div>{{ previewRecord.question }}</div>
         </a-alert>
         <a-alert type="success">
-          <template #title>系统答</template>
+          <template #title>绯荤粺绛?/template>
           <div>{{ previewRecord.answer }}</div>
         </a-alert>
-        <a-divider>相似问题</a-divider>
+        <a-divider>鐩镐技闂</a-divider>
         <a-tag v-for="alt in previewRecord.alternatives" :key="alt" style="margin: 4px">{{ alt }}</a-tag>
       </template>
     </a-modal>
 
-    <!-- 导入弹窗 -->
-    <a-modal v-model:visible="importVisible" title="导入问答" @ok="submitImport" :width="480" :loading="importing">
-      <a-form-item label="导入方式">
+    <!-- 瀵煎叆寮圭獥 -->
+    <a-modal v-model:visible="importVisible" title="瀵煎叆闂瓟" @ok="submitImport" :width="480" :loading="importing">
+      <a-form-item label="瀵煎叆鏂瑰紡">
         <a-radio-group v-model="importMode">
-          <a-radio value="merge">合并（追加）</a-radio>
-          <a-radio value="replace">覆盖（清空后导入）</a-radio>
+          <a-radio value="merge">鍚堝苟锛堣拷鍔狅級</a-radio>
+          <a-radio value="replace">瑕嗙洊锛堟竻绌哄悗瀵煎叆锛?/a-radio>
         </a-radio-group>
       </a-form-item>
-      <a-form-item label="选择文件">
+      <a-form-item label="閫夋嫨鏂囦欢">
         <a-upload :limit="1" accept=".json,.csv,.xlsx" :custom-request="handleFileChange" />
       </a-form-item>
-      <a-alert type="info" message="支持 JSON、CSV、XLSX 格式，每条记录需包含 question、answer 字段" />
+      <a-alert type="info" message="鏀寔 JSON銆丆SV銆乆LSX 鏍煎紡锛屾瘡鏉¤褰曢渶鍖呭惈 question銆乤nswer 瀛楁" />
     </a-modal>
   </div>
 </template>
@@ -116,7 +116,7 @@ const previewRecord = ref<any>(null)
 const importMode = ref('merge')
 const importFile = ref<any>(null)
 
-const tagOptions = ['宠物喂食', '宠物健康', '设备使用', '账户问题', '固件升级', '常见问题']
+const tagOptions = ['瀹犵墿鍠傞', '瀹犵墿鍋ュ悍', '璁惧浣跨敤', '璐︽埛闂', '鍥轰欢鍗囩骇', '甯歌闂']
 const qaList = ref<any[]>([])
 const pagination = reactive({ current: 1, pageSize: 10, total: 0 })
 
@@ -126,11 +126,11 @@ const qaForm = reactive({
 
 const columns = [
   { title: 'ID', dataIndex: 'id', width: 80 },
-  { title: '问题', dataIndex: 'question', ellipsis: true },
-  { title: '答案预览', dataIndex: 'answer', ellipsis: true },
-  { title: '标签', slotName: 'tags', width: 200 },
-  { title: '启用', slotName: 'enabled', width: 80 },
-  { title: '操作', slotName: 'actions', fixed: 'right', width: 200 },
+  { title: '闂', dataIndex: 'question', ellipsis: true },
+  { title: '绛旀棰勮', dataIndex: 'answer', ellipsis: true },
+  { title: '鏍囩', slotName: 'tags', width: 200 },
+  { title: '鍚敤', slotName: 'enabled', width: 80 },
+  { title: '鎿嶄綔', slotName: 'actions', fixed: 'right', width: 200 },
 ]
 
 const loadQA = async () => {
@@ -143,9 +143,9 @@ const loadQA = async () => {
     pagination.total = res.data.total || 0
   } catch {
     qaList.value = [
-      { id: 1, question: '如何给宠物添加新设备？', answer: '打开设备管理页面，点击添加设备按钮...', tags: ['设备使用'], alternatives: ['怎么绑定设备', '设备怎么连接'], enabled: true },
-      { id: 2, question: '固件升级失败怎么办？', answer: '请检查网络连接，确保设备在线...', tags: ['固件升级', '常见问题'], alternatives: ['OTA升级不了'], enabled: true },
-      { id: 3, question: '宠物健康数据在哪看？', answer: '在健康医疗菜单中查看健康报告...', tags: ['宠物健康'], alternatives: ['健康报告怎么查'], enabled: false },
+      { id: 1, question: '濡備綍缁欏疇鐗╂坊鍔犳柊璁惧锛?, answer: '鎵撳紑璁惧绠＄悊椤甸潰锛岀偣鍑绘坊鍔犺澶囨寜閽?..', tags: ['璁惧浣跨敤'], alternatives: ['鎬庝箞缁戝畾璁惧', '璁惧鎬庝箞杩炴帴'], enabled: true },
+      { id: 2, question: '鍥轰欢鍗囩骇澶辫触鎬庝箞鍔烇紵', answer: '璇锋鏌ョ綉缁滆繛鎺ワ紝纭繚璁惧鍦ㄧ嚎...', tags: ['鍥轰欢鍗囩骇', '甯歌闂'], alternatives: ['OTA鍗囩骇涓嶄簡'], enabled: true },
+      { id: 3, question: '瀹犵墿鍋ュ悍鏁版嵁鍦ㄥ摢鐪嬶紵', answer: '鍦ㄥ仴搴峰尰鐤楄彍鍗曚腑鏌ョ湅鍋ュ悍鎶ュ憡...', tags: ['瀹犵墿鍋ュ悍'], alternatives: ['鍋ュ悍鎶ュ憡鎬庝箞鏌?], enabled: false },
     ]
     pagination.total = 3
   } finally { loading.value = false }
@@ -174,24 +174,24 @@ const submitQA = async () => {
     const payload = { ...qaForm, alternatives: qaForm.alternatives.split('\n').filter(Boolean) }
     if (isEdit.value) {
       await axios.put(`/api/v1/knowledge/qa/${qaForm.id}`, payload)
-      Message.success('更新成功')
+      Message.success('鏇存柊鎴愬姛')
     } else {
       await axios.post('/api/v1/knowledge/qa', payload)
-      Message.success('创建成功')
+      Message.success('鍒涘缓鎴愬姛')
     }
     modalVisible.value = false
     loadQA()
-  } catch { Message.error('操作失败') } finally { submitting.value = false }
+  } catch { Message.error('鎿嶄綔澶辫触') } finally { submitting.value = false }
 }
 
 const toggleQA = async (record: any) => {
-  try { await axios.put(`/api/v1/knowledge/qa/${record.id}`, { enabled: record.enabled }); Message.success('更新成功') }
-  catch { record.enabled = !record.enabled; Message.error('更新失败') }
+  try { await axios.put(`/api/v1/knowledge/qa/${record.id}`, { enabled: record.enabled }); Message.success('鏇存柊鎴愬姛') }
+  catch { record.enabled = !record.enabled; Message.error('鏇存柊澶辫触') }
 }
 
 const deleteQA = async (record: any) => {
-  try { await axios.delete(`/api/v1/knowledge/qa/${record.id}`); Message.success('删除成功'); loadQA() }
-  catch { Message.error('删除失败') }
+  try { await axios.delete(`/api/v1/knowledge/qa/${record.id}`); Message.success('鍒犻櫎鎴愬姛'); loadQA() }
+  catch { Message.error('鍒犻櫎澶辫触') }
 }
 
 const handleExport = async () => {
@@ -201,25 +201,25 @@ const handleExport = async () => {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a'); a.href = url; a.download = 'knowledge-qa.json'; a.click()
     URL.revokeObjectURL(url)
-    Message.success('导出成功')
-  } catch { Message.error('导出失败') }
+    Message.success('瀵煎嚭鎴愬姛')
+  } catch { Message.error('瀵煎嚭澶辫触') }
 }
 
 const showImportModal = () => { importVisible.value = true }
 const handleFileChange = (options: any) => { importFile.value = options.file; options.onSuccess() }
 
 const submitImport = async () => {
-  if (!importFile.value) { Message.warning('请选择文件'); return }
+  if (!importFile.value) { Message.warning('璇烽€夋嫨鏂囦欢'); return }
   importing.value = true
   try {
     const formData = new FormData()
     formData.append('file', importFile.value)
     formData.append('mode', importMode.value)
     await axios.post('/api/v1/knowledge/qa/import', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
-    Message.success('导入成功')
+    Message.success('瀵煎叆鎴愬姛')
     importVisible.value = false
     loadQA()
-  } catch { Message.error('导入失败') } finally { importing.value = false }
+  } catch { Message.error('瀵煎叆澶辫触') } finally { importing.value = false }
 }
 
 const handlePageChange = (page: number) => { pagination.current = page; loadQA() }

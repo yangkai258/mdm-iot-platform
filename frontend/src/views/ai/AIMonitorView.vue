@@ -108,7 +108,7 @@
           </a-select>
         </a-form-item>
         <a-form-item label="鐘舵€?>
-          <a-select v-model="searchForm.status" placeholder="閫夋嫨鐘舵€? allow-clear style="width: 120px">
+          <a-select v-model="searchForm.status" placeholder="閫夋嫨鐘舵€" allow-clear style="width: 120px">
             <a-option value="online">鍦ㄧ嚎</a-option>
             <a-option value="offline">绂荤嚎</a-option>
             <a-option value="deprecated">宸插簾寮?/a-option>

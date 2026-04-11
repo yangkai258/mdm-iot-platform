@@ -1,9 +1,9 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <a-card class="general-card" title="社交平台分享">
+    <a-card class="general-card" title="绀句氦骞冲彴鍒嗕韩">
       <a-row :gutter="16">
         <a-col :span="12">
-          <a-card title="已绑定的社交账号" size="small">
+          <a-card title="宸茬粦瀹氱殑绀句氦璐﹀彿" size="small">
             <a-list :data="boundAccounts" :loading="loading">
               <template #item="{ item }">
                 <a-list-item>
@@ -13,36 +13,36 @@
                     </template>
                   </a-list-item-meta>
                   <template #actions>
-                    <a-button type="primary" size="small" @click="handleUnbind(item)">解绑</a-button>
+                    <a-button type="primary" size="small" @click="handleUnbind(item)">瑙ｇ粦</a-button>
                   </template>
                 </a-list-item>
               </template>
               <template #empty>
-                <a-empty description="暂无绑定的社交账�? />
+                <a-empty description="鏆傛棤缁戝畾鐨勭ぞ浜よ处锟? />
               </template>
             </a-list>
             <div style="margin-top: 16px">
-              <a-button type="primary" @click="showBindModal = true"><icon-plus />绑定新账�?/a-button>
+              <a-button type="primary" @click="showBindModal = true"><icon-plus />缁戝畾鏂拌处锟?/a-button>
             </div>
           </a-card>
         </a-col>
         <a-col :span="12">
-          <a-card title="分享模板配置" size="small">
+          <a-card title="鍒嗕韩妯℃澘閰嶇疆" size="small">
             <a-form :model="templateForm" layout="vertical">
-              <a-form-item label="默认分享标题">
-                <a-input v-model="templateForm.title" placeholder="请输入分享标�? />
+              <a-form-item label="榛樿鍒嗕韩鏍囬">
+                <a-input v-model="templateForm.title" placeholder="璇疯緭鍏ュ垎浜爣锟" />
               </a-form-item>
-              <a-form-item label="默认分享文案">
-                <a-textarea v-model="templateForm.content" :rows="3" placeholder="请输入分享文�? />
+              <a-form-item label="榛樿鍒嗕韩鏂囨">
+                <a-textarea v-model="templateForm.content" :rows="3" placeholder="璇疯緭鍏ュ垎浜枃锟" />
               </a-form-item>
-              <a-form-item label="分享配图">
+              <a-form-item label="鍒嗕韩閰嶅浘">
                 <a-upload action="/api/v1/upload" :show-upload-list="false" @success="handleUploadSuccess">
-                  <a-button><icon-upload />上传配图</a-button>
+                  <a-button><icon-upload />涓婁紶閰嶅浘</a-button>
                 </a-upload>
                 <a-image v-if="templateForm.image" :src="templateForm.image" width="100" style="margin-left: 8px" />
               </a-form-item>
               <a-form-item>
-                <a-button type="primary" @click="handleSaveTemplate">保存配置</a-button>
+                <a-button type="primary" @click="handleSaveTemplate">淇濆瓨閰嶇疆</a-button>
               </a-form-item>
             </a-form>
           </a-card>
@@ -50,18 +50,18 @@
       </a-row>
     </a-card>
 
-    <a-modal v-model:visible="showBindModal" title="绑定社交账号" @ok="handleBind">
+    <a-modal v-model:visible="showBindModal" title="缁戝畾绀句氦璐﹀彿" @ok="handleBind">
       <a-form :model="bindForm" layout="vertical">
-        <a-form-item label="选择平台">
-          <a-select v-model="bindForm.platform" placeholder="请选择平台">
-            <a-option value="wechat">微信</a-option>
-            <a-option value="weibo">微博</a-option>
-            <a-option value="douyin">抖音</a-option>
-            <a-option value="xiaohongshu">小红�?/a-option>
+        <a-form-item label="閫夋嫨骞冲彴">
+          <a-select v-model="bindForm.platform" placeholder="璇烽€夋嫨骞冲彴">
+            <a-option value="wechat">寰俊</a-option>
+            <a-option value="weibo">寰崥</a-option>
+            <a-option value="douyin">鎶栭煶</a-option>
+            <a-option value="xiaohongshu">灏忕孩锟?/a-option>
           </a-select>
         </a-form-item>
-        <a-form-item label="账号">
-          <a-input v-model="bindForm.account" placeholder="请输入账�? />
+        <a-form-item label="璐﹀彿">
+          <a-input v-model="bindForm.account" placeholder="璇疯緭鍏ヨ处锟" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -93,43 +93,43 @@ const loadData = async () => {
 
 const loadMockData = () => {
   boundAccounts.value = [
-    { id: 1, platform: '微信', account: 'pet123', icon: 'W', color: '#07c160' },
-    { id: 2, platform: '抖音', account: 'pet_home', icon: 'D', color: '#fe2c55' }
+    { id: 1, platform: '寰俊', account: 'pet123', icon: 'W', color: '#07c160' },
+    { id: 2, platform: '鎶栭煶', account: 'pet_home', icon: 'D', color: '#fe2c55' }
   ]
 }
 
 const handleUnbind = (item) => {
   boundAccounts.value = boundAccounts.value.filter(a => a.id !== item.id)
-  Message.success(`已解�? ${item.platform}`)
+  Message.success(`宸茶В锟? ${item.platform}`)
 }
 
 const handleBind = () => {
   if (!bindForm.platform || !bindForm.account) {
-    Message.warning('请填写完整信�?)
+    Message.warning('璇峰～鍐欏畬鏁翠俊锟?)
     return
   }
   const colors = { wechat: '#07c160', weibo: '#e6162d', douyin: '#fe2c55', xiaohongshu: '#fe2c55' }
   const icons = { wechat: 'W', weibo: 'W', douyin: 'D', xiaohongshu: 'X' }
   boundAccounts.value.push({
     id: Date.now(),
-    platform: bindForm.platform === 'wechat' ? '微信' : bindForm.platform === 'weibo' ? '微博' : bindForm.platform === 'douyin' ? '抖音' : '小红�?,
+    platform: bindForm.platform === 'wechat' ? '寰俊' : bindForm.platform === 'weibo' ? '寰崥' : bindForm.platform === 'douyin' ? '鎶栭煶' : '灏忕孩锟?,
     account: bindForm.account,
     icon: icons[bindForm.platform],
     color: colors[bindForm.platform]
   })
   showBindModal.value = false
-  Message.success('绑定成功')
+  Message.success('缁戝畾鎴愬姛')
   bindForm.platform = ''
   bindForm.account = ''
 }
 
 const handleUploadSuccess = (file) => {
   templateForm.image = file
-  Message.success('上传成功')
+  Message.success('涓婁紶鎴愬姛')
 }
 
 const handleSaveTemplate = () => {
-  Message.success('分享模板已保�?)
+  Message.success('鍒嗕韩妯℃澘宸蹭繚锟?)
 }
 
 onMounted(() => loadData())

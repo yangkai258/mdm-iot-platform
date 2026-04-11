@@ -1,27 +1,27 @@
-<template>
+﻿<template>
   <div class="page-container">
-    <a-card class="general-card" title="应用市场">
+    <a-card class="general-card" title="搴旂敤甯傚満">
       <template #extra>
         <a-space>
-          <a-button @click="loadData"><icon-refresh />刷新</a-button>
+          <a-button @click="loadData"><icon-refresh />鍒锋柊</a-button>
         </a-space>
       </template>
       <div class="search-form">
         <a-form :model="form" layout="inline">
-          <a-form-item label="应用名称">
-            <a-input v-model="form.name" placeholder="请输入应用名�? style="width: 160px" />
+          <a-form-item label="搴旂敤鍚嶇О">
+            <a-input v-model="form.name" placeholder="璇疯緭鍏ュ簲鐢ㄥ悕锟" style="width: 160px" />
           </a-form-item>
-          <a-form-item label="分类">
-            <a-select v-model="form.category" placeholder="请选择" allow-clear style="width: 140px">
-              <a-option value="tool">工具�?/a-option>
-              <a-option value="game">游戏�?/a-option>
-              <a-option value="education">教育�?/a-option>
-              <a-option value="social">社交�?/a-option>
+          <a-form-item label="鍒嗙被">
+            <a-select v-model="form.category" placeholder="璇烽€夋嫨" allow-clear style="width: 140px">
+              <a-option value="tool">宸ュ叿锟?/a-option>
+              <a-option value="game">娓告垙锟?/a-option>
+              <a-option value="education">鏁欒偛锟?/a-option>
+              <a-option value="social">绀句氦锟?/a-option>
             </a-select>
           </a-form-item>
           <a-form-item>
-            <a-button type="primary" @click="loadData">查询</a-button>
-            <a-button @click="handleReset">重置</a-button>
+            <a-button type="primary" @click="loadData">鏌ヨ</a-button>
+            <a-button @click="handleReset">閲嶇疆</a-button>
           </a-form-item>
         </a-form>
       </div>
@@ -37,12 +37,12 @@
           <span style="margin-left: 8px">{{ record.rating?.toFixed(1) }}</span>
         </template>
         <template #price="{ record }">
-          <span v-if="record.price === 0" class="free-tag">免费</span>
-          <span v-else>¥{{ record.price }}</span>
+          <span v-if="record.price === 0" class="free-tag">鍏嶈垂</span>
+          <span v-else>楼{{ record.price }}</span>
         </template>
         <template #actions="{ record }">
-          <a-button type="primary" size="small" @click="handleInstall(record)">安装</a-button>
-          <a-button size="small" @click="handleViewDetail(record)">详情</a-button>
+          <a-button type="primary" size="small" @click="handleInstall(record)">瀹夎</a-button>
+          <a-button size="small" @click="handleViewDetail(record)">璇︽儏</a-button>
         </template>
       </a-table>
     </a-card>
@@ -60,14 +60,14 @@ const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 
 const columns = [
-  { title: '图标', slotName: 'icon', width: 80 },
-  { title: '应用名称', dataIndex: 'name', width: 180 },
-  { title: '分类', dataIndex: 'category_name', width: 100 },
-  { title: '版本', dataIndex: 'version', width: 80 },
-  { title: '评分', slotName: 'rating', width: 160 },
-  { title: '下载�?, dataIndex: 'downloads', width: 100 },
-  { title: '价格', slotName: 'price', width: 80 },
-  { title: '操作', slotName: 'actions', width: 160 }
+  { title: '鍥炬爣', slotName: 'icon', width: 80 },
+  { title: '搴旂敤鍚嶇О', dataIndex: 'name', width: 180 },
+  { title: '鍒嗙被', dataIndex: 'category_name', width: 100 },
+  { title: '鐗堟湰', dataIndex: 'version', width: 80 },
+  { title: '璇勫垎', slotName: 'rating', width: 160 },
+  { title: '涓嬭浇锟?, dataIndex: 'downloads', width: 100 },
+  { title: '浠锋牸', slotName: 'price', width: 80 },
+  { title: '鎿嶄綔', slotName: 'actions', width: 160 }
 ]
 
 const loadData = async () => {
@@ -95,11 +95,11 @@ const loadData = async () => {
 
 const loadMockData = () => {
   data.value = [
-    { id: 1, name: '宠物投喂助手', category: 'tool', category_name: '工具�?, version: '1.2.0', rating: 4.5, downloads: 12580, price: 0, icon: '' },
-    { id: 2, name: '趣味训练游戏', category: 'game', category_name: '游戏�?, version: '2.0.1', rating: 4.8, downloads: 8960, price: 6, icon: '' },
-    { id: 3, name: '宠物健康课堂', category: 'education', category_name: '教育�?, version: '1.0.5', rating: 4.2, downloads: 5620, price: 0, icon: '' },
-    { id: 4, name: '萌宠社区', category: 'social', category_name: '社交�?, version: '1.5.2', rating: 4.6, downloads: 23400, price: 0, icon: '' },
-    { id: 5, name: '智能拍照', category: 'tool', category_name: '工具�?, version: '1.1.0', rating: 4.3, downloads: 9870, price: 3, icon: '' }
+    { id: 1, name: '瀹犵墿鎶曞杺鍔╂墜', category: 'tool', category_name: '宸ュ叿锟?, version: '1.2.0', rating: 4.5, downloads: 12580, price: 0, icon: '' },
+    { id: 2, name: '瓒ｅ懗璁粌娓告垙', category: 'game', category_name: '娓告垙锟?, version: '2.0.1', rating: 4.8, downloads: 8960, price: 6, icon: '' },
+    { id: 3, name: '瀹犵墿鍋ュ悍璇惧爞', category: 'education', category_name: '鏁欒偛锟?, version: '1.0.5', rating: 4.2, downloads: 5620, price: 0, icon: '' },
+    { id: 4, name: '钀屽疇绀惧尯', category: 'social', category_name: '绀句氦锟?, version: '1.5.2', rating: 4.6, downloads: 23400, price: 0, icon: '' },
+    { id: 5, name: '鏅鸿兘鎷嶇収', category: 'tool', category_name: '宸ュ叿锟?, version: '1.1.0', rating: 4.3, downloads: 9870, price: 3, icon: '' }
   ]
   pagination.total = data.value.length
 }
@@ -112,11 +112,11 @@ const handleReset = () => {
 }
 
 const handleInstall = (record) => {
-  Message.success(`已开始安�? ${record.name}`)
+  Message.success(`宸插紑濮嬪畨锟? ${record.name}`)
 }
 
 const handleViewDetail = (record) => {
-  Message.info(`查看详情: ${record.name}`)
+  Message.info(`鏌ョ湅璇︽儏: ${record.name}`)
 }
 
 const onPageChange = (page) => {

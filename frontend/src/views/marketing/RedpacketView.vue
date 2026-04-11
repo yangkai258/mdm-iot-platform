@@ -1,9 +1,9 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="红包管理">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate"><icon-plus />创建红包</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />新建红包</a-button>
           <a-button @click="loadData"><icon-refresh />刷新</a-button>
         </a-space>
       </template>
@@ -26,9 +26,8 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '创建红包'" :width="560">
+    <a-modal v-model="formVisible" :title="isEdit ? '编辑' : '新建红包'" :width="560">
       <a-form :model="form" layout="vertical">
         <a-form-item label="红包名称"><a-input v-model="form.name" /></a-form-item>
         <a-form-item label="金额"><a-input-number v-model="form.amount" :min="0" :precision="2" style="width:100%" /></a-form-item>
@@ -36,7 +35,7 @@
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>

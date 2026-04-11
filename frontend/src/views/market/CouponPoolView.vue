@@ -1,15 +1,15 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="优惠券池">
       <template #extra>
         <a-space>
-          <a-button type="primary" @click="openCreate"><icon-plus />创建批次</a-button>
+          <a-button type="primary" @click="openCreate"><icon-plus />新建优惠券</a-button>
           <a-button @click="loadData"><icon-refresh />刷新</a-button>
         </a-space>
       </template>
       <a-row :gutter="16">
         <a-col :span="8">
-          <a-form-item label="批次名称">
+          <a-form-item label="优惠券名称">
             <a-input v-model="form.keyword" placeholder="请输入" @pressEnter="loadData" />
           </a-form-item>
         </a-col>
@@ -28,16 +28,15 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '编辑批次' : '创建批次'" :width="560">
+    <a-modal v-model="formVisible" :title="isEdit ? '编辑优惠券' : '新建优惠券'" :width="560">
       <a-form :model="form" layout="vertical">
-        <a-form-item label="批次名称"><a-input v-model="form.name" /></a-form-item>
+        <a-form-item label="优惠券名称"><a-input v-model="form.name" /></a-form-item>
         <a-form-item label="优惠券数量"><a-input-number v-model="form.total_count" :min="1" style="width: 100%" /></a-form-item>
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -55,7 +54,7 @@ const form = reactive({ keyword: '', name: '', total_count: 0 })
 const data = ref([])
 const pagination = reactive({ current: 1, pageSize: 20, total: 0 })
 const columns = [
-  { title: '批次名称', dataIndex: 'name', width: 220 },
+  { title: '优惠券名称', dataIndex: 'name', width: 220 },
   { title: '总数量', dataIndex: 'total_count', width: 100 },
   { title: '已发放', dataIndex: 'issued_count', width: 100 },
   { title: '已使用', dataIndex: 'used_count', width: 100 },

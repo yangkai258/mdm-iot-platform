@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="container">
     <a-card class="general-card" title="AI模型版本">
       <template #extra>
@@ -27,9 +27,8 @@
           <a-button type="text" size="small" status="danger" @click="handleDelete(record)">删除</a-button>
         </template>
       </a-table>
-      </a-table>
     </a-card>
-    <a-modal v-model="formVisible" :title="isEdit ? '编辑版本' : '新建版本'">
+    <a-modal v-model:formVisible" :title="isEdit ? '编辑版本' : '新建版本'">
       <a-form :model="form" layout="vertical">
         <a-form-item label="模型名称"><a-input v-model="form.name" /></a-form-item>
         <a-form-item label="版本号"><a-input v-model="form.version" /></a-form-item>
@@ -37,7 +36,7 @@
       </a-form>
       <template #footer>
         <a-button @click="formVisible = false">取消</a-button>
-        <a-button type="primary" @click="handleSubmit">确定</a-button>
+        <a-button type="primary" @click="handleSubmit">确认</a-button>
       </template>
     </a-modal>
   </div>
@@ -73,10 +72,25 @@ const loadData = async () => {
   } catch { data.value = [] } finally { loading.value = false }
 }
 
-const openCreate = () => { isEdit.value = false; Object.assign(form, { name: '', version: '', model_path: '' }); formVisible.value = true }
-const openEdit = (record) => { isEdit.value = true; Object.assign(form, record); formVisible.value = true }
-const handleSubmit = () => { formVisible.value = false; Message.success(isEdit.value ? '更新成功' : '创建成功'); loadData() }
-const handleDelete = () => { Message.success('删除成功'); loadData() }
+const openCreate = () => { 
+  isEdit.value = false; 
+  Object.assign(form, { name: '', version: '', model_path: '' }); 
+  formVisible.value = true 
+}
+const openEdit = (record) => { 
+  isEdit.value = true; 
+  Object.assign(form, record); 
+  formVisible.value = true 
+}
+const handleSubmit = () => { 
+  formVisible.value = false; 
+  Message.success(isEdit.value ? '更新成功' : '创建成功'); 
+  loadData() 
+}
+const handleDelete = () => { 
+  Message.success('删除成功'); 
+  loadData() 
+}
 const onPageChange = (page) => { pagination.current = page; loadData() }
 
 onMounted(() => loadData())
